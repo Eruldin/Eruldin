@@ -196,15 +196,35 @@ func _ring_pos() -> Vector2:
 			return p
 	return Vector2.INF
 
+# surge şekilleri: halka (VS klasik), duvar (bir yönden akan hat), pusu (yakın çember)
 func _surge(m: float) -> void:
-	G.ui.toast("KOVAN SÜRÜYOR!")
 	G.audio.play("roar", 0.7, 0.5)
 	var n := mini(34, 16 + int(m * 2.0))
-	for i in n:
-		var p := G.player.pos + Vector2.from_angle(TAU * i / n) * G.rf(720.0, 780.0)
-		p = G.room.clamp_pos(p, 20.0)
-		var sk := Enemy.EKind.VARL if i % 4 == 0 else (Enemy.EKind.DRONE if i % 7 == 0 else Enemy.EKind.HUSK)
-		Enemy.spawn(sk, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
+	match ["ring", "wall", "hunt"][randi() % 3]:
+		"wall":
+			G.ui.toast("DUVAR AKIŞI!")
+			var ang := G.rf(0.0, TAU)
+			var base := G.player.pos + Vector2.from_angle(ang) * 780.0
+			var perp := Vector2.from_angle(ang + PI * 0.5)
+			for i in n:
+				var p := base + perp * G.rf(-420.0, 420.0)
+				p = G.room.clamp_pos(p, 20.0)
+				var sk := Enemy.EKind.VARL if i % 3 == 0 else Enemy.EKind.HUSK
+				Enemy.spawn(sk, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
+		"hunt":
+			G.ui.toast("PUSU!")
+			for i in n:
+				var p := G.player.pos + Vector2.from_angle(TAU * i / n) * G.rf(360.0, 480.0)
+				p = G.room.clamp_pos(p, 20.0)
+				var sk := Enemy.EKind.VARL if i % 5 == 0 else Enemy.EKind.HUSK
+				Enemy.spawn(sk, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
+		_:
+			G.ui.toast("KOVAN SÜRÜYOR!")
+			for i in n:
+				var p := G.player.pos + Vector2.from_angle(TAU * i / n) * G.rf(720.0, 780.0)
+				p = G.room.clamp_pos(p, 20.0)
+				var sk := Enemy.EKind.VARL if i % 4 == 0 else (Enemy.EKind.DRONE if i % 7 == 0 else Enemy.EKind.HUSK)
+				Enemy.spawn(sk, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
 
 func _boss(kind: int, hs: float, ann: String, off := Vector2.ZERO, show_ui := true) -> Boss:
 	var p := G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * 560.0 + off
