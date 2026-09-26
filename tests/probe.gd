@@ -25,6 +25,7 @@ var _merch_close := false
 var _stray_done := false
 var _stray_ck := false
 var _stray_sub := -1
+var _pre_story_cho := 0
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -144,6 +145,22 @@ func _process(_d: float) -> void:
 						_shoot()                    # envanterde AKTİF set satırı
 					25:
 						G.ui._advance_overlay()
+					26:
+						G.ui.worldmap_panel()       # hikaye düğümü testi için harita
+					27:
+						_pre_story_cho = int(G.meta.data.get("choralim", 0))
+						G.ui._wmap_pick("kayalik", Label.new(), {"id": "kayalik"})
+					28:
+						_shoot()                    # hikaye kartı 1
+					29:
+						G.ui._advance_overlay()     # kart 2
+						_shoot()
+					30:
+						G.ui._advance_overlay()     # kartlar bitti -> overlay kapanır
+						print("[probe] story kayalik -> choralim +%d done=%s" % [int(G.meta.data.get("choralim", 0)) - _pre_story_cho, str((G.meta.data.get("story_done", []) as Array).has("kayalik"))])
+					31:
+						G.ui._wmap_pick("kayalik", Label.new(), {"id": "kayalik"})  # tekrar: reddedilmeli
+						print("[probe] story re-pick can_enter=%s" % str(Wmap.can_enter("kayalik")))
 					_:
 						G.run.force_waylay = "pusu"   # yol olayı zorlanır
 						G.player.pos = G.room.doors[0].pos + Vector2(0, 6)
