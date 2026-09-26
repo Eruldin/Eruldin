@@ -1396,12 +1396,30 @@ func inventory_panel() -> void:
 		var icc := CenterContainer.new()
 		icc.add_child(ic)
 		cv.add_child(icc)
-		var nm := _lbl(str(d.get("name", "—")), Vector2.ZERO, 9, Color(0.85, 0.85, 0.9))
+		var nm := _lbl(Items.disp_name(iid) if not d.is_empty() else "—", Vector2.ZERO, 9, Color(0.85, 0.85, 0.9))
 		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		nm.custom_minimum_size = Vector2(96, 24)
 		cv.add_child(nm)
 		if not d.is_empty():
+			var fp := Items.forge_price(iid)
+			if fp > 0:
+				var fb := Button.new()
+				fb.text = "İŞLE ◆%d" % fp
+				fb.add_theme_font_override("font", ui_font())
+				fb.custom_minimum_size = Vector2(80, 18)
+				fb.disabled = int(G.meta.data.get("choralim", 0)) < fp
+				if fb.disabled:
+					fb.modulate = Color(0.5, 0.5, 0.55)
+				var fid := iid
+				fb.pressed.connect(func():
+					var paid := Items.forge(fid)
+					if paid > 0:
+						G.audio.jingle("boon")
+						toast("%s işlendi: ◆-%d" % [Items.disp_name(fid), paid])
+						_close_overlay()
+						inventory_panel())
+				cv.add_child(fb)
 			cell.mouse_filter = Control.MOUSE_FILTER_STOP
 			cell.gui_input.connect(func(ev: InputEvent):
 				if ev is InputEventMouseButton and ev.pressed:
@@ -1458,7 +1476,7 @@ func inventory_panel() -> void:
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.modulate = rc
 		row.add_child(ic)
-		var nm := _lbl(str(d.name), Vector2.ZERO, 10, Color(0.9, 0.9, 0.94))
+		var nm := _lbl(Items.disp_name(str(iid)), Vector2.ZERO, 10, Color(0.9, 0.9, 0.94))
 		row.add_child(nm)
 		var md := _lbl(Items.stat_text(str(iid)), Vector2.ZERO, 9, Color(0.65, 0.75, 0.85))
 		cv.add_child(md)
