@@ -179,6 +179,14 @@ func _enter_arena() -> void:
 		G.meta.save()
 		G.player.xp_mult *= 1.15
 		G.ui.toast("NEVA'NIN ŞARKISI — bu koşuda +%15 XP")
+	if bool(G.meta.data.get("hired", false)):
+		G.meta.data["hired"] = false
+		G.meta.save()
+		var comp := Drone.spawn(0)
+		comp.dmg = 16.0
+		comp.cd = 0.85
+		comp.tint(Px.C("ffd75f"))
+		G.ui.toast("YOLDAŞ yanında — muhafız dronu koşu boyunca seninle")
 	if pending_dmg > 0.0:
 		G.player.hp = maxf(1.0, G.player.hp - pending_dmg)
 		pending_dmg = 0.0
