@@ -292,6 +292,8 @@ static func apply_opt(opt: Dictionary, p: Player) -> void:
 		"gift":
 			if opt.id == "frag":
 				G.run.fragments += 120
+			elif opt.id == "skip":
+				G.run.fragments += 15
 			else:
 				p.heal(p.max_hp * 0.4)
 

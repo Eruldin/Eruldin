@@ -19,7 +19,8 @@ var boon_ids: Array = []
 var luck := 0.0           # raised by elites; sways epic boon rolls
 var alive := true
 var time := 0.0           # seconds survived this run (Director drives it)
-var pending_drafts := 0   # queued level-up drafts
+var pending_drafts := 0     # queued level-up drafts
+var draft_reroll := false   # one card reroll available per level-up draft
 var stats := {"kills": 0, "rooms": 0}
 
 func _init(g: Node2D) -> void:
