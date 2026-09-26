@@ -10,6 +10,16 @@ const MINI_T := 330.0     # 5:30
 const FINAL_T := 660.0    # 11:00
 const WIN_T := 780.0      # 13:00 failsafe — swarm collapses
 
+# per-sector bosses: miniboss is the previous sector's efendi (biome 0 keeps
+# the Host); the final is that sector's own boss — twins/Aeterna spawn as pairs
+const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM]
+const FINAL_KIND := [
+	[Boss.BKind.REX],
+	[Boss.BKind.HOST],
+	[Boss.BKind.NAHUM, Boss.BKind.TUMAN],
+	[Boss.BKind.KIRIN, Boss.BKind.CONST],
+]
+
 var t := 0.0
 var biome := 0
 var running := true
@@ -20,6 +30,7 @@ var _surge_t := 85.0
 var _mini := false
 var _final := false
 var _won := false
+var _final_alive := 0     # final-boss count still standing (pairs need both down)
 
 func _process(d: float) -> void:
 	if not running or G.state != G.State.ROOM or G.player == null or G.player.dead:
@@ -65,11 +76,25 @@ func _tick_events(d: float) -> void:
 	# miniboss
 	if not _mini and t >= MINI_T:
 		_mini = true
-		_boss(Boss.BKind.HOST, 1.0 + m * 0.10, "PROTERIAN HOST geliyor")
+		_boss(MINI_KIND[biome], 1.0 + m * 0.10 + biome * 0.35, "%s geliyor" % Boss.NAMES[MINI_KIND[biome]])
 	# final boss — kill it to clear the stage
 	if not _final and t >= FINAL_T:
 		_final = true
-		_boss(Boss.BKind.REX, 1.0 + m * 0.14, "ALFA-05 — Düşmüş Kardeş geliyor")
+		var kinds: Array = FINAL_KIND[clampi(biome, 0, FINAL_KIND.size() - 1)]
+		var first: Boss = null
+		for i in kinds.size():
+			var off := Vector2((i - float(kinds.size() - 1) * 0.5) * 140.0, 0)
+			var b := _boss(int(kinds[i]), 1.0 + m * 0.14 + biome * 0.4, "%s geliyor" % Boss.NAMES[int(kinds[i])], off, false)
+			if b != null:
+				b.set_meta("final_boss", true)
+				_final_alive += 1
+				if first == null:
+					first = b
+		if first != null:
+			G.room.boss = first
+			G.ui.boss_bar(true, first)
+			G.ui.boss_intro(first)
+			G.audio.boss_sting()
 
 func _comp(m: float) -> int:
 	var pool: Array = [Enemy.EKind.HUSK]
@@ -95,10 +120,10 @@ func _comp(m: float) -> int:
 
 func _hp_scale() -> float:
 	var m := t / 60.0
-	return 1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12
+	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30)
 
 func _dmg_scale() -> float:
-	return 1.0 + (t / 60.0) * 0.11
+	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15)
 
 func _spawn(kind: int, elite: bool) -> Enemy:
 	if not is_instance_valid(G.room):
@@ -132,18 +157,18 @@ func _surge(m: float) -> void:
 		var sk := Enemy.EKind.VARL if i % 4 == 0 else (Enemy.EKind.DRONE if i % 7 == 0 else Enemy.EKind.HUSK)
 		Enemy.spawn(sk, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
 
-func _boss(kind: int, hs: float, ann: String) -> void:
-	var p := G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * 560.0
+func _boss(kind: int, hs: float, ann: String, off := Vector2.ZERO, show_ui := true) -> Boss:
+	var p := G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * 560.0 + off
 	p = G.room.clamp_pos(p, 40.0)
 	var b := Boss.spawn_boss(kind, p, G.room, hs)
-	if kind == Boss.BKind.REX:
-		b.set_meta("final_boss", true)
 	b.died.connect(_on_boss_dead)
-	G.room.boss = b
-	G.ui.boss_bar(true, b)
-	G.ui.boss_intro(b)
-	G.audio.boss_sting()
+	if show_ui:
+		G.room.boss = b
+		G.ui.boss_bar(true, b)
+		G.ui.boss_intro(b)
+		G.audio.boss_sting()
 	G.ui.toast(ann)
+	return b
 
 func _on_boss_dead(b) -> void:
 	if is_instance_valid(G.ui):
@@ -157,7 +182,8 @@ func _on_boss_dead(b) -> void:
 	if is_instance_valid(G.room):
 		G.room.boss = null
 		if b.has_meta("final_boss"):
-			if not _won:
+			_final_alive -= 1
+			if _final_alive <= 0 and not _won:
 				_won = true
 				G.run.victory()
 			return

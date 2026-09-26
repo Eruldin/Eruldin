@@ -5,6 +5,7 @@ extends Node
 # user://probe/, logs status lines, then quits.
 
 var _step := 0
+var _sub := 0
 var _shot_at := -1.0
 var _msg_at := 0.0
 var _shot_n := 0
@@ -26,8 +27,22 @@ func _process(_d: float) -> void:
 				print("[probe] title -> hub")
 		1:
 			if G.state == G.State.HUB and is_instance_valid(G.player) and is_instance_valid(G.room) and not G.room.doors.is_empty():
-				G.player.pos = G.room.doors[0].pos + Vector2(0, 6)
-				_step = 2
+				# one action per frame so each shot captures a distinct state
+				match _sub:
+					0:
+						_shoot()                    # camp + new NPCs
+					1:
+						G.ui.dialogue("david")      # İz Sürücü -> saha seçimi
+					2:
+						G.ui._advance_overlay()
+					3:
+						_shoot()                    # biome cards visible
+						G.ui._pick_card({"kind": "biome", "id": 1})
+					_:
+						G.player.pos = G.room.doors[0].pos + Vector2(0, 6)
+						_step = 2
+						_sub = -1
+				_sub += 1
 		2:
 			if G.state == G.State.ROOM:
 				G.run.dbg_god()
