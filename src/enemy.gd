@@ -111,7 +111,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender"][randi() % 7]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split"][randi() % 8]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -132,6 +132,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 			"mender":
 				_mend_t = 1.6
 				actor_name = "ŞİFALI " + actor_name
+			"split":
+				actor_name = "BÖLÜCÜ " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -160,7 +162,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("ffb74d"), 0.4, 1.4)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		_hp_bg = ColorRect.new()
 		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
@@ -496,6 +498,15 @@ func die(h: Dictionary) -> void:
 			G.fx.light_flash(blast_pos, Color(1, 0.6, 0.2), 2.2, 3.0, 0.25)
 			G.audio.play("explode", 0.9, 0.7)
 			G.fx.shake(0.18, 0.2))
+	# bölücü elit: ölünce iki husk'a ayrılır
+	if elite and affix == "split" and is_instance_valid(G.room):
+		var hs2 := G.run.hp_scale() if is_instance_valid(G.run) else 1.0
+		var ds2 := G.run.dmg_scale() if is_instance_valid(G.run) else 1.0
+		for i in 2:
+			var sp := Enemy.spawn(EKind.HUSK, pos + Vector2(G.rf(-26.0, 26.0), G.rf(-26.0, 26.0)), false, hs2, ds2, G.room)
+			if sp != null:
+				sp.speed *= 1.15
+		G.ui.float_text(pos, "BÖLÜNDÜ", Color(1.0, 0.62, 0.3), 16)
 		if G.chance(0.045 * (2.0 if is_instance_valid(G.player) and G.player.has_meta("heal_luck") else 1.0)) and not G.run.dark:
 			G.room.spawn_heal(pos)
 		# HASAT ŞENLİĞİ kozu: kesim başına küçük parçacık damlası
