@@ -12,6 +12,7 @@ static var NAMES := {
 var nid := ""
 var body: Sprite2D
 var prompt: Label
+var mark: Label       # "!" — görev işi var (yeni teklif / teslim / ilerleme)
 var _e_held := false
 var _bob := 0.0
 
@@ -52,6 +53,17 @@ func _ready() -> void:
 	prompt.visible = false
 	prompt.z_index = 500
 	add_child(prompt)
+	mark = Label.new()
+	mark.text = "!"
+	mark.add_theme_font_size_override("font_size", 22)
+	mark.add_theme_font_override("font", Ui.ui_font())
+	mark.add_theme_color_override("font_color", Px.C("ffd700"))
+	mark.add_theme_color_override("font_outline_color", Color.BLACK)
+	mark.add_theme_constant_override("outline_size", 4)
+	mark.position = Vector2(-6, -body.texture.get_height() - 46)
+	mark.visible = false
+	mark.z_index = 500
+	add_child(mark)
 	_bob = G.rf(0, TAU)
 
 func _process(d: float) -> void:
@@ -63,6 +75,11 @@ func _process(d: float) -> void:
 		_fr_i = (_fr_i + 1) % _fr.size()
 		if is_instance_valid(body):
 			body.texture = _fr[_fr_i]
+	# BG2 "!" — bu NPC'de görev işi varsa başının üstünde yanar (sektirmede hafif zıplar)
+	if is_instance_valid(mark):
+		mark.visible = G.state == G.State.HUB and Quests.has_business(nid)
+		if mark.visible:
+			mark.position.y = -body.texture.get_height() - 46 - absf(sin(_bob * 3.0)) * 5.0
 	if G.player == null or G.player.dead or G.state != G.State.HUB or G.ui.overlay_open():
 		if is_instance_valid(prompt):
 			prompt.visible = false

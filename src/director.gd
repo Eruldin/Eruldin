@@ -45,6 +45,7 @@ var _final := false
 var _won := false
 var _final_alive := 0     # final-boss count still standing (pairs need both down)
 var _harvest_t := 30.0    # endless-mode reaper cadence
+var _quest_t := 0.0       # 1sn'lik görev tick'i
 
 func _process(d: float) -> void:
 	if not running or G.state != G.State.ROOM or G.player == null or G.player.dead:
@@ -55,6 +56,10 @@ func _process(d: float) -> void:
 	G.MELEE_TOKENS_MAX = 2 + mini(10, int(t / 75.0))
 	_tick_spawn(d)
 	_tick_events(d)
+	_quest_t += d
+	if _quest_t >= 1.0:
+		_quest_t = 0.0
+		Quests.tick("time")
 	if t >= WIN_T and not _won:
 		_won = true
 		G.ui.banner("KOVAN DAĞILIYOR", "dayanma süresi doldu")
@@ -68,6 +73,7 @@ func _tick_spawn(d: float) -> void:
 	var hyp: bool = G.run.hyper
 	var inf: bool = G.run.endless
 	_spawn_t = lerpf(1.6, 0.34, clampf(t / 540.0, 0.0, 1.0)) * (0.72 if hyp else 1.0) * (0.7 if inf else 1.0)
+	_spawn_t /= float(G.run.node_mods.get("spawn", 1.0))
 	var cap := mini(230, int((60 + m * 13.0) * (1.4 if hyp else 1.0) * (1.3 if inf else 1.0)))
 	var batch := mini(6, 2 + int(t / 140.0)) + (1 if hyp else 0)
 	while batch > 0 and G.enemies.size() < cap:
@@ -83,7 +89,7 @@ func _tick_events(d: float) -> void:
 	# elites — every ~50s after 1:35; they drop chests
 	_elite_t -= d
 	if _elite_t <= 0.0:
-		_elite_t = G.rf(44.0, 58.0) * (0.8 if G.run.hyper else 1.0) * (0.8 if G.run.elite_fever else 1.0)
+		_elite_t = G.rf(44.0, 58.0) * (0.8 if G.run.hyper else 1.0) * (0.8 if G.run.elite_fever else 1.0) * float(G.run.node_mods.get("elite_t", 1.0))
 		var kind: int = G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.HUSK] if m < 4.0 else ([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER] if m < 6.5 else [Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA, Enemy.EKind.SPITTER]))
 		var e := _spawn(kind, true)
 		if e != null:
@@ -189,10 +195,10 @@ func _comp(m: float) -> int:
 
 func _hp_scale() -> float:
 	var m := t / 60.0
-	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30) * (1.15 if G.run.hyper else 1.0)
+	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30) * (1.15 if G.run.hyper else 1.0) * float(G.run.node_mods.get("hp", 1.0))
 
 func _dmg_scale() -> float:
-	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15) * (1.2 if G.run.hyper else 1.0)
+	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15) * (1.2 if G.run.hyper else 1.0) * float(G.run.node_mods.get("dmg", 1.0))
 
 func _spawn(kind: int, elite: bool) -> Enemy:
 	if not is_instance_valid(G.room):
@@ -276,11 +282,13 @@ func _on_boss_dead(b) -> void:
 	if is_instance_valid(G.ui):
 		G.ui.boss_bar(false, null)
 	if is_instance_valid(G.meta):
+		var bid := "final"
 		match int(b.bkind):
-			Boss.BKind.REX: G.meta.boss_down("rex")
-			Boss.BKind.HOST: G.meta.boss_down("host")
-			Boss.BKind.NAHUM, Boss.BKind.TUMAN: G.meta.boss_down("twins")
-			_: G.meta.boss_down("final")
+			Boss.BKind.REX: bid = "rex"
+			Boss.BKind.HOST: bid = "host"
+			Boss.BKind.NAHUM, Boss.BKind.TUMAN: bid = "twins"
+		G.meta.boss_down(bid)
+		Quests.tick("boss", bid)
 	if is_instance_valid(G.room):
 		G.room.boss = null
 		if b.has_meta("final_boss"):
@@ -289,10 +297,13 @@ func _on_boss_dead(b) -> void:
 				_won = true
 				G.run.victory()
 			return
-		# miniboss loot: two chests + a fragment shower
+		# miniboss loot: two chests + a fragment shower + garanti eşya
 		G.room.spawn_chest(b.pos + Vector2(-40, 0))
 		G.room.spawn_chest(b.pos + Vector2(40, 0))
 		G.run.drop_fragments(b.pos, 90)
+		var miid := Items.roll(G.run.luck + 0.2)
+		if miid != "":
+			G.room.spawn_loot(miid, b.pos + Vector2(0, -50))
 		G.ui.toast("%s düştü — sandıklar yere saçıldı" % b.actor_name)
 		G.audio.jingle("boss")
 

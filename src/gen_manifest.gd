@@ -21,6 +21,7 @@ const SPRITES := {
 	"bg_0": "art/gen/g_bg_0.png", "bg_1": "art/gen/g_bg_1.png",
 	"bg_2": "art/gen/g_bg_2.png", "bg_3": "art/gen/g_bg_3.png",
 	"bg_hub": "art/gen/g_bg_hub.png",
+	"bg_wmap": "art/gen/g_wmap.png",
 	"cbv_0_0": "art/gen/g_bg_0.png", "cbg_0_0": "art/gen/g_bg_0.png",
 	"cbv_1_0": "art/gen/g_bg_1.png", "cbg_1_0": "art/gen/g_bg_1.png",
 	"cbv_2_0": "art/gen/g_bg_2.png", "cbg_2_0": "art/gen/g_bg_2.png",

@@ -474,6 +474,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "icn_crown", "col": "ffd700", "s": 20.0})
 			elif k == "tome":
 				out.append({"p": pk.position, "icon": "ico_boon", "col": "c9a227", "s": 24.0})
+			elif k == "loot":
+				out.append({"p": pk.position, "icon": "ico_loot", "col": "42d4f4", "s": 20.0})
 		if G.room.mono_active:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
 	return out
@@ -688,6 +690,21 @@ func cinematic(tex_key: String, title: String, sub: String, dur := 2.6) -> void:
 		if overlay_open() and _overlay.get_meta("kind", "") == "cine":
 			_advance_overlay())
 
+# hikaye kartı zinciri — her kart sinematik letterbox; E/tık sıradakine geçer
+func cine_seq(cards: Array) -> void:
+	if overlay_open() or cards.is_empty():
+		return
+	_cine_cards = cards.duplicate()
+	_cine_play()
+
+var _cine_cards: Array = []
+
+func _cine_play() -> void:
+	if _cine_cards.is_empty():
+		return
+	var c: Dictionary = _cine_cards.pop_front()
+	cinematic(str(c.get("tex", "bg3")), str(c.get("title", "")), str(c.get("sub", "")), 3.2)
+
 # ---------------------------------------------------------------- boss bar
 
 func boss_bar(on: bool, b) -> void:
@@ -845,7 +862,11 @@ func _advance_overlay() -> void:
 	match kind:
 		"dialogue":
 			var nid: String = _overlay.get_meta("nid")
-			if nid == "vane":
+			# görev işi olan NPC önce görev panosunu açar; panodan hizmete geçilir
+			if Quests.has_business(nid):
+				_close_overlay()
+				quest_panel(nid)
+			elif nid == "vane":
 				_close_overlay()
 				upgrade_panel()
 			elif nid == "rhasa":
@@ -853,7 +874,7 @@ func _advance_overlay() -> void:
 				stance_panel()
 			elif nid == "david":
 				_close_overlay()
-				biome_panel()
+				worldmap_panel()
 			elif nid == "zirkon":
 				_close_overlay()
 				records_panel()
@@ -866,6 +887,11 @@ func _advance_overlay() -> void:
 			elif nid == "elyb":
 				_close_overlay()
 				hero_panel()
+			elif nid == "saphire":
+				_close_overlay()
+				inventory_panel()
+			elif nid == "neva":
+				_close_overlay()
 			else:
 				_close_overlay()
 		"death":
@@ -874,13 +900,18 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv":
 			_close_overlay()
 		"cine":
 			var c := _overlay
 			var tw := create_tween()
 			tw.tween_property(c, "modulate:a", 0.0, 0.3)
-			tw.tween_callback(_close_overlay)
+			if not _cine_cards.is_empty():
+				tw.tween_callback(func():
+					_close_overlay()
+					_cine_play())
+			else:
+				tw.tween_callback(_close_overlay)
 		"title":
 			_close_overlay()
 			G.run.hub()
@@ -954,6 +985,329 @@ func _biome_desc(b: int) -> String:
 			"Simithar damarları — kovanın kökleri.",
 			"İmparatorluk enkazı — çürüyen taht.",
 			"Protokolün kalbi — son masa."][b]
+
+# ---------------------------------------------------------------- açık dünya haritası (BG2 node graph)
+
+func _service_panel_for(nid: String) -> void:
+	match nid:
+		"vane":    upgrade_panel()
+		"rhasa":   stance_panel()
+		"david":   worldmap_panel()
+		"zirkon":  records_panel()
+		"ehnar":   contract_panel()
+		"ahusk":   blessing_panel()
+		"saphire": inventory_panel()
+		"elyb":    hero_panel()
+		_:         pass
+
+# David'in haritası: node-graph açık dünya — düğümler görev/boss ile açılır
+func worldmap_panel() -> void:
+	_pause(true)
+	var v := _show_panel("wmap", "DÜNYA HARİTASI — İz Sürücü David", Px.C("00E5FF"))
+	var canvas := Control.new()
+	canvas.custom_minimum_size = Vector2(1120, 560)
+	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(canvas)
+	var bg := TextureRect.new()
+	bg.texture = Px.S2("bg_wmap")
+	if bg.texture == null:
+		bg.texture = Px.S2("bg3")
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	bg.modulate = Color(0.55, 0.55, 0.62, 0.5)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(bg)
+	# seyahat hatları — BG2 kenar çizimleri
+	var edge_c := Control.new()
+	edge_c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	edge_c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(edge_c)
+	for e in Wmap.EDGES:
+		var a: Dictionary = Wmap.node(str(e[0]))
+		var b: Dictionary = Wmap.node(str(e[1]))
+		if a.is_empty() or b.is_empty():
+			continue
+		var ln := Line2D.new()
+		ln.points = PackedVector2Array([a.pos * 0.92 + Vector2(45, 30), b.pos * 0.92 + Vector2(45, 30)])
+		ln.width = 2.0
+		var ok := Wmap.can_enter(str(a.id)) and Wmap.can_enter(str(b.id))
+		ln.default_color = Color(0.35, 0.75, 0.95, 0.55) if ok else Color(0.3, 0.28, 0.35, 0.3)
+		edge_c.add_child(ln)
+	var cur := str(G.meta.data.get("arena_node", "b0"))
+	var info := _lbl("", Vector2.ZERO, 12, Color(0.8, 0.85, 0.95))
+	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(info)
+	var sel := {"id": cur}
+	for n in Wmap.NODES:
+		var nid := str(n.id)
+		var can := Wmap.can_enter(nid)
+		var is_cur := nid == cur
+		var btn := PanelContainer.new()
+		btn.position = n.pos * 0.92 + Vector2(45, 30) - Vector2(30, 30)
+		var ncol := Px.C(str(n.col))
+		var bc := ncol.lerp(Color.WHITE, 0.45) if is_cur else (ncol if can else Color(0.3, 0.3, 0.36))
+		btn.add_theme_stylebox_override("panel", _style_panel(Color(0.04, 0.03, 0.07, 0.9), bc, 3 if is_cur else 2, 18))
+		var bb := VBoxContainer.new()
+		bb.add_theme_constant_override("separation", 2)
+		btn.add_child(bb)
+		var ic := TextureRect.new()
+		ic.texture = Px.S2(str(n.icon))
+		ic.custom_minimum_size = Vector2(30, 30)
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.modulate = ncol if can else Color(0.4, 0.4, 0.45)
+		var icc := CenterContainer.new()
+		icc.add_child(ic)
+		bb.add_child(icc)
+		var nl := _lbl(str(n.name).split(" ")[0], Vector2.ZERO, 9, Color.WHITE if can else Color(0.5, 0.5, 0.55))
+		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		bb.add_child(nl)
+		btn.mouse_filter = Control.MOUSE_FILTER_STOP
+		canvas.add_child(btn)
+		btn.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed:
+				_wmap_pick(nid, info, sel))
+		btn.mouse_entered.connect(func():
+			info.text = "%s — %s%s" % [str(n.name), str(n.desc), "" if can else "   [%s]" % Wmap.unlock_text(nid)])
+	# mutator şeridi
+	var mut := HBoxContainer.new()
+	mut.alignment = BoxContainer.ALIGNMENT_CENTER
+	mut.add_theme_constant_override("separation", 18)
+	v.add_child(mut)
+	var hyp := bool(G.meta.data.get("hyper", false))
+	var hb := Button.new()
+	hb.text = "AŞILAMA: %s" % ("AÇIK" if hyp else "kapalı")
+	hb.add_theme_font_override("font", ui_font())
+	hb.custom_minimum_size = Vector2(180, 28)
+	mut.add_child(hb)
+	hb.pressed.connect(func():
+		var nw := not bool(G.meta.data.get("hyper", false))
+		G.meta.data["hyper"] = nw
+		G.meta.save()
+		hb.text = "AŞILAMA: %s" % ("AÇIK" if nw else "kapalı")
+		G.audio.play("boon", 1.1, 0.5))
+	var drk := bool(G.meta.data.get("dark", false))
+	var db := Button.new()
+	db.text = "KARANLIK: %s" % ("AÇIK" if drk else "kapalı")
+	db.add_theme_font_override("font", ui_font())
+	db.custom_minimum_size = Vector2(180, 28)
+	mut.add_child(db)
+	db.pressed.connect(func():
+		var nw := not bool(G.meta.data.get("dark", false))
+		G.meta.data["dark"] = nw
+		G.meta.save()
+		db.text = "KARANLIK: %s" % ("AÇIK" if nw else "kapalı")
+		G.audio.play("boon", 0.9, 0.5))
+	var gate := _lbl("hedef: %s — portal kampta güneyde" % str(Wmap.node(cur).get("name", "?")), Vector2.ZERO, 12, Px.C("c26bff"))
+	gate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(gate)
+	_overlay.set_meta("gate_lbl", gate)
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
+func _wmap_pick(nid: String, info: Label, sel: Dictionary) -> void:
+	if not Wmap.can_enter(nid):
+		toast("kilitli: %s" % Wmap.unlock_text(nid))
+		G.audio.play("die", 1.4, 0.3)
+		return
+	if str(Wmap.node(nid).get("kind", "")) == "hub":
+		toast("burası kamp — zaten buradayız")
+		return
+	sel["id"] = nid
+	G.meta.data["arena_node"] = nid
+	G.meta.data["arena_biome"] = int(Wmap.node(nid).get("biome", 0))
+	G.meta.save()
+	G.audio.jingle("boon")
+	toast("rota: %s" % str(Wmap.node(nid).name))
+	var gl = _overlay.get_meta("gate_lbl") if is_instance_valid(_overlay) else null
+	if gl != null and is_instance_valid(gl):
+		gl.text = "hedef: %s — portal kampta güneyde" % str(Wmap.node(nid).get("name", "?"))
+	worldmap_panel()  # seçili çerçeveyi tazele
+
+# ---------------------------------------------------------------- görev panosu
+
+func quest_panel(nid: String) -> void:
+	_pause(true)
+	var ncol := Px.C(NPC_COL.get(nid, "00E5FF"))
+	var v := _show_panel("quest", "GÖREVLER — %s" % str(NPC.NAMES.get(nid, nid)), ncol)
+	var any := false
+	for q in Quests.claimable_for(nid):
+		any = true
+		v.add_child(_quest_row(q, "TESLİM AL", ncol, func():
+			var rew := Quests.claim(str(q.id))
+			G.audio.jingle("victory")
+			toast("ödül: %s" % Quests.rew_text(rew))
+			_close_overlay()
+			quest_panel(nid)))
+	for q in Quests.active_for(nid):
+		any = true
+		v.add_child(_quest_row(q, "%s" % Quests.prog_text(q), Color(0.6, 0.6, 0.7), Callable()))
+	for q in Quests.available_for(nid):
+		any = true
+		v.add_child(_quest_row(q, "KABUL ET", Px.C("00E676"), func():
+			Quests.accept(str(q.id))
+			G.audio.jingle("boon")
+			_close_overlay()
+			quest_panel(nid)))
+	if not any:
+		var l := _lbl("şimdilik iş yok — sahadan haber getir", Vector2.ZERO, 13, Color(0.6, 0.6, 0.7))
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(l)
+	var svc := Button.new()
+	svc.text = "HİZMET / PANEL →"
+	svc.add_theme_font_override("font", ui_font())
+	svc.custom_minimum_size = Vector2(200, 28)
+	var sc := CenterContainer.new()
+	sc.add_child(svc)
+	v.add_child(sc)
+	svc.pressed.connect(func():
+		_close_overlay()
+		_service_panel_for(nid))
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
+func _quest_row(q: Dictionary, btn_text: String, bcol: Color, cb: Callable) -> Control:
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", _style_panel(Color(0.05, 0.03, 0.08, 0.9), bcol.darkened(0.25), 1, 3))
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 14)
+	h.custom_minimum_size = Vector2(760, 0)
+	p.add_child(h)
+	var ic := TextureRect.new()
+	ic.texture = Px.S2("ico_quest")
+	ic.custom_minimum_size = Vector2(26, 26)
+	ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	ic.modulate = bcol
+	h.add_child(ic)
+	var mid := VBoxContainer.new()
+	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(mid)
+	var t := _lbl("%s  —  %s" % [str(q.name), Quests.obj_text(q)], Vector2.ZERO, 13, Color(0.92, 0.92, 0.96))
+	mid.add_child(t)
+	var d := _lbl("%s   ·   ödül: %s" % [str(q.desc), Quests.rew_text(q.get("rew", {}))], Vector2.ZERO, 11, Color(0.65, 0.65, 0.75))
+	mid.add_child(d)
+	if cb.is_valid():
+		var b := Button.new()
+		b.text = btn_text
+		b.add_theme_font_override("font", ui_font())
+		b.custom_minimum_size = Vector2(110, 26)
+		h.add_child(b)
+		b.pressed.connect(cb)
+	else:
+		var pl := _lbl(btn_text, Vector2.ZERO, 12, bcol)
+		h.add_child(pl)
+	return p
+
+# ---------------------------------------------------------------- envanter (Saphire)
+
+func inventory_panel() -> void:
+	_pause(true)
+	var v := _show_panel("inv", "TEÇHİZAT — Saphire'in tezgâhı", Px.C("ff9e4d"))
+	var eq: Dictionary = G.meta.data.get("equip", {})
+	var estats := Items.equip_stats()
+	var top := HBoxContainer.new()
+	top.alignment = BoxContainer.ALIGNMENT_CENTER
+	top.add_theme_constant_override("separation", 10)
+	v.add_child(top)
+	for slot in Items.SLOTS:
+		var iid := str(eq.get(slot, ""))
+		var d: Dictionary = Items.DEFS.get(iid, {})
+		var cell := PanelContainer.new()
+		var rc := Px.C(Items.RARITY_COL[int(d.get("r", 0))]) if not d.is_empty() else Color(0.3, 0.3, 0.38)
+		cell.add_theme_stylebox_override("panel", _style_panel(Color(0.04, 0.03, 0.07, 0.95), rc, 2, 3))
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 3)
+		cell.add_child(cv)
+		var sl := _lbl(Items.SLOT_NAME.get(slot, slot), Vector2.ZERO, 9, Color(0.55, 0.55, 0.62))
+		sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cv.add_child(sl)
+		var ic := TextureRect.new()
+		ic.texture = Px.S2(str(d.get("icon", "ico_loot"))) if not d.is_empty() else null
+		ic.custom_minimum_size = Vector2(34, 34)
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.modulate = rc if not d.is_empty() else Color(0.2, 0.2, 0.25)
+		var icc := CenterContainer.new()
+		icc.add_child(ic)
+		cv.add_child(icc)
+		var nm := _lbl(str(d.get("name", "—")), Vector2.ZERO, 9, Color(0.85, 0.85, 0.9))
+		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		nm.custom_minimum_size = Vector2(96, 24)
+		cv.add_child(nm)
+		if not d.is_empty():
+			cell.mouse_filter = Control.MOUSE_FILTER_STOP
+			cell.gui_input.connect(func(ev: InputEvent):
+				if ev is InputEventMouseButton and ev.pressed:
+					Items.unequip(slot)
+					toast("%s çıkarıldı" % str(d.name))
+					_close_overlay()
+					inventory_panel())
+		top.add_child(cell)
+	var stats_txt := []
+	for k in ["hp", "armor", "dmg", "spd", "crit", "critmult", "ls", "mag", "xp", "dash_regen", "revive"]:
+		var f := float(estats.get(k, 0))
+		if f == 0.0:
+			continue
+		var fmt := "+%d" % int(f) if absf(f) >= 1.5 else "+%d%%" % int(f * 100)
+		stats_txt.append("%s %s" % [fmt, {"hp": "can", "armor": "zırh", "dmg": "hasar", "spd": "hız", "crit": "kritik", "critmult": "kritik×", "ls": "can emme", "mag": "mıknatıs", "xp": "XP", "dash_regen": "dash yenileme", "revive": "dirilme"}[k]])
+	var sl2 := _lbl("ekipman toplamı:  %s" % ("   ·   ".join(stats_txt) if not stats_txt.is_empty() else "—"), Vector2.ZERO, 11, Color(0.7, 0.8, 0.9))
+	sl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sl2)
+	var sep := _lbl("— ZULA  (seç: kuşan / tekrar seç: geri koy) —", Vector2.ZERO, 12, Px.C("ff9e4d"))
+	sep.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sep)
+	var stash: Array = G.meta.data.get("stash", [])
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	v.add_child(grid)
+	if stash.is_empty():
+		var l := _lbl("zula boş — elitler ve boss'lar eşya düşürür", Vector2.ZERO, 12, Color(0.5, 0.5, 0.6))
+		grid.add_child(l)
+	for iid in stash:
+		var d: Dictionary = Items.DEFS.get(str(iid), {})
+		if d.is_empty():
+			continue
+		var cell := PanelContainer.new()
+		var rc := Px.C(Items.RARITY_COL[int(d.r)])
+		cell.add_theme_stylebox_override("panel", _style_panel(Color(0.05, 0.04, 0.08, 0.95), rc, 2, 3))
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 2)
+		cell.add_child(cv)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		cv.add_child(row)
+		var ic := TextureRect.new()
+		ic.texture = Px.S2(str(d.icon))
+		ic.custom_minimum_size = Vector2(24, 24)
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.modulate = rc
+		row.add_child(ic)
+		var nm := _lbl(str(d.name), Vector2.ZERO, 10, Color(0.9, 0.9, 0.94))
+		row.add_child(nm)
+		var md := _lbl(Items.stat_text(str(iid)), Vector2.ZERO, 9, Color(0.65, 0.75, 0.85))
+		cv.add_child(md)
+		cell.mouse_filter = Control.MOUSE_FILTER_STOP
+		grid.add_child(cell)
+		cell.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed:
+				Items.equip(str(iid), Items.slot_of(str(iid)))
+				G.audio.jingle("boon")
+				toast("kuşanıldı: %s" % str(d.name))
+				_close_overlay()
+				inventory_panel())
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
 
 # Vezir: the camp's living ledger — lifetime stats + boss dossiers.
 func records_panel() -> void:
@@ -1030,6 +1384,23 @@ func records_panel() -> void:
 		right.add_child(l)
 	cols.add_child(right)
 	v.add_child(cols)
+	# görev defteri — kabul edilen / biten / teslim edilenler
+	var qsep := _lbl("— GÖREV DEFTERİ —", Vector2.ZERO, 12, Px.C("c9a227"))
+	v.add_child(qsep)
+	var qany := false
+	for q in Quests.DEFS:
+		var st := Quests.state(str(q.id))
+		if st == "":
+			continue
+		qany = true
+		var ic := "◆" if st == "claimed" else ("◈" if st == "done" else "◇")
+		var col := Color(0.9, 0.85, 0.5) if st == "claimed" else (Color(0.5, 0.9, 0.6) if st == "done" else Color(0.75, 0.75, 0.85))
+		var tag := "teslim edildi" if st == "claimed" else ("TAMAM — %s'a dön" % str(NPC.NAMES.get(str(q.giver), str(q.giver))) if st == "done" else Quests.prog_text(q))
+		var l := _lbl("%s  %s  ·  %s  ·  %s" % [ic, str(q.name), str(NPC.NAMES.get(str(q.giver), str(q.giver))).split(" ")[-1], tag], Vector2.ZERO, 12, col)
+		v.add_child(l)
+	if not qany:
+		var l := _lbl("henüz görev yok — NPC'lerdeki ! işaretini takip et", Vector2.ZERO, 11, Color(0.5, 0.5, 0.6))
+		v.add_child(l)
 	var ld: Dictionary = d.get("last_death", {})
 	if not ld.is_empty() and str(ld.get("killer", "")) != "":
 		var l := _lbl("son düşüş: %s @ %s" % [str(ld.get("killer")), BIOME_NAME[int(ld.get("biome", 0))]], Vector2.ZERO, 11, Color(0.6, 0.55, 0.6))

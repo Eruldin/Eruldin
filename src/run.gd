@@ -32,6 +32,10 @@ var arcana := ""           # koşu başında seçilen KOZ kartı (VS arcana)
 var elite_fever := false   # SARI HAT: elitler %20 sık doğar
 var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var stats := {"kills": 0, "rooms": 0}
+var node_id := "b0"       # wmap node this run entered through
+var node_name := ""       # banner'da node adı (fallback: biome adı)
+var node_mods := {}       # spawn/hp/dmg/frag/loot/elite_t çarpanları
+var frag_node := 1.0      # node "frag" modu — parçacık düşüşlerini büyütür
 
 func _init(g: Node2D) -> void:
 	game = g
@@ -52,9 +56,38 @@ func hub() -> void:
 	_spawn_player(r.spawn_point())
 	_contract_tick()
 	G.ui.hub_ui(true)
+	_intro_story()
+
+# ilk kampa inişte tek seferlik açılış sinematiği (seen_story ile korunur)
+func _intro_story() -> void:
+	var seen: Array = G.meta.data.get("seen_story", [])
+	if seen.has("intro"):
+		return
+	seen.append("intro")
+	G.meta.data["seen_story"] = seen
+	G.meta.save()
+	G.ui.cine_seq([
+		{"tex": "bg3", "title": "DÜŞÜŞ: CHORALIM PROTOKOLÜ", "sub": "Viator son kampa çekildi. Protokol, hayatta kalan tek praetorianı seçti: sen."},
+		{"tex": "por_neva", "title": "NEVA", "sub": "Rezonans seni geri getirir, Alfa-04. Her düşüşte bir parçan eksik döner — ama dönersin."},
+		{"tex": "por_david", "title": "DAVID", "sub": "Harita açık. Görevler yazılı, yollar kilitli. Efendileri düşür, dünya açılsın."},
+	])
 
 func start_run() -> void:
-	biome = clampi(int(G.meta.data.get("arena_biome", 0)), 0, 3)
+	# açık-dünya düğümü: David'in haritasında seçilen node biome + mods verir
+	var nid := str(G.meta.data.get("arena_node", ""))
+	var nd := Wmap.node(nid)
+	if nd.is_empty() or not Wmap.can_enter(nid):
+		# eski saha seçimiyle geriye uyum
+		nid = "b%d" % clampi(int(G.meta.data.get("arena_biome", 0)), 0, 3)
+		nd = Wmap.node(nid)
+		if nd.is_empty() or not Wmap.can_enter(nid):
+			nid = "b0"
+			nd = Wmap.node("b0")
+	node_id = nid
+	node_name = str(nd.get("name", ""))
+	node_mods = nd.get("mods", {})
+	frag_node = float(node_mods.get("frag", 1.0))
+	biome = clampi(int(nd.get("biome", 0)), 0, 3)
 	hyper = bool(G.meta.data.get("hyper", false))
 	dark = bool(G.meta.data.get("dark", false))
 	reward_mult = (1.5 if hyper else 1.0) * (1.25 if dark else 1.0)
@@ -73,7 +106,13 @@ func start_run() -> void:
 	curse = 0
 	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
+	# saha keşfi: görevler için distinct biome sayısı birikir
+	var vis: Array = G.meta.data.get("visited", [])
+	if not vis.has(biome):
+		vis.append(biome)
+		G.meta.data["visited"] = vis
 	G.meta.save()
+	Quests.tick("biomes")
 	G.fx.transition()
 	_room_to(G.room)
 	var a := Arena.new()
@@ -143,6 +182,7 @@ func on_kill(_elite: bool) -> void:
 		fragments += bonus
 		G.ui.toast("KATLİAM x%d  —  +%d parçacık" % [streak, bonus])
 		G.audio.jingle("boon")
+	Quests.tick("kills")
 
 func open_chest() -> void:
 	var evos := Weapons.evo_ready(G.player)
@@ -156,6 +196,7 @@ func open_chest() -> void:
 
 func apply_evo(spec: Dictionary) -> void:
 	Weapons.apply_evo(spec, G.player)
+	Quests.tick("evos")
 
 func next_room(reward: int) -> void:
 	depth += 1
@@ -224,6 +265,14 @@ func contract_text(c: Dictionary) -> String:
 	return "—"
 
 func _write_last_run(win: bool) -> void:
+	# eşya ganimeti kalıcı zulaya taşınır + kalan görev tipleri son kez tıklanır
+	var banked := Items.bank_bag()
+	if banked > 0:
+		stats["loot_banked"] = banked
+		if is_instance_valid(G.ui):
+			G.ui.toast("ganimet zulada: %d eşya" % banked)
+	stats["won"] = win
+	Quests.tick_all()
 	G.meta.data["last_run"] = {
 		"kills": int(stats.get("kills", 0)),
 		"time": int(time),
@@ -388,7 +437,7 @@ func take_boon(b: Dictionary) -> void:
 
 func drop_fragments(p: Vector2, total: int) -> void:
 	if is_instance_valid(G.room):
-		G.room.spawn_fragments(p, total)
+		G.room.spawn_fragments(p, int(total * frag_node))
 
 func _room_to(old: Room) -> void:
 	if old != null and is_instance_valid(old):

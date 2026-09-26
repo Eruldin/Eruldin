@@ -58,6 +58,7 @@ var xp := 0.0
 var xp_next := 8.0
 var magnet_r := 95.0
 var xp_mult := 1.0
+var frag_mult := 1.0        # ekipman "frag" modu — parçacık toplama verimi
 var cd_mult := 1.0
 var area_mult := 1.0
 var proj_spd := 1.0
@@ -554,15 +555,29 @@ func reset_for_run() -> void:
 	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer", "streak_spd", "elite_heal", "heal_luck", "drones", "harvest"]:
 		remove_meta(k)
 	max_hp = 100 + G.meta.upg(Meta.U.HP) * 20
-	hp = max_hp
 	armor = G.meta.upg(Meta.U.SHIELD) * 1.0
 	dmg_mult += G.meta.upg(Meta.U.DMG) * 0.08
 	# altın nüveler: kalıcı koşu-başı hasar artışı (VS golden egg)
 	dmg_mult += float(G.meta.data.get("eggs", 0)) * 0.005
 	dash_max = 1 + G.meta.upg(Meta.U.DASH)
-	dash_charges = dash_max
 	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)
 	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
+	# ekipman modları — 7 slot HoT zırh/tılsım sistemi (items.gd)
+	var eq: Dictionary = Items.equip_stats()
+	max_hp += float(eq.get("hp", 0.0))
+	armor += float(eq.get("armor", 0.0))
+	dmg_mult += float(eq.get("dmg", 0.0))
+	speed *= 1.0 + float(eq.get("spd", 0.0))
+	crit_ch += float(eq.get("crit", 0.0))
+	crit_mult += float(eq.get("critmult", 0.0))
+	lifesteal += float(eq.get("ls", 0.0))
+	magnet_r += float(eq.get("mag", 0.0))
+	xp_mult += float(eq.get("xp", 0.0))
+	frag_mult += float(eq.get("frag", 0.0))
+	dash_regen_mult += float(eq.get("dash_regen", 0.0))
+	revives_extra += int(eq.get("revive", 0))
+	hp = max_hp
+	dash_charges = dash_max
 	_apply_hero()
 	_load_frames(_hero_set(), 7.0)
 	Px.fit(body, 94.0)

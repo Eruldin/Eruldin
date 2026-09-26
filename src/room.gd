@@ -759,8 +759,12 @@ func _collect(pk: Node) -> void:
 			G.ui.toast("ALTIN NÜVE — kalıcı +%%0.5 hasar (toplam %d)" % int(G.meta.data["eggs"]))
 		"chest":
 			G.run.open_chest()
+		"loot":
+			Items.drop_to_run(str(pk.get_meta("item", "")))
+			Quests.tick("loot")
 		_:
-			G.run.fragments += int(pk.get_meta("val"))
+			var fm: float = G.player.frag_mult if is_instance_valid(G.player) else 1.0
+			G.run.fragments += int(int(pk.get_meta("val")) * fm)
 			G.audio.play("pickup", G.rf(0.9, 1.1), 0.4)
 	G.fx.burst(pk.position, pk.modulate if pk.modulate.a > 0.5 else Px.C("7B1FA2"), 4, 80.0, 3.0, 0.3)
 	pk.queue_free()
@@ -828,6 +832,26 @@ func spawn_special(kind: String, p: Vector2) -> void:
 	pk.set_meta("val", 0)
 	pickups_node.add_child(pk)
 	G.fx.mk_light(pk, Vector2.ZERO, Px.C(col), 0.6, 1.4)
+
+# eşya düşüşü (HoT gear): elitlerden/bosslardan çıkar — üstüne bas, çantaya gir
+func spawn_loot(iid: String, p: Vector2) -> void:
+	var d: Dictionary = Items.DEFS.get(iid, {})
+	if d.is_empty():
+		return
+	var pk := Sprite2D.new()
+	pk.texture = Px.S2(str(d.get("icon", "ico_loot")))
+	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pk.scale = Vector2.ONE * 1.5
+	var col := Px.C(Items.RARITY_COL[int(d.get("r", 0))])
+	pk.modulate = col
+	pk.position = clamp_pos(p, 30.0)
+	pk.z_index = int(p.y)
+	pk.set_meta("kind", "loot")
+	pk.set_meta("item", iid)
+	pk.set_meta("val", 0)
+	pickups_node.add_child(pk)
+	G.fx.mk_light(pk, Vector2(0, -8), col, 0.8, 1.8)
+	G.fx.float_text(p + Vector2(0, -36), "%s!" % str(d.name), col, 0.95)
 
 # HoT ability tome: üstüne basınca bedava lütuf taslağı açan saha kalıntısı
 func spawn_tome(p: Vector2) -> void:

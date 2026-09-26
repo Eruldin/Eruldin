@@ -35,6 +35,14 @@ var data := {
 	"hero": "ely",         # chosen chassis — "ely" or heavy "elyb"
 	"unlocked_w": [],      # gated silahların duyurulduğu id'ler (toast bir kez)
 	"arena_biome": 0,      # arena sector picked via David (İz Sürücü)
+	"arena_node": "b0",    # world-map node the next run targets (wmap.gd)
+	"unlocked": [],        # quest/node unlocks — wmap "node" gating
+	"visited": [],         # distinct biomes seen this save
+	"quests": {},          # qid -> {st:"act"|"done"|"claimed", prog:int}
+	"stash": [],           # collected items awaiting equipment
+	"equip": {},           # slot -> item id (7 slots, items.gd)
+	"loot_found": 0,       # lifetime item drops
+	"seen_story": [],      # cinematic cards already shown (one-shot story beats)
 	"hyper": false,        # AŞILAMA: sürü hızlı/kalabalık akar, ödeme ×1.5
 	"dark": false,         # KARANLIK: şifa küresi düşmez, ödeme ×1.25
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır

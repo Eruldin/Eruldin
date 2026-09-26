@@ -16,6 +16,8 @@ var _mono_check := false
 var _tome_done := false
 var _tome_ck := false
 var _tome_boons := 0
+var _loot_done := false
+var _loot_ck := false
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -37,12 +39,32 @@ func _process(_d: float) -> void:
 					0:
 						_shoot()                    # camp + new NPCs
 					1:
-						G.ui.dialogue("david")      # İz Sürücü -> saha seçimi
+						G.ui.dialogue("ehnar")      # görevli NPC -> diyalog
 					2:
-						G.ui._advance_overlay()
+						G.ui._advance_overlay()     # diyalog -> görev panosu
 					3:
-						_shoot()                    # biome cards visible
-						G.ui._pick_card({"kind": "biome", "id": 1})
+						_shoot()                    # quest panel açıkken çek
+					4:
+						var qa := Quests.available_for("ehnar")
+						if not qa.is_empty():
+							Quests.accept(str(qa[0].id))
+							print("[probe] quest accepted: %s" % str(qa[0].id))
+						G.ui._advance_overlay()     # quest panel -> close
+					5:
+						G.ui.inventory_panel()      # saphire envanteri (doğrudan)
+					6:
+						_shoot()                    # inventory visible
+					7:
+						G.ui._advance_overlay()     # close -> camp
+					8:
+						G.ui.worldmap_panel()       # david dünya haritası
+					9:
+						_shoot()                    # node-graph map visible
+					10:
+						G.ui._wmap_pick("b0", Label.new(), {"id": "b0"})
+					11:
+						_shoot()                    # map with selection refreshed
+						G.ui._advance_overlay()
 					_:
 						G.player.pos = G.room.doors[0].pos + Vector2(0, 6)
 						_step = 2
@@ -96,6 +118,17 @@ func _process(_d: float) -> void:
 			if _tome_ck and t >= 118.0:
 				_tome_ck = false
 				print("[probe] tome consumed ok" if G.run.boon_ids.size() > _tome_boons else "[probe] WARN tome not consumed")
+			# eşya düşüşü kapsaması: elit loot spawn + toplama -> run loot bag
+			if not _loot_done and t >= 130.0:
+				_loot_done = true
+				var iid := Items.roll(0.0)
+				print("[probe] loot roll -> %s" % iid)
+				if iid != "":
+					G.room.spawn_loot(iid, G.player.pos + Vector2(12, 0))
+			if _loot_done and not _loot_ck and t >= 140.0:
+				_loot_ck = true
+				var bag := (G.run.stats.get("loot", []) as Array).size()
+				print("[probe] loot bag=%d elite_kills=%d" % [bag, int(G.run.stats.get("elite_kills", 0))])
 			if t >= _shot_at:
 				_shot_at = t + 15.0
 				_shoot()
