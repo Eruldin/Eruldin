@@ -101,6 +101,7 @@ var _dash_row: HBoxContainer
 var _frag_lbl: Label
 var _boon_row: HBoxContainer
 var _room_lbl: Label
+var _quest_lbl: Label
 var _hint_lbl: Label
 var _tip: PanelContainer
 var _tip_lbl: Label
@@ -280,6 +281,9 @@ func _build_hud() -> void:
 
 	_room_lbl = _lbl("", Vector2(20, 134), 12, Color(0.72, 0.72, 0.82))
 	_hud.add_child(_room_lbl)
+	# görev izleyici — koşuda aktif görevlerin ilerlemesi (BG2 journal-glance)
+	_quest_lbl = _lbl("", Vector2(20, 152), 11, Color(0.82, 0.78, 0.55))
+	_hud.add_child(_quest_lbl)
 
 	_hint_lbl = _lbl("WASD hareket · SPACE dash · E etkileşim · ESC duraklat — silahlar kendiliğinden ateş eder", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
 	_hud.add_child(_hint_lbl)
@@ -451,6 +455,14 @@ func _tick_hud() -> void:
 		_room_lbl.text = "VIATOR KAMPI"
 	else:
 		_room_lbl.text = ""
+	var qs := ""
+	for q in (Quests.active() if G.state == G.State.ROOM else []):
+		if qs.length() > 0:
+			qs += "   "
+		qs += "· %s %s" % [str(q.name).to_lower(), Quests.prog_text(q)]
+		if qs.length() > 60:
+			break
+	_quest_lbl.text = qs
 
 # ekran dışı hedefler için kenar işaretleri (HoT objective markers): elitler,
 # boss, sandıklar ve saha özel eşyaları dünya konumundan kenara yansıtılır

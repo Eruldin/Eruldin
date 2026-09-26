@@ -115,6 +115,17 @@ func build_hub() -> void:
 	_prop(Vector2(430, -180), 12, "prop_hub_4")
 	_prop(Vector2(60, -190), 12, "medic")
 	_fire(Vector2(0, -60))
+	# kamp ateşi çevresinde sıcak moteler (ateş böcekleri)
+	for i in 12:
+		var f := Sprite2D.new()
+		f.texture = Px.S("dot")
+		f.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		f.scale = Vector2.ONE * rng.randf_range(0.4, 0.9)
+		f.modulate = Color(1.0, 0.72, 0.28, rng.randf_range(0.35, 0.7))
+		f.position = Vector2(rng.randf_range(-260, 260), rng.randf_range(-180, 100))
+		f.z_index = 1500
+		add_child(f)
+		motes.append({"s": f, "vel": Vector2(rng.randf_range(-8, 8), rng.randf_range(-10, -3)), "ph": rng.randf() * TAU})
 	# Resonance Gate — south edge, starts the run
 	var gate := _door_node("portal")
 	gate.position = Vector2(0, H * 0.5 - 26)
@@ -897,6 +908,10 @@ func _tick_pickups(d: float) -> void:
 			continue   # tom draft açıkken tetiklenmesin — yerinde bekler
 		if int(pk.get_meta("vac", 0)) == 1 or dist < magnet:
 			pk.position = pk.position.move_toward(G.player.pos, (340.0 + (magnet - dist) * 4.0) * d)
+		if str(pk.get_meta("kind", "")) == "xp":
+			var tw := float(pk.get_meta("tw", G.rf(0.0, TAU)))
+			pk.set_meta("tw", tw + d)
+			pk.modulate.a = 0.8 + sin(tw * 3.0) * 0.2
 		if dist < 16:
 			_collect(pk)
 
