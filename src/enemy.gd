@@ -31,6 +31,7 @@ var proj_dmg := 9.0
 var keep_min := 0.0
 var keep_max := 9999.0
 var kamikaze := false
+var splits := 0             # on death, burst into this many parasite runners
 
 var _st: int = St.RISE
 var _rise_t := 0.55
@@ -92,6 +93,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 			windup_t = 0.7; recover_t = 0.8; attack_cd = 1.6; touch_r = 48
 			actor_name = "Konakçı Yaratık"
 			knock_resist = 60.0
+			splits = 2
 		EKind.ALFA:
 			max_hp = 88; speed = 128; touch_dmg = 16; radius = 15; hit_radius = 18
 			windup_t = 0.5; recover_t = 0.55; attack_cd = 1.0; touch_r = 42
@@ -395,6 +397,11 @@ func die(h: Dictionary) -> void:
 	G.fx.splat(pos + Vector2(0, 4), Color(0.4, 0.03, 0.03), 1.4 if elite else 0.8)
 	if kind == EKind.DRONE or kind == EKind.SPITTER:
 		G.fx.burst(pos + Vector2(0, -6), Px.C("00E676"), 12, 130.0, 4.0, 0.5)
+	if splits > 0 and is_instance_valid(G.room) and G.state == G.State.ROOM:
+		for i in splits:
+			var off := Vector2.RIGHT.rotated(TAU * float(i) / float(splits) + G.rf(0, 0.6)) * 30.0
+			Enemy.spawn(EKind.VARL, pos + off, false, 0.5, 0.7, G.room)
+		G.fx.burst(pos, Px.C("8dc63f"), 14, 150.0, 4.0, 0.4)
 	if is_instance_valid(G.room):
 		# XP gem every kill; elites also drop a chest; rare heal orb
 		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0][kind] + (10.0 if elite else 0.0)
