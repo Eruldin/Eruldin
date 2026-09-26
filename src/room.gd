@@ -1020,6 +1020,13 @@ func _collect(pk: Node) -> void:
 			if ciid != "":
 				spawn_loot(ciid, pk.position + Vector2(30, 10))
 			Quests.tick("cursed")
+		"ceset":
+			var cv := int(pk.get_meta("val", 0))
+			G.run.fragments += cv
+			G.ui.toast("eski cesedini buldun — +%d parçacık" % cv)
+			G.audio.jingle("boon")
+			G.fx.light_flash(pk.position, Px.C("9be8ff"), 1.8, 2.4, 0.4)
+			Quests.tick("ceset")
 		"chest":
 			G.run.open_chest()
 		"loot":
@@ -1069,7 +1076,7 @@ func spawn_chest(p: Vector2) -> void:
 
 # rare field items (VS floor pickups): vacuum draws every gem in, bomb hits
 # the whole swarm, freeze staggers it for a few seconds
-func spawn_special(kind: String, p: Vector2) -> void:
+func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 	var pk := Sprite2D.new()
 	var col := "ffffff"
 	match kind:
@@ -1097,6 +1104,9 @@ func spawn_special(kind: String, p: Vector2) -> void:
 		"cursed":
 			pk.texture = Px.S("crate")
 			col = "ff3355"
+		"ceset":
+			pk.texture = Px.S2("por_rex") if Px.S2("por_rex") != null else Px.S("dot")
+			col = "9be8ff"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	pk.scale = Vector2.ONE * (0.95 if kind == "cursed" else 0.8)
 	pk.modulate = Px.C(col)
@@ -1106,6 +1116,7 @@ func spawn_special(kind: String, p: Vector2) -> void:
 	pk.set_meta("val", 0)
 	pickups_node.add_child(pk)
 	G.fx.mk_light(pk, Vector2.ZERO, Px.C(col), 0.6, 1.4)
+	return pk
 
 # eşya düşüşü (HoT gear): elitlerden/bosslardan çıkar — üstüne bas, çantaya gir
 func spawn_loot(iid: String, p: Vector2) -> void:

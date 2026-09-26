@@ -29,6 +29,13 @@ func build_arena(biome_idx: int) -> void:
 		if p.distance_to(Vector2.ZERO) < 280.0:
 			continue
 		spawn_special(["vacuum", "bomb", "freeze", "boost", "guard"][i % 5], p)
+	# ceset koşusu: önceki ölüm bu sahadaysa eski ceset parçacık iadesi taşır (BG2 corpse run)
+	var ld: Dictionary = G.meta.data.get("last_death", {}) if is_instance_valid(G.meta) else {}
+	if int(ld.get("biome", -1)) == biome and int(ld.get("depth", 0)) > 0:
+		var cp := Vector2(rng.randf_range(BOUNDS.position.x + 160, BOUNDS.end.x - 160), rng.randf_range(BOUNDS.position.y + 160, BOUNDS.end.y - 160))
+		var ck := spawn_special("ceset", cp)
+		ck.set_meta("val", int(clampf(float(ld.get("depth", 0)) * 0.4, 40.0, 400.0)))
+		G.ui.toast("bu sahada eski cesedin yatıyor — parçacıkların orada")
 	G.audio.play_music("mus_%d" % biome)
 	var nn := str(G.run.node_name) if G.run != null else ""
 	G.ui.banner(nn if nn != "" else BIOME_NAME[biome], "kovan akıyor — hayatta kal")

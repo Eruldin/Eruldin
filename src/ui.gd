@@ -490,6 +490,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "ico_boon", "col": "c9a227", "s": 24.0})
 			elif k == "loot":
 				out.append({"p": pk.position, "icon": "ico_loot", "col": "42d4f4", "s": 20.0})
+			elif k == "ceset":
+				out.append({"p": pk.position, "icon": "ico_frag", "col": "9be8ff", "s": 24.0})
 		if G.room.mono_active:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
 		if G.room.merchant_active:
@@ -2351,6 +2353,10 @@ func death_screen(killer: String, gained: int) -> void:
 	var sl := _lbl("skor: %d%s" % [sc, " — YENİ REKOR!" if G.run.stats.get("new_record", false) else ""], Vector2.ZERO, 13, Px.C("c9a227") if G.run.stats.get("new_record", false) else Color(0.65, 0.65, 0.75))
 	sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sl)
+	var gdt: String = _grade(sc)
+	var grl := _lbl("NOTA: %s" % gdt, Vector2.ZERO, 26, {"S": Px.C("ffd700"), "A": Px.C("8fd4ff"), "B": Px.C("8dc63f"), "C": Px.C("c9a227")}.get(gdt, Color.WHITE))
+	grl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(grl)
 	var kname := str(G.meta.data.get("last_death", {}).get("killer", ""))
 	if kname != "":
 		var kl2 := _lbl("son nefes: %s" % kname, Vector2.ZERO, 12, Px.C("ff5533"))
@@ -2361,6 +2367,9 @@ func death_screen(killer: String, gained: int) -> void:
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 	G.audio.play_music("mus_hub")
+
+func _grade(sc: int) -> String:
+	return "S" if sc >= 5000 else ("A" if sc >= 3500 else ("B" if sc >= 2200 else "C"))
 
 func victory_screen(stats: Dictionary) -> void:
 	_pause(true)
@@ -2401,6 +2410,10 @@ func victory_screen(stats: Dictionary) -> void:
 	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d\nChoralim saflaştırıldı: ◆ +%d\nToplam zafer: %d\nSkor: %d%s" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), int(stats.get("best_streak", 0)), int(stats.get("gained", 0)), G.meta.data.victories, int(stats.get("score", 0)), " — YENİ REKOR!" if stats.get("new_record", false) else ""], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
 	t2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t2)
+	var gdt2: String = _grade(int(stats.get("score", 0)))
+	var grl2 := _lbl("NOTA: %s" % gdt2, Vector2.ZERO, 26, {"S": Px.C("ffd700"), "A": Px.C("8fd4ff"), "B": Px.C("8dc63f"), "C": Px.C("c9a227")}.get(gdt2, Color.WHITE))
+	grl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(grl2)
 	var ngl := int(stats.get("ng", 0))
 	if ngl > 0:
 		var t3 := _lbl("PROTOKOL DERİNLİĞİ +%d — kovan sonsuza +%d%% sert, ödemeler +%d%%" % [ngl, ngl * 12, ngl * 8], Vector2.ZERO, 12, Px.C("c26bff"))
