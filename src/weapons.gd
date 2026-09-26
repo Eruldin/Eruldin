@@ -123,6 +123,20 @@ const DEFS := {
 		"b": {"dmg": 82.0, "cd": 1.4, "len": 780.0, "w": 46.0},
 		"hidden": true,
 	},
+	"seeker": {
+		"name": "SİNYAL MİSKETİ", "icon": "ico_exit", "col": "ffd166",
+		"desc": "Etraftaki düşmanlara güdümlü misketler",
+		"b": {"dmg": 13.0, "cd": 1.8, "n": 2.0, "spd": 340.0},
+		"inc": {"dmg": 4.2, "n": 0.5, "cd": -0.06},
+		"feats": {5: {"n": 1.0}, 8: {"n": 1.0}},
+		"evo": "warp", "into": "seeker_x",
+	},
+	"seeker_x": {
+		"name": "KÜME SAĞANAĞI", "icon": "ico_exit", "col": "ffe9a0",
+		"desc": "Delici misket sürüsü — hepsi kilitlenir",
+		"b": {"dmg": 34.0, "cd": 1.2, "n": 7.0, "spd": 480.0, "pierce": 1.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -134,6 +148,7 @@ const PDEFS := {
 	"core":    {"name": "HEDEF İŞLEMCİ",      "icon": "icn_upg_dmg",    "col": "ff4444", "desc": "+%8 hasar"},
 	"vigor":   {"name": "BİYOLAT",            "icon": "icn_upg_hp",     "col": "ff6688", "desc": "+15 azami can"},
 	"regen":   {"name": "REJENERASYON",       "icon": "ico_heal",       "col": "39ff14", "desc": "+0.7 can/sn"},
+	"warp":    {"name": "ROTA AKSAMI",        "icon": "icn_crown",      "col": "ffd166", "desc": "+%9 mermi hızı"},
 }
 
 static func def(wid: String) -> Dictionary:
@@ -184,6 +199,7 @@ static func apply_passive(pid: String, p: Player) -> void:
 			p.hp = minf(p.hp + 15.0, p.max_hp)
 		"regen":
 			p.set_meta("regen", float(p.get_meta("regen", 0.0)) + 0.7)
+		"warp": p.proj_spd *= 1.09
 
 # which evolutions the player can cash in right now
 static func evo_ready(p: Player) -> Array:
@@ -336,6 +352,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"spit", "spit_x": _spit(st, p, w)
 		"dagger", "dagger_x": _dagger(st, p)
 		"ray", "ray_x": _ray(st, p)
+		"seeker", "seeker_x": _seeker(st, p)
 
 static func _nearest(p: Vector2, max_r: float) -> Enemy:
 	var best: Enemy = null
@@ -537,6 +554,24 @@ static func _ray(st: Dictionary, p: Player) -> void:
 	tw.tween_callback(beam.queue_free)
 	G.audio.play("plasma", 0.8, 0.75)
 	G.fx.shake(0.1, 0.06)
+
+# rosette of homing missiles — each curves into the swarm on its own
+static func _seeker(st: Dictionary, p: Player) -> void:
+	var n := maxi(1, roundi(float(st.n)))
+	var pierce: bool = st.get("pierce", 0.0) > 0.0
+	for i in n:
+		var dir := Vector2.from_angle(TAU * i / n + G.rf(-0.2, 0.2))
+		var pr := Projectile.new()
+		G.game.world.add_child(pr)
+		pr.setup(G.Team.PLAYER, p.pos + dir * 20.0, dir * float(st.spd) * p.proj_spd,
+			float(st.dmg) * p.dmg_mult, 7.5, Px.C("ffd166"), "spark")
+		pr.homing = true
+		pr.piercing = pierce
+		pr.knock = 5.0
+		pr.stag = 0.3
+		pr.life = 3.2
+	G.audio.play("shoot", 0.85, 0.6)
+	G.fx.burst(p.pos + Vector2(0, -12), Px.C("ffd166"), 8, 140.0, 3.0, 0.25)
 
 static func _tick_orbit(w: Dictionary, p: Player, d: float) -> void:
 	var st := stats(str(w.id), int(w.lvl))
