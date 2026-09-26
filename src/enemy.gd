@@ -137,12 +137,28 @@ func _make_body() -> void:
 		base_color = Color(0.9, 0.65, 1.0)
 		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
+		_hp_bg = ColorRect.new()
+		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
+		_hp_bg.position = Vector2(-24, -80)
+		_hp_bg.size = Vector2(48, 6)
+		_hp_bg.z_index = 30
+		add_child(_hp_bg)
+		_hp_fg = ColorRect.new()
+		_hp_fg.color = Px.C("ffb74d")
+		_hp_fg.position = Vector2(1, 1)
+		_hp_fg.size = Vector2(46, 4)
+		_hp_bg.add_child(_hp_fg)
 	body.modulate = Color(0.2, 0.2, 0.2, 0)
 	_orbit = -1.0 if G.chance(0.5) else 1.0
+
+var _hp_bg: ColorRect
+var _hp_fg: ColorRect
 
 func _process(_d: float) -> void:
 	if dead:
 		return
+	if is_instance_valid(_hp_fg):
+		_hp_fg.size.x = 46.0 * clampf(float(hp) / float(max_hp), 0.0, 1.0)
 	var d := get_process_delta_time()
 	tick(d)
 	if stagger > 0:
@@ -288,7 +304,7 @@ func _do_strike() -> void:
 		EKind.SPITTER:
 			_shoot_at(G.player.pos, proj_spd, proj_dmg, Px.C("39ff14"), 9.0)
 		EKind.CEREB:
-			_shoot_at(G.player.pos, proj_spd, proj_dmg, Px.C("7B1FA2"), 12.0)
+			_lob(G.player.pos)
 		EKind.TURRET:
 			_burst_co()
 		EKind.DRONE:
@@ -304,6 +320,21 @@ func _burst_co() -> void:
 
 func _shoot_at(target: Vector2, spd: float, dmg: float, col: Color, rad: float) -> void:
 	_shoot_dir((target - pos).normalized(), spd, dmg, col, rad)
+
+# mortar lob: mark the landing zone, the glob bursts there in an AoE
+func _lob(target: Vector2) -> void:
+	var dist := pos.distance_to(target)
+	var flight := clampf(dist / proj_spd, 0.5, 1.6)
+	var blast_r := 62.0
+	G.fx.tele_circle(target, blast_r, flight, Color(0.6, 0.2, 1.0, 0.3))
+	var p := Projectile.new()
+	G.game.world.add_child(p)
+	var dir := (target - pos).normalized()
+	p.setup(G.Team.ENEMY, pos + dir * 16.0, dir * (dist / flight), proj_dmg, 12.0, Px.C("7B1FA2"), "dot")
+	p.life = flight
+	p.aoe = blast_r
+	p.source = self
+	G.audio.play("shoot", G.rf(0.7, 0.9), 0.5)
 
 func _shoot_dir(dir: Vector2, spd: float, dmg: float, col: Color, rad: float) -> void:
 	var p := Projectile.new()
