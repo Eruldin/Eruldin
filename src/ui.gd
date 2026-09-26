@@ -449,7 +449,7 @@ func _edge_targets() -> Array:
 			var k := str(pk.get_meta("kind", ""))
 			if k == "chest":
 				out.append({"p": pk.position, "icon": "ico_boon", "col": "ffb74d", "s": 22.0})
-			elif k == "vacuum" or k == "bomb" or k == "freeze":
+			elif k == "vacuum" or k == "bomb" or k == "freeze" or k == "boost" or k == "guard":
 				out.append({"p": pk.position, "icon": "ico_frag", "col": "00E5FF", "s": 18.0})
 	return out
 

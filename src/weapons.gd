@@ -396,7 +396,7 @@ static func tick(p: Player, d: float) -> void:
 		w.t = float(w.t) - d
 		if w.t <= 0.0:
 			var st := stats(wid, int(w.lvl))
-			w.t = maxf(0.12, float(st.get("cd", 1.0)) * p.cd_mult / maxf(p.atk_speed, 0.5))
+			w.t = maxf(0.12, float(st.get("cd", 1.0)) * p.cd_mult / maxf(p.atk_speed * (1.35 if p.boost_t > 0.0 else 1.0), 0.5))
 			_fire(wid, st, p, w)
 
 static var _fwpn := ""   # id of the weapon currently firing — stamps spawned projectiles/hits for the damage tally
