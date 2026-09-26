@@ -67,7 +67,7 @@ func _tick_events(d: float) -> void:
 		var kind: int = G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.HUSK] if m < 4.0 else ([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER] if m < 6.5 else [Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA, Enemy.EKind.SPITTER]))
 		var e := _spawn(kind, true)
 		if e != null:
-			G.ui.toast("elit — sandık taşıyor")
+			G.ui.toast("%s — sandık taşıyor" % e.actor_name)
 	# surge events — a visible ring/flood every ~75s
 	_surge_t -= d
 	if _surge_t <= 0.0:
