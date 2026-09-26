@@ -1,0 +1,90 @@
+class_name Boons
+extends RefCounted
+
+# Boon (Lütuf) system — Resonance Protocols. Each patron grants a themed set.
+# rarity: 0 common, 1 rare, 2 epic. Applied instantly on pick, run-scoped.
+
+static func all() -> Array:
+	return [
+		# --- Rhasa Doktrini (physical) ---
+		{"id":"crushing","patron":"Rhasa","name":"Ezici Vuruşlar","desc":"+%20 kılıç hasarı","rarity":0,"color":Px.C("a8842f")},
+		{"id":"shredder","patron":"Rhasa","name":"Zırh Kemiren","desc":"Vuruşlar zırhı yok sayar, +4 düz hasar","rarity":1,"color":Px.C("a8842f")},
+		{"id":"veteran","patron":"Rhasa","name":"Kıdemli Kavrama","desc":"+%12 saldırı hızı","rarity":0,"color":Px.C("a8842f")},
+		{"id":"bulwark","patron":"Rhasa","name":"Siper Doktrini","desc":"+2 zırh, parry penceresi +0.05sn","rarity":1,"color":Px.C("a8842f")},
+		{"id":"shockslam","patron":"Rhasa","name":"Şok Darbesi","desc":"Ağır vuruşlar alan şoku salar","rarity":2,"color":Px.C("a8842f")},
+		# --- Neva Rezonansı (telekinesis) ---
+		{"id":"well","patron":"Neva","name":"Yerçekimi Anomalisi","desc":"Vuruşlar %25 ihtimalle düşmanları çeker","rarity":1,"color":Px.C("7B1FA2")},
+		{"id":"homing","patron":"Neva","name":"Kıvrılan Mermiler","desc":"Plazma mermileri hedefe döner","rarity":1,"color":Px.C("7B1FA2")},
+		{"id":"mind","patron":"Neva","name":"Zihin Kırılması","desc":"+%15 kritik ihtimali","rarity":0,"color":Px.C("7B1FA2")},
+		{"id":"aegis","patron":"Neva","name":"Telekinetik Zırh","desc":"Dash sonrası +0.15sn dokunulmazlık","rarity":2,"color":Px.C("7B1FA2")},
+		# --- Saphire Kabile Taktikleri ---
+		{"id":"venom","patron":"Saphire","name":"Zehir Sürme","desc":"Vuruşlar zehir bırakır (hasarın %25'i/sn)","rarity":0,"color":Px.C("00E676")},
+		{"id":"predator","patron":"Saphire","name":"Avcı Odağı","desc":"+%10 kritik, kritik ×2.4","rarity":1,"color":Px.C("00E676")},
+		{"id":"swift","patron":"Saphire","name":"Yıldırım Ayaklar","desc":"Dash yenilenmesi %35 hızlı","rarity":0,"color":Px.C("00E676")},
+		{"id":"camo","patron":"Saphire","name":"Kamuflaj Sıçrayışı","desc":"Dash sonrası 1.2sn düşmanlar seni görmez","rarity":2,"color":Px.C("00E676")},
+		{"id":"regen","patron":"Saphire","name":"Köksülük","desc":"Saniyede +0.8 can yenilenmesi","rarity":1,"color":Px.C("00E676")},
+		# --- Rex Sibernetik Glitch ---
+		{"id":"emp","patron":"Rex","name":"EMP Patlaması","desc":"Vuruşlar %20 ihtimalle zincir şok salar","rarity":1,"color":Px.C("ff4444")},
+		{"id":"overcharge","patron":"Rex","name":"Aşırı Isınma","desc":"+%35 plazma hasarı, daha hızlı dolum","rarity":1,"color":Px.C("ff4444")},
+		{"id":"static","patron":"Rex","name":"Statik Alan","desc":"Yakındaki düşmanlar saniyede 6 şok hasarı alır","rarity":0,"color":Px.C("ff4444")},
+		{"id":"parryemp","patron":"Rex","name":"Kafa Karıştıran","desc":"Parry etrafında şok dalgası patlatır","rarity":2,"color":Px.C("ff4444")},
+		# --- Kovan Mutasyonu (chaos — bedelli) ---
+		{"id":"bloodlust","patron":"Kovan","name":"Kan Hırsı","desc":"+%40 hasar — ama +%15 hasar alırsın","rarity":1,"color":Px.C("39ff14")},
+		{"id":"frenzy","patron":"Kovan","name":"Kuduz","desc":"+%18 saldırı hızı — ama -15 azami can","rarity":0,"color":Px.C("39ff14")},
+		{"id":"carapace","patron":"Kovan","name":"Et Zırhı","desc":"+%8 can çalma — ama -%10 azami can","rarity":2,"color":Px.C("39ff14")},
+	]
+
+static func roll(owned: Array, luck := 0.0) -> Array:
+	# pick 3 distinct boons not already owned; weight by rarity (epic rare)
+	var pool: Array = []
+	for b in all():
+		if owned.has(b.id):
+			continue
+		var w: float = [10.0, 4.0, 1.4][int(b.rarity)]
+		if int(b.rarity) == 2:
+			w += luck * 3.0
+		pool.append({"b": b, "w": w})
+	var out: Array = []
+	for i in 3:
+		if pool.is_empty():
+			break
+		var total := 0.0
+		for e in pool: total += e.w
+		var r := G.rf(0, total)
+		var acc := 0.0
+		var idx := 0
+		for j in pool.size():
+			acc += pool[j].w
+			if r <= acc:
+				idx = j
+				break
+		out.append(pool[idx].b)
+		pool.remove_at(idx)
+	return out
+
+static func parry_bonus() -> float:
+	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0
+
+static func apply(id: String, p: Player) -> void:
+	match id:
+		"crushing": p.melee_dmg *= 1.20
+		"shredder": p.melee_dmg += 4.0; p.set_meta("shred", true)
+		"veteran": p.atk_speed *= 1.12
+		"bulwark": p.armor += 2.0
+		"shockslam": p.set_meta("shockslam", true)
+		"well": p.b_gravity_well = true
+		"homing": p.b_homing = true
+		"mind": p.crit_ch += 0.15
+		"aegis": p.set_meta("aegis", true)
+		"venom": p.b_poison = true
+		"predator": p.crit_ch += 0.10; p.crit_mult = 2.4
+		"swift": p.dash_regen_mult *= 1.35
+		"camo": p.b_stealth_dash = true
+		"regen": p.set_meta("regen", 0.8)
+		"emp": p.b_emp = true
+		"overcharge": p.plasma_mult *= 1.35; p.charge_rate *= 1.45
+		"static": p.set_meta("static", 6.0)
+		"parryemp": p.b_parry_shock = true
+		"bloodlust": p.dmg_mult *= 1.40; p.dmg_taken_mult *= 1.15
+		"frenzy": p.atk_speed *= 1.18; p.max_hp = maxf(20.0, p.max_hp - 15); p.hp = minf(p.hp, p.max_hp)
+		"carapace": p.lifesteal += 0.08; p.max_hp = maxf(20.0, p.max_hp * 0.9); p.hp = minf(p.hp, p.max_hp)
