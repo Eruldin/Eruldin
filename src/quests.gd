@@ -38,6 +38,7 @@ const DEFS := [
 	{"id": "q_dua",    "giver": "ahusk",   "name": "SESSİZ DUA",       "desc": "Mabed hâlâ dinliyor. Bir koşuda 300 sn boyunca tek parça kal — tapınağın yolu açılır.", "obj": {"type": "time", "n": 300}, "rew": {"cho": 90, "node": "mabed"}},
 	{"id": "q_nobet",  "giver": "ehnar",   "name": "SON NÖBET",        "desc": "Mezardaki nöbetçiler sayıyor. Tek koşuda 10 elit kes — mezarın kapağı kalkar.", "obj": {"type": "elites", "n": 10}, "rew": {"cho": 110, "node": "mezarlik"}, "prereq": "q_elit"},
 	{"id": "q_batak",  "giver": "david",   "name": "BATAKLIK ROTASI",   "desc": "Konakçı Yaratıkların izi doğuda bir bataklığa çıkıyor. 8 tanesini kes — rotayı çizerim.", "obj": {"type": "kind", "k": "Konakçı Yaratık", "n": 8}, "rew": {"cho": 90, "node": "batak"}, "prereq": "q_gez"},
+	{"id": "q_sis",    "giver": "ahusk",   "name": "SİS PERDESİ",        "desc": "Kistlerin şarkısı batıda bir geçidi işaretliyor. 12 Cerebellum Kisti kes — geçidi bulayım.", "obj": {"type": "kind", "k": "Cerebellum Kisti", "n": 12}, "rew": {"cho": 100, "node": "sisgecidi"}, "prereq": "q_dua"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}

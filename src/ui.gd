@@ -1638,6 +1638,9 @@ const WAYLAY := {
 	"harabe": {"name": "YOLKENARI HARABE", "col": "8fd4ff",
 		"sub": "Çöken bir karakol kalıntısı yolu kesiyor. Molozun altında eşya olabilir — ya da sadece düşen taşlar.",
 		"opts": ["ARAŞTIR — şansına: eşya ya da enkaz hasarı", "GEÇ — durmaya değmez"]},
+	"gezgin": {"name": "YALNIZ GEZGİN", "col": "c26bff",
+		"sub": "Bacağı tüten bir şasi yolun kenarında duruyor. Sırt çantası ağzına kadar eşya dolu: 'Kaliteli mal, düşük fiyat. Viator'a indirim yok.'",
+		"opts": ["AL — ◆120, rasgele eşya", "GEÇ — yola devam"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -1662,6 +1665,9 @@ func travel_event(wkind: String, dest: String) -> void:
 		ob.custom_minimum_size = Vector2(480, 34)
 		# pusuda haraç: choralim yetmezse tek çıkış savaş
 		if wkind == "pusu" and i == 1 and int(G.meta.data.get("choralim", 0)) < 40:
+			ob.disabled = true
+			ob.modulate = Color(0.45, 0.45, 0.5)
+		if wkind == "gezgin" and i == 0 and int(G.meta.data.get("choralim", 0)) < 120:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		var oc := CenterContainer.new()
@@ -1700,6 +1706,14 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 					toast("harabe çöktü — girişte yara alacaksın")
 			else:
 				toast("harabe geçildi")
+		"gezgin":
+			if idx == 0:
+				G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - 120
+				G.meta.save()
+				Items.drop_to_run(Items.roll(G.run.luck))
+				toast("gezgin takası — eşya çantaya girdi")
+			else:
+				toast("gezgin yoluna devam etti")
 	G.audio.jingle("boon")
 	_close_overlay()
 	G.run._enter_arena()
