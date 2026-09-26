@@ -512,6 +512,24 @@ func _gear_icon(icon: String, col: String, lvl: int, size: int) -> Control:
 	tr.add_child(l)
 	return slot
 
+# end-screen inventory: the loadout the run ended with (VS results recap)
+func _build_recap(v: VBoxContainer) -> void:
+	if not is_instance_valid(G.player):
+		return
+	var tl := _lbl("YÜKÜN", Vector2.ZERO, 11, Color(0.55, 0.55, 0.68))
+	tl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(tl)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 6)
+	for w in G.player.weapons:
+		var d: Dictionary = Weapons.def(str(w.id))
+		row.add_child(_gear_icon(str(d.get("icon", "ico_boon")), str(d.get("col", "7fd4ff")), int(w.lvl), 30))
+	for ps in G.player.passives:
+		var d: Dictionary = Weapons.pdef(str(ps.id))
+		row.add_child(_gear_icon(str(d.get("icon", "ico_frag")), str(d.get("col", "c26bff")), int(ps.lvl), 22))
+	v.add_child(row)
+
 func _boon_spec(bid: String) -> Dictionary:
 	for b in Boons.all():
 		if b.id == bid:
@@ -1176,6 +1194,7 @@ func death_screen(killer: String, gained: int) -> void:
 	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
 	dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dl)
+	_build_recap(v)
 	var h := _lbl("Neva'nın rezonansı seni geri çekiyor...\n[E / tık] — Viator Kampı'na dön", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
@@ -1201,6 +1220,7 @@ func victory_screen(stats: Dictionary) -> void:
 	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim\nChoralim saflaştırıldı: ◆ +%d\nToplam zafer: %d" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), int(stats.get("gained", 0)), G.meta.data.victories], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
 	t2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t2)
+	_build_recap(v)
 	var h := _lbl("[E / tık] — kampa dön (yeni döngü)", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
