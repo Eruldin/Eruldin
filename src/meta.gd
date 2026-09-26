@@ -104,23 +104,23 @@ func achievements() -> Array:
 		if not Weapons.DEFS[wid].get("hidden", false) and not Weapons.unlocked(wid):
 			arsenal = false
 	return [
-		{"name": "İLK ZAFER", "desc": "bir koşuyu zaferle bitir", "done": int(data["victories"]) > 0},
-		{"name": "KESİM MAKİNESİ", "desc": "toplam 1.000 kesim", "done": int(data["kills"]) >= 1000},
-		{"name": "KOVAN KIRICI", "desc": "toplam 10.000 kesim", "done": int(data["kills"]) >= 10000},
-		{"name": "EFENDİ AVCISI", "desc": "dört efendiyi de düşür", "done": (data["bosses"] as Array).size() >= 4},
-		{"name": "DERİN GEZGİN", "desc": "tek koşuda 10+ dakika dayan", "done": int(data["best_depth"]) >= 600 or int(data["victories"]) > 0},
-		{"name": "İNATÇI", "desc": "10 koşuya çık", "done": int(data["runs"]) >= 10},
-		{"name": "TAM ARSENAL", "desc": "tüm silahların kilidini aç", "done": arsenal},
-		{"name": "HASAT AVCISI", "desc": "bir HASATÇI'yı kes", "done": int(data.get("reapers", 0)) > 0},
-		{"name": "EVRİM MİMARI", "desc": "tek koşuda 3 evrim tamamla", "done": int(data.get("best_evos", 0)) >= 3},
-		{"name": "NÜVE AVCISI", "desc": "10 altın nüve topla", "done": int(data.get("eggs", 0)) >= 10},
-		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0},
-		{"name": "SKOR AVCISI", "desc": "tek koşuda 4000+ skor", "done": int(data.get("best_score", 0)) >= 4000},
-		{"name": "MARATONCU", "desc": "tek koşuda 14+ dakika dayan", "done": int(data.get("best_depth", 0)) >= 840},
-		{"name": "KOZ KOLEKSİYONCUSU", "desc": "7 koz kartının hepsini kullan", "done": (data.get("arcanas_seen", []) as Array).size() >= Boons.ARCANAS.size()},
-		{"name": "HARİTA USTASI", "desc": "kamp hariç tüm node'lara koşu yap", "done": (data.get("visited_nodes", []) as Array).size() >= int(Wmap.NODES.size()) - 1},
-		{"name": "KOLEKSİYONER", "desc": "zula + ekipmanda 10+ eşya", "done": (data.get("stash", []) as Array).size() + (data.get("equip", {}) as Dictionary).size() >= 10},
-		{"name": "GÖREV ERİ", "desc": "8 görevi teslim et", "done": _claimed_count() >= 8},
+		{"name": "İLK ZAFER", "desc": "bir koşuyu zaferle bitir", "done": int(data["victories"]) > 0, "rew": 150},
+		{"name": "KESİM MAKİNESİ", "desc": "toplam 1.000 kesim", "done": int(data["kills"]) >= 1000, "rew": 100},
+		{"name": "KOVAN KIRICI", "desc": "toplam 10.000 kesim", "done": int(data["kills"]) >= 10000, "rew": 300},
+		{"name": "EFENDİ AVCISI", "desc": "dört efendiyi de düşür", "done": (data["bosses"] as Array).size() >= 4, "rew": 200},
+		{"name": "DERİN GEZGİN", "desc": "tek koşuda 10+ dakika dayan", "done": int(data["best_depth"]) >= 600 or int(data["victories"]) > 0, "rew": 100},
+		{"name": "İNATÇI", "desc": "10 koşuya çık", "done": int(data["runs"]) >= 10, "rew": 80},
+		{"name": "TAM ARSENAL", "desc": "tüm silahların kilidini aç", "done": arsenal, "rew": 250},
+		{"name": "HASAT AVCISI", "desc": "bir HASATÇI'yı kes", "done": int(data.get("reapers", 0)) > 0, "rew": 150},
+		{"name": "EVRİM MİMARI", "desc": "tek koşuda 3 evrim tamamla", "done": int(data.get("best_evos", 0)) >= 3, "rew": 120},
+		{"name": "NÜVE AVCISI", "desc": "10 altın nüve topla", "done": int(data.get("eggs", 0)) >= 10, "rew": 120},
+		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0, "rew": 150},
+		{"name": "SKOR AVCISI", "desc": "tek koşuda 4000+ skor", "done": int(data.get("best_score", 0)) >= 4000, "rew": 150},
+		{"name": "MARATONCU", "desc": "tek koşuda 14+ dakika dayan", "done": int(data.get("best_depth", 0)) >= 840, "rew": 200},
+		{"name": "KOZ KOLEKSİYONCUSU", "desc": "7 koz kartının hepsini kullan", "done": (data.get("arcanas_seen", []) as Array).size() >= Boons.ARCANAS.size(), "rew": 150},
+		{"name": "HARİTA USTASI", "desc": "kamp hariç tüm node'lara koşu yap", "done": (data.get("visited_nodes", []) as Array).size() >= int(Wmap.NODES.size()) - 1, "rew": 200},
+		{"name": "KOLEKSİYONER", "desc": "zula + ekipmanda 10+ eşya", "done": (data.get("stash", []) as Array).size() + (data.get("equip", {}) as Dictionary).size() >= 10, "rew": 100},
+		{"name": "GÖREV ERİ", "desc": "8 görevi teslim et", "done": _claimed_count() >= 8, "rew": 150},
 	]
 
 func _claimed_count() -> int:
@@ -137,7 +137,10 @@ func new_feats() -> Array:
 	for a in achievements():
 		if bool(a.done) and not seen.has(str(a.name)):
 			seen.append(str(a.name))
-			out.append(str(a.name))
+			var r := int(a.get("rew", 0))
+			if r > 0:
+				data["choralim"] = int(data.get("choralim", 0)) + r
+			out.append(str(a.name) + ("  +◆%d" % r if r > 0 else ""))
 	data["feats_seen"] = seen
 	if not out.is_empty():
 		save()
