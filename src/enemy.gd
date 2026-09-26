@@ -5,6 +5,8 @@ extends Actor
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
 enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA }
+
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
@@ -425,6 +427,10 @@ func die(h: Dictionary) -> void:
 	G.meta.data.kills += 1
 	if is_instance_valid(G.run):
 		G.run.stats.kills = int(G.run.stats.get("kills", 0)) + 1
+		var kk: Dictionary = G.run.stats.get("kind_kills", {})
+		var kn := str(KIND_NAME.get(kind, actor_name))
+		kk[kn] = int(kk.get(kn, 0)) + 1
+		G.run.stats["kind_kills"] = kk
 		G.run.on_kill(elite)
 	G.audio.play("die", G.rf(0.9, 1.2), 0.6)
 	G.fx.light_flash(pos + Vector2(0, -12), Color(1, 0.5, 0.3), 1.4, 2.4, 0.2)
