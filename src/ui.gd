@@ -492,6 +492,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "ico_loot", "col": "42d4f4", "s": 20.0})
 			elif k == "ceset":
 				out.append({"p": pk.position, "icon": "ico_frag", "col": "9be8ff", "s": 24.0})
+			elif k == "totem":
+				out.append({"p": pk.position, "icon": "icn_skull", "col": "ff6d3d", "s": 24.0})
 		if G.room.mono_active:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
 		if G.room.merchant_active:

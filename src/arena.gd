@@ -29,6 +29,10 @@ func build_arena(biome_idx: int) -> void:
 		if p.distance_to(Vector2.ZERO) < 280.0:
 			continue
 		spawn_special(["vacuum", "bomb", "freeze", "boost", "guard"][i % 5], p)
+	# deneme totemi: üstüne basınca iki elit doğar — ikisi de düşerse ödül (isteğe bağlı yan savaş)
+	var tp := Vector2(rng.randf_range(BOUNDS.position.x + 180, BOUNDS.end.x - 180), rng.randf_range(BOUNDS.position.y + 180, BOUNDS.end.y - 180))
+	if tp.distance_to(Vector2.ZERO) > 320.0:
+		spawn_special("totem", tp)
 	# ceset koşusu: önceki ölüm bu sahadaysa eski ceset parçacık iadesi taşır (BG2 corpse run)
 	var ld: Dictionary = G.meta.data.get("last_death", {}) if is_instance_valid(G.meta) else {}
 	if int(ld.get("biome", -1)) == biome and int(ld.get("depth", 0)) > 0:
