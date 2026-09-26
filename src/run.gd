@@ -38,6 +38,7 @@ func hub() -> void:
 	game.world.add_child(r)
 	r.build_hub()
 	_spawn_player(r.spawn_point())
+	_contract_tick()
 	G.ui.hub_ui(true)
 
 func start_run() -> void:
@@ -131,6 +132,64 @@ func descend() -> void:
 	depth = -1
 	next_room(Room.Reward.BOON)
 
+# Ehnar's rotating contracts — one field task per camp visit, pays choralim
+const CONTRACTS := [
+	{"key": "kills", "need": 150, "reward": 45},
+	{"key": "kills", "need": 400, "reward": 90},
+	{"key": "time",  "need": 480, "reward": 60},
+	{"key": "time",  "need": 660, "reward": 85},
+	{"key": "level", "need": 10,  "reward": 40},
+	{"key": "level", "need": 16,  "reward": 70},
+	{"key": "win",   "need": 1,   "reward": 120},
+]
+
+func contract_text(c: Dictionary) -> String:
+	if c.is_empty():
+		return "—"
+	match str(c.get("key", "")):
+		"kills": return "Tek koşuda %d kesim" % int(c.need)
+		"time":  return "Tek koşuda %d saniye dayan" % int(c.need)
+		"level": return "Tek koşuda seviye %d'e ulaş" % int(c.need)
+		"win":   return "Son efendiyi düşür ve dön"
+	return "—"
+
+func _write_last_run(win: bool) -> void:
+	G.meta.data["last_run"] = {
+		"kills": int(stats.get("kills", 0)),
+		"time": int(time),
+		"level": G.player.level if is_instance_valid(G.player) else 1,
+		"win": win,
+	}
+
+func _contract_met(c: Dictionary, lr: Dictionary) -> bool:
+	if c.is_empty() or lr.is_empty():
+		return false
+	match str(c.get("key", "")):
+		"kills": return int(lr.get("kills", 0)) >= int(c.need)
+		"time":  return int(lr.get("time", 0)) >= int(c.need)
+		"level": return int(lr.get("level", 0)) >= int(c.need)
+		"win":   return bool(lr.get("win", false))
+	return false
+
+# evaluate the last run against Ehnar's contract, then hand out the next one
+func _contract_tick() -> void:
+	var c: Dictionary = G.meta.data.get("contract", {})
+	if _contract_met(c, G.meta.data.get("last_run", {})):
+		var r := int(c.get("reward", 0))
+		G.meta.add_choralim(r)
+		G.ui.toast("EHNAR: sözleşme tuttu — +%d◆" % r)
+		G.audio.jingle("boon")
+		c = {}
+	if c.is_empty():
+		var nxt: Dictionary = CONTRACTS[randi() % CONTRACTS.size()]
+		# don't repeat the identical task back-to-back
+		var last_k: String = G.meta.data.get("_last_contract_key", "")
+		if str(nxt.key) == last_k:
+			nxt = CONTRACTS[(CONTRACTS.find(nxt) + 1) % CONTRACTS.size()]
+		G.meta.data["contract"] = {"key": nxt.key, "need": nxt.need, "reward": nxt.reward}
+		G.meta.data["_last_contract_key"] = nxt.key
+		G.meta.save()
+
 func victory() -> void:
 	if not alive:
 		return
@@ -143,6 +202,7 @@ func victory() -> void:
 	G.ui.boss_bar(false, null)
 	stats.time = time
 	stats.level = G.player.level if is_instance_valid(G.player) else 1
+	_write_last_run(true)
 	var gained := int(fragments * G.meta.frag_mult())
 	G.meta.add_choralim(gained)
 	stats.gained = gained
@@ -165,6 +225,7 @@ func on_player_death(h: Dictionary) -> void:
 	if is_instance_valid(G.director):
 		G.director.running = false
 	G.ui.boss_bar(false, null)
+	_write_last_run(false)
 	G.meta.record_death(killer, biome, int(time), was_boss)
 	var gained := int(fragments * G.meta.frag_mult())
 	G.meta.add_choralim(gained)

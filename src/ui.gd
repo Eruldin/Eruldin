@@ -36,6 +36,11 @@ const LINES := {
 		"Kayıtlarım kampla yaşıyor. Ne kadar koştuğunu, kimi düşürdüğünü — hepsi burada.",
 		"İsimler unutulunca ölüm iki kez kazanır. Seni unutturmayacağım.",
 	],
+	"ehnar": [
+		"Ben de bir zamanlar protokolün kılıcıydım, çocuk. Şimdi sadece kontrat imzalıyorum.",
+		"Kampa her dönüşünde yeni bir görev bulursun bende. Tutarsan choralim konuşur.",
+		"Beceri ölümcüldür ama sabır sabırdır. Kontrata odaklan — kovan bekleyebilir.",
+	],
 }
 
 const DEATH_LINES := [
@@ -59,6 +64,7 @@ const NPC_COL := {
 	"saphire": "ff9e4d", # viator kızıl-kum
 	"david": "00E5FF",   # iz sürücü
 	"zirkon": "c9a227",  # vezir — altın
+	"ehnar": "ff9e4d",   # eski şövalye — kızıl-kum
 }
 
 static var _font: Font
@@ -672,6 +678,8 @@ func dialogue(nid: String) -> void:
 		hint.text = "[E / tık] saha seçimi"
 	elif nid == "zirkon":
 		hint.text = "[E / tık] kamp kayıtları"
+	elif nid == "ehnar":
+		hint.text = "[E / tık] aktif sözleşme"
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
@@ -712,6 +720,9 @@ func _advance_overlay() -> void:
 			elif nid == "zirkon":
 				_close_overlay()
 				records_panel()
+			elif nid == "ehnar":
+				_close_overlay()
+				contract_panel()
 			else:
 				_close_overlay()
 		"death":
@@ -720,7 +731,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -820,6 +831,30 @@ func records_panel() -> void:
 		var l := _lbl("son düşüş: %s @ %s" % [str(ld.get("killer")), BIOME_NAME[int(ld.get("biome", 0))]], Vector2.ZERO, 11, Color(0.6, 0.55, 0.6))
 		v.add_child(l)
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	v.add_child(h)
+
+# Ehnar: the standing field contract — met by the next run's stats at camp.
+func contract_panel() -> void:
+	_pause(true)
+	var v := _show_panel("contract", "SAHA SÖZLEŞMESİ — Eski Şövalye Ehnar", Px.C("ff9e4d"))
+	var c: Dictionary = G.meta.data.get("contract", {})
+	var lr: Dictionary = G.meta.data.get("last_run", {})
+	var l1 := _lbl("◈ %s" % G.run.contract_text(c), Vector2.ZERO, 16, Color(0.95, 0.9, 0.8))
+	l1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l1)
+	var l2 := _lbl("ödül: ◆ %d choralim" % int(c.get("reward", 0)), Vector2.ZERO, 13, Px.C("c26bff"))
+	l2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l2)
+	var prog := "henüz koşu yok"
+	if not lr.is_empty():
+		prog = "son koşu:  %d kesim · %02d:%02d · seviye %d%s" % [
+			int(lr.get("kills", 0)), int(lr.get("time", 0)) / 60, int(lr.get("time", 0)) % 60,
+			int(lr.get("level", 1)), " · ZAFER" if bool(lr.get("win", false)) else ""]
+	var l3 := _lbl(prog, Vector2.ZERO, 11, Color(0.6, 0.6, 0.72))
+	l3.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l3)
+	var h := _lbl("[E / tık] kapat — sözleşme kampa döndüğünde değerlendirilir", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 
 # ---------------------------------------------------------------- boon draft
