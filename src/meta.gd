@@ -62,6 +62,7 @@ var data := {
 	"best_streak_all": 0,  # tüm zamanların en uzun serisi
 	"best_score": 0,       # en yüksek koşu skoru
 	"arcanas_seen": [],    # kullanılan koz kartları (KOLEKSİYONCUSU besler)
+	"wep_unlocked": [],    # görev ödülüyle açılan silahlar (feat koşulunu atlar)
 	"_last_contract_key": "",  # Ehnar sözleşme tekrar engeli
 	"last_death": {"killer":"", "biome":0, "depth":0, "boss":false},
 	"shop_stock": [],      # Saphire'in tezgâh stoku — koşu başına yenilenir
