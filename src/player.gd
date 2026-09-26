@@ -314,7 +314,7 @@ func _swing(stage: int, dur: float) -> void:
 	)
 	tw.tween_callback(func(): blade.modulate = Color(0.45, 0.9, 1, 0))
 
-func hit_arc(dmg: float, ang: float, reach: float, arc: float, heavy: bool) -> void:
+func hit_arc(dmg: float, ang: float, reach: float, arc: float, heavy: bool, wpn := "") -> void:
 	var hits := 0
 	for e in G.enemies.duplicate():
 		if not is_instance_valid(e) or e.dead:
@@ -331,7 +331,7 @@ func hit_arc(dmg: float, ang: float, reach: float, arc: float, heavy: bool) -> v
 			"type": G.DamageType.MELEE, "from": pos,
 			"knock": 7.0 if heavy else 3.5,
 			"stagger": 0.5 if heavy else 0.18,
-			"source": self, "crit": crit,
+			"source": self, "crit": crit, "wpn": wpn,
 			"shred": has_meta("shred")
 		}
 		e.take_hit(h)
@@ -353,6 +353,10 @@ func hit_arc(dmg: float, ang: float, reach: float, arc: float, heavy: bool) -> v
 		G.fx.shake(0.05, 0.08)
 
 func on_dealt_damage(target: Actor, h: Dictionary) -> void:
+	var wid := str(h.get("wpn", ""))
+	if wid != "" and G.run != null:
+		var k := "wdmg_" + wid
+		G.run.stats[k] = float(G.run.stats.get(k, 0.0)) + float(h.get("dmg", 0.0))
 	if lifesteal > 0:
 		heal(h.get("dmg", 0.0) * lifesteal)
 	if b_gravity_well and G.chance(0.25):
@@ -396,7 +400,7 @@ func _emp_chain(first: Actor) -> void:
 		n += 1
 
 # survivors auto-swing: called by the blade weapon with its own numbers
-func auto_swing(ang: float, reach: float, arc_deg: float, dmg: float, heavy: bool) -> void:
+func auto_swing(ang: float, reach: float, arc_deg: float, dmg: float, heavy: bool, wpn := "") -> void:
 	aim_dir = Vector2.from_angle(ang)
 	_anim = ""
 	_set_anim("atk%d" % G.ri(1, 3), 8.0)
@@ -413,7 +417,7 @@ func auto_swing(ang: float, reach: float, arc_deg: float, dmg: float, heavy: boo
 	get_tree().create_timer(0.09, false).timeout.connect(func():
 		if dead:
 			return
-		hit_arc(dmg, ang, reach + st_reach, arc, heavy)
+		hit_arc(dmg, ang, reach + st_reach, arc, heavy, wpn)
 		G.audio.play("hitHeavy" if heavy else "hit", G.rf(0.9, 1.15), 0.6))
 	tw.tween_callback(func(): blade.modulate = Color(0.45, 0.9, 1, 0))
 

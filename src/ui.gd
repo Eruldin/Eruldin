@@ -531,9 +531,22 @@ func _build_recap(v: VBoxContainer) -> void:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 6)
+	var wdtot := 0.0
+	if G.run != null:
+		for k in G.run.stats.keys():
+			if str(k).begins_with("wdmg_"):
+				wdtot += float(G.run.stats[k])
 	for w in G.player.weapons:
 		var d: Dictionary = Weapons.def(str(w.id))
-		row.add_child(_gear_icon(str(d.get("icon", "ico_boon")), str(d.get("col", "7fd4ff")), int(w.lvl), 30))
+		var cell := VBoxContainer.new()
+		cell.add_theme_constant_override("separation", 0)
+		cell.add_child(_gear_icon(str(d.get("icon", "ico_boon")), str(d.get("col", "7fd4ff")), int(w.lvl), 30))
+		if wdtot > 0.0:
+			var sh := float(G.run.stats.get("wdmg_" + str(w.id), 0.0)) / wdtot
+			var sl := _lbl("%d%%" % roundi(sh * 100.0), Vector2.ZERO, 9, Color(0.95, 0.8, 0.45))
+			sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			cell.add_child(sl)
+		row.add_child(cell)
 	for ps in G.player.passives:
 		var d: Dictionary = Weapons.pdef(str(ps.id))
 		row.add_child(_gear_icon(str(d.get("icon", "ico_frag")), str(d.get("col", "c26bff")), int(ps.lvl), 22))
