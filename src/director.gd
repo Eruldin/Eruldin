@@ -12,12 +12,14 @@ const WIN_T := 780.0      # 13:00 failsafe — swarm collapses
 
 # per-sector bosses: miniboss is the previous sector's efendi (biome 0 keeps
 # the Host); the final is that sector's own boss — twins/Aeterna spawn as pairs
-const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM]
+const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM, Boss.BKind.TUMAN]
 const FINAL_KIND := [
 	[Boss.BKind.REX],
 	[Boss.BKind.HOST],
 	[Boss.BKind.NAHUM, Boss.BKind.TUMAN],
 	[Boss.BKind.KIRIN, Boss.BKind.CONST],
+	[Boss.BKind.NAHUM, Boss.BKind.TUMAN],
+	[Boss.BKind.REX, Boss.BKind.KIRIN],
 ]
 
 var t := 0.0
@@ -223,6 +225,7 @@ func _comp(m: float) -> int:
 			2: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.HUSK])
 			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA])
 			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB])   # bataklık: şişkin konakçılar + kistler
+			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL]) # kül ovası: ateşi seven sert öncüler
 	return G.pick(pool)
 
 func _hp_scale() -> float:

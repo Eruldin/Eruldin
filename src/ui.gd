@@ -2418,6 +2418,7 @@ func victory_screen(stats: Dictionary) -> void:
 		"mabed": "Kırık mabedin yankısı huzurla doldu.",
 		"mezarlik": "Düşmüşler sonunda mezarlarında dinleniyor.",
 		"batak": "Bataklık çamuru ilk kez birini geri verdi.",
+		"kulovasi": "Kül söndü — imparatorluğun yangını yüz yıl sonra bitti.",
 	}
 	var epi := str(epilog.get(str(stats.get("node_id", "")), ""))
 	if epi != "":

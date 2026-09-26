@@ -25,6 +25,7 @@ var _merch_close := false
 var _stray_done := false
 var _stray_ck := false
 var _ceset_done := false
+var _node := "batak"   # --node=<id> ile hangi düğüm koşulacağı seçilir
 var _stray_sub := -1
 var _pre_story_cho := 0
 
@@ -32,7 +33,10 @@ func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://probe"))
 	Engine.time_scale = 5.0
-	print("[probe] armed, shots -> %s" % ProjectSettings.globalize_path("user://probe"))
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--node="):
+			_node = a.trim_prefix("--node=")
+	print("[probe] armed (node=%s), shots -> %s" % [_node, ProjectSettings.globalize_path("user://probe")])
 
 func _process(_d: float) -> void:
 	match _step:
@@ -102,10 +106,10 @@ func _process(_d: float) -> void:
 						_shoot()                    # node-graph map visible
 					13:
 						var un: Array = G.meta.data.get("unlocked", [])
-						if not un.has("batak"):
-							un.append("batak")
+						if not un.has(_node):
+							un.append(_node)
 							G.meta.data["unlocked"] = un
-						G.ui._wmap_pick("batak", Label.new(), {"id": "batak"})
+						G.ui._wmap_pick(_node, Label.new(), {"id": _node})
 					14:
 						_shoot()                    # map with selection refreshed
 						G.ui._advance_overlay()
