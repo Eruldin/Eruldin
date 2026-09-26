@@ -69,6 +69,10 @@ func start_run() -> void:
 	G.ui.hub_ui(false)
 	if hyper:
 		G.ui.toast("AŞILAMA AKTİF — kovan hızlı akıyor, ödeme ×1.5")
+	if bool(G.meta.data.get("blessing", false)):
+		G.meta.data["blessing"] = false
+		G.meta.save()
+		take_boon(G.pick(Boons.all()))
 	var dr := Director.new()
 	dr.biome = biome
 	add_child(dr)

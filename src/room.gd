@@ -96,6 +96,7 @@ func build_hub() -> void:
 	NPC.make("david", Vector2(-380, 90), self)
 	NPC.make("zirkon", Vector2(360, -220), self)
 	NPC.make("ehnar", Vector2(60, -300), self)
+	NPC.make("ahusk", Vector2(-140, -260), self)
 	G.audio.play_music("mus_hub")
 	G.ui.banner("VIATOR KAMPI", "son güvenli toprak — konuşmak için E, kapıya yürü")
 

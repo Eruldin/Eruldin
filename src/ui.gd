@@ -41,6 +41,11 @@ const LINES := {
 		"Kampa her dönüşünde yeni bir görev bulursun bende. Tutarsan choralim konuşur.",
 		"Beceri ölümcüldür ama sabır sabırdır. Kontrata odaklan — kovan bekleyebilir.",
 	],
+	"ahusk": [
+		"Kovandan kaçtım, Praetorian. Kabuk hâlâ içimde ama emirler sustu.",
+		"Bir lütuf taşıyorum sana — küçük bir rezonans. Parçacık ver, savaşa hazır in.",
+		"Sahada ölürsem diye verdim kendimi. Sizinkiler geri döner — bizdekiler dönmez.",
+	],
 }
 
 const DEATH_LINES := [
@@ -65,6 +70,7 @@ const NPC_COL := {
 	"david": "00E5FF",   # iz sürücü
 	"zirkon": "c9a227",  # vezir — altın
 	"ehnar": "ff9e4d",   # eski şövalye — kızıl-kum
+	"ahusk": "6aa8a0",   # göçebe — soluk çelik
 }
 
 static var _font: Font
@@ -681,6 +687,8 @@ func dialogue(nid: String) -> void:
 		hint.text = "[E / tık] kamp kayıtları"
 	elif nid == "ehnar":
 		hint.text = "[E / tık] aktif sözleşme"
+	elif nid == "ahusk":
+		hint.text = "[E / tık] destek takası"
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
@@ -724,6 +732,9 @@ func _advance_overlay() -> void:
 			elif nid == "ehnar":
 				_close_overlay()
 				contract_panel()
+			elif nid == "ahusk":
+				_close_overlay()
+				blessing_panel()
 			else:
 				_close_overlay()
 		"death":
@@ -732,7 +743,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -859,6 +870,48 @@ func contract_panel() -> void:
 	l3.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(l3)
 	var h := _lbl("[E / tık] kapat — sözleşme kampa döndüğünde değerlendirilir", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
+# Ahusk: a deserter from the swarm sells a war boon — next run starts with a
+# random boon for ◆80, buyable once per run.
+func blessing_panel() -> void:
+	_pause(true)
+	var v := _show_panel("blessing", "GÖÇEBE AHUSK — destek takası", Px.C("6aa8a0"))
+	var por := TextureRect.new()
+	por.texture = Px.S2("por_ahusk")
+	por.custom_minimum_size = Vector2(72, 72)
+	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pc := CenterContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(por)
+	v.add_child(pc)
+	var has := bool(G.meta.data.get("blessing", false))
+	var l := _lbl("koşu bir lütufla başlar — rasgele, patronu sen seçmezsin", Vector2.ZERO, 13, Color(0.8, 0.85, 0.8))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l)
+	var money := _lbl("Saf Choralim: ◆ %d" % G.meta.data.choralim, Vector2.ZERO, 12, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
+	var btn := Button.new()
+	btn.text = "✓ HAZIR — sahaya in" if has else "◆ 80 — SATIN AL"
+	btn.disabled = has or G.meta.data.choralim < 80
+	btn.custom_minimum_size = Vector2(200, 30)
+	btn.add_theme_font_override("font", ui_font())
+	var bc := CenterContainer.new()
+	bc.add_child(btn)
+	v.add_child(bc)
+	btn.pressed.connect(func():
+		if not has and G.meta.data.choralim >= 80:
+			G.meta.data["choralim"] -= 80
+			G.meta.data["blessing"] = true
+			G.meta.save()
+			G.audio.play("boon", 1.1, 0.6)
+			_close_overlay()
+			blessing_panel())
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 

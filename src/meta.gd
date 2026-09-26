@@ -34,6 +34,7 @@ var data := {
 	"stance": "",          # chosen doctrine from Rhasa
 	"arena_biome": 0,      # arena sector picked via David (İz Sürücü)
 	"hyper": false,        # AŞILAMA: sürü hızlı/kalabalık akar, ödeme ×1.5
+	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır
 	"contract": {},        # Ehnar's aktif görevi: {key,need,reward}
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"last_death": {"killer":"", "biome":0, "depth":0, "boss":false},
