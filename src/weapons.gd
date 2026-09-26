@@ -306,10 +306,18 @@ static func draft_opts(p: Player, luck: float) -> Array:
 				break
 		out.append(pool[idx])
 		pool.remove_at(idx)
-	if out.is_empty():
-		out.append(_opt("gift", "frag", 0, "PARÇACIK ÖBÜRÜ", "ico_frag", "c26bff", "+120 choralim parçacığı", 1.0))
-		out.append(_opt("gift", "heal", 0, "NANOBİYOLAT", "ico_heal", "39ff14", "+%40 can yenile", 1.0))
-		out.append(_opt("gift", "heal", 0, "NANOBİYOLAT", "ico_heal", "39ff14", "+%40 can yenile", 1.0))
+	# limit-break: maxed-out runs still get 3 picks — stat chips + consumables
+	var gifts := [
+		_opt("gift", "frag", 0, "PARÇACIK ÖBÜRÜ", "ico_frag", "c26bff", "+120 choralim parçacığı", 1.0),
+		_opt("gift", "heal", 0, "NANOBİYOLAT", "ico_heal", "39ff14", "+%40 can yenile", 1.0),
+		_opt("gift", "dmg", 0, "KİLİT MODÜLÜ", "icn_upg_dmg", "ff5533", "+%4 hasar", 1.0),
+		_opt("gift", "hp", 0, "NANOZIRH", "icn_upg_hp", "00E676", "+8 azami can", 1.0),
+		_opt("gift", "spd", 0, "SÜRÜCÜ YAĞI", "icn_upg_dash", "00E5FF", "+%3 hareket hızı", 1.0),
+	]
+	var gi := 0
+	while out.size() < 3:
+		out.append(gifts[gi % gifts.size()])
+		gi += 1
 	return out
 
 static func _lvl_desc(wid: String, lvl: int) -> String:
@@ -353,12 +361,13 @@ static func apply_opt(opt: Dictionary, p: Player) -> void:
 				if b.id == opt.id:
 					G.run.take_boon(b)
 		"gift":
-			if opt.id == "frag":
-				G.run.fragments += 120
-			elif opt.id == "skip":
-				G.run.fragments += 15
-			else:
-				p.heal(p.max_hp * 0.4)
+			match str(opt.id):
+				"frag": G.run.fragments += 120
+				"skip": G.run.fragments += 15
+				"dmg": p.dmg_mult *= 1.04
+				"hp": p.max_hp += 8.0; p.hp += 8.0
+				"spd": p.speed *= 1.03
+				_: p.heal(p.max_hp * 0.4)
 
 static func apply_evo(spec: Dictionary, p: Player) -> void:
 	for w in p.weapons:
