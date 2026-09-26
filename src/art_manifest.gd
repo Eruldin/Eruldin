@@ -108,6 +108,9 @@ const SPRITES := {
 	"npc2_ahusk": "art/c_ahusk_idle_0.png",
 	"npcb_ahusk": "art/c_ahusk_idle_1.png",
 	"por_ahusk": "art/por_c_ahusk.png",
+	"npc2_elyb": "art/c_elyb_idle_0.png",
+	"npcb_elyb": "art/c_elyb_idle_1.png",
+	"por_elyb": "art/por_c_elyb.png",
 }
 
 const FRAMES := {
