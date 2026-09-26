@@ -35,6 +35,7 @@ var pending_ambush := false # YOL OLAYI pusu: arenaya kuşatılmış girilir
 var pending_dmg := 0.0     # YOL OLAYI harabe: girişte alınan enkaz hasarı
 var force_waylay := ""     # probe/debug: yol olayını zorla
 var _first_visit := false   # bu koşu düğüme ilk iniş mi (lore kartı için)
+var daily := {}             # günlük protokol mutasyonu (Wmap.daily)
 var stats := {"kills": 0, "rooms": 0}
 var node_id := "b0"       # wmap node this run entered through
 var node_name := ""       # banner'da node adı (fallback: biome adı)
@@ -109,6 +110,15 @@ func start_run() -> void:
 	fragments = 0
 	boon_ids.clear()
 	luck = G.meta.upg(Meta.U.LUCK) * 0.15
+	# günlük protokol: tarihe göre seçilen mutasyon tüm koşuya uygulanır
+	daily = Wmap.daily()
+	if not daily.is_empty():
+		for mk in (daily.get("mods", {}) as Dictionary):
+			node_mods[mk] = float(node_mods.get(mk, 1.0)) * float(daily.mods[mk])
+		luck += float(daily.get("luck", 0.0))
+		reward_mult *= float(daily.get("rew", 1.0))
+		frag_node = float(node_mods.get("frag", 1.0))
+		stats["daily"] = str(daily.name)
 	alive = true
 	endless = false
 	time = 0.0
@@ -158,6 +168,8 @@ func _enter_arena() -> void:
 	G.ui.hub_ui(false)
 	if hyper:
 		G.ui.toast("AŞILAMA AKTİF — kovan hızlı akıyor, ödeme ×1.5")
+	if not daily.is_empty():
+		G.ui.toast("BUGÜNÜN PROTOKOLÜ: %s — %s" % [str(daily.name), str(daily.desc)])
 	if bool(G.meta.data.get("blessing", false)):
 		G.meta.data["blessing"] = false
 		G.meta.save()

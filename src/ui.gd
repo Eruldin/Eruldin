@@ -1020,7 +1020,19 @@ func _show_panel(kind: String, title: String, title_col: Color) -> VBoxContainer
 	t.custom_minimum_size = Vector2(520, 0)
 	v.add_child(t)
 	root.add_child(_overlay)
+	call_deferred("_wire_sfx")
 	return v
+
+# panel içindeki tüm butonlara tık/hover sesi — senkron eklenen kartları da yakalar
+func _wire_sfx() -> void:
+	if not is_instance_valid(_overlay):
+		return
+	for b in _overlay.find_children("*", "Button", true, false):
+		if b.has_meta("sfxd"):
+			continue
+		b.set_meta("sfxd", true)
+		b.pressed.connect(func(): G.audio.play("ui", 1.1, 0.4))
+		b.mouse_entered.connect(func(): G.audio.play("ui", 1.7, 0.15))
 
 # ---------------------------------------------------------------- david / zirkon
 
@@ -1108,6 +1120,11 @@ func worldmap_panel() -> void:
 		var dpl := _lbl("PROTOKOL DERİNLİĞİ +%d — kovan +%d%% sert · ödeme +%d%%" % [ngd, ngd * 12, ngd * 8], Vector2.ZERO, 11, Px.C("c26bff"))
 		dpl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(dpl)
+	var dmd := Wmap.daily()
+	if not dmd.is_empty():
+		var dml := _lbl("BUGÜNÜN PROTOKOLÜ: %s — %s" % [str(dmd.name), str(dmd.desc)], Vector2.ZERO, 11, Px.C("ffb74d"))
+		dml.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(dml)
 	var info := _lbl("", Vector2.ZERO, 12, Color(0.8, 0.85, 0.95))
 	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
