@@ -139,6 +139,12 @@ func _boss(kind: int, hs: float, ann: String) -> void:
 func _on_boss_dead(b) -> void:
 	if is_instance_valid(G.ui):
 		G.ui.boss_bar(false, null)
+	if is_instance_valid(G.meta):
+		match int(b.bkind):
+			Boss.BKind.REX: G.meta.boss_down("rex")
+			Boss.BKind.HOST: G.meta.boss_down("host")
+			Boss.BKind.NAHUM, Boss.BKind.TUMAN: G.meta.boss_down("twins")
+			_: G.meta.boss_down("final")
 	if is_instance_valid(G.room):
 		G.room.boss = null
 		if b.has_meta("final_boss"):

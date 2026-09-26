@@ -138,8 +138,15 @@ func victory() -> void:
 	alive = false
 	if is_instance_valid(G.director):
 		G.director.running = false
+	if is_instance_valid(G.room):
+		G.room.boss = null
+	G.ui.boss_bar(false, null)
 	stats.time = time
 	stats.level = G.player.level if is_instance_valid(G.player) else 1
+	var gained := int(fragments * G.meta.frag_mult())
+	G.meta.add_choralim(gained)
+	stats.gained = gained
+	fragments = 0
 	G.meta.data["victories"] += 1
 	G.meta.save()
 	G.audio.jingle("boss")
@@ -157,10 +164,22 @@ func on_player_death(h: Dictionary) -> void:
 	var was_boss := is_instance_valid(G.room) and G.room.boss != null
 	if is_instance_valid(G.director):
 		G.director.running = false
+	G.ui.boss_bar(false, null)
 	G.meta.record_death(killer, biome, int(time), was_boss)
 	var gained := int(fragments * G.meta.frag_mult())
 	G.meta.add_choralim(gained)
+	fragments = 0
 	G.ui.death_screen(killer, gained)
+
+func abandon_to_hub() -> void:
+	if not alive:
+		return
+	alive = false
+	var gained := int(fragments * G.meta.frag_mult())
+	if gained > 0:
+		G.meta.add_choralim(gained)
+	fragments = 0
+	respawn_to_hub()
 
 func respawn_to_hub() -> void:
 	# purge the dead player shell, rebuild at camp
@@ -215,8 +234,14 @@ func _room_to(old: Room) -> void:
 		if is_instance_valid(p):
 			p.queue_free()
 		G.projectiles.erase(p)
+	for c in game.world.get_children():
+		if c is Enemy and is_instance_valid(c):
+			c.queue_free()
+			G.enemies.erase(c)
 	G.melee_tokens = 2
 	G.MELEE_TOKENS_MAX = 2
+	if is_instance_valid(G.ui):
+		G.ui.boss_bar(false, null)
 	if is_instance_valid(G.director):
 		G.director.queue_free()
 		G.director = null
