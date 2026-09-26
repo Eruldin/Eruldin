@@ -103,6 +103,9 @@ func achievements() -> Array:
 		{"name": "EVRİM MİMARI", "desc": "tek koşuda 3 evrim tamamla", "done": int(data.get("best_evos", 0)) >= 3},
 		{"name": "NÜVE AVCISI", "desc": "10 altın nüve topla", "done": int(data.get("eggs", 0)) >= 10},
 		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0},
+		{"name": "SKOR AVCISI", "desc": "tek koşuda 4000+ skor", "done": int(data.get("best_score", 0)) >= 4000},
+		{"name": "MARATONCU", "desc": "tek koşuda 14+ dakika dayan", "done": int(data.get("best_depth", 0)) >= 840},
+		{"name": "KOZ KOLEKSİYONCUSU", "desc": "7 koz kartının hepsini kullan", "done": (data.get("arcanas_seen", []) as Array).size() >= Boons.ARCANAS.size()},
 	]
 
 # feats completed since last check — announced once via toast

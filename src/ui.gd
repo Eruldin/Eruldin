@@ -965,6 +965,7 @@ func records_panel() -> void:
 		"toplam kesim: %d   ·   en derin: %d" % [int(d.get("kills", 0)), int(d.get("best_depth", 0))],
 		"choralim rezervi: ◆ %d" % int(d.get("choralim", 0)),
 		"en yüksek skor: %d" % int(d.get("best_score", 0)),
+		"en uzun seri: x%d" % int(d.get("best_streak_all", 0)),
 		"altın nüve: %d   (+%0.1f%% kalıcı hasar)" % [int(d.get("eggs", 0)), int(d.get("eggs", 0)) * 0.5],
 	]
 	for r in rows:
@@ -1250,6 +1251,11 @@ func _pick_card(o: Dictionary) -> void:
 	if str(o.get("kind", "")) == "arcana":
 		G.run.arcana = str(o.get("id", ""))
 		Boons.apply_arcana(G.run.arcana, G.player)
+		var seen: Array = G.meta.data.get("arcanas_seen", [])
+		if not seen.has(G.run.arcana):
+			seen.append(G.run.arcana)
+			G.meta.data["arcanas_seen"] = seen
+			G.meta.save()
 		G.audio.jingle("boon")
 		G.ui.toast("KOZ: %s" % str(o.get("name", "?")))
 		return
