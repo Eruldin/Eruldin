@@ -38,6 +38,7 @@ var data := {
 	"arena_node": "b0",    # world-map node the next run targets (wmap.gd)
 	"unlocked": [],        # quest/node unlocks — wmap "node" gating
 	"visited": [],         # distinct biomes seen this save
+	"visited_nodes": [],   # distinct wmap nodes run at — haritada ✓ işareti
 	"quests": {},          # qid -> {st:"act"|"done"|"claimed", prog:int}
 	"stash": [],           # collected items awaiting equipment
 	"equip": {},           # slot -> item id (7 slots, items.gd)

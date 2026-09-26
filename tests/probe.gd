@@ -34,6 +34,10 @@ func _process(_d: float) -> void:
 				print("[probe] title -> hub")
 		1:
 			if G.state == G.State.HUB and is_instance_valid(G.player) and is_instance_valid(G.room) and not G.room.doors.is_empty():
+				# açılış/epilog sinematiği oynuyorsa önce boşalt — paneller onu yemesin
+				if is_instance_valid(G.ui) and G.ui.overlay_open() and str(G.ui._overlay.get_meta("kind", "")) == "cine":
+					G.ui._advance_overlay()
+					return
 				# one action per frame so each shot captures a distinct state
 				match _sub:
 					0:
@@ -55,6 +59,15 @@ func _process(_d: float) -> void:
 					6:
 						_shoot()                    # inventory visible
 					7:
+						var st: Array = G.meta.data.get("stash", [])
+						if st.is_empty():
+							st.append("i_migfer")
+							G.meta.data["stash"] = st
+						if not st.is_empty():
+							var iid0 := str(st[0])
+							var c0 := int(G.meta.data.get("choralim", 0))
+							var got := Items.sell(iid0)
+							print("[probe] sell %s -> +%d (choralim %d->%d)" % [iid0, got, c0, int(G.meta.data.get("choralim", 0))])
 						G.ui._advance_overlay()     # close -> camp
 					8:
 						G.ui.worldmap_panel()       # david dünya haritası

@@ -141,6 +141,24 @@ static func equip_stats() -> Dictionary:
 static func slot_of(id: String) -> String:
 	return str(DEFS.get(id, {}).get("slot", ""))
 
+# grind→para: zuladaki eşyayı choralim'e çevir (rarity başına fiyat)
+static func sell_price(id: String) -> int:
+	var d: Dictionary = DEFS.get(id, {})
+	if d.is_empty():
+		return 0
+	return [20, 50, 110][int(d.r)]
+
+static func sell(id: String) -> int:
+	var st: Array = G.meta.data.get("stash", [])
+	if not st.has(id):
+		return 0
+	st.erase(id)
+	G.meta.data["stash"] = st
+	var p := sell_price(id)
+	G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) + p
+	G.meta.save()
+	return p
+
 # tek satırlık mod özeti — envanter kartlarında gösterilir
 static func stat_text(id: String) -> String:
 	var d: Dictionary = DEFS.get(id, {})

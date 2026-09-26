@@ -1062,9 +1062,17 @@ func worldmap_panel() -> void:
 		var icc := CenterContainer.new()
 		icc.add_child(ic)
 		bb.add_child(icc)
-		var nl := _lbl(str(n.name).split(" ")[0], Vector2.ZERO, 9, Color.WHITE if can else Color(0.5, 0.5, 0.55))
+		var vnm: Array = G.meta.data.get("visited_nodes", [])
+		var ntxt := str(n.name).split(" ")[0]
+		if vnm.has(nid):
+			ntxt += " ✓"
+		var nl := _lbl(ntxt, Vector2.ZERO, 9, (Px.C("00E676") if vnm.has(nid) else Color.WHITE) if can else Color(0.5, 0.5, 0.55))
 		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		bb.add_child(nl)
+		if is_cur:
+			var tag := _lbl("▼ HEDEF", Vector2.ZERO, 8, Px.C("ffd700"))
+			tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			bb.add_child(tag)
 		btn.mouse_filter = Control.MOUSE_FILTER_STOP
 		canvas.add_child(btn)
 		btn.gui_input.connect(func(ev: InputEvent):
@@ -1142,7 +1150,11 @@ func quest_panel(nid: String) -> void:
 			G.audio.jingle("victory")
 			toast("ödül: %s" % Quests.rew_text(rew))
 			_close_overlay()
-			quest_panel(nid)))
+			# bölge ödülü varsa sinematik açılış kartı oynar
+			if str(rew.get("node", "")) != "":
+				Wmap.unlock_cine(str(rew.node))
+			else:
+				quest_panel(nid)))
 	for q in Quests.active_for(nid):
 		any = true
 		v.add_child(_quest_row(q, "%s" % Quests.prog_text(q), Color(0.6, 0.6, 0.7), Callable()))
@@ -1209,6 +1221,9 @@ func _quest_row(q: Dictionary, btn_text: String, bcol: Color, cb: Callable) -> C
 func inventory_panel() -> void:
 	_pause(true)
 	var v := _show_panel("inv", "TEÇHİZAT — Saphire'in tezgâhı", Px.C("ff9e4d"))
+	var money := _lbl("Saf Choralim: ◆ %d" % int(G.meta.data.get("choralim", 0)), Vector2.ZERO, 13, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
 	var eq: Dictionary = G.meta.data.get("equip", {})
 	var estats := Items.equip_stats()
 	var top := HBoxContainer.new()
@@ -1296,15 +1311,32 @@ func inventory_panel() -> void:
 		row.add_child(nm)
 		var md := _lbl(Items.stat_text(str(iid)), Vector2.ZERO, 9, Color(0.65, 0.75, 0.85))
 		cv.add_child(md)
+		var brow := HBoxContainer.new()
+		brow.add_theme_constant_override("separation", 4)
+		cv.add_child(brow)
+		var eqb := Button.new()
+		eqb.text = "KUŞAN"
+		eqb.add_theme_font_override("font", ui_font())
+		eqb.custom_minimum_size = Vector2(64, 20)
+		brow.add_child(eqb)
+		eqb.pressed.connect(func():
+			Items.equip(str(iid), Items.slot_of(str(iid)))
+			toast("%s kuşanıldı" % str(d.name))
+			_close_overlay()
+			inventory_panel())
+		var slb := Button.new()
+		slb.text = "SAT ◆%d" % Items.sell_price(str(iid))
+		slb.add_theme_font_override("font", ui_font())
+		slb.custom_minimum_size = Vector2(70, 20)
+		brow.add_child(slb)
+		slb.pressed.connect(func():
+			var got := Items.sell(str(iid))
+			G.audio.jingle("boon")
+			toast("%s satıldı: ◆+%d" % [str(d.name), got])
+			_close_overlay()
+			inventory_panel())
 		cell.mouse_filter = Control.MOUSE_FILTER_STOP
 		grid.add_child(cell)
-		cell.gui_input.connect(func(ev: InputEvent):
-			if ev is InputEventMouseButton and ev.pressed:
-				Items.equip(str(iid), Items.slot_of(str(iid)))
-				G.audio.jingle("boon")
-				toast("kuşanıldı: %s" % str(d.name))
-				_close_overlay()
-				inventory_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)

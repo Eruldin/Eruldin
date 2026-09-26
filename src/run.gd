@@ -61,16 +61,26 @@ func hub() -> void:
 # ilk kampa inişte tek seferlik açılış sinematiği (seen_story ile korunur)
 func _intro_story() -> void:
 	var seen: Array = G.meta.data.get("seen_story", [])
-	if seen.has("intro"):
+	if not seen.has("intro"):
+		seen.append("intro")
+		G.meta.data["seen_story"] = seen
+		G.meta.save()
+		G.ui.cine_seq([
+			{"tex": "bg3", "title": "DÜŞÜŞ: CHORALIM PROTOKOLÜ", "sub": "Viator son kampa çekildi. Protokol, hayatta kalan tek praetorianı seçti: sen."},
+			{"tex": "por_neva", "title": "NEVA", "sub": "Rezonans seni geri getirir, Alfa-04. Her düşüşte bir parçan eksik döner — ama dönersin."},
+			{"tex": "por_david", "title": "DAVID", "sub": "Harita açık. Görevler yazılı, yollar kilitli. Efendileri düşür, dünya açılsın."},
+		])
 		return
-	seen.append("intro")
-	G.meta.data["seen_story"] = seen
-	G.meta.save()
-	G.ui.cine_seq([
-		{"tex": "bg3", "title": "DÜŞÜŞ: CHORALIM PROTOKOLÜ", "sub": "Viator son kampa çekildi. Protokol, hayatta kalan tek praetorianı seçti: sen."},
-		{"tex": "por_neva", "title": "NEVA", "sub": "Rezonans seni geri getirir, Alfa-04. Her düşüşte bir parçan eksik döner — ama dönersin."},
-		{"tex": "por_david", "title": "DAVID", "sub": "Harita açık. Görevler yazılı, yollar kilitli. Efendileri düşür, dünya açılsın."},
-	])
+	# ilk zaferden sonraki kampa dönüş — epilog kartları
+	if int(G.meta.data.get("victories", 0)) > 0 and not seen.has("epilog"):
+		seen.append("epilog")
+		G.meta.data["seen_story"] = seen
+		G.meta.save()
+		G.ui.cine_seq([
+			{"tex": "cine_3_0", "title": "AETERNA DÜŞTÜ", "sub": "Son masa boşaldı. Protokolün şarkısı sustu — yerine seninki başladı."},
+			{"tex": "por_neva", "title": "NEVA", "sub": "Döndün. Bu sefer her şeyi geri getirdin. Kamp ateşi bu gece daha parlak yanıyor."},
+			{"tex": "por_david", "title": "DAVID", "sub": "Harita artık tamamen senin. Ama kovan sessizliği uzun sürmez — sözleşmeler bekliyor."},
+		])
 
 func start_run() -> void:
 	# açık-dünya düğümü: David'in haritasında seçilen node biome + mods verir
@@ -111,6 +121,11 @@ func start_run() -> void:
 	if not vis.has(biome):
 		vis.append(biome)
 		G.meta.data["visited"] = vis
+	# node-bazlı ziyaret: haritada ✓ işaretlerini besler
+	var vn: Array = G.meta.data.get("visited_nodes", [])
+	if not vn.has(node_id):
+		vn.append(node_id)
+		G.meta.data["visited_nodes"] = vn
 	G.meta.save()
 	Quests.tick("biomes")
 	G.fx.transition()
@@ -217,7 +232,13 @@ func next_room(reward: int) -> void:
 		var por: String = {"rex": "rex", "host": "host", "twins": "nahum", "final": "kirin"}[BOSS_IDS[biome]]
 		G.ui.cinematic("por_" + por, BOSS_NAMES[biome], _boss_intro_sub(biome), 2.4)
 	elif depth == 0:
-		G.ui.cinematic("cine_%d_0" % biome, Room.BIOME_NAME[biome], _biome_sub(biome), 2.8)
+		# görev node'ları kendi lore kartıyla açılır; boss sahaları biome kartını korur
+		var nd := Wmap.node(node_id)
+		var lore := str(nd.get("lore", ""))
+		if lore != "":
+			G.ui.cinematic("cine_%d_0" % biome, node_name, lore, 3.0)
+		else:
+			G.ui.cinematic("cine_%d_0" % biome, Room.BIOME_NAME[biome], _biome_sub(biome), 2.8)
 
 func _biome_sub(b: int) -> String:
 	return ["Proterian çoraklığı — Alfa-05'in izi burada.",
