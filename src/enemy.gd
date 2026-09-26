@@ -19,6 +19,21 @@ const KIND_SET := {
 	EKind.MUHFIZ: "c_alfa",
 }
 
+# tür lore'u — Zirkon'un kayıtlarında kesim sayısının altında gösterilir
+const KIND_LORE := {
+	EKind.HUSK: "Protokolün büküp bıraktığı ilk gövde — kovana hâlâ itaat ediyor.",
+	EKind.SPITTER: "Boğaz kesesinde proterian asidi birikir; mesafeyi sever.",
+	EKind.TURRET: "Sabit nöbetçi — gövdesi zemine kaynaklı, sabrı sonsuz.",
+	EKind.DRONE: "Kovanın eşek arısı. Tuzak gibi düşer, yankı gibi ölür.",
+	EKind.SENTINEL: "İmparatorluk nöbetçisi — zırhı hâlâ eski emirleri taşır.",
+	EKind.VARL: "Çölayan sürü artığı — hızlı, aç, kalabalık gelir.",
+	EKind.CEREB: "Yürüyen kist — lobların içinde choralim pişer, uzaktan atar.",
+	EKind.KONAKCI: "Taşıdığı yük canlı; ölürken içini boşaltır — arkasında durma.",
+	EKind.ALFA: "Kovanın öncü şövalyesi — ilk çizgiyi o kurar, son çizgide o durur.",
+	EKind.CARRIER: "Hamal — sırtındaki çuvalda ganimet taşır; öldür, payını al.",
+	EKind.MUHFIZ: "Eski alayın kalkanı — önden vurulmaz, yandan çözülür.",
+}
+
 var kind: int = EKind.HUSK
 var elite := false
 var affix := ""            # elite modifier: armored / volatile / swift / sparked
@@ -63,6 +78,14 @@ static func spawn(p_kind: int, p_pos: Vector2, p_elite: bool, hp_scale: float, d
 	e._setup_stats(hp_scale, dmg_scale)
 	e.init()
 	G.enemies.append(e)
+	# ilk karşılaşma: tür Zirkon'un kayıtlarına düşer
+	var sk: Array = G.meta.data.get("seen_kinds", [])
+	if not sk.has(p_kind):
+		sk.append(p_kind)
+		G.meta.data["seen_kinds"] = sk
+		G.meta.save()
+		if is_instance_valid(G.ui):
+			G.ui.toast("KAYIT: %s — yeni tür deftere işlendi" % KIND_NAME.get(p_kind, "?"))
 	return e
 
 func _setup_stats(hs: float, ds: float) -> void:
