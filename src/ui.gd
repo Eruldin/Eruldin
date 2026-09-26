@@ -328,7 +328,7 @@ func _tick_hud() -> void:
 	var p := G.player
 	_hp_bar.size.x = 256 * clampf(p.hp / p.max_hp, 0.0, 1.0)
 	_hp_hi.size.x = _hp_bar.size.x
-	_hp_txt.text = "%d / %d" % [ceili(p.hp), ceili(p.max_hp)]
+	_hp_txt.text = "%d / %d" % [maxi(0, ceili(p.hp)), ceili(p.max_hp)]
 	# plasma charge strip
 	var charging: bool = p._plasma_charge >= 0.0
 	_ch_back.visible = charging
@@ -558,7 +558,21 @@ func boss_intro(b: Boss) -> void:
 # ---------------------------------------------------------------- hub
 
 func hub_ui(_show: bool) -> void:
-	pass  # HUD label handles state; campfire toast covers the rest
+	if not _show:
+		return
+	# reset run HUD so the camp doesn't show the last run's leftovers
+	_time_lbl.text = "00:00"
+	_kills_lbl.text = ""
+	_lvl_lbl.text = ""
+	_xp_bar.size.x = 0
+	for c in _wpn_row.get_children():
+		c.queue_free()
+	for c in _psv_row.get_children():
+		c.queue_free()
+	for c in _boon_row.get_children():
+		c.queue_free()
+	_gear_sig = ""
+	boss_bar(false, null)
 
 # ---------------------------------------------------------------- dialogue
 
@@ -675,6 +689,8 @@ func _advance_overlay() -> void:
 			pass  # cards handle their own clicks
 
 func _show_panel(kind: String, title: String, title_col: Color) -> VBoxContainer:
+	if is_instance_valid(_overlay):
+		_overlay.queue_free()
 	_overlay = Control.new()
 	_overlay.set_meta("kind", kind)
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -869,7 +885,7 @@ func victory_screen(stats: Dictionary) -> void:
 	t1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t1)
 	var vt := int(stats.get("time", 0))
-	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim\nToplam zafer: %d" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), G.meta.data.victories], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
+	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim\nChoralim saflaştırıldı: ◆ +%d\nToplam zafer: %d" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), int(stats.get("gained", 0)), G.meta.data.victories], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
 	t2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t2)
 	var h := _lbl("[E / tık] — kampa dön (yeni döngü)", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
@@ -1055,6 +1071,15 @@ func pause_panel() -> void:
 			if key == "mus" and is_instance_valid(G.audio.music):
 				G.audio.music.volume_db = linear_to_db(clampf(0.4 * float(st.mus), 0.001, 1.0))
 			G.audio.play("ui", 1.2, 0.5))
+	if G.state == G.State.ROOM:
+		var qb := Button.new()
+		qb.text = "KAMPA DÖN (koşuyu bırak)"
+		qb.custom_minimum_size = Vector2(260, 28)
+		qb.add_theme_font_override("font", ui_font())
+		v.add_child(qb)
+		qb.pressed.connect(func():
+			_close_overlay()
+			G.run.abandon_to_hub())
 	var h := _lbl("[ESC / E / tık] devam et", Vector2.ZERO, 11, Color(0.5, 0.5, 0.62))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
