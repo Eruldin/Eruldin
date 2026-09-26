@@ -36,7 +36,7 @@ const DEATH_LINES := [
 	"NEVA: {killer}. Bunu not ettim. Bir dahakine aynı şarkıyı dinlemeyiz.",
 	"RHASA: Tekrar ayağa kalktın. Kovan bunu sayıyor.",
 	"SAPHIRE: Kampın ateşi seni bekledi. Yine.",
-	"NEVA: Derinlik {depth}. Her düşüşte daha derine iniyorsun.",
+	"NEVA: {depth} saniye dayandın. Her düşüşte daha derine iniyorsun.",
 	"VANE: Kalibrasyon tuttu. Düşüş verisi kaydedildi.",
 	"RHASA: Viator'da ölüm bir istatistik. Sen iyi bir istatistik ol.",
 ]
@@ -79,6 +79,14 @@ var _flash: ColorRect
 var _overlay: Control = null     # current modal overlay (dialogue/boon/death/etc)
 var _crt: TextureRect
 var _vign: TextureRect
+var _xp_back: ColorRect
+var _xp_bar: ColorRect
+var _lvl_lbl: Label
+var _time_lbl: Label
+var _kills_lbl: Label
+var _wpn_row: HBoxContainer
+var _psv_row: HBoxContainer
+var _gear_sig := ""
 
 func _ready() -> void:
 	layer = 100
@@ -176,15 +184,47 @@ func _build_hud() -> void:
 	_frag_lbl = _lbl("◆ 0", Vector2(1140, 648), 16, Px.C("c26bff"))
 	_hud.add_child(_frag_lbl)
 
+	# XP bar — full-width strip across the top
+	_xp_back = ColorRect.new()
+	_xp_back.color = Color(0.02, 0.05, 0.09, 0.95)
+	_xp_back.position = Vector2(0, 0)
+	_xp_back.size = Vector2(1280, 7)
+	_hud.add_child(_xp_back)
+	_xp_bar = ColorRect.new()
+	_xp_bar.color = Px.C("00E5FF")
+	_xp_bar.position = Vector2(0, 0)
+	_xp_bar.size = Vector2(0, 7)
+	_hud.add_child(_xp_bar)
+
+	_lvl_lbl = _lbl("SEV 1", Vector2(20, 12), 14, Px.C("00E5FF"))
+	_hud.add_child(_lvl_lbl)
+	_time_lbl = _lbl("00:00", Vector2(0, 12), 20, Color(0.9, 0.95, 1))
+	_time_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_time_lbl.size = Vector2(1280, 24)
+	_hud.add_child(_time_lbl)
+	_kills_lbl = _lbl("0 kesim", Vector2(1150, 14), 13, Color(0.8, 0.8, 0.9))
+	_kills_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_kills_lbl.size = Vector2(110, 18)
+	_hud.add_child(_kills_lbl)
+
+	_wpn_row = HBoxContainer.new()
+	_wpn_row.position = Vector2(20, 40)
+	_wpn_row.add_theme_constant_override("separation", 5)
+	_hud.add_child(_wpn_row)
+	_psv_row = HBoxContainer.new()
+	_psv_row.position = Vector2(20, 76)
+	_psv_row.add_theme_constant_override("separation", 4)
+	_hud.add_child(_psv_row)
+
 	_boon_row = HBoxContainer.new()
-	_boon_row.position = Vector2(20, 14)
+	_boon_row.position = Vector2(20, 102)
 	_boon_row.add_theme_constant_override("separation", 6)
 	_hud.add_child(_boon_row)
 
-	_room_lbl = _lbl("", Vector2(20, 46), 12, Color(0.72, 0.72, 0.82))
+	_room_lbl = _lbl("", Vector2(20, 134), 12, Color(0.72, 0.72, 0.82))
 	_hud.add_child(_room_lbl)
 
-	_hint_lbl = _lbl("WASD hareket · LMB kılıç · RMB plazma(basılı tut) · SPACE dash · Q/F parry · E etkileşim · ESC duraklat", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
+	_hint_lbl = _lbl("WASD hareket · SPACE dash · E etkileşim · ESC duraklat — silahlar kendiliğinden ateş eder", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
 	_hud.add_child(_hint_lbl)
 
 	# boon tooltip
@@ -307,6 +347,12 @@ func _tick_hud() -> void:
 	for i in _dash_row.get_child_count():
 		_dash_row.get_child(i).modulate = Px.C("00E5FF") if i < p.dash_charges else Color(0.15, 0.2, 0.28)
 	_frag_lbl.text = "◆ %d  (+%d)" % [G.meta.data.choralim, int(G.run.fragments * G.meta.frag_mult())]
+	_xp_bar.size.x = 1280.0 * clampf(p.xp / maxf(p.xp_next, 1.0), 0.0, 1.0)
+	_lvl_lbl.text = "SEV %d" % p.level
+	var tt := int(G.run.time)
+	_time_lbl.text = "%02d:%02d" % [tt / 60, tt % 60]
+	_kills_lbl.text = "%d kesim" % int(G.run.stats.get("kills", 0))
+	_sync_gear_rows(p)
 	while _boon_row.get_child_count() < G.run.boon_ids.size():
 		var idx := _boon_row.get_child_count()
 		var bid: String = G.run.boon_ids[idx]
@@ -322,11 +368,47 @@ func _tick_hud() -> void:
 		s.mouse_entered.connect(func(): _show_tip(s, spec))
 		s.mouse_exited.connect(func(): _tip.visible = false)
 	if G.state == G.State.ROOM and is_instance_valid(G.room):
-		_room_lbl.text = "%s · %s" % [BIOME_NAME[G.run.biome], "BOSS" if G.room.rtype == Room.Type.BOSS else "oda %d/%d" % [G.run.depth + 1, Run.ROOMS_PER_BIOME]]
+		_room_lbl.text = BIOME_NAME[clampi(G.run.biome, 0, 3)]
 	elif G.state == G.State.HUB:
 		_room_lbl.text = "VIATOR KAMPI"
 	else:
 		_room_lbl.text = ""
+
+func _sync_gear_rows(p: Player) -> void:
+	var sig := ""
+	for w in p.weapons:
+		sig += "%s:%d," % [w.id, int(w.lvl)]
+	sig += "|"
+	for ps in p.passives:
+		sig += "%s:%d," % [ps.id, int(ps.lvl)]
+	if sig == _gear_sig:
+		return
+	_gear_sig = sig
+	for c in _wpn_row.get_children():
+		c.queue_free()
+	for c in _psv_row.get_children():
+		c.queue_free()
+	for w in p.weapons:
+		var d: Dictionary = Weapons.def(str(w.id))
+		_wpn_row.add_child(_gear_icon(str(d.get("icon", "ico_boon")), str(d.get("col", "7fd4ff")), int(w.lvl), 30))
+	for ps in p.passives:
+		var d: Dictionary = Weapons.pdef(str(ps.id))
+		_psv_row.add_child(_gear_icon(str(d.get("icon", "ico_frag")), str(d.get("col", "c26bff")), int(ps.lvl), 20))
+
+func _gear_icon(icon: String, col: String, lvl: int, size: int) -> Control:
+	var tr := TextureRect.new()
+	tr.texture = Px.S2(icon)
+	if tr.texture == null:
+		tr.texture = Px.S("ico_boon")
+	tr.custom_minimum_size = Vector2(size, size)
+	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	tr.modulate = Px.C(col)
+	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := _lbl(str(lvl), Vector2(size - 12, size - 13), 10, Color.WHITE)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tr.add_child(l)
+	return tr
 
 func _boon_spec(bid: String) -> Dictionary:
 	for b in Boons.all():
@@ -589,7 +671,7 @@ func _advance_overlay() -> void:
 		"title":
 			_close_overlay()
 			G.run.hub()
-		"boon":
+		"boon", "draft", "chest":
 			pass  # cards handle their own clicks
 
 func _show_panel(kind: String, title: String, title_col: Color) -> VBoxContainer:
@@ -631,76 +713,110 @@ func _show_panel(kind: String, title: String, title_col: Color) -> VBoxContainer
 # ---------------------------------------------------------------- boon draft
 
 func boon_choice() -> void:
-	var opts := Boons.roll(G.run.boon_ids, G.run.luck)
+	var rolled := Boons.roll(G.run.boon_ids, G.run.luck)
+	if rolled.is_empty():
+		return
+	var cards: Array = []
+	for b in rolled:
+		cards.append({"kind": "boon", "id": b.id, "name": b.name, "icon": "icn_" + str(b.patron).to_lower(), "col": b.color.to_html(false), "desc": b.desc, "top": b.patron, "w": 1.0})
+	_pause(true)
+	_show_cards("draft", "REZONANS PROTOKOLÜ — lütuf seç  [1/2/3]", Px.C("7B1FA2"), cards)
+
+func levelup_draft() -> void:
+	if overlay_open():
+		G.run.pending_drafts += 1
+		return
+	var opts := Weapons.draft_opts(G.player, G.run.luck)
 	if opts.is_empty():
 		return
 	_pause(true)
-	var v := _show_panel("boon", "REZONANS PROTOKOLÜ — lütuf seç  [1/2/3]", Px.C("7B1FA2"))
+	_show_cards("draft", "SEVİYE %d — güçlendirme seç  [1/2/3]" % G.player.level, Px.C("00E5FF"), opts)
+
+func chest_choice(evos: Array) -> void:
+	_pause(true)
+	var opts: Array = []
+	for e in evos:
+		var fd: Dictionary = Weapons.def(str(e.from))
+		var td: Dictionary = Weapons.def(str(e.into))
+		opts.append({"kind": "evo", "id": e.into, "from": e.from, "name": td.get("name", "?"), "icon": td.get("icon", "icn_rex"), "col": td.get("col", "ffb74d"), "desc": "%s evrimleşiyor" % fd.get("name", "?"), "top": "EVRİM", "w": 1.0})
+	opts.append({"kind": "gift", "id": "frag", "name": "PARÇACIK ÖBÜRÜ", "icon": "ico_frag", "col": "c26bff", "desc": "evrimi alma — +120 parçacık", "top": "GEÇ", "w": 1.0})
+	_show_cards("chest", "ELİT SANDIĞI", Px.C("ffb74d"), opts)
+
+func _show_cards(kind: String, title: String, tcol: Color, opts: Array) -> void:
+	var v := _show_panel(kind, title, tcol)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
 	v.add_child(row)
 	for i in opts.size():
-		var b: Dictionary = opts[i]
+		var o: Dictionary = opts[i]
+		var col := Px.C(str(o.get("col", "7B1FA2")))
 		var card := PanelContainer.new()
-		var cs := _style_panel(Color(0.06, 0.03, 0.1, 0.95), b.color, 2, 4)
+		var cs := _style_panel(Color(0.06, 0.03, 0.1, 0.95), col, 2, 4)
 		card.add_theme_stylebox_override("panel", cs)
 		var cv := VBoxContainer.new()
 		cv.add_theme_constant_override("separation", 6)
 		cv.custom_minimum_size = Vector2(176, 168)
 		card.add_child(cv)
-		var patron := _lbl("[%d] %s" % [i + 1, b.patron], Vector2.ZERO, 11, b.color)
-		patron.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		cv.add_child(patron)
-		# patron sigil
+		var top := _lbl("[%d] %s" % [i + 1, str(o.get("top", ""))], Vector2.ZERO, 11, col)
+		top.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cv.add_child(top)
 		var icon := TextureRect.new()
-		icon.texture = Px.S2("icn_" + str(b.patron).to_lower())
+		icon.texture = Px.S2(str(o.get("icon", "ico_boon")))
+		if icon.texture == null:
+			icon.texture = Px.S("ico_boon")
 		icon.custom_minimum_size = Vector2(40, 40)
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		icon.modulate = b.color.lerp(Color.WHITE, 0.35)
+		icon.modulate = col.lerp(Color.WHITE, 0.35)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var ic := CenterContainer.new()
 		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ic.add_child(icon)
 		cv.add_child(ic)
-		var nm := _lbl(b.name, Vector2.ZERO, 15, Color.WHITE)
+		var nm := _lbl(str(o.get("name", "?")), Vector2.ZERO, 14, Color.WHITE)
 		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		cv.add_child(nm)
-		var ds := _lbl(b.desc, Vector2.ZERO, 12, Color(0.78, 0.78, 0.88))
+		var ds := _lbl(str(o.get("desc", "")), Vector2.ZERO, 11, Color(0.78, 0.78, 0.88))
 		ds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		ds.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		cv.add_child(ds)
-		var rar := _lbl(["Sıradan", "Nadir", "Destansı"][int(b.rarity)], Vector2.ZERO, 10, [Color(0.6,0.6,0.7), b.color, Px.C("c26bff")][int(b.rarity)])
-		rar.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		cv.add_child(rar)
 		row.add_child(card)
 		card.gui_input.connect(func(ev: InputEvent):
 			if ev is InputEventMouseButton and ev.pressed:
-				_pick_boon(b))
+				_pick_card(o))
 		card.mouse_entered.connect(func():
-			cs.border_color = b.color.lerp(Color.WHITE, 0.5)
+			cs.border_color = col.lerp(Color.WHITE, 0.5)
 			cs.set_border_width_all(3))
 		card.mouse_exited.connect(func():
-			cs.border_color = b.color
+			cs.border_color = col
 			cs.set_border_width_all(2))
-		card.set_meta("boon_idx", i)
 	_overlay.set_meta("opts", opts)
 
-func _pick_boon(b: Dictionary) -> void:
-	if not is_instance_valid(_overlay) or _overlay.get_meta("kind", "") != "boon":
+func _pick_card(o: Dictionary) -> void:
+	if not is_instance_valid(_overlay):
+		return
+	var kind := str(_overlay.get_meta("kind", ""))
+	if kind != "draft" and kind != "chest" and kind != "boon":
 		return
 	_close_overlay()
-	G.run.take_boon(b)
+	if str(o.get("kind", "")) == "evo":
+		G.run.apply_evo({"from": o.get("from", ""), "into": o.get("id", "")})
+		return
+	Weapons.apply_opt(o, G.player)
+	if is_instance_valid(G.player):
+		G.fx.burst(G.player.pos + Vector2(0, -24), Px.C(str(o.get("col", "00E5FF"))), 20, 150.0, 4.0, 0.7)
+	G.audio.jingle("boon")
+	G.ui.toast(str(o.get("name", "?")))
 
 func _unhandled_key_input(ev: InputEvent) -> void:
 	if not (ev is InputEventKey and ev.pressed and not ev.echo):
 		return
-	if overlay_open() and _overlay.get_meta("kind", "") == "boon":
+	if overlay_open() and str(_overlay.get_meta("kind", "")) in ["boon", "draft", "chest"]:
 		var opts: Array = _overlay.get_meta("opts", [])
 		var idx := int(ev.keycode) - int(KEY_1)
 		if idx >= 0 and idx < opts.size():
-			_pick_boon(opts[idx])
+			_pick_card(opts[idx])
 	elif ev.keycode == KEY_ESCAPE and not overlay_open() and G.state in [G.State.ROOM, G.State.HUB]:
 		pause_panel()
 
@@ -727,7 +843,8 @@ func death_screen(killer: String, gained: int) -> void:
 	var gl := _lbl("Choralim saflaştırıldı: ◆ +%d" % gained, Vector2.ZERO, 15, Px.C("c26bff"))
 	gl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(gl)
-	var dl := _lbl("Derinlik: %s · oda %d" % [BIOME_NAME[maxi(0, G.run.biome)], maxi(0, G.run.depth) + 1], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
+	var tt := int(G.run.time)
+	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
 	dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dl)
 	var h := _lbl("Neva'nın rezonansı seni geri çekiyor...\n[E / tık] — Viator Kampı'na dön", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
@@ -751,7 +868,8 @@ func victory_screen(stats: Dictionary) -> void:
 	var t1 := _lbl("Dört mühür kırıldı. Kovan sustu.\nChoralim'in şarkısı artık senin.", Vector2.ZERO, 14, Color(0.7, 0.95, 1))
 	t1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t1)
-	var t2 := _lbl("Bu koşu: %d oda · %d kesim\nToplam zafer: %d" % [stats.rooms, stats.kills, G.meta.data.victories], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
+	var vt := int(stats.get("time", 0))
+	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim\nToplam zafer: %d" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), G.meta.data.victories], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
 	t2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t2)
 	var h := _lbl("[E / tık] — kampa dön (yeni döngü)", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
@@ -975,10 +1093,10 @@ func title_screen() -> void:
 	var st := _lbl("— CHORALIM PROTOCOL —", Vector2.ZERO, 15, Px.C("00E5FF"))
 	st.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(st)
-	var sub := _lbl("İzometrik aksiyon roguelite.\nKampa uyan, kapıdan geç, düş. Tekrar uyan.", Vector2.ZERO, 12, Color(0.8, 0.78, 0.88))
+	var sub := _lbl("Sürü-hayatta kalma roguelite.\nKampa uyan, kapıdan geç, kovana dayan. Tekrar uyan.", Vector2.ZERO, 12, Color(0.8, 0.78, 0.88))
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
-	v.add_child(_lbl("WASD hareket · LMB kılıç · RMB plazma · SPACE dash · Q/F parry · E etkileşim", Vector2.ZERO, 11, Color(0.55, 0.55, 0.65)))
+	v.add_child(_lbl("WASD hareket · SPACE dash · E etkileşim — silahlar otomatik ateş eder, sen hayatta kal", Vector2.ZERO, 11, Color(0.55, 0.55, 0.65)))
 	var btn := Button.new()
 	btn.text = "VIATOR'A UYAN"
 	btn.custom_minimum_size = Vector2(220, 40)

@@ -8,9 +8,9 @@ extends Node2D
 enum Type { COMBAT, ELITE, BOSS }
 enum Reward { BOON, HEAL, FRAGMENTS }
 
-const W := 1180.0
-const H := 660.0
-const BOUNDS := Rect2(-540, -290, 1080, 580)
+var W := 1180.0
+var H := 660.0
+var BOUNDS := Rect2(-540, -290, 1080, 580)
 
 const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE"]
 const PROP_SPR := [
@@ -575,15 +575,65 @@ func _tick_hazards(d: float) -> void:
 func _tick_pickups(d: float) -> void:
 	if G.player == null:
 		return
+	var magnet := 90.0
+	if G.player is Player:
+		magnet = G.player.magnet_r
 	for pk in pickups_node.get_children():
 		var dist: float = pk.position.distance_to(G.player.pos)
-		if dist < 90:
-			pk.position = pk.position.move_toward(G.player.pos, 340.0 * d)
+		if dist < magnet:
+			pk.position = pk.position.move_toward(G.player.pos, (340.0 + (magnet - dist) * 4.0) * d)
 		if dist < 16:
+			_collect(pk)
+
+func _collect(pk: Node) -> void:
+	match str(pk.get_meta("kind", "frag")):
+		"xp":
+			G.player.add_xp(float(pk.get_meta("val")))
+			G.audio.play("pickup", G.rf(1.2, 1.4), 0.35)
+		"heal":
+			G.player.heal(24.0)
+			G.audio.play("heal", 1.0, 0.5)
+		"chest":
+			G.run.open_chest()
+		_:
 			G.run.fragments += int(pk.get_meta("val"))
-			G.fx.burst(pk.position, Px.C("7B1FA2"), 4, 80.0, 3.0, 0.3)
 			G.audio.play("pickup", G.rf(0.9, 1.1), 0.4)
-			pk.queue_free()
+	G.fx.burst(pk.position, pk.modulate if pk.modulate.a > 0.5 else Px.C("7B1FA2"), 4, 80.0, 3.0, 0.3)
+	pk.queue_free()
+
+func spawn_gem(p: Vector2, val: float) -> void:
+	var pk := Sprite2D.new()
+	pk.texture = Px.S("dot")
+	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pk.modulate = Px.C("00E5FF") if val < 3.0 else (Px.C("c26bff") if val < 10.0 else Px.C("ffb74d"))
+	pk.scale = Vector2.ONE * (0.4 + minf(val, 12.0) * 0.05)
+	pk.position = p + Vector2(G.rf(-26, 26), G.rf(-20, 20))
+	pk.z_index = int(pk.position.y) - 1
+	pk.set_meta("kind", "xp")
+	pk.set_meta("val", val)
+	pickups_node.add_child(pk)
+
+func spawn_chest(p: Vector2) -> void:
+	var pk := Sprite2D.new()
+	pk.texture = Px.S("crate")
+	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pk.modulate = Px.C("ffb74d")
+	pk.scale = Vector2.ONE * 0.85
+	pk.position = p
+	pk.z_index = int(p.y)
+	pk.set_meta("kind", "chest")
+	pickups_node.add_child(pk)
+	G.fx.mk_light(pk, Vector2(0, -14), Px.C("ffb74d"), 0.7, 1.6)
+	G.fx.float_text(p + Vector2(0, -34), "SANDIK!", Px.C("ffb74d"), 1.1)
+
+func spawn_heal(p: Vector2) -> void:
+	var pk := Sprite2D.new()
+	pk.texture = Px.S("ico_heal")
+	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pk.position = p + Vector2(G.rf(-30, 30), G.rf(-24, 24))
+	pk.z_index = int(pk.position.y)
+	pk.set_meta("kind", "heal")
+	pickups_node.add_child(pk)
 
 func spawn_fragments(p: Vector2, total: int) -> void:
 	var n := clampi(int(total / 2.0), 3, 10)
@@ -594,6 +644,7 @@ func spawn_fragments(p: Vector2, total: int) -> void:
 		pk.scale = Vector2.ONE * 0.7
 		pk.position = p + Vector2(G.rf(-60, 60), G.rf(-40, 40))
 		pk.z_index = int(pk.position.y)
+		pk.set_meta("kind", "frag")
 		pk.set_meta("val", int(ceilf(total / float(n))))
 		pickups_node.add_child(pk)
 

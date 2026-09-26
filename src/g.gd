@@ -21,8 +21,9 @@ static var state: int = State.TITLE
 
 static var enemies: Array = []        # Array[Enemy]
 static var projectiles: Array = []    # Array[Projectile]
+static var director: Director          # arena swarm director (null outside runs)
 static var melee_tokens := 2          # attack director: simultaneous melee attackers
-const MELEE_TOKENS_MAX := 2
+static var MELEE_TOKENS_MAX := 2       # Director raises the cap as minutes pass
 
 static var rng := RandomNumberGenerator.new()
 

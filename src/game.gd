@@ -24,7 +24,7 @@ func _ready() -> void:
 	add_child(G.audio)
 
 	cam = Camera2D.new()
-	cam.zoom = Vector2.ONE * 0.85
+	cam.zoom = Vector2.ONE * 0.72
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 7.0
 	add_child(cam)
@@ -58,6 +58,9 @@ func _ready() -> void:
 	add_child(G.run)
 
 	G.ui.title_screen()
+
+	if OS.get_cmdline_user_args().has("--probe"):
+		add_child(preload("res://tests/probe.gd").new())
 
 var _dark: CanvasModulate
 

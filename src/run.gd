@@ -1,7 +1,8 @@
 class_name Run
 extends Node
 
-# One descent attempt: hub → biome rooms → boss → next biome … → victory or death.
+# One arena run: hub → open field → time-scripted swarm → miniboss → final boss.
+# Victory by killing the final boss (or outlasting the collapse timer).
 # Holds run-scoped state (fragments, boons). On death all of it resets;
 # meta progression (Pure Choralim + upgrades) persists via G.meta.
 
@@ -15,8 +16,10 @@ var biome := 0
 var depth := 0            # room index within the biome (0..ROOMS_PER_BIOME)
 var fragments := 0        # impure choralim gathered this run → purified on death
 var boon_ids: Array = []
-var luck := 0.0           # raised by elite clears; sways epic boon rolls
+var luck := 0.0           # raised by elites; sways epic boon rolls
 var alive := true
+var time := 0.0           # seconds survived this run (Director drives it)
+var pending_drafts := 0   # queued level-up drafts
 var stats := {"kills": 0, "rooms": 0}
 
 func _init(g: Node2D) -> void:
@@ -44,12 +47,44 @@ func start_run() -> void:
 	boon_ids.clear()
 	luck = 0.0
 	alive = true
+	time = 0.0
+	pending_drafts = 0
 	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
 	G.meta.save()
+	G.fx.transition()
+	_room_to(G.room)
+	var a := Arena.new()
+	game.world.add_child(a)
+	G.state = G.State.TRANSITION
+	a.build_arena(biome)
+	_place_player(a)
 	G.player.reset_for_run()
 	G.ui.hub_ui(false)
-	next_room(Room.Reward.FRAGMENTS)   # first room always opens free
+	var dr := Director.new()
+	dr.biome = biome
+	add_child(dr)
+	G.director = dr
+	G.state = G.State.ROOM
+
+# level-up drafts queue up while an overlay is open; open the next when clear
+func _process(_d: float) -> void:
+	if pending_drafts > 0 and G.state == G.State.ROOM and is_instance_valid(G.ui) and not G.ui.overlay_open():
+		pending_drafts -= 1
+		G.ui.levelup_draft()
+
+func open_chest() -> void:
+	var evos := Weapons.evo_ready(G.player)
+	if evos.is_empty():
+		fragments += 120
+		G.player.heal(G.player.max_hp * 0.25)
+		G.ui.toast("sandık: +120 parçacık · can yenilendi")
+		G.audio.jingle("boon")
+		return
+	G.ui.chest_choice(evos)
+
+func apply_evo(spec: Dictionary) -> void:
+	Weapons.apply_evo(spec, G.player)
 
 func next_room(reward: int) -> void:
 	depth += 1
@@ -97,8 +132,14 @@ func descend() -> void:
 	next_room(Room.Reward.BOON)
 
 func victory() -> void:
+	if not alive:
+		return
 	G.state = G.State.VICTORY
 	alive = false
+	if is_instance_valid(G.director):
+		G.director.running = false
+	stats.time = time
+	stats.level = G.player.level if is_instance_valid(G.player) else 1
 	G.meta.data["victories"] += 1
 	G.meta.save()
 	G.audio.jingle("boss")
@@ -114,7 +155,9 @@ func on_player_death(h: Dictionary) -> void:
 	if src is Actor:
 		killer = src.actor_name
 	var was_boss := is_instance_valid(G.room) and G.room.boss != null
-	G.meta.record_death(killer, biome, biome * 10 + depth, was_boss)
+	if is_instance_valid(G.director):
+		G.director.running = false
+	G.meta.record_death(killer, biome, int(time), was_boss)
 	var gained := int(fragments * G.meta.frag_mult())
 	G.meta.add_choralim(gained)
 	G.ui.death_screen(killer, gained)
@@ -158,7 +201,6 @@ func take_boon(b: Dictionary) -> void:
 		G.fx.flash(Color(0.1, 0.9, 0.2, 0.1), 0.6)
 
 func drop_fragments(p: Vector2, total: int) -> void:
-	stats.kills += 1
 	if is_instance_valid(G.room):
 		G.room.spawn_fragments(p, total)
 
@@ -173,7 +215,11 @@ func _room_to(old: Room) -> void:
 		if is_instance_valid(p):
 			p.queue_free()
 		G.projectiles.erase(p)
-	G.melee_tokens = G.MELEE_TOKENS_MAX
+	G.melee_tokens = 2
+	G.MELEE_TOKENS_MAX = 2
+	if is_instance_valid(G.director):
+		G.director.queue_free()
+		G.director = null
 	if is_instance_valid(G.fx):
 		G.fx.clear_decals()
 		G.fx.hitstop_t = 0.0
@@ -282,10 +328,10 @@ func dbg_aim(x: float, y: float) -> void:
 		G.player.aim_dir = (Vector2(x, y) - G.player.pos).normalized()
 
 func dbg_pick_boon(i: int) -> void:
-	if is_instance_valid(G.ui._overlay) and G.ui._overlay.get_meta("kind", "") == "boon":
+	if is_instance_valid(G.ui._overlay) and str(G.ui._overlay.get_meta("kind", "")) in ["boon", "draft", "chest"]:
 		var opts: Array = G.ui._overlay.get_meta("opts", [])
 		if i >= 0 and i < opts.size():
-			G.ui._pick_boon(opts[i])
+			G.ui._pick_card(opts[i])
 
 func dbg_step_to_clear(max_steps: int = 20) -> int:
 	# returns how many door-steps remain; used to sanity-check progression
