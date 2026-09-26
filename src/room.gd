@@ -603,15 +603,20 @@ func _collect(pk: Node) -> void:
 
 func spawn_gem(p: Vector2, val: float) -> void:
 	var pk := Sprite2D.new()
-	pk.texture = Px.S("dot")
-	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var tex := Px.S2("crystal")
+	if tex == null:
+		tex = Px.S("dot")
+	pk.texture = tex
+	pk.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	pk.modulate = Px.C("00E5FF") if val < 3.0 else (Px.C("c26bff") if val < 10.0 else Px.C("ffb74d"))
-	pk.scale = Vector2.ONE * (0.4 + minf(val, 12.0) * 0.05)
+	pk.scale = Vector2.ONE * (0.5 + minf(val, 12.0) * 0.035)
 	pk.position = p + Vector2(G.rf(-26, 26), G.rf(-20, 20))
 	pk.z_index = int(pk.position.y) - 1
 	pk.set_meta("kind", "xp")
 	pk.set_meta("val", val)
 	pickups_node.add_child(pk)
+	if val >= 10.0:
+		G.fx.mk_light(pk, Vector2.ZERO, pk.modulate, 0.5, 1.1)
 
 func spawn_chest(p: Vector2) -> void:
 	var pk := Sprite2D.new()

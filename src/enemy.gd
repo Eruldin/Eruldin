@@ -4,8 +4,15 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA }
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
+
+# painted concept-art sets for the new kinds; biome variants fall back to the
+# base set automatically in _make_body
+const KIND_SET := {
+	EKind.VARL: "c_varl", EKind.CEREB: "c_cereb",
+	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa",
+}
 
 var kind: int = EKind.HUSK
 var elite := false
@@ -69,6 +76,24 @@ func _setup_stats(hs: float, ds: float) -> void:
 			max_hp = 12; speed = 165; touch_dmg = 12; radius = 10; hit_radius = 13
 			windup_t = 0.55; recover_t = 0.4; attack_cd = 0.8; touch_r = 34; kamikaze = true
 			actor_name = "Vızıltı Dronu"
+		EKind.VARL:
+			max_hp = 16; speed = 192; touch_dmg = 7; radius = 11; hit_radius = 14
+			windup_t = 0.35; recover_t = 0.4; attack_cd = 0.9; touch_r = 30
+			actor_name = "Çölayan Varl"
+		EKind.CEREB:
+			max_hp = 34; speed = 62; touch_dmg = 7; radius = 15; hit_radius = 18
+			windup_t = 0.6; recover_t = 0.9; attack_cd = 2.2; keep_min = 170; keep_max = 300
+			proj_spd = 175; proj_dmg = 13; burst_n = 1
+			actor_name = "Cerebellum Kisti"
+		EKind.KONAKCI:
+			max_hp = 150; speed = 60; touch_dmg = 20; radius = 19; hit_radius = 22
+			windup_t = 0.7; recover_t = 0.8; attack_cd = 1.6; touch_r = 48
+			actor_name = "Konakçı Yaratık"
+			knock_resist = 60.0
+		EKind.ALFA:
+			max_hp = 88; speed = 128; touch_dmg = 16; radius = 15; hit_radius = 18
+			windup_t = 0.5; recover_t = 0.55; attack_cd = 1.0; touch_r = 42
+			actor_name = "Alfa Şövalye"
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
@@ -86,13 +111,13 @@ func _make_body() -> void:
 	body = Sprite2D.new()
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(body)
-	var kn: String = EKind.keys()[kind].to_lower()
+	var kn: String = KIND_SET.get(kind, EKind.keys()[kind].to_lower())
 	if is_instance_valid(G.room) and G.room.biome > 0:
 		var bk := "%s_%d" % [kn, G.room.biome]
 		if not Px._ext_frames(bk).is_empty():
 			kn = bk
 	_load_frames(kn, 5.0)
-	Px.fit(body, 118.0 if elite else 86.0)
+	Px.fit(body, 118.0 if elite else (108.0 if kind == EKind.KONAKCI else 86.0))
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("7B1FA2"), 0.5, 1.6)
@@ -153,7 +178,7 @@ func _seek(d: float) -> void:
 		var dd := away.length()
 		if dd < radius + o.radius + 5.0 and dd > 0.01:
 			dir += away.normalized() * (1.2 - dd / 40.0) * 1.4
-	if kind == EKind.SPITTER:
+	if kind == EKind.SPITTER or kind == EKind.CEREB:
 		if dist < keep_min:
 			dir = -dir
 		elif dist < keep_max:
@@ -169,11 +194,11 @@ func _seek(d: float) -> void:
 		match kind:
 			EKind.TURRET:
 				if dist < 400.0: _begin_windup()
-			EKind.SPITTER:
+			EKind.SPITTER, EKind.CEREB:
 				if dist < keep_max + 40.0: _begin_windup()
 			EKind.DRONE:
 				if dist < 55.0: _begin_windup()
-			EKind.HUSK, EKind.SENTINEL:
+			EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA:
 				if dist < 110.0:
 					if _has_tok or G.melee_tokens > 0:
 						if not _has_tok:
@@ -194,9 +219,9 @@ func _begin_windup() -> void:
 	if kind == EKind.DRONE:
 		_tele = G.fx.tele_circle(pos, 55.0, windup_t, Color(1, 0.3, 0.1, 0.3))
 		_tele["follow"] = self
-	elif kind == EKind.HUSK or kind == EKind.SENTINEL:
+	elif kind in [EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA]:
 		var ang := rad_to_deg((G.player.pos - pos).angle())
-		_tele = G.fx.tele_wedge(pos, ang, 78.0, windup_t)
+		_tele = G.fx.tele_wedge(pos, ang, 78.0 if kind != EKind.KONAKCI else 104.0, windup_t)
 	G.audio.play("ui", 0.6, 0.3)
 
 func _windup(d: float) -> void:
@@ -215,8 +240,14 @@ func _windup(d: float) -> void:
 
 func _strike(d: float) -> void:
 	_state_t -= d
-	if kind == EKind.HUSK or kind == EKind.SENTINEL:
-		pos += _strike_dir * (420.0 if kind == EKind.SENTINEL else 320.0) * d
+	if kind in [EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA]:
+		var lunge := 320.0
+		match kind:
+			EKind.SENTINEL: lunge = 420.0
+			EKind.VARL: lunge = 400.0
+			EKind.ALFA: lunge = 470.0
+			EKind.KONAKCI: lunge = 240.0
+		pos += _strike_dir * lunge * d
 		if is_instance_valid(G.room):
 			pos = G.room.clamp_pos(pos, radius)
 		if G.player != null and not G.player.dead and pos.distance_to(G.player.pos) < radius + G.player.hit_radius + 8.0:
@@ -231,6 +262,8 @@ func _do_strike() -> void:
 	match kind:
 		EKind.SPITTER:
 			_shoot_at(G.player.pos, proj_spd, proj_dmg, Px.C("39ff14"), 9.0)
+		EKind.CEREB:
+			_shoot_at(G.player.pos, proj_spd, proj_dmg, Px.C("7B1FA2"), 12.0)
 		EKind.TURRET:
 			_burst_co()
 		EKind.DRONE:
@@ -307,7 +340,7 @@ func die(h: Dictionary) -> void:
 		G.fx.burst(pos + Vector2(0, -6), Px.C("00E676"), 12, 130.0, 4.0, 0.5)
 	if is_instance_valid(G.room):
 		# XP gem every kill; elites also drop a chest; rare heal orb
-		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0][kind] + (10.0 if elite else 0.0)
+		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0][kind] + (10.0 if elite else 0.0)
 		G.room.spawn_gem(pos, xp_val)
 		if elite:
 			G.room.spawn_chest(pos)

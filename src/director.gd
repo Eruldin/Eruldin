@@ -53,7 +53,7 @@ func _tick_events(d: float) -> void:
 	_elite_t -= d
 	if _elite_t <= 0.0:
 		_elite_t = G.rf(44.0, 58.0)
-		var kind: int = G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.HUSK] if m < 4.0 else [Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER])
+		var kind: int = G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.HUSK] if m < 4.0 else ([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER] if m < 6.5 else [Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA, Enemy.EKind.SPITTER]))
 		var e := _spawn(kind, true)
 		if e != null:
 			G.ui.toast("elit — sandık taşıyor")
@@ -75,14 +75,22 @@ func _comp(m: float) -> int:
 	var pool: Array = [Enemy.EKind.HUSK]
 	if m >= 0.8:
 		pool = [Enemy.EKind.HUSK, Enemy.EKind.HUSK, Enemy.EKind.HUSK, Enemy.EKind.DRONE]
+	if m >= 1.4:
+		pool.append_array([Enemy.EKind.VARL, Enemy.EKind.VARL])
 	if m >= 2.2:
 		pool.append_array([Enemy.EKind.SPITTER, Enemy.EKind.HUSK])
+	if m >= 3.2:
+		pool.append_array([Enemy.EKind.CEREB])
 	if m >= 4.0:
 		pool.append_array([Enemy.EKind.SENTINEL, Enemy.EKind.DRONE, Enemy.EKind.SPITTER])
+	if m >= 5.0:
+		pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.VARL])
 	if m >= 6.5:
 		pool.append_array([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.DRONE])
+	if m >= 7.5:
+		pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.CEREB])
 	if m >= 8.5:
-		pool.append_array([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.DRONE])
+		pool.append_array([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.DRONE, Enemy.EKind.KONAKCI])
 	return G.pick(pool)
 
 func _hp_scale() -> float:
@@ -121,7 +129,8 @@ func _surge(m: float) -> void:
 	for i in n:
 		var p := G.player.pos + Vector2.from_angle(TAU * i / n) * G.rf(720.0, 780.0)
 		p = G.room.clamp_pos(p, 20.0)
-		Enemy.spawn(Enemy.EKind.HUSK if i % 4 != 0 else Enemy.EKind.DRONE, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
+		var sk := Enemy.EKind.VARL if i % 4 == 0 else (Enemy.EKind.DRONE if i % 7 == 0 else Enemy.EKind.HUSK)
+		Enemy.spawn(sk, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
 
 func _boss(kind: int, hs: float, ann: String) -> void:
 	var p := G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * 560.0
