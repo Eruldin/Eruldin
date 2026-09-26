@@ -49,6 +49,7 @@ const DEFS := [
 	{"id": "q_frag",  "giver": "saphire", "name": "PARÇACIK HASADI",     "desc": "Tezgâh parçacıksız dönmez. Tek koşuda 600 parçacık topla — kesende dursun, teslime gerek yok.", "obj": {"type": "frag", "n": 600}, "rew": {"cho": 140}, "prereq": "q_loot"},
 	{"id": "q_glaive","giver": "ehnar",   "name": "AĞIR TAHMİS",         "desc": "Sırp diskleri depoda paslanıyor. Tek koşuda 400 kesim yaparsan birini sana kalibrarım.", "obj": {"type": "kills", "n": 400}, "rew": {"cho": 150, "wep": "glaive"}, "prereq": "q_nobet2"},
 	{"id": "q_deneme","giver": "ehnar",   "name": "DENEME KANITI",       "desc": "Sahalardaki eski deneme totemleri hâlâ sayıyor. İkisini tamamla — ikisinin de elitleri düşsün.", "obj": {"type": "totem", "n": 2}, "rew": {"cho": 170, "item": "i_koro"}, "prereq": "q_elit"},
+	{"id": "q_son",   "giver": "zirkon",  "name": "ARŞİVİN SONU",        "desc": "Defterin son sayfası boş kalmasın. On görev teslim et — arşivin mührü senin olsun.", "obj": {"type": "quests", "n": 10}, "rew": {"cho": 400, "wep": "meteor"}, "prereq": "q_final"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -112,7 +113,7 @@ static func has_business(nid: String) -> bool:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests"]:
 		done.append_array(tick(type))
 	for q in DEFS:
 		if state(q.id) != "act" or str(q.obj.get("type", "")) != "boss":
@@ -174,6 +175,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"biomes":  cur = (G.meta.data.get("visited", []) as Array).size()
 			"score":   cur = int(G.run.stats.get("score", 0))
 			"frag":    cur = int(G.run.fragments)
+			"quests":  cur = _claimed_count()
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
 		if cur >= need:
@@ -238,7 +240,15 @@ static func obj_text(q: Dictionary) -> String:
 		"score":  return "%d skor" % need
 		"frag":   return "%d parçacık topla" % need
 		"totem":  return "%d deneme totemi tamamla" % need
+		"quests": return "%d görev teslim et" % need
 	return "?"
+
+static func _claimed_count() -> int:
+	var n := 0
+	for qid in _q():
+		if str(_q()[qid].get("st", "")) == "claimed":
+			n += 1
+	return n
 
 static func prog_text(q: Dictionary) -> String:
 	var o: Dictionary = q.obj

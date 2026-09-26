@@ -26,6 +26,7 @@ var _sum_t := 0.0   # çağırıcı elit: döl saçma sayacı
 var _mend_t := 0.0  # şifalı elit: alan onarımı sayacı
 var _lead_pulse := 0.0  # sürücü elit: hız aurası sayacı
 var lead_t := 0.0       # bu düşmanın üstündeki kalan sürücü buffı
+var _trail_t := 0.0     # iz süren elit: kor izi bırakma sayacı
 var _sum_n := 0     # bu elitin saldığı döl sayısı
 var speed := 100.0
 var touch_dmg := 10.0
@@ -115,7 +116,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu"][randi() % 9]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz"][randi() % 10]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -141,6 +142,9 @@ func _setup_stats(hs: float, ds: float) -> void:
 			"surucu":
 				_lead_pulse = 0.8
 				actor_name = "SÜRÜCÜ " + actor_name
+			"iz":
+				_trail_t = 0.6
+				actor_name = "İZ SÜREN " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -169,7 +173,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("ffb74d"), 0.4, 1.4)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		_hp_bg = ColorRect.new()
 		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
@@ -264,6 +268,13 @@ func _process(_d: float) -> void:
 					ln += 1
 			if ln >= 3:
 				G.fx.tele_ring(pos, 220.0, 0.45, Color(0.75, 0.8, 0.2, 0.35))
+	# iz süren elit: ardında kısa ömürlü kor birikintileri bırakır — pozisyon baskısı
+	if affix == "iz" and _st == St.SEEK:
+		_trail_t -= d
+		if _trail_t <= 0.0 and is_instance_valid(G.room) and pos.distance_to(G.player.pos) < 620.0:
+			_trail_t = 0.9
+			var ds2: float = G.director._dmg_scale() if G.director != null else 1.0
+			G.room.add_hazard(pos + Vector2(G.rf(-8, 8), G.rf(-8, 8)), 26.0, 8.0 * ds2, 2.6, Color(1.0, 0.45, 0.15, 0.5))
 	if _cd_t > 0:
 		_cd_t -= d
 	_tick_anim(d)
