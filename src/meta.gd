@@ -38,6 +38,7 @@ var data := {
 	"hyper": false,        # AŞILAMA: sürü hızlı/kalabalık akar, ödeme ×1.5
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır
 	"contract": {},        # Ehnar's aktif görevi: {key,need,reward}
+	"feats_seen": [],      # duyurulmuş başarımlar (toast bir kez)
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"last_death": {"killer":"", "biome":0, "depth":0, "boss":false},
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
@@ -78,6 +79,35 @@ func boss_down(id: String) -> void:
 	if not data["bosses"].has(id):
 		data["bosses"].append(id)
 	save()
+
+# milestone list — Zirkon's BAŞARIMLAR section + end-of-run toasts
+func achievements() -> Array:
+	var arsenal := true
+	for wid in Weapons.DEFS:
+		if not Weapons.DEFS[wid].get("hidden", false) and not Weapons.unlocked(wid):
+			arsenal = false
+	return [
+		{"name": "İLK ZAFER", "desc": "bir koşuyu zaferle bitir", "done": int(data["victories"]) > 0},
+		{"name": "KESİM MAKİNESİ", "desc": "toplam 1.000 kesim", "done": int(data["kills"]) >= 1000},
+		{"name": "KOVAN KIRICI", "desc": "toplam 10.000 kesim", "done": int(data["kills"]) >= 10000},
+		{"name": "EFENDİ AVCISI", "desc": "dört efendiyi de düşür", "done": (data["bosses"] as Array).size() >= 4},
+		{"name": "DERİN GEZGİN", "desc": "tek koşuda 10+ dakika dayan", "done": int(data["best_depth"]) >= 600 or int(data["victories"]) > 0},
+		{"name": "İNATÇI", "desc": "10 koşuya çık", "done": int(data["runs"]) >= 10},
+		{"name": "TAM ARSENAL", "desc": "tüm silahların kilidini aç", "done": arsenal},
+	]
+
+# feats completed since last check — announced once via toast
+func new_feats() -> Array:
+	var seen: Array = data.get("feats_seen", [])
+	var out: Array = []
+	for a in achievements():
+		if bool(a.done) and not seen.has(str(a.name)):
+			seen.append(str(a.name))
+			out.append(str(a.name))
+	data["feats_seen"] = seen
+	if not out.is_empty():
+		save()
+	return out
 
 func seen_line(id: String) -> bool:
 	return data["seen_lines"].has(id)
