@@ -30,6 +30,8 @@ static func all() -> Array:
 		{"id":"overcharge","patron":"Rex","name":"Aşırı Isınma","desc":"+%35 plazma hasarı, daha hızlı dolum","rarity":1,"color":Px.C("ff4444")},
 		{"id":"static","patron":"Rex","name":"Statik Alan","desc":"Yakındaki düşmanlar saniyede 6 şok hasarı alır","rarity":0,"color":Px.C("ff4444")},
 		{"id":"parryemp","patron":"Rex","name":"Kafa Karıştıran","desc":"Her 6sn etrafında şok dalgası patlatır","rarity":2,"color":Px.C("ff4444")},
+		{"id":"xpgain","patron":"Rex","name":"İşlemci Aşısı","desc":"+%15 deneyim kazanımı","rarity":0,"color":Px.C("ff4444")},
+		{"id":"heartcall","patron":"Neva","name":"Kan Çağrısı","desc":"Şifa küresi düşme şansı iki katına çıkar","rarity":1,"color":Px.C("7B1FA2")},
 		# --- Kovan Mutasyonu (chaos — bedelli) ---
 		{"id":"bloodlust","patron":"Kovan","name":"Kan Hırsı","desc":"+%40 hasar — ama +%15 hasar alırsın","rarity":1,"color":Px.C("39ff14")},
 		{"id":"frenzy","patron":"Kovan","name":"Kuduz","desc":"+%18 saldırı hızı — ama -15 azami can","rarity":0,"color":Px.C("39ff14")},
@@ -96,3 +98,5 @@ static func apply(id: String, p: Player) -> void:
 		"carapace": p.lifesteal += 0.08; p.max_hp = maxf(20.0, p.max_hp * 0.9); p.hp = minf(p.hp, p.max_hp)
 		"revive": p.revives_extra += 1
 		"scav": p.set_meta("elite_heal", true)
+		"xpgain": p.xp_mult *= 1.15
+		"heartcall": p.set_meta("heal_luck", true)

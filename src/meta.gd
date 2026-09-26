@@ -43,6 +43,7 @@ var data := {
 	"reapers": 0,          # kesilen HASATÇI sayısı
 	"best_evos": 0,        # tek koşuda en çok evrim
 	"curse_wins": 0,       # 2+ sözleşmeyle kazanılan zafer
+	"eggs": 0,             # toplanan altın nüve (kalıcı +%0.5 hasar/adet)
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"last_death": {"killer":"", "biome":0, "depth":0, "boss":false},
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
@@ -100,6 +101,7 @@ func achievements() -> Array:
 		{"name": "TAM ARSENAL", "desc": "tüm silahların kilidini aç", "done": arsenal},
 		{"name": "HASAT AVCISI", "desc": "bir HASATÇI'yı kes", "done": int(data.get("reapers", 0)) > 0},
 		{"name": "EVRİM MİMARI", "desc": "tek koşuda 3 evrim tamamla", "done": int(data.get("best_evos", 0)) >= 3},
+		{"name": "NÜVE AVCISI", "desc": "10 altın nüve topla", "done": int(data.get("eggs", 0)) >= 10},
 		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0},
 	]
 

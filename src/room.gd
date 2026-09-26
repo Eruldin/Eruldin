@@ -715,6 +715,12 @@ func _collect(pk: Node) -> void:
 			G.player.invuln = maxf(G.player.invuln, 3.0)
 			G.audio.play("parry", 1.0, 0.6)
 			G.ui.toast("koruyucu zarf — 3sn dokunulmaz")
+		"egg":
+			G.meta.data["eggs"] = int(G.meta.data.get("eggs", 0)) + 1
+			G.meta.save()
+			G.player.dmg_mult *= 1.005
+			G.audio.play("boon", 1.4, 0.7)
+			G.ui.toast("ALTIN NÜVE — kalıcı +%%0.5 hasar (toplam %d)" % int(G.meta.data["eggs"]))
 		"chest":
 			G.run.open_chest()
 		_:
@@ -774,6 +780,9 @@ func spawn_special(kind: String, p: Vector2) -> void:
 		"guard":
 			pk.texture = Px.S("icn_upg_shield")
 			col = "00E5FF"
+		"egg":
+			pk.texture = Px.S("icn_crown")
+			col = "ffd700"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	pk.scale = Vector2.ONE * 0.8
 	pk.modulate = Px.C(col)
