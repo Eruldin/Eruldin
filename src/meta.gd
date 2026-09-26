@@ -141,6 +141,7 @@ func achievements() -> Array:
 		{"name": "GÖREV ERİ", "desc": "8 görevi teslim et", "done": _claimed_count() >= 8, "rew": 150},
 		{"name": "ARŞİVCİ", "desc": "8 veri kütüğünü topla", "done": (data.get("lore", []) as Array).size() >= Quests.LORE.size(), "rew": 200},
 		{"name": "DERİN SEÇİLMİŞ", "desc": "3. derinliğe ulaş (3 zafer)", "done": int(data.get("ng", 0)) >= 3, "rew": 300},
+		{"name": "ALTIN KIRICI", "desc": "toplam 10 şampiyon elit kes", "done": int(data.get("champs", 0)) >= 10, "rew": 400},
 	]
 
 func _claimed_count() -> int:

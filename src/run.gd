@@ -446,7 +446,16 @@ func victory() -> void:
 	for f in G.meta.new_feats():
 		G.ui.toast("BAŞARIM: %s" % f)
 	G.audio.jingle("boss")
-	G.ui.victory_screen(stats)
+	# zafer sinematiği: biome kartı + Neva repliği, sonra sonuç paneli
+	var ci := clampi(biome, 0, 5)
+	var tex := "cine_%d_%d" % [ci, randi() % 4] if ci <= 3 else "cine_%d_0" % ci
+	var epi := G.ui.epilog(node_id)
+	G.ui.cine_seq([
+		{"tex": tex, "title": "PROTOKOL KIRILDI", "sub": (node_name + "\n" + epi) if epi != "" else node_name},
+		{"tex": "por_neva", "title": "NEVA", "sub": "Şarkı sustu, Alfa-04. Bu sefer geriye tam döndün."},
+	], func(): G.ui.victory_screen(stats))
+	if not G.ui.overlay_open():
+		G.ui.victory_screen(stats)
 
 # zaferden sonra devam — kovan sonsuz ölçeklenmeye döner, sonraki ölüm normal öder
 func continue_endless() -> void:
