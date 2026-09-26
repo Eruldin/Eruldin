@@ -67,6 +67,32 @@ static func roll(owned: Array, luck := 0.0) -> Array:
 		pool.remove_at(idx)
 	return out
 
+# KOZ kartları (VS arcana): koşu başında bir tane seçilir, tüm koşuyu boylar
+const ARCANAS := {
+	"kan":     {"name": "KAN AYI",       "desc": "+%12 can çalma — ama -%15 azami can", "col": "ff4444"},
+	"firtina": {"name": "FIRTINA GÖZÜ",  "desc": "Kristaller çok uzaktan sana doğru akar", "col": "00E5FF"},
+	"sari":    {"name": "SARI HAT",      "desc": "Elitler %20 daha sık doğar — ödeme ×1.25", "col": "ffb74d"},
+	"golge":   {"name": "GÖLGE ADIM",    "desc": "Sürü %10 yavaşlar — sen %5 yavaşsın", "col": "7B1FA2"},
+	"hasat":   {"name": "HASAT ŞENLİĞİ", "desc": "Her kesimde %2 ihtimalle +1 parçacık", "col": "39ff14"},
+}
+
+static func apply_arcana(id: String, p: Player) -> void:
+	match id:
+		"kan":
+			p.lifesteal += 0.12
+			p.max_hp *= 0.85
+			p.hp = minf(p.hp, p.max_hp)
+		"firtina":
+			p.magnet_r += 420.0
+		"sari":
+			G.run.elite_fever = true
+			G.run.reward_mult *= 1.25
+		"golge":
+			G.run.slow_all = true
+			p.speed *= 0.95
+		"hasat":
+			p.set_meta("harvest", true)
+
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0
 

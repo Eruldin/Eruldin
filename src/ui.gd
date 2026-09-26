@@ -1112,6 +1112,17 @@ func _open_draft() -> void:
 	all.append({"kind": "gift", "id": "skip", "name": "GEÇ", "icon": "ico_frag", "col": "9aa0b0", "desc": "+15 parçacık — hiçbirini alma", "top": "SEÇME", "w": 1.0})
 	_show_cards("draft", "SEVİYE %d — güçlendirme seç  [1-%d]" % [G.player.level, all.size()], Px.C("00E5FF"), all)
 
+# koşu açılışında KOZ taslağı (VS arcana) — bir kart, koşu boyu etki
+func arcana_choice() -> void:
+	var pool := Boons.ARCANAS.keys()
+	pool.shuffle()
+	var cards: Array = []
+	for aid in pool.slice(0, 3):
+		var a: Dictionary = Boons.ARCANAS[aid]
+		cards.append({"kind": "arcana", "id": aid, "name": str(a["name"]), "icon": "icn_crown", "col": str(a["col"]), "desc": str(a["desc"]), "top": "KOZ", "w": 1.0})
+	_pause(true)
+	_show_cards("boon", "KOZ KARTI — koşu boyu süren kader  [1-3]", Px.C("c9a227"), cards)
+
 func chest_choice(evos: Array) -> void:
 	_pause(true)
 	var opts: Array = []
@@ -1226,6 +1237,12 @@ func _pick_card(o: Dictionary) -> void:
 		return
 	if str(o.get("kind", "")) == "evo":
 		G.run.apply_evo({"from": o.get("from", ""), "into": o.get("id", "")})
+		return
+	if str(o.get("kind", "")) == "arcana":
+		G.run.arcana = str(o.get("id", ""))
+		Boons.apply_arcana(G.run.arcana, G.player)
+		G.audio.jingle("boon")
+		G.ui.toast("KOZ: %s" % str(o.get("name", "?")))
 		return
 	Weapons.apply_opt(o, G.player)
 	if is_instance_valid(G.player):
@@ -1563,6 +1580,11 @@ func pause_panel() -> void:
 				G.audio.music.volume_db = linear_to_db(clampf(0.4 * float(st.mus), 0.001, 1.0))
 			G.audio.play("ui", 1.2, 0.5))
 	if G.state == G.State.ROOM:
+		var p := G.player
+		if is_instance_valid(p):
+			var stl := _lbl("hasar ×%0.2f · hız %0.2f · krit %%%d·×%0.1f · zırh %d · çalma %%%d · KOZ: %s" % [p.dmg_mult, p.speed / 205.0, roundi(p.crit_ch * 100), p.crit_mult, roundi(p.armor), roundi(p.lifesteal * 100), str(Boons.ARCANAS.get(G.run.arcana, {}).get("name", "—"))], Vector2.ZERO, 11, Color(0.55, 0.65, 0.8))
+			stl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			v.add_child(stl)
 		_build_recap(v)
 		var qb := Button.new()
 		qb.text = "KAMPA DÖN (koşuyu bırak)"

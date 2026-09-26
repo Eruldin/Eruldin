@@ -68,7 +68,7 @@ func _tick_events(d: float) -> void:
 	# elites — every ~50s after 1:35; they drop chests
 	_elite_t -= d
 	if _elite_t <= 0.0:
-		_elite_t = G.rf(44.0, 58.0) * (0.8 if G.run.hyper else 1.0)
+		_elite_t = G.rf(44.0, 58.0) * (0.8 if G.run.hyper else 1.0) * (0.8 if G.run.elite_fever else 1.0)
 		var kind: int = G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.HUSK] if m < 4.0 else ([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER] if m < 6.5 else [Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA, Enemy.EKind.SPITTER]))
 		var e := _spawn(kind, true)
 		if e != null:

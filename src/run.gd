@@ -28,6 +28,9 @@ var pending_drafts := 0     # queued level-up drafts
 var draft_reroll := false   # one card reroll available per level-up draft
 var draft_banish := false   # one card banish available per level-up draft
 var banished: Array = []    # ids kovulanlar — bu koşuda draft'a girmez
+var arcana := ""           # koşu başında seçilen KOZ kartı (VS arcana)
+var elite_fever := false   # SARI HAT: elitler %20 sık doğar
+var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var stats := {"kills": 0, "rooms": 0}
 
 func _init(g: Node2D) -> void:
@@ -64,6 +67,9 @@ func start_run() -> void:
 	time = 0.0
 	pending_drafts = 0
 	banished.clear()
+	arcana = ""
+	elite_fever = false
+	slow_all = false
 	curse = 0
 	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
@@ -102,6 +108,7 @@ func start_run() -> void:
 	add_child(dr)
 	G.director = dr
 	G.state = G.State.ROOM
+	G.ui.arcana_choice()
 
 # level-up drafts queue up while an overlay is open; open the next when clear
 func _process(_d: float) -> void:
