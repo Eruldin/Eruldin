@@ -1103,6 +1103,11 @@ func worldmap_panel() -> void:
 		ln.default_color = Color(0.35, 0.75, 0.95, 0.55) if ok else Color(0.3, 0.28, 0.35, 0.3)
 		edge_c.add_child(ln)
 	var cur := str(G.meta.data.get("arena_node", "b0"))
+	var ngd := int(G.meta.data.get("ng", 0))
+	if ngd > 0:
+		var dpl := _lbl("PROTOKOL DERİNLİĞİ +%d — kovan +%d%% sert · ödeme +%d%%" % [ngd, ngd * 12, ngd * 8], Vector2.ZERO, 11, Px.C("c26bff"))
+		dpl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(dpl)
 	var info := _lbl("", Vector2.ZERO, 12, Color(0.8, 0.85, 0.95))
 	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -2712,7 +2717,16 @@ func title_screen() -> void:
 	v.add_child(bc)
 	btn.pressed.connect(func():
 		_close_overlay()
-		G.run.hub())
+		G.run.hub()
+		# ilk açılış: BG2 tarzı giriş kartları — hikaye bir kez anlatılır
+		if not bool(G.meta.data.get("intro_seen", false)):
+			G.meta.data["intro_seen"] = true
+			G.meta.save()
+			cine_seq([
+				{"tex": "cine_4_0", "title": "DÜŞÜŞ", "sub": "Endusterra'da kovan her şeyi yuttu.\nViator Kampı, hâlâ nefes alan son durak."},
+				{"tex": "cine_0_0", "title": "PROTOKOL", "sub": "Kapıdan geçen ya parçacıkla döner\nya da şarkının bir parçası olur."},
+				{"tex": "cine_3_0", "title": "SEN", "sub": "Alfa-04 — kovanın yarım bıraktığı kasa.\nTopla. Güçlen. Protokolü kır."},
+			]))
 	root.add_child(_overlay)
 
 func _notification(what: int) -> void:
