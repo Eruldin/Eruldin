@@ -171,6 +171,21 @@ const DEFS := {
 		"b": {"dmg": 68.0, "cd": 1.9, "n": 7.0, "r": 95.0, "tel": 0.65},
 		"hidden": true,
 	},
+	"drone": {
+		"name": "NÖBETÇİ DRON", "icon": "icn_saphire", "col": "00E5FF",
+		"desc": "Etrafında süzülen dron — en yakın düşmana kendi mermi atar",
+		"b": {"dmg": 11.0, "cd": 1.15, "n": 1.0, "drones": 1.0},
+		"inc": {"dmg": 2.8, "cd": -0.04},
+		"feats": {5: {"n": 1.0}, 8: {"drones": 1.0}},
+		"evo": "warp", "into": "drone_x",
+		"req": {"bosses": 3},
+	},
+	"drone_x": {
+		"name": "SÜRÜ NÖBETİ", "icon": "icn_saphire", "col": "a9ffe8",
+		"desc": "Üç delici dron — yörüngede doyasıya kesim",
+		"b": {"dmg": 22.0, "cd": 0.72, "n": 2.0, "drones": 3.0, "pierce": 1.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -439,6 +454,26 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"seeker", "seeker_x": _seeker(st, p)
 		"glaive", "glaive_x": _glaive(st, p, w)
 		"meteor", "meteor_x": _meteor(st, p, w)
+		"drone", "drone_x": _drone(st, p, wid)
+
+# pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
+# yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
+static func _drone(st: Dictionary, p: Player, wid: String) -> void:
+	var want := maxi(1, roundi(float(st.get("drones", 1.0))))
+	var ds: Array = p.get_meta("drones") if p.has_meta("drones") else []
+	ds = ds.filter(func(d): return is_instance_valid(d))
+	while ds.size() < want:
+		ds.append(Drone.spawn(ds.size()))
+	p.set_meta("drones", ds)
+	for i in ds.size():
+		var dr: Drone = ds[i]
+		dr.wid = wid
+		dr.dmg = float(st.dmg)
+		dr.cd = float(st.cd)
+		dr.n = maxi(1, roundi(float(st.n)))
+		dr.pierce = st.get("pierce", 0.0) > 0.0
+		dr.idx = i
+		dr.total = ds.size()
 
 static func _nearest(p: Vector2, max_r: float) -> Enemy:
 	var best: Enemy = null
