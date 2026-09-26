@@ -33,6 +33,7 @@ var pickups_node: Node2D
 var mono: Dictionary = {}      # rezonans kümesi: {pos,t,need,node,ring} — yakınında durarak şarj edilir
 var mono_pos := Vector2.ZERO   # kenar işareti okur
 var mono_active := false
+var _merge_t := 80.0            # kristal konsolidasyonu sayacı
 var decals: Node2D
 var pending_reward: int = Reward.FRAGMENTS
 var cleared := false
@@ -633,6 +634,10 @@ func _tick_hazards(d: float) -> void:
 func _tick_pickups(d: float) -> void:
 	if G.player == null:
 		return
+	_merge_t -= d
+	if _merge_t <= 0.0:
+		_merge_t = 80.0
+		_merge_gems()
 	var magnet := 90.0
 	if G.player is Player:
 		magnet = G.player.magnet_r
@@ -642,6 +647,27 @@ func _tick_pickups(d: float) -> void:
 			pk.position = pk.position.move_toward(G.player.pos, (340.0 + (magnet - dist) * 4.0) * d)
 		if dist < 16:
 			_collect(pk)
+
+# VS-style consolidation: saçılan kristaller periyodik olarak tek dev kristalde
+# birleşir — saha kırıntısı çürümeden değerini korur, magnet turları anlamlı kalır
+func _merge_gems() -> void:
+	var gems := []
+	var total := 0.0
+	var cen := Vector2.ZERO
+	for pk in pickups_node.get_children():
+		if str(pk.get_meta("kind", "")) != "xp":
+			continue
+		gems.append(pk)
+		total += float(pk.get_meta("val", 0.0))
+		cen += pk.position
+	if gems.size() < 6:
+		return
+	cen /= gems.size()
+	for pk in gems:
+		pk.queue_free()
+	spawn_gem(cen, total)
+	G.fx.burst(cen, Px.C("c26bff"), 12, 140.0, 4.0, 0.4)
+	G.audio.play("pickup", 1.8, 0.5)
 
 func _collect(pk: Node) -> void:
 	match str(pk.get_meta("kind", "frag")):
