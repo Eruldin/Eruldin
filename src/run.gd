@@ -397,6 +397,8 @@ func victory() -> void:
 	G.ui.boss_bar(false, null)
 	stats.time = time
 	stats.level = G.player.level if is_instance_valid(G.player) else 1
+	stats["node_id"] = node_id
+	stats["node_name"] = node_name
 	_write_last_run(true)
 	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
 	G.meta.add_choralim(gained)

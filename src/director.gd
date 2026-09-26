@@ -45,6 +45,7 @@ var _final := false
 var _won := false
 var _final_alive := 0     # final-boss count still standing (pairs need both down)
 var _merch_fired := false # gezgin tüccar — koşuda bir kez
+var _stray_fired := false  # kayıp şasi — koşuda bir kez
 var _harvest_t := 30.0    # endless-mode reaper cadence
 var _quest_t := 0.0       # 1sn'lik görev tick'i
 
@@ -128,6 +129,18 @@ func _tick_events(d: float) -> void:
 		if mp == Vector2.ZERO:
 			mp = G.room.clamp_pos(G.player.pos + Vector2(-380, 0), 40.0)
 		G.room.spawn_merchant(mp)
+	# kayıp şasi: ~7:30'da koşu içi karşılaşma — onar ya da parçala
+	if not _stray_fired and m >= 7.5 and is_instance_valid(G.room) and G.player != null and not G.player.dead:
+		_stray_fired = true
+		var sp := Vector2.ZERO
+		for i in 8:
+			var cand := G.player.pos + Vector2(G.rf(-560, 560), G.rf(-380, 380))
+			if G.room.inside(cand, 90.0) and cand.distance_to(G.player.pos) > 280.0:
+				sp = cand
+				break
+		if sp == Vector2.ZERO:
+			sp = G.room.clamp_pos(G.player.pos + Vector2(380, 0), 40.0)
+		G.room.spawn_stray(sp)
 	# HoT ability tome: saha kalıntısı — üstüne basan bedava lütuf taslağı açar
 	_tome_t -= d
 	if _tome_t <= 0.0 and is_instance_valid(G.room):
