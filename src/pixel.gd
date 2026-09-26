@@ -587,20 +587,25 @@ static var _ext := {}
 const _AMF := preload("res://src/art_manifest.gd")
 const _CMF := preload("res://src/concept_manifest.gd")
 const _PMF := preload("res://src/paint_manifest.gd")
+const _GMF := preload("res://src/gen_manifest.gd")
 
 static func _ext_manifest() -> Dictionary:
 	if _ext.is_empty():
-		# priority: painted sprites > concept-art crops > DCSS tiles
+		# priority: generated art > painted sprites > concept-art crops > DCSS tiles
 		var sp := _AMF.SPRITES.duplicate()
 		for k in _CMF.SPRITES:
 			sp[k] = _CMF.SPRITES[k]
 		for k in _PMF.SPRITES:
 			sp[k] = _PMF.SPRITES[k]
+		for k in _GMF.SPRITES:
+			sp[k] = _GMF.SPRITES[k]
 		var fr := _AMF.FRAMES.duplicate()
 		for k in _CMF.FRAMES:
 			fr[k] = _CMF.FRAMES[k]
 		for k in _PMF.FRAMES:
 			fr[k] = _PMF.FRAMES[k]
+		for k in _GMF.frames():
+			fr[k] = _GMF.frames()[k]
 		_ext = {"sprites": sp, "frames": fr}
 	return _ext
 

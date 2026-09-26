@@ -1,0 +1,121 @@
+extends RefCounted
+# AI-uretilmis pixel-art setleri (tools/pix_proc.gd ile dilimlendi).
+# _ext_manifest icinde en son birlesir = en yuksek oncelik.
+#
+# Poz haritasi:
+#   kahraman sheet (8): 0 idleA 1 idleB 2 runA 3 runB 4 slash 5 thrust 6 dash 7 die
+#   dusman sheet  (6): 0 idleA 1 idleB 2 windup 3 strike 4 hurt 5 die
+#   boss sheet    (4): 0 idle 1 windup 2 strike 3 die
+#   npc sheet     (4): npca = rhasa neva saphire vane | npcb = david zirkon ehnar ahusk
+const SPRITES := {
+	"npc2_rhasa": "art/gen/g_npca_0.png", "npcb_rhasa": "art/gen/g_npca_0.png",
+	"npc2_neva": "art/gen/g_npca_1.png", "npcb_neva": "art/gen/g_npca_1.png",
+	"npc2_saphire": "art/gen/g_npca_2.png", "npcb_saphire": "art/gen/g_npca_2.png",
+	"npc2_vane": "art/gen/g_npca_3.png", "npcb_vane": "art/gen/g_npca_3.png",
+	"npc2_david": "art/gen/g_npcb_0.png", "npcb_david": "art/gen/g_npcb_0.png",
+	"npc2_zirkon": "art/gen/g_npcb_1.png", "npcb_zirkon": "art/gen/g_npcb_1.png",
+	"npc2_ehnar": "art/gen/g_npcb_2.png", "npcb_ehnar": "art/gen/g_npcb_2.png",
+	"npc2_ahusk": "art/gen/g_npcb_3.png", "npcb_ahusk": "art/gen/g_npcb_3.png",
+	"npc2_elyb": "art/gen/g_elyb_0.png", "npcb_elyb": "art/gen/g_elyb_1.png",
+	# sahne vistalari (uretilmis): backdrop katmanlari + arena ufku
+	"bg_0": "art/gen/g_bg_0.png", "bg_1": "art/gen/g_bg_1.png",
+	"bg_2": "art/gen/g_bg_2.png", "bg_3": "art/gen/g_bg_3.png",
+	"bg_hub": "art/gen/g_bg_hub.png",
+	"cbv_0_0": "art/gen/g_bg_0.png", "cbg_0_0": "art/gen/g_bg_0.png",
+	"cbv_1_0": "art/gen/g_bg_1.png", "cbg_1_0": "art/gen/g_bg_1.png",
+	"cbv_2_0": "art/gen/g_bg_2.png", "cbg_2_0": "art/gen/g_bg_2.png",
+	"cbv_3_0": "art/gen/g_bg_3.png", "cbg_3_0": "art/gen/g_bg_3.png",
+	"cbv_hub": "art/gen/g_bg_hub.png", "cbg_hub": "art/gen/g_bg_hub.png",
+	# efekt kareleri (renkleri pikselde — modulate beyaz kullan)
+	"fx_boom": "art/gen/g_fx_0.png", "fx_zap": "art/gen/g_fx_1.png",
+	"fx_slash": "art/gen/g_fx_2.png", "fx_heal": "art/gen/g_fx_3.png",
+	"fx_void": "art/gen/g_fx_4.png", "fx_shine": "art/gen/g_fx_5.png",
+}
+
+static func _hero(prefix: String) -> Dictionary:
+	return {
+		"idle": ["art/gen/%s_0.png" % prefix, "art/gen/%s_1.png" % prefix],
+		"run": ["art/gen/%s_2.png" % prefix, "art/gen/%s_3.png" % prefix],
+		"atk1": ["art/gen/%s_4.png" % prefix],
+		"atk2": ["art/gen/%s_5.png" % prefix],
+		"atk3": ["art/gen/%s_4.png" % prefix],
+		"dash": ["art/gen/%s_6.png" % prefix],
+		"parry": ["art/gen/%s_0.png" % prefix],
+		"charge": ["art/gen/%s_5.png" % prefix],
+		"hurt": ["art/gen/%s_7.png" % prefix],
+		"die": ["art/gen/%s_7.png" % prefix],
+	}
+
+static func _en(prefix: String) -> Dictionary:
+	return {
+		"idle": ["art/gen/%s_0.png" % prefix, "art/gen/%s_1.png" % prefix],
+		"windup": ["art/gen/%s_2.png" % prefix],
+		"strike": ["art/gen/%s_3.png" % prefix],
+		"atk": ["art/gen/%s_3.png" % prefix],
+		"hurt": ["art/gen/%s_4.png" % prefix],
+		"die": ["art/gen/%s_5.png" % prefix],
+	}
+
+static func _bs(prefix: String) -> Dictionary:
+	return {
+		"idle": ["art/gen/%s_0.png" % prefix],
+		"windup": ["art/gen/%s_1.png" % prefix],
+		"strike": ["art/gen/%s_2.png" % prefix],
+		"atk": ["art/gen/%s_2.png" % prefix],
+		"p2": ["art/gen/%s_1.png" % prefix],
+		"hurt": ["art/gen/%s_0.png" % prefix],
+		"die": ["art/gen/%s_3.png" % prefix],
+	}
+
+const FRAMES := {
+	"ely": {
+		"idle": ["art/gen/g_ely_0.png", "art/gen/g_ely_1.png"],
+		"run": ["art/gen/g_ely_2.png", "art/gen/g_ely_3.png"],
+		"atk1": ["art/gen/g_ely_4.png"],
+		"atk2": ["art/gen/g_ely_5.png"],
+		"atk3": ["art/gen/g_ely_4.png"],
+		"dash": ["art/gen/g_ely_6.png"],
+		"parry": ["art/gen/g_ely_0.png"],
+		"charge": ["art/gen/g_ely_5.png"],
+		"hurt": ["art/gen/g_ely_7.png"],
+		"die": ["art/gen/g_ely_7.png"],
+	},
+	"c_elyb": {
+		"idle": ["art/gen/g_elyb_0.png", "art/gen/g_elyb_1.png"],
+		"run": ["art/gen/g_elyb_2.png", "art/gen/g_elyb_3.png"],
+		"atk1": ["art/gen/g_elyb_4.png"],
+		"atk2": ["art/gen/g_elyb_5.png"],
+		"atk3": ["art/gen/g_elyb_4.png"],
+		"dash": ["art/gen/g_elyb_6.png"],
+		"parry": ["art/gen/g_elyb_0.png"],
+		"charge": ["art/gen/g_elyb_5.png"],
+		"hurt": ["art/gen/g_elyb_7.png"],
+		"die": ["art/gen/g_elyb_7.png"],
+	},
+	"c_viawar": {
+		"idle": ["art/gen/g_viawar_0.png", "art/gen/g_viawar_1.png"],
+		"run": ["art/gen/g_viawar_2.png", "art/gen/g_viawar_3.png"],
+		"atk1": ["art/gen/g_viawar_4.png"],
+		"atk2": ["art/gen/g_viawar_5.png"],
+		"atk3": ["art/gen/g_viawar_4.png"],
+		"dash": ["art/gen/g_viawar_6.png"],
+		"parry": ["art/gen/g_viawar_0.png"],
+		"charge": ["art/gen/g_viawar_5.png"],
+		"hurt": ["art/gen/g_viawar_7.png"],
+		"die": ["art/gen/g_viawar_7.png"],
+	},
+	"husk": {}, "sentinel": {}, "spitter": {}, "turret": {}, "drone": {},
+	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {},
+	"rex": {}, "host": {}, "nahum": {}, "tuman": {}, "kirin": {}, "const": {},
+}
+
+static func frames() -> Dictionary:
+	var d := FRAMES.duplicate()
+	for k in ["husk", "sentinel", "spitter", "turret", "drone"]:
+		d[k] = _en("g_" + k)
+	for k in ["c_varl", "c_cereb", "c_konakci", "c_alfa"]:
+		d[k] = _en("g_" + k.trim_prefix("c_"))
+	d["c_carrier"] = _en("g_carrier")
+	for k in ["rex", "host", "nahum", "tuman", "kirin", "const"]:
+		d[k] = _bs("g_" + k)
+	return d
