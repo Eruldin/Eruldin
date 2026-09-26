@@ -43,6 +43,7 @@ var data := {
 	"quests": {},          # qid -> {st:"act"|"done"|"claimed", prog:int}
 	"stash": [],           # collected items awaiting equipment
 	"equip": {},           # slot -> item id (7 slots, items.gd)
+	"item_lvl": {},        # item id -> işleme seviyesi (Saphire forge, max 3)
 	"loot_found": 0,       # lifetime item drops
 	"seen_story": [],      # cinematic cards already shown (one-shot story beats)
 	"story_done": [],      # tamamlanan hikaye düğümleri — haritada tek seferlik duraklar,

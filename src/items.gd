@@ -151,7 +151,8 @@ static func equip_stats() -> Dictionary:
 		if not DEFS.has(id):
 			continue
 		for k in DEFS[id].mods:
-			out[k] = float(out.get(k, 0.0)) + float(DEFS[id].mods[k])
+			var m := float(DEFS[id].mods[k])
+			out[k] = float(out.get(k, 0.0)) + (m if k == "revive" else m * _lscale(id))
 	for sid in SETS:
 		var s: Dictionary = SETS[sid]
 		var ok := true
@@ -181,6 +182,36 @@ static func set_state() -> Array:
 static func slot_of(id: String) -> String:
 	return str(DEFS.get(id, {}).get("slot", ""))
 
+# işleme: Saphire eşyayı choralim karşılığında +3'e kadar işler —
+# modlar işleme seviyesi başına %30 ölçeklenir (grind / para gideri)
+static func item_lvl(id: String) -> int:
+	return int(G.meta.data.get("item_lvl", {}).get(id, 0))
+
+static func _lscale(id: String) -> float:
+	return 1.0 + 0.30 * item_lvl(id)
+
+static func disp_name(id: String) -> String:
+	var n := str(DEFS.get(id, {}).get("name", id))
+	var l := item_lvl(id)
+	return "%s +%d" % [n, l] if l > 0 else n
+
+static func forge_price(id: String) -> int:
+	var d: Dictionary = DEFS.get(id, {})
+	if d.is_empty() or item_lvl(id) >= 3:
+		return 0
+	return int([70, 130, 240][int(d.r)] * (item_lvl(id) + 1))
+
+static func forge(id: String) -> int:
+	var p := forge_price(id)
+	if p <= 0 or int(G.meta.data.get("choralim", 0)) < p:
+		return 0
+	G.meta.data["choralim"] -= p
+	var lv: Dictionary = G.meta.data.get("item_lvl", {})
+	lv[id] = item_lvl(id) + 1
+	G.meta.data["item_lvl"] = lv
+	G.meta.save()
+	return p
+
 # grind→para: zuladaki eşyayı choralim'e çevir (rarity başına fiyat)
 static func sell_price(id: String) -> int:
 	var d: Dictionary = DEFS.get(id, {})
@@ -194,6 +225,9 @@ static func sell(id: String) -> int:
 		return 0
 	st.erase(id)
 	G.meta.data["stash"] = st
+	var lv: Dictionary = G.meta.data.get("item_lvl", {})
+	lv.erase(id)
+	G.meta.data["item_lvl"] = lv
 	var p := sell_price(id)
 	G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) + p
 	G.meta.save()
@@ -274,7 +308,7 @@ static func stat_text(id: String) -> String:
 		"xp": "XP", "frag": "parçacık", "dash_regen": "dash yenileme", "revive": "dirilme"}
 	var parts: Array = []
 	for k in d.mods:
-		var f := float(d.mods[k])
+		var f := float(d.mods[k]) * (1.0 if k == "revive" else _lscale(id))
 		var fmt := "+%d" % int(f) if absf(f) >= 1.5 else "+%d%%" % int(f * 100)
 		parts.append("%s %s" % [fmt, names.get(k, k)])
 	return "  ".join(parts)
