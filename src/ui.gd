@@ -948,7 +948,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1396,6 +1396,16 @@ func inventory_panel() -> void:
 	tb.pressed.connect(func():
 		_close_overlay()
 		barter_panel())
+	var sb := Button.new()
+	sb.text = "PAZAR TEZGÂHI →   choralim ile eşya al (stok koşu başına yenilenir)"
+	sb.add_theme_font_override("font", ui_font())
+	sb.custom_minimum_size = Vector2(320, 28)
+	var sc := CenterContainer.new()
+	sc.add_child(sb)
+	v.add_child(sc)
+	sb.pressed.connect(func():
+		_close_overlay()
+		shop_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)

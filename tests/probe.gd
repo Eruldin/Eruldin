@@ -110,6 +110,17 @@ func _process(_d: float) -> void:
 						G.ui.boss_taunt("rex", "REX — AVCI FORMU", "Şarkı sustuğunda... beni hatırla, Alfa-04.")
 					19:
 						_shoot()                    # faz-2 hikaye kartı görünürken
+					20:
+						G.ui.shop_panel()           # saphire pazar tezgâhı
+					21:
+						_shoot()                    # tezgâh açıkken çek
+					22:
+						var stk := Items.shop_stock()
+						if not stk.is_empty():
+							var sid := str(stk[0])
+							var paid := Items.buy(sid)
+							print("[probe] shop buy %s -> %d (choralim %d)" % [sid, paid, int(G.meta.data.get("choralim", 0))])
+						G.ui._advance_overlay()
 					_:
 						G.run.force_waylay = "pusu"   # yol olayı zorlanır
 						G.player.pos = G.room.doors[0].pos + Vector2(0, 6)

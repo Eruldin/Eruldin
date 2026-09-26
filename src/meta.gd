@@ -55,6 +55,9 @@ var data := {
 	"eggs": 0,             # toplanan altın nüve (kalıcı +%0.5 hasar/adet)
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"last_death": {"killer":"", "biome":0, "depth":0, "boss":false},
+	"shop_stock": [],      # Saphire'in tezgâh stoku — koşu başına yenilenir
+	"shop_gen": -1,        # stok üretimindeki koşu sayacı
+	"neva_song": false,    # Neva'nın şarkısı — sonraki koşuda +%15 XP
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
 }
 
