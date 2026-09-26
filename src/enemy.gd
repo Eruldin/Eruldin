@@ -135,7 +135,7 @@ func _make_body() -> void:
 	Px.fit(body, 118.0 if elite else (108.0 if kind == EKind.KONAKCI else 86.0))
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc := {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 	body.modulate = Color(0.2, 0.2, 0.2, 0)
 	_orbit = -1.0 if G.chance(0.5) else 1.0
