@@ -211,7 +211,13 @@ func _ring_pos() -> Vector2:
 func _surge(m: float) -> void:
 	G.audio.play("roar", 0.7, 0.5)
 	var n := mini(34, 16 + int(m * 2.0))
-	match ["ring", "wall", "hunt"][randi() % 3]:
+	match ["ring", "wall", "hunt", "twins"][randi() % 4]:
+		"twins":
+			G.ui.toast("İKİZ ELİTLER!")
+			for i in 2:
+				var e := _spawn(_elite_kind_for(m), true)
+				if e != null and i == 1:
+					e.affix = ["vampir", "mender", "caller"][randi() % 3]
 		"wall":
 			G.ui.toast("DUVAR AKIŞI!")
 			var ang := G.rf(0.0, TAU)
@@ -236,6 +242,10 @@ func _surge(m: float) -> void:
 				p = G.room.clamp_pos(p, 20.0)
 				var sk := Enemy.EKind.VARL if i % 4 == 0 else (Enemy.EKind.DRONE if i % 7 == 0 else Enemy.EKind.HUSK)
 				Enemy.spawn(sk, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
+
+# surge "twins" varyantının elit türü dakikaya göre seçilir
+func _elite_kind_for(m: float) -> int:
+	return G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.HUSK] if m < 4.0 else [Enemy.EKind.ALFA, Enemy.EKind.KONAKCI, Enemy.EKind.SENTINEL])
 
 func _boss(kind: int, hs: float, ann: String, off := Vector2.ZERO, show_ui := true) -> Boss:
 	var p := G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * 560.0 + off

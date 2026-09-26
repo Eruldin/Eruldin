@@ -201,6 +201,21 @@ const DEFS := {
 		"b": {"dmg": 0.0, "cd": 11.0, "n": 0.0, "drones": 3.0, "shot": 16.0, "rate": 0.3, "dur": 20.0, "pierce": 1.0},
 		"hidden": true,
 	},
+	"aura": {
+		"name": "REZONANS AURASI", "icon": "icn_neva", "col": "c26bff",
+		"desc": "Etrafında sürekli yakan choralim alanı",
+		"b": {"dmg": 6.0, "cd": 1.1, "r": 95.0},
+		"inc": {"dmg": 2.2, "r": 6.0, "cd": -0.03},
+		"feats": {5: {"r": 18.0}},
+		"evo": "fortune", "into": "aura_x",
+		"req": {"kills": 2000},
+	},
+	"aura_x": {
+		"name": "KORO YANKISI", "icon": "icn_neva", "col": "e066ff",
+		"desc": "Geniş yankı alanı — yakar ve sersemletir",
+		"b": {"dmg": 16.0, "cd": 0.8, "r": 170.0, "slow": 1.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -215,6 +230,7 @@ const PDEFS := {
 	"warp":    {"name": "ROTA AKSAMI",        "icon": "icn_crown",      "col": "ffd166", "desc": "+%9 mermi hızı"},
 	"edge":    {"name": "KESKİN KİLİT",       "icon": "icn_upg_frag",   "col": "ff9de2", "desc": "+%6 kritik şansı"},
 	"dup":     {"name": "ÇOĞALTAN",            "icon": "icn_crown",      "col": "b388ff", "desc": "+1 mermi/gülle adedi"},
+	"fortune": {"name": "TALİH MÜHRÜ",         "icon": "icn_crown",      "col": "ffd700", "desc": "+%8 şans — nadir düşüş ve lütuf kalitesini sallar"},
 }
 
 static func def(wid: String) -> Dictionary:
@@ -268,6 +284,7 @@ static func apply_passive(pid: String, p: Player) -> void:
 			p.set_meta("regen", float(p.get_meta("regen", 0.0)) + 0.7)
 		"warp": p.proj_spd *= 1.09
 		"dup":  p.bonus_proj += 1
+		"fortune": G.run.luck += 0.08
 
 # which evolutions the player can cash in right now
 static func evo_ready(p: Player) -> Array:
@@ -471,6 +488,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"meteor", "meteor_x": _meteor(st, p, w)
 		"drone", "drone_x": _drone(st, p, wid)
 		"sentry", "sentry_x": _sentry(st, p, wid)
+		"aura", "aura_x": _aura(st, p)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
@@ -638,6 +656,37 @@ static func _nova(st: Dictionary, p: Player) -> void:
 				e.stagger = maxf(e.stagger, 1.1)
 	G.audio.play("explode", 0.7, 0.55)
 	G.fx.shake(0.14, 0.12)
+
+# aura arketipi (VS Garlic): kalıcı hasar alanı — her nabız yakın sürüyü yakar
+static func _aura(st: Dictionary, p: Player) -> void:
+	var r := float(st.r) * p.area_mult
+	var s := Sprite2D.new()
+	s.texture = Px.S("ring")
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	s.modulate = Color(0.76, 0.42, 1.0, 0.55)
+	s.position = p.pos
+	s.scale = Vector2.ONE * (r * 1.7) / 96.0
+	s.z_index = 60
+	G.game.world.add_child(s)
+	var tw := s.create_tween()
+	tw.tween_property(s, "scale", Vector2.ONE * (r * 2.0) / 96.0, 0.26)
+	tw.parallel().tween_property(s, "modulate:a", 0.0, 0.26)
+	tw.tween_callback(s.queue_free)
+	var dmg := float(st.dmg) * p.dmg_mult
+	var n := 0
+	for e in G.enemies.duplicate():
+		if not is_instance_valid(e) or e.dead:
+			continue
+		if p.pos.distance_to(e.pos) < r + e.hit_radius:
+			var crit := G.chance(p.crit_ch)
+			var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.PURE, "from": p.pos, "knock": 0.0, "stagger": 0.0, "source": p, "crit": crit, "wpn": _fwpn}
+			e.take_hit(h)
+			p.on_dealt_damage(e, h)
+			if st.get("slow", 0.0) > 0.0:
+				e.stagger = maxf(e.stagger, 0.3)
+			n += 1
+	if n > 0:
+		G.audio.play("boon", 1.8, 0.12)
 
 static func _spit(st: Dictionary, p: Player, w: Dictionary) -> void:
 	var n := maxi(1, roundi(float(st.n)))
