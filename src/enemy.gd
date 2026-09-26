@@ -103,11 +103,11 @@ func _setup_stats(hs: float, ds: float) -> void:
 			max_hp = 88; speed = 128; touch_dmg = 16; radius = 15; hit_radius = 18
 			windup_t = 0.5; recover_t = 0.55; attack_cd = 1.0; touch_r = 42
 			actor_name = "Alfa Şövalye"
-	EKind.CARRIER:
-		max_hp = 130; speed = 66; touch_dmg = 12; radius = 18; hit_radius = 21
-		windup_t = 0.65; recover_t = 0.8; attack_cd = 1.5; touch_r = 44
-		actor_name = "Hamal Taşıyıcı"
-		knock_resist = 80.0
+		EKind.CARRIER:
+			max_hp = 130; speed = 66; touch_dmg = 12; radius = 18; hit_radius = 21
+			windup_t = 0.65; recover_t = 0.8; attack_cd = 1.5; touch_r = 44
+			actor_name = "Hamal Taşıyıcı"
+			knock_resist = 80.0
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
