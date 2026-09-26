@@ -35,6 +35,8 @@ const DEFS := [
 	{"id": "q_surv2",  "giver": "neva",    "name": "UZUN TÜRKÜ",       "desc": "Şarkı sekiz dakikaya uzuyor — bir koşuda 480 sn hayatta kal.",  "obj": {"type": "time", "n": 480},   "rew": {"cho": 130, "item": "i_aegis"}, "prereq": "q_surv"},
 	{"id": "q_loot2",  "giver": "saphire", "name": "KOLEKSİYONCUNUN GÖZÜ", "desc": "Tezgâh doluyor ama hâlâ eksik. Bir koşuda 6 eşya bul — karşılığında bilinen bir rota var.", "obj": {"type": "loot", "n": 6}, "rew": {"cho": 120, "node": "yuvalar"}, "prereq": "q_loot"},
 	{"id": "q_vatika", "giver": "neva",    "name": "SESSİZ VATİKA",    "desc": "Aeterna dibinde bir sığınak var. Uzun Türkü'nü bitirene yolu açarım.", "obj": {"type": "boss", "k": "twins"}, "rew": {"node": "vatika"}, "prereq": "q_surv2"},
+	{"id": "q_dua",    "giver": "ahusk",   "name": "SESSİZ DUA",       "desc": "Mabed hâlâ dinliyor. Bir koşuda 300 sn boyunca tek parça kal — tapınağın yolu açılır.", "obj": {"type": "time", "n": 300}, "rew": {"cho": 90, "node": "mabed"}},
+	{"id": "q_nobet",  "giver": "ehnar",   "name": "SON NÖBET",        "desc": "Mezardaki nöbetçiler sayıyor. Tek koşuda 10 elit kes — mezarın kapağı kalkar.", "obj": {"type": "elites", "n": 10}, "rew": {"cho": 110, "node": "mezarlik"}, "prereq": "q_elit"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
