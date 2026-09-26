@@ -45,6 +45,9 @@ const DEFS := [
 	{"id": "q_kul",   "giver": "david",   "name": "KÜL ROTASI",         "desc": "Kuyu'nun doğusunda kül hâlâ yanıyor — Alfa Şövalyeleri orada toplanıyor. 10 tanesini kes, rotayı çıkarayım.", "obj": {"type": "kind", "k": "Alfa Şövalye", "n": 10}, "rew": {"cho": 150, "node": "kulovasi"}, "prereq": "q_sinir"},
 	{"id": "q_iz",    "giver": "neva",    "name": "YANKININ İZİ",       "desc": "Düştüğün yerde parçacıkların kalır. Öldüğün sahaya geri dön, eski cesedinden yükünü geri al — iki kez.", "obj": {"type": "ceset", "n": 2}, "rew": {"cho": 140, "item": "i_koro"}, "prereq": "q_surv"},
 	{"id": "q_aura",  "giver": "vane",    "name": "AURA FİŞEĞİ",         "desc": "Rezonans protokolü denemeye hazır. Tek koşuda 12 elit kes — fişeği sana bağlarım.", "obj": {"type": "elites", "n": 12}, "rew": {"cho": 160, "wep": "aura"}, "prereq": "q_nobet"},
+	{"id": "q_skor",  "giver": "rhasa",   "name": "SKOR VERGİSİ",        "desc": "Kovan rekor sever. Tek koşuda 4000 skor yap — oranını yükseltirim.", "obj": {"type": "score", "n": 4000}, "rew": {"cho": 260}, "prereq": "q_kan2"},
+	{"id": "q_frag",  "giver": "saphire", "name": "PARÇACIK HASADI",     "desc": "Tezgâh parçacıksız dönmez. Tek koşuda 600 parçacık topla — kesende dursun, teslime gerek yok.", "obj": {"type": "frag", "n": 600}, "rew": {"cho": 140}, "prereq": "q_loot"},
+	{"id": "q_glaive","giver": "ehnar",   "name": "AĞIR TAHMİS",         "desc": "Sırp diskleri depoda paslanıyor. Tek koşuda 400 kesim yaparsan birini sana kalibrarım.", "obj": {"type": "kills", "n": 400}, "rew": {"cho": 150, "wep": "glaive"}, "prereq": "q_nobet2"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -108,7 +111,7 @@ static func has_business(nid: String) -> bool:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag"]:
 		done.append_array(tick(type))
 	for q in DEFS:
 		if state(q.id) != "act" or str(q.obj.get("type", "")) != "boss":
@@ -168,6 +171,8 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"loot":    cur = (G.run.stats.get("loot", []) as Array).size()
 			"win":     cur = 1 if bool(G.run.stats.get("won", false)) else 0
 			"biomes":  cur = (G.meta.data.get("visited", []) as Array).size()
+			"score":   cur = int(G.run.stats.get("score", 0))
+			"frag":    cur = int(G.run.fragments)
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
 		if cur >= need:
@@ -229,6 +234,8 @@ static func obj_text(q: Dictionary) -> String:
 		"evos":   return "%d evrim" % need
 		"loot":   return "%d eşya" % need
 		"biomes": return "%d farklı saha" % need
+		"score":  return "%d skor" % need
+		"frag":   return "%d parçacık topla" % need
 	return "?"
 
 static func prog_text(q: Dictionary) -> String:

@@ -351,6 +351,13 @@ func _write_last_run(win: bool) -> void:
 		if is_instance_valid(G.ui):
 			G.ui.toast("ganimet zulada: %d eşya" % banked)
 	stats["won"] = win
+	# skor önce yazılır — tick_all 'score' görevlerini bu değerle değerlendirir
+	var score := int(stats.get("kills", 0)) * 10 + int(stats.get("level", 1)) * 120 + int(time) * 3 + int(stats.get("evos", 0)) * 500 + curse * 250
+	stats["score"] = score
+	if score > int(G.meta.data.get("best_score", 0)):
+		G.meta.data["best_score"] = score
+		stats["new_record"] = true
+		G.meta.save()
 	Quests.tick_all()
 	G.meta.data["last_run"] = {
 		"kills": int(stats.get("kills", 0)),
@@ -368,13 +375,6 @@ func _write_last_run(win: bool) -> void:
 		G.meta.save()
 	G.meta.data["best_evos"] = maxi(int(G.meta.data.get("best_evos", 0)), int(stats.get("evos", 0)))
 	G.meta.data["best_streak_all"] = maxi(int(G.meta.data.get("best_streak_all", 0)), int(stats.get("best_streak", 0)))
-	# koşu skoru: kesim + seviye + süre + evrim + azap çarpanı — rekor meta'da tutulur
-	var score := int(stats.get("kills", 0)) * 10 + int(stats.get("level", 1)) * 120 + int(time) * 3 + int(stats.get("evos", 0)) * 500 + curse * 250
-	stats["score"] = score
-	if score > int(G.meta.data.get("best_score", 0)):
-		G.meta.data["best_score"] = score
-		stats["new_record"] = true
-		G.meta.save()
 	if win and curse >= 2:
 		G.meta.data["curse_wins"] = int(G.meta.data.get("curse_wins", 0)) + 1
 		G.meta.save()
