@@ -1271,11 +1271,11 @@ func death_screen(killer: String, gained: int) -> void:
 	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0)), int(G.run.stats.get("best_streak", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
 	dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dl)
-	var killer := str(G.meta.data.get("last_death", {}).get("killer", ""))
-	if killer != "":
-		var kl := _lbl("son nefes: %s" % killer, Vector2.ZERO, 12, Px.C("ff5533"))
-		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		v.add_child(kl)
+	var kname := str(G.meta.data.get("last_death", {}).get("killer", ""))
+	if kname != "":
+		var kl2 := _lbl("son nefes: %s" % kname, Vector2.ZERO, 12, Px.C("ff5533"))
+		kl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(kl2)
 	_build_recap(v)
 	var h := _lbl("Neva'nın rezonansı seni geri çekiyor...\n[E / tık] — Viator Kampı'na dön", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
