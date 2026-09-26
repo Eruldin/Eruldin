@@ -551,7 +551,7 @@ func reset_for_run() -> void:
 	magnet_r = 95.0; xp_mult = 1.0; cd_mult = 1.0; area_mult = 1.0; proj_spd = 1.0; bonus_proj = 0
 	_attack_slow = 1.0; _pulse_t = 0.0
 	_apply_stance()
-	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer", "streak_spd", "elite_heal", "heal_luck", "drones"]:
+	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer", "streak_spd", "elite_heal", "heal_luck", "drones", "harvest"]:
 		remove_meta(k)
 	max_hp = 100 + G.meta.upg(Meta.U.HP) * 20
 	hp = max_hp

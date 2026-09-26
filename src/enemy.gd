@@ -128,6 +128,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
+	if G.run != null and G.run.slow_all:
+		speed *= 0.9
 	hp = max_hp
 
 func init() -> void:
@@ -482,5 +484,8 @@ func die(h: Dictionary) -> void:
 			G.fx.shake(0.18, 0.2))
 		if G.chance(0.045 * (2.0 if is_instance_valid(G.player) and G.player.has_meta("heal_luck") else 1.0)) and not G.run.dark:
 			G.room.spawn_heal(pos)
+		# HASAT ŞENLİĞİ kozu: kesim başına küçük parçacık damlası
+		if is_instance_valid(G.player) and G.player.has_meta("harvest") and G.chance(0.02):
+			G.run.drop_fragments(pos, 1)
 		G.room.on_enemy_dead(self)
 	queue_free()
