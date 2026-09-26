@@ -25,16 +25,29 @@ func spawn_point() -> Vector2:
 	return Vector2.ZERO
 
 func _field_floor() -> void:
-	# one tiled TextureRect instead of ~1000 tile sprites
+	# painted biome vista fills the void around the field
+	var bg_tex := Px.S2("bg_%d" % biome)
+	if bg_tex != null:
+		var bg := Sprite2D.new()
+		bg.texture = bg_tex
+		bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		bg.scale = Vector2.ONE * maxf(
+			(W + 2400.0) / maxf(float(bg_tex.get_width()), 1.0),
+			(H + 2400.0) / maxf(float(bg_tex.get_height()), 1.0))
+		bg.modulate = Color(0.85, 0.82, 0.9)
+		bg.z_index = -4000
+		add_child(bg)
+	# one tiled TextureRect instead of ~1000 tile sprites — confined to the
+	# field itself so the vista reads beyond the walls
 	var ground := TextureRect.new()
 	ground.name = "ground"
 	ground.texture = Px.S2("t2_%s_0" % str(biome))
 	ground.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	ground.stretch_mode = TextureRect.STRETCH_TILE
 	ground.scale = Vector2.ONE * 2.0
-	ground.size = Vector2((W + 512.0) / 2.0, (H + 512.0) / 2.0)
+	ground.size = Vector2((W + 160.0) / 2.0, (H + 160.0) / 2.0)
 	ground.position = -ground.size
-	ground.modulate = Color(0.66, 0.64, 0.72)
+	ground.modulate = Color(0.72, 0.7, 0.78)
 	ground.z_index = -2000
 	ground.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(ground)

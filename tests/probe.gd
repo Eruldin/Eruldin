@@ -8,6 +8,8 @@ var _step := 0
 var _shot_at := -1.0
 var _msg_at := 0.0
 var _shot_n := 0
+var _roster_done := false
+var _edge_done := false
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -45,6 +47,17 @@ func _process(_d: float) -> void:
 			if t >= _msg_at:
 				_msg_at = t + 15.0
 				print("[probe] t=%.0f hp=%.0f lvl=%d enemies=%d kills=%d pending=%d" % [t, G.player.hp, G.player.level, G.enemies.size(), int(G.run.stats.get("kills", 0)), G.run.pending_drafts])
+			# visual coverage: roster of the new enemy kinds, then a vista shot at the arena edge
+			if not _roster_done and t >= 30.0:
+				_roster_done = true
+				for i in [Enemy.EKind.VARL, Enemy.EKind.CEREB, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA].size():
+					var kd: int = [Enemy.EKind.VARL, Enemy.EKind.CEREB, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA][i]
+					Enemy.spawn(kd, G.player.pos + Vector2.from_angle(TAU * i / 4.0) * 240.0, false, 1.0, 0.0, G.room)
+				_shot_at = t + 2.0
+			if not _edge_done and t >= 45.0:
+				_edge_done = true
+				G.player.pos = Vector2(1350, -880)
+				_shot_at = t + 1.0
 			if t >= _shot_at:
 				_shot_at = t + 15.0
 				_shoot()
