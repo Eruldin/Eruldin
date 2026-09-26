@@ -121,6 +121,22 @@ func _process(_d: float) -> void:
 							var paid := Items.buy(sid)
 							print("[probe] shop buy %s -> %d (choralim %d)" % [sid, paid, int(G.meta.data.get("choralim", 0))])
 						G.ui._advance_overlay()
+					23:
+						var st4: Array = G.meta.data.get("stash", [])
+						for sid2 in ["i_maske", "i_bilek"]:
+							if not st4.has(sid2):
+								st4.append(sid2)
+						G.meta.data["stash"] = st4
+						Items.equip("i_maske", "bas")
+						Items.equip("i_bilek", "eldiven")
+						G.ui.inventory_panel()      # set bonusları görünsün
+						for s in Items.set_state():
+							if s.active:
+								print("[probe] set active: %s" % str(s.name))
+					24:
+						_shoot()                    # envanterde AKTİF set satırı
+					25:
+						G.ui._advance_overlay()
 					_:
 						G.run.force_waylay = "pusu"   # yol olayı zorlanır
 						G.player.pos = G.room.doors[0].pos + Vector2(0, 6)

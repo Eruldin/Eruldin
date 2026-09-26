@@ -57,6 +57,16 @@ const P2_LINES := {
 	BKind.CONST: "Aeterna'yı izledin mi? Krallıklar işte böyle düşer.",
 }
 
+# ölüm anı kartı: ikiz boss'larda ancak ikincisi düşünce çalınır
+const DEATH_LINES := {
+	BKind.REX:   "Avcı formu çözüldü... Neva'ya söyle, sinyal hâlâ temiz.",
+	BKind.HOST:  "Konakçı boşaldı. Damarların şarkısı sustu.",
+	BKind.NAHUM: "İkizin biri sustu. Tuman da duydu — defter kapanıyor.",
+	BKind.TUMAN: "İkizin biri sustu. Nahum da duydu — defter kapanıyor.",
+	BKind.KIRIN: "Kirin'in tahtı çatladı. Masa son sahibini bekliyor.",
+	BKind.CONST: "Constantin düştü — protokolün son çanı sustu.",
+}
+
 static func spawn_boss(p_kind: int, p_pos: Vector2, parent: Node, hp_scale := 1.0) -> Boss:
 	var b := Boss.new()
 	b.bkind = p_kind
@@ -519,4 +529,7 @@ func die(h: Dictionary) -> void:
 	G.audio.play("roar", 0.8)
 	G.fx.burst(pos + Vector2(0, -16), Px.C("8B0000"), 40, 280.0, 7.0, 0.9)
 	G.fx.splat(pos, Color(0.4, 0.03, 0.03), 2.2)
+	# ölüm hikaye kartı — ikiz bağlıysa ancak son kalanın ölümünde
+	if not (is_instance_valid(link) and not link.dead):
+		G.ui.boss_taunt(SPR.get(bkind, "rex"), NAMES.get(bkind, "?"), DEATH_LINES.get(bkind, "..."))
 	super.die(h)

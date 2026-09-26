@@ -132,17 +132,50 @@ static func unequip(slot: String) -> void:
 	G.meta.save()
 
 # aggregate all equipped mods into one dict of multipliers/adds
+# set bonusları (BG2 tarzı): listenin tüm parçaları kuşanılınca ekstra mod
+const SETS := {
+	"avci":     {"name": "AVCI SETİ",     "ids": ["i_maske", "i_bilek"],          "mods": {"dmg": 0.10, "crit": 0.03}},
+	"gezgin":   {"name": "GEZGİN SETİ",   "ids": ["i_palto", "i_ruzgar"],         "mods": {"spd": 0.08, "dash_regen": 0.10}},
+	"rezonans": {"name": "REZONANS SETİ", "ids": ["i_halo", "i_neva", "i_koro"],  "mods": {"xp": 0.15, "frag": 0.10}},
+	"bosluk":   {"name": "BOŞLUK SETİ",   "ids": ["i_bosluk", "i_final"],         "mods": {"ls": 0.04, "dmg": 0.05}},
+}
+
 static func equip_stats() -> Dictionary:
 	var out := {"hp": 0.0, "armor": 0.0, "dmg": 0.0, "spd": 0.0, "crit": 0.0,
 		"critmult": 0.0, "ls": 0.0, "mag": 0.0, "xp": 0.0, "frag": 0.0,
 		"dash_regen": 0.0, "revive": 0}
 	var eq: Dictionary = G.meta.data.get("equip", {})
+	var worn: Array = eq.values()
 	for slot in eq:
 		var id := str(eq[slot])
 		if not DEFS.has(id):
 			continue
 		for k in DEFS[id].mods:
 			out[k] = float(out.get(k, 0.0)) + float(DEFS[id].mods[k])
+	for sid in SETS:
+		var s: Dictionary = SETS[sid]
+		var ok := true
+		for iid in s.ids:
+			if not worn.has(iid):
+				ok = false
+				break
+		if ok:
+			for k in s.mods:
+				out[k] = float(out.get(k, 0.0)) + float(s.mods[k])
+	return out
+
+# envanter paneline ilerleme satırları: {name, have, need, active}
+static func set_state() -> Array:
+	var eq: Dictionary = G.meta.data.get("equip", {})
+	var worn: Array = eq.values()
+	var out := []
+	for sid in SETS:
+		var s: Dictionary = SETS[sid]
+		var have := 0
+		for iid in s.ids:
+			if worn.has(iid):
+				have += 1
+		out.append({"name": str(s.name), "have": have, "need": (s.ids as Array).size(), "active": have == (s.ids as Array).size()})
 	return out
 
 static func slot_of(id: String) -> String:
