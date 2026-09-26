@@ -143,6 +143,11 @@ func start_run() -> void:
 		G.meta.data["blessing"] = false
 		G.meta.save()
 		take_boon(G.pick(Boons.all()))
+	if bool(G.meta.data.get("neva_song", false)):
+		G.meta.data["neva_song"] = false
+		G.meta.save()
+		G.player.xp_mult *= 1.15
+		G.ui.toast("NEVA'NIN ŞARKISI — bu koşuda +%15 XP")
 	# kilitli silahlar koşulu ilk kez tutunca duyurulur
 	var seen: Array = G.meta.data.get("unlocked_w", [])
 	var changed := false
