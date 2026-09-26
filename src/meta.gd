@@ -40,6 +40,9 @@ var data := {
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır
 	"contract": {},        # Ehnar's aktif görevi: {key,need,reward}
 	"feats_seen": [],      # duyurulmuş başarımlar (toast bir kez)
+	"reapers": 0,          # kesilen HASATÇI sayısı
+	"best_evos": 0,        # tek koşuda en çok evrim
+	"curse_wins": 0,       # 2+ sözleşmeyle kazanılan zafer
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"last_death": {"killer":"", "biome":0, "depth":0, "boss":false},
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
@@ -95,6 +98,9 @@ func achievements() -> Array:
 		{"name": "DERİN GEZGİN", "desc": "tek koşuda 10+ dakika dayan", "done": int(data["best_depth"]) >= 600 or int(data["victories"]) > 0},
 		{"name": "İNATÇI", "desc": "10 koşuya çık", "done": int(data["runs"]) >= 10},
 		{"name": "TAM ARSENAL", "desc": "tüm silahların kilidini aç", "done": arsenal},
+		{"name": "HASAT AVCISI", "desc": "bir HASATÇI'yı kes", "done": int(data.get("reapers", 0)) > 0},
+		{"name": "EVRİM MİMARI", "desc": "tek koşuda 3 evrim tamamla", "done": int(data.get("best_evos", 0)) >= 3},
+		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0},
 	]
 
 # feats completed since last check — announced once via toast

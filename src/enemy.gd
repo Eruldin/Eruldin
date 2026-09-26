@@ -18,6 +18,8 @@ var kind: int = EKind.HUSK
 var elite := false
 var affix := ""            # elite modifier: armored / volatile / swift / sparked
 var _spk_t := 0.0
+var _sum_t := 0.0   # çağırıcı elit: döl saçma sayacı
+var _sum_n := 0     # bu elitin saldığı döl sayısı
 var speed := 100.0
 var touch_dmg := 10.0
 var touch_r := 36.0
@@ -101,7 +103,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked"][randi() % 4]
+		affix = ["armored", "volatile", "swift", "sparked", "caller"][randi() % 5]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -114,6 +116,9 @@ func _setup_stats(hs: float, ds: float) -> void:
 			"sparked":
 				_spk_t = 1.2
 				actor_name = "ŞİMŞEKLİ " + actor_name
+			"caller":
+				_sum_t = 5.0
+				actor_name = "ÇAĞIRICI " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -137,7 +142,7 @@ func _make_body() -> void:
 	Px.fit(body, 118.0 if elite else (108.0 if kind == EKind.KONAKCI else 86.0))
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		_hp_bg = ColorRect.new()
 		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
@@ -195,6 +200,17 @@ func _process(_d: float) -> void:
 				G.player.take_hit({"dmg": maxf(4.0, touch_dmg * 0.5), "type": G.DamageType.SHOCK, "from": pos + Vector2(0, -40), "knock": 0.0, "source": self})
 				G.fx.light_flash(G.player.pos + Vector2(0, -24), Px.C("ffe066"), 1.2, 1.6, 0.12)
 				G.fx.directional(G.player.pos + Vector2(0, -60), Vector2.DOWN, Px.C("ffe066"), 4, 200.0, 2.5, 0.14)
+	# çağırıcı elit: periyodik olarak varl dölleri saçar — öncelik hedef olur
+	if affix == "caller" and _sum_n < 8:
+		_sum_t -= d
+		if _sum_t <= 0.0:
+			_sum_t = 6.5
+			_sum_n += 2
+			for i in 2:
+				var off := Vector2.RIGHT.rotated(TAU * i / 2.0 + G.rf(0, 0.8)) * 42.0
+				Enemy.spawn(EKind.VARL, pos + off, false, G.run.hp_scale() * 0.6, G.run.dmg_scale() * 0.8, G.room)
+			G.fx.burst(pos + Vector2(0, -14), Px.C("4dd0e1"), 10, 120.0, 4.0, 0.4)
+			G.audio.play("roar", 1.6, 0.3)
 	if _cd_t > 0:
 		_cd_t -= d
 	_tick_anim(d)
@@ -409,6 +425,11 @@ func die(h: Dictionary) -> void:
 		if elite:
 			G.room.spawn_chest(pos)
 			G.run.drop_fragments(pos, G.ri(8, 14))
+			if is_instance_valid(G.player) and G.player.has_meta("elite_heal"):
+				G.player.heal(8.0)
+			if actor_name.contains("HASATÇI"):
+				G.meta.data["reapers"] = int(G.meta.data.get("reapers", 0)) + 1
+				G.meta.save()
 			if G.chance(0.12):
 				G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard"]), pos)
 		elif G.chance(0.12):

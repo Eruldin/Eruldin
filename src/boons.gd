@@ -23,6 +23,7 @@ static func all() -> Array:
 		{"id":"predator","patron":"Saphire","name":"Avcı Odağı","desc":"+%10 kritik, kritik ×2.4","rarity":1,"color":Px.C("00E676")},
 		{"id":"swift","patron":"Saphire","name":"Yıldırım Ayaklar","desc":"Dash yenilenmesi %35 hızlı","rarity":0,"color":Px.C("00E676")},
 		{"id":"camo","patron":"Saphire","name":"Kamuflaj Sıçrayışı","desc":"Dash sonrası 1.2sn düşmanlar seni görmez","rarity":2,"color":Px.C("00E676")},
+		{"id":"ritm","patron":"Saphire","name":"Seri Ritim","desc":"Katliam serisi x30 üstündeyken +%30 hareket hızı","rarity":1,"color":Px.C("00E676")},
 		{"id":"regen","patron":"Saphire","name":"Köksülük","desc":"Saniyede +0.8 can yenilenmesi","rarity":1,"color":Px.C("00E676")},
 		# --- Rex Sibernetik Glitch ---
 		{"id":"emp","patron":"Rex","name":"EMP Patlaması","desc":"Vuruşlar %20 ihtimalle zincir şok salar","rarity":1,"color":Px.C("ff4444")},
@@ -33,6 +34,7 @@ static func all() -> Array:
 		{"id":"bloodlust","patron":"Kovan","name":"Kan Hırsı","desc":"+%40 hasar — ama +%15 hasar alırsın","rarity":1,"color":Px.C("39ff14")},
 		{"id":"frenzy","patron":"Kovan","name":"Kuduz","desc":"+%18 saldırı hızı — ama -15 azami can","rarity":0,"color":Px.C("39ff14")},
 		{"id":"carapace","patron":"Kovan","name":"Et Zırhı","desc":"+%8 can çalma — ama -%10 azami can","rarity":2,"color":Px.C("39ff14")},
+		{"id":"scav","patron":"Kovan","name":"Çöpçü İçgüdüsü","desc":"Elit kesimi +8 can yeniler","rarity":2,"color":Px.C("39ff14")},
 	]
 
 static func roll(owned: Array, luck := 0.0) -> Array:
@@ -84,6 +86,7 @@ static func apply(id: String, p: Player) -> void:
 		"swift": p.dash_regen_mult *= 1.35
 		"camo": p.b_stealth_dash = true
 		"regen": p.set_meta("regen", 0.8)
+		"ritm": p.set_meta("streak_spd", true)
 		"emp": p.b_emp = true
 		"overcharge": p.plasma_mult *= 1.35; p.charge_rate *= 1.45
 		"static": p.set_meta("static", 6.0)
@@ -92,3 +95,4 @@ static func apply(id: String, p: Player) -> void:
 		"frenzy": p.atk_speed *= 1.18; p.max_hp = maxf(20.0, p.max_hp - 15); p.hp = minf(p.hp, p.max_hp)
 		"carapace": p.lifesteal += 0.08; p.max_hp = maxf(20.0, p.max_hp * 0.9); p.hp = minf(p.hp, p.max_hp)
 		"revive": p.revives_extra += 1
+		"scav": p.set_meta("elite_heal", true)

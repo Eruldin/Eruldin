@@ -11,6 +11,8 @@ var _msg_at := 0.0
 var _shot_n := 0
 var _roster_done := false
 var _edge_done := false
+var _mono_done := false
+var _mono_check := false
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -73,6 +75,15 @@ func _process(_d: float) -> void:
 				_edge_done = true
 				G.player.pos = Vector2(1350, -880)
 				_shot_at = t + 1.0
+			# rezonans kümesi kapsaması: oyuncunun dibinde doğur, kısa şarjla çözülmesini bekle
+			if not _mono_done and t >= 95.0:
+				_mono_done = true
+				G.room.spawn_monolith(G.player.pos + Vector2(30, 0))
+				G.room.mono["need"] = 3.0
+				print("[probe] monolith spawned")
+			if _mono_done and not _mono_check and not G.room.mono_active:
+				_mono_check = true
+				print("[probe] monolith resolved ok")
 			if t >= _shot_at:
 				_shot_at = t + 15.0
 				_shoot()
