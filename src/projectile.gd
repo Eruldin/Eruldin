@@ -17,6 +17,8 @@ var reflected := false
 var piercing := false
 var aoe := 0.0              # >0: lobbed shot, explodes in an area on impact/expiry
 var life0 := 0.0            # lobbed shots: initial life, drives the fake arc
+var boomerang := false      # returns to the player at half-life, piercing all the way
+var _boom_flip := false
 var col := Color.WHITE
 var dmg_type: int = G.DamageType.PROJECTILE
 var source: Actor = null
@@ -50,6 +52,11 @@ func _process(_d: float) -> void:
 		else:
 			_die()
 		return
+	if boomerang and team == G.Team.PLAYER:
+		if not _boom_flip and life <= life0 * 0.5:
+			_boom_flip = true
+		if _boom_flip and is_instance_valid(G.player) and not G.player.dead:
+			vel = vel.length() * (G.player.pos - global_position).normalized()
 	if homing and team == G.Team.PLAYER:
 		var best: Enemy = null
 		var bd := 160.0
