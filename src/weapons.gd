@@ -620,7 +620,7 @@ static func _bolt(st: Dictionary, p: Player) -> void:
 		hits += 1
 	if hits == 0:
 		G.fx.burst(p.pos + Vector2(0, -30), Px.C("ffe066"), 6, 120.0, 3.0, 0.25)
-	G.audio.play("plasma", 1.5, 0.55)
+	G.audio.play("zap", 1.2, 0.5)
 
 static func _strike(e: Enemy, dmg: float, p: Player, chain: int) -> void:
 	var cur: Enemy = e
@@ -775,7 +775,7 @@ static func _ray(st: Dictionary, p: Player) -> void:
 	var tw := beam.create_tween()
 	tw.tween_property(beam, "modulate:a", 0.0, 0.28)
 	tw.tween_callback(beam.queue_free)
-	G.audio.play("plasma", 0.8, 0.75)
+	G.audio.play("beam", 1.0, 0.7)
 	G.fx.shake(0.1, 0.06)
 
 # rosette of homing missiles — each curves into the swarm on its own
