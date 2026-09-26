@@ -261,6 +261,8 @@ func victory() -> void:
 	fragments = 0
 	G.meta.data["victories"] += 1
 	G.meta.save()
+	for f in G.meta.new_feats():
+		G.ui.toast("BAŞARIM: %s" % f)
 	G.audio.jingle("boss")
 	G.ui.victory_screen(stats)
 
@@ -294,6 +296,8 @@ func on_player_death(h: Dictionary) -> void:
 	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
 	G.meta.add_choralim(gained)
 	fragments = 0
+	for f in G.meta.new_feats():
+		G.ui.toast("BAŞARIM: %s" % f)
 	G.ui.death_screen(killer, gained)
 
 func abandon_to_hub() -> void:

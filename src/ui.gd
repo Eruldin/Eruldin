@@ -946,8 +946,13 @@ func records_panel() -> void:
 		var l := _lbl("%s  %s" % ["◆" if done else "◇", "%s — %s" % [BIOME_NAME[i], Run.BOSS_NAMES[i]]],
 			Vector2.ZERO, 13, Color(0.95, 0.85, 0.4) if done else Color(0.5, 0.5, 0.6))
 		v.add_child(l)
+	var cols := HBoxContainer.new()
+	cols.alignment = BoxContainer.ALIGNMENT_CENTER
+	cols.add_theme_constant_override("separation", 34)
+	var left := VBoxContainer.new()
+	left.add_theme_constant_override("separation", 5)
 	var sep2 := _lbl("— ARSENAL —", Vector2.ZERO, 12, Px.C("c9a227"))
-	v.add_child(sep2)
+	left.add_child(sep2)
 	for wid in Weapons.DEFS:
 		var wd: Dictionary = Weapons.DEFS[wid]
 		if wd.get("hidden", false):
@@ -955,7 +960,20 @@ func records_panel() -> void:
 		var ok := Weapons.unlocked(wid)
 		var l := _lbl("%s  %s%s" % ["◆" if ok else "◇", str(wd.name), "" if ok else "  — " + Weapons.req_text(wid)],
 			Vector2.ZERO, 12, Color(0.9, 0.85, 0.6) if ok else Color(0.45, 0.45, 0.55))
-		v.add_child(l)
+		left.add_child(l)
+	cols.add_child(left)
+	var right := VBoxContainer.new()
+	right.add_theme_constant_override("separation", 5)
+	var sep3 := _lbl("— BAŞARIMLAR —", Vector2.ZERO, 12, Px.C("c9a227"))
+	right.add_child(sep3)
+	for a in G.meta.achievements():
+		var l := _lbl("%s  %s\n        %s" % ["◆" if a.done else "◇", str(a.name), str(a.desc)],
+			Vector2.ZERO, 11, Color(0.95, 0.8, 0.4) if a.done else Color(0.45, 0.45, 0.55))
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.custom_minimum_size = Vector2(240, 0)
+		right.add_child(l)
+	cols.add_child(right)
+	v.add_child(cols)
 	var ld: Dictionary = d.get("last_death", {})
 	if not ld.is_empty() and str(ld.get("killer", "")) != "":
 		var l := _lbl("son düşüş: %s @ %s" % [str(ld.get("killer")), BIOME_NAME[int(ld.get("biome", 0))]], Vector2.ZERO, 11, Color(0.6, 0.55, 0.6))
