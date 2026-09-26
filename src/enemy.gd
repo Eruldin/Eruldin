@@ -43,6 +43,7 @@ var _mend_t := 0.0  # şifalı elit: alan onarımı sayacı
 var _lead_pulse := 0.0  # sürücü elit: hız aurası sayacı
 var lead_t := 0.0       # bu düşmanın üstündeki kalan sürücü buffı
 var _trail_t := 0.0     # iz süren elit: kor izi bırakma sayacı
+var _warp_t := 0.0      # ışınlanan elit: teleport sayacı
 var _sum_n := 0     # bu elitin saldığı döl sayısı
 var speed := 100.0
 var touch_dmg := 10.0
@@ -145,7 +146,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz"][randi() % 10]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp"][randi() % 11]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -174,6 +175,9 @@ func _setup_stats(hs: float, ds: float) -> void:
 			"iz":
 				_trail_t = 0.6
 				actor_name = "İZ SÜREN " + actor_name
+			"warp":
+				_warp_t = 2.5
+				actor_name = "IŞINLANAN " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -205,7 +209,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		_hp_bg = ColorRect.new()
 		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
@@ -307,6 +311,16 @@ func _process(_d: float) -> void:
 			_trail_t = 0.9
 			var ds2: float = G.director._dmg_scale() if G.director != null else 1.0
 			G.room.add_hazard(pos + Vector2(G.rf(-8, 8), G.rf(-8, 8)), 26.0, 8.0 * ds2, 2.6, Color(1.0, 0.45, 0.15, 0.5))
+	# ışınlanan elit: uzak kalırsa oyuncunun yanına teleport eder — arka hat güvenli değil
+	if affix == "warp" and _st == St.SEEK and is_instance_valid(G.room):
+		_warp_t -= d
+		if _warp_t <= 0.0 and pos.distance_to(G.player.pos) > 340.0:
+			_warp_t = 3.8
+			G.fx.burst(pos, Px.C("b388ff"), 10, 120.0, 4.0, 0.3)
+			G.audio.play("dash", 2.6, 0.3)
+			pos = G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * G.rf(160.0, 230.0)
+			pos = G.room.clamp_pos(pos, radius)
+			G.fx.burst(pos, Px.C("b388ff"), 10, 120.0, 4.0, 0.3)
 	if _cd_t > 0:
 		_cd_t -= d
 	_tick_anim(d)
