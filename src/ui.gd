@@ -122,6 +122,8 @@ var _xp_back: ColorRect
 var _xp_bar: ColorRect
 var _lvl_lbl: Label
 var _time_lbl: Label
+var _prog_bg: ColorRect
+var _prog_fg: ColorRect
 var _kills_lbl: Label
 var _wpn_row: HBoxContainer
 var _psv_row: HBoxContainer
@@ -243,6 +245,20 @@ func _build_hud() -> void:
 	_time_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_time_lbl.size = Vector2(1280, 24)
 	_hud.add_child(_time_lbl)
+
+	# zafer ilerleme barı — sürenin altında kovana kadar kalan yolu gösterir
+	_prog_bg = ColorRect.new()
+	_prog_bg.color = Color(0.05, 0.05, 0.1, 0.8)
+	_prog_bg.position = Vector2(515, 40)
+	_prog_bg.size = Vector2(250, 5)
+	_prog_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_prog_bg)
+	_prog_fg = ColorRect.new()
+	_prog_fg.color = Px.C("00E5FF")
+	_prog_fg.size = Vector2(0, 3)
+	_prog_fg.position = Vector2(1, 1)
+	_prog_fg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prog_bg.add_child(_prog_fg)
 	_kills_lbl = _lbl("0 kesim", Vector2(1150, 14), 13, Color(0.8, 0.8, 0.9))
 	_kills_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_kills_lbl.size = Vector2(110, 18)
@@ -405,6 +421,9 @@ func _tick_hud() -> void:
 	var tt := int(G.run.time)
 	_time_lbl.text = ("%02d:%02d" % [tt / 60, tt % 60]) + ("   AZAP ×%d" % int(G.run.curse) if int(G.run.curse) > 0 else "")
 	_time_lbl.add_theme_color_override("font_color", Px.C("c26bff") if G.run.endless else (Px.C("ff5533") if (G.run.hyper or G.run.dark) else Color(0.9, 0.95, 1)))
+	if is_instance_valid(_prog_fg):
+		_prog_fg.size.x = 248.0 * clampf(G.run.time / Director.WIN_T, 0.0, 1.0)
+		_prog_fg.color = Px.C("c26bff") if G.run.endless else Px.C("00E5FF")
 	_kills_lbl.text = "%d kesim" % int(G.run.stats.get("kills", 0))
 	if G.run.streak >= 10:
 		_kills_lbl.text += "  x%d" % G.run.streak
@@ -713,6 +732,8 @@ func hub_ui(_show: bool) -> void:
 	_kills_lbl.text = ""
 	_lvl_lbl.text = ""
 	_xp_bar.size.x = 0
+	if is_instance_valid(_prog_fg):
+		_prog_fg.size.x = 0
 	for c in _wpn_row.get_children():
 		c.queue_free()
 	for c in _psv_row.get_children():
@@ -1250,6 +1271,11 @@ func death_screen(killer: String, gained: int) -> void:
 	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0)), int(G.run.stats.get("best_streak", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
 	dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dl)
+	var kname := str(G.meta.data.get("last_death", {}).get("killer", ""))
+	if kname != "":
+		var kl2 := _lbl("son nefes: %s" % kname, Vector2.ZERO, 12, Px.C("ff5533"))
+		kl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(kl2)
 	_build_recap(v)
 	var h := _lbl("Neva'nın rezonansı seni geri çekiyor...\n[E / tık] — Viator Kampı'na dön", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
