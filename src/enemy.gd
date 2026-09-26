@@ -442,6 +442,7 @@ func die(h: Dictionary) -> void:
 		kk[kn] = int(kk.get(kn, 0)) + 1
 		G.run.stats["kind_kills"] = kk
 		G.run.on_kill(elite)
+		Quests.tick("kind", kn)
 	G.audio.play("die", G.rf(0.9, 1.2), 0.6)
 	G.fx.light_flash(pos + Vector2(0, -12), Color(1, 0.5, 0.3), 1.4, 2.4, 0.2)
 	G.fx.burst(pos + Vector2(0, -10), Color(0.5, 0.05, 0.05), 30 if elite else 16, 190.0, 5.0, 0.6, 6.0)
@@ -463,6 +464,14 @@ func die(h: Dictionary) -> void:
 		if elite:
 			G.room.spawn_chest(pos)
 			G.run.drop_fragments(pos, G.ri(8, 14))
+			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
+			Quests.tick("elites")
+			# eşya düşüşü — node "loot" modu şansı büyütür
+			var loot_mod := float(G.run.node_mods.get("loot", 1.0)) if is_instance_valid(G.run) else 1.0
+			if G.chance(0.14 * loot_mod):
+				var iid := Items.roll(G.run.luck)
+				if iid != "":
+					G.room.spawn_loot(iid, pos + Vector2(0, -18))
 			if is_instance_valid(G.player) and G.player.has_meta("elite_heal"):
 				G.player.heal(8.0)
 			if actor_name.contains("HASATÇI"):
@@ -507,7 +516,7 @@ func die(h: Dictionary) -> void:
 			var sp := Enemy.spawn(EKind.HUSK, pos + Vector2(G.rf(-26.0, 26.0), G.rf(-26.0, 26.0)), false, hs2, ds2, G.room)
 			if sp != null:
 				sp.speed *= 1.15
-		G.ui.float_text(pos, "BÖLÜNDÜ", Color(1.0, 0.62, 0.3), 16)
+		G.fx.float_text(pos, "BÖLÜNDÜ", Color(1.0, 0.62, 0.3), 16)
 		if G.chance(0.045 * (2.0 if is_instance_valid(G.player) and G.player.has_meta("heal_luck") else 1.0)) and not G.run.dark:
 			G.room.spawn_heal(pos)
 		# HASAT ŞENLİĞİ kozu: kesim başına küçük parçacık damlası

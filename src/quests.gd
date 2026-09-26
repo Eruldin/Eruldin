@@ -1,0 +1,214 @@
+class_name Quests
+extends RefCounted
+
+# BG2-style quest journal: NPCs offer quests; progress is tracked live during
+# runs (kills / kind_kills / time / boss downs / loot); turn-in at the giver
+# pays choralim, items, or unlocks world-map nodes.
+
+# objective types:
+#   kills n               — total kills this run
+#   kind <name> n         — kills of one enemy kind (KIND_NAME)
+#   time n                — survive n seconds in one run
+#   boss <id>             — defeat boss id ("rex","host","twins","final")
+#   win                   — any victory
+#   elites n              — elite kills this run
+#   evos n                — evolutions this run
+#   loot n                — items found this run
+#   biomes n              — visit n distinct areas (meta.visited)
+# reward: {"cho": int, "item": id, "node": node_id, "wep": weapon_id}
+const DEFS := [
+	{"id": "q_kan",    "giver": "rhasa",   "name": "KAN VERGİSİ",      "desc": "Kovan kanla beslenir. Tek koşuda 200 kesim yap.",         "obj": {"type": "kills", "n": 200},  "rew": {"cho": 60}},
+	{"id": "q_varl",   "giver": "ehnar",   "name": "ÇÖLAYAN AVI",      "desc": "Çölayan Varl'lar kamp sınırını kokluyor. 25 tanesini kes.", "obj": {"type": "kind", "k": "Çölayan Varl", "n": 25}, "rew": {"cho": 50, "item": "i_cizme"}},
+	{"id": "q_surv",   "giver": "neva",    "name": "REZONANS TÜRKÜSÜ", "desc": "Şarkıya altı dakika dayan — bir koşuda 360 sn hayatta kal.", "obj": {"type": "time", "n": 360}, "rew": {"cho": 80}},
+	{"id": "q_rex",    "giver": "rhasa",   "name": "DÜŞMÜŞ KARDEŞ",    "desc": "Alfa-05'i serbest bırak — Endusterra'nın efendisini düşür.", "obj": {"type": "boss", "k": "rex"}, "rew": {"cho": 120, "node": "yol"}},
+	{"id": "q_elit",   "giver": "ehnar",   "name": "ELİT DEFTERİ",     "desc": "Elitler sandık taşır. Tek koşuda 6 elit kes.",             "obj": {"type": "elites", "n": 6},   "rew": {"cho": 70, "item": "i_hirsiz"}},
+	{"id": "q_evo",    "giver": "vane",    "name": "SAHA DENEYİ",      "desc": "Evrim zincirini test et — bir koşuda 2 evrim tamamla.",    "obj": {"type": "evos", "n": 2},     "rew": {"cho": 90, "item": "i_maske"}},
+	{"id": "q_host",   "giver": "david",   "name": "DAMARLARIN KALBİ", "desc": "Simithar'ın Konakçı'sını düşür — madenin kapağını açar.",  "obj": {"type": "boss", "k": "host"}, "rew": {"cho": 140, "node": "tarla"}},
+	{"id": "q_loot",   "giver": "saphire", "name": "HURDA MERAKI",     "desc": "Pazar için malzeme lazım. Bir koşuda 3 eşya bul.",         "obj": {"type": "loot", "n": 3},    "rew": {"cho": 60, "node": "pazar"}},
+	{"id": "q_gez",    "giver": "david",   "name": "İZ SÜRÜCÜNÜN İZİ", "desc": "Dört sahayı da gör. Her bioma bir koşu yap.",              "obj": {"type": "biomes", "n": 4},   "rew": {"cho": 110, "item": "i_ikiz"}},
+	{"id": "q_final",  "giver": "zirkon",  "name": "SON KAYIT",        "desc": "Masadaki son iki isim: Kirin ve Constantin'i düşür.",      "obj": {"type": "boss", "k": "final"}, "rew": {"cho": 250, "item": "i_final"}},
+	{"id": "q_zafer",  "giver": "ahusk",   "name": "GÖÇEBENİN İNADI",  "desc": "Kovandan kaçan yaşar, kovana dönen kazanır. Bir zafer getir.", "obj": {"type": "win"}, "rew": {"cho": 100, "item": "i_kantas"}},
+	{"id": "q_deep",   "giver": "vane",    "name": "DERİN PROTOKOL",   "desc": "Aeterna'nın altında bir şey sinyal veriyor — Kirin sonrası açılır.", "obj": {"type": "boss", "k": "final"}, "rew": {"node": "kuyu"}, "prereq": "q_final"},
+]
+
+# states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
+static func _q() -> Dictionary:
+	if not G.meta.data.has("quests"):
+		G.meta.data["quests"] = {}
+	return G.meta.data["quests"]
+
+static func state(id: String) -> String:
+	return str(_q().get(id, {}).get("st", ""))
+
+static func prog(id: String) -> int:
+	return int(_q().get(id, {}).get("prog", 0))
+
+static func def(id: String) -> Dictionary:
+	for q in DEFS:
+		if q.id == id:
+			return q
+	return {}
+
+static func available_for(nid: String) -> Array:
+	var out: Array = []
+	for q in DEFS:
+		if q.giver != nid:
+			continue
+		if state(q.id) != "":
+			continue
+		var pre := str(q.get("prereq", ""))
+		if pre != "" and state(pre) != "claimed":
+			continue
+		out.append(q)
+	return out
+
+# quests this NPC can take back: done but unclaimed
+static func claimable_for(nid: String) -> Array:
+	var out: Array = []
+	for q in DEFS:
+		if q.giver == nid and state(q.id) == "done":
+			out.append(q)
+	return out
+
+static func active() -> Array:
+	var out: Array = []
+	for q in DEFS:
+		if state(q.id) == "act":
+			out.append(q)
+	return out
+
+# quests this NPC gave that are still being worked
+static func active_for(nid: String) -> Array:
+	var out: Array = []
+	for q in DEFS:
+		if q.giver == nid and state(q.id) == "act":
+			out.append(q)
+	return out
+
+# anything to talk about: new offer, live progress, or a claimable reward
+static func has_business(nid: String) -> bool:
+	return not (available_for(nid).is_empty() and claimable_for(nid).is_empty() and active_for(nid).is_empty())
+
+# koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
+static func tick_all() -> void:
+	var done: Array = []
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win"]:
+		done.append_array(tick(type))
+	for q in DEFS:
+		if state(q.id) != "act" or str(q.obj.get("type", "")) != "boss":
+			continue
+		var need := str(q.obj.get("k", ""))
+		if (G.meta.data.get("bosses", []) as Array).has(need):
+			_q()[q.id]["st"] = "done"
+			_q()[q.id]["prog"] = 1
+			done.append(q)
+	for q in DEFS:
+		if state(q.id) != "act" or str(q.obj.get("type", "")) != "kind":
+			continue
+		var kk: Dictionary = G.run.stats.get("kind_kills", {})
+		var cur := int(kk.get(str(q.obj.k), 0))
+		_q()[q.id]["prog"] = cur
+		if cur >= int(q.obj.get("n", 1)):
+			_q()[q.id]["st"] = "done"
+			done.append(q)
+	if not done.is_empty():
+		G.meta.save()
+		_announce(done)
+
+static func _announce(done_now: Array) -> void:
+	for q in done_now:
+		if is_instance_valid(G.ui):
+			G.ui.toast("GÖREV TAMAM: %s — %s yanına dön" % [str(q.name), str(NPC.NAMES.get(str(q.giver), str(q.giver)))])
+			G.audio.jingle("boon")
+
+static func accept(id: String) -> void:
+	_q()[id] = {"st": "act", "prog": 0}
+	G.meta.save()
+
+static func abandon(id: String) -> void:
+	_q().erase(id)
+	G.meta.save()
+
+# live progress — called from run hooks; returns quests that just finished
+static func tick(type: String, arg := "", n := 1) -> Array:
+	var done_now: Array = []
+	for q in DEFS:
+		if state(q.id) != "act":
+			continue
+		var o: Dictionary = q.obj
+		if str(o.type) != type:
+			continue
+		if str(o.get("k", "")) != "" and arg != str(o.k):
+			continue
+		# boss/biomes check absolute values, not increments
+		var need := int(o.get("n", 1))
+		var cur: int
+		match type:
+			"kills":   cur = int(G.run.stats.get("kills", 0))
+			"kind":    cur = int(G.run.stats.get("kind_kills", {}).get(arg, 0))
+			"time":    cur = int(G.run.time)
+			"elites":  cur = int(G.run.stats.get("elite_kills", 0))
+			"evos":    cur = int(G.run.stats.get("evos", 0))
+			"loot":    cur = (G.run.stats.get("loot", []) as Array).size()
+			"win":     cur = 1 if bool(G.run.stats.get("won", false)) else 0
+			"biomes":  cur = (G.meta.data.get("visited", []) as Array).size()
+			_:         cur = prog(q.id) + n
+		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
+		if cur >= need:
+			_q()[q.id]["st"] = "done"
+			done_now.append(q)
+	if not done_now.is_empty():
+		G.meta.save()
+		_announce(done_now)
+	return done_now
+
+static func claim(id: String) -> Dictionary:
+	if state(id) != "done":
+		return {}
+	var q := def(id)
+	_q()[id]["st"] = "claimed"
+	var rew: Dictionary = q.get("rew", {})
+	if int(rew.get("cho", 0)) > 0:
+		G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) + int(rew.cho)
+	if str(rew.get("item", "")) != "":
+		var st: Array = G.meta.data.get("stash", [])
+		if not st.has(str(rew.item)):
+			st.append(str(rew.item))
+		G.meta.data["stash"] = st
+	if str(rew.get("node", "")) != "":
+		var un: Array = G.meta.data.get("unlocked", [])
+		if not un.has(str(rew.node)):
+			un.append(str(rew.node))
+		G.meta.data["unlocked"] = un
+	G.meta.save()
+	return rew
+
+static func rew_text(rew: Dictionary) -> String:
+	var parts: Array = []
+	if int(rew.get("cho", 0)) > 0:
+		parts.append("◆ %d choralim" % int(rew.cho))
+	if str(rew.get("item", "")) != "":
+		parts.append("eşya: %s" % str(Items.DEFS.get(str(rew.item), {}).get("name", rew.item)))
+	if str(rew.get("node", "")) != "":
+		parts.append("yeni bölge açıldı")
+	return " + ".join(parts)
+
+static func obj_text(q: Dictionary) -> String:
+	var o: Dictionary = q.obj
+	var need := int(o.get("n", 1))
+	match str(o.type):
+		"kills":  return "%d kesim" % need
+		"kind":   return "%s x%d" % [str(o.k), need]
+		"time":   return "%d sn hayatta kal" % need
+		"boss":   return "efendi: %s" % str(o.k).to_upper()
+		"win":    return "bir zafer"
+		"elites": return "%d elit" % need
+		"evos":   return "%d evrim" % need
+		"loot":   return "%d eşya" % need
+		"biomes": return "%d farklı saha" % need
+	return "?"
+
+static func prog_text(q: Dictionary) -> String:
+	var o: Dictionary = q.obj
+	var need := int(o.get("n", 1))
+	return "%d / %d" % [mini(prog(q.id), need), need]

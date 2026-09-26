@@ -668,6 +668,11 @@ static func _build2(n: String) -> Texture2D:
 	if n.begins_with("npc2_"): return _tex(_npc_fig(n.substr(5), {"bob": 0}), true)
 	if n.begins_with("npcb_"): return _tex(_npc_fig(n.substr(5), {"bob": -1}), true)
 	match n:
+		"ico_camp": return _icon2("camp")
+		"ico_run": return _icon2("run")
+		"ico_loot": return _icon2("lootbag")
+		"ico_quest": return _icon2("quest")
+		"ico_map": return _icon2("run")
 		"light": return _light_tex()
 		"slash_arc": return _slash_arc()
 		"title_bg": return _title_bg()
@@ -1434,6 +1439,38 @@ static func _icon2(key: String) -> Texture2D:
 			for i in 3:
 				_rect(t, 5 + i * 5, 6, 3, 8, C("c9a227"))
 			_disc(t, 11, 12, 2, C("00E5FF"))
+		"dagger":
+			_blade(t, 6, 18, -0.6, 14, C("cfd6dd"))
+			_rect(t, 4, 16, 5, 3, C("5a4632"))
+		"sword":
+			_blade(t, 5, 17, -0.7, 15, C("cfd6dd"))
+			_rect(t, 3, 15, 7, 3, C("a8842f"))
+			_rect(t, 5, 18, 2, 3, C("5a4632"))
+		"zap":
+			_blade(t, 13, 3, 0.6, 9, C("ffe066"))
+			_blade(t, 9, 12, 0.6, 9, C("ffe066"))
+		"mine":
+			_disc(t, 11, 13, 6, C("00E676"))
+			_blade(t, 11, 4, 0.0, 6, C("5a4632"))
+			_blade(t, 11, 4, 1.2, 6, C("5a4632"))
+			_blade(t, 11, 4, -1.2, 6, C("5a4632"))
+		"camp":
+			_disc(t, 11, 14, 6, C("ff9e4d"))
+			_rect(t, 9, 10, 4, 4, C("ffe066"))
+			_rect(t, 5, 16, 12, 2, C("5a4632"))
+		"run":
+			_rect(t, 4, 4, 4, 8, C("00E5FF"))
+			_blade(t, 8, 8, 0.6, 10, C("00E5FF"))
+		"lootbag":
+			_disc(t, 11, 14, 7, C("8a6a3a"))
+			_rect(t, 8, 4, 6, 4, C("6a4a26"))
+			_disc(t, 11, 14, 3, C("ffd700"))
+		"quest":
+			_rect(t, 5, 3, 12, 16, C("e8dcc0"))
+			_rect(t, 7, 6, 8, 1, C("4a3220"))
+			_rect(t, 7, 9, 8, 1, C("4a3220"))
+			_rect(t, 7, 12, 5, 1, C("4a3220"))
+			_disc(t, 15, 16, 2, C("8B0000"))
 		_:
 			_disc(t, 11, 11, 6, C("7B1FA2"))
 			_disc(t, 11, 11, 3, C("00E5FF"))

@@ -13,6 +13,9 @@ func build_arena(biome_idx: int) -> void:
 	is_hub = false
 	rng.randomize()
 	G.game.set_dark(DARK[biome])
+	# dünya-haritası düğümü modları: alacakaranlık düğümler daha koyu atmosfer
+	if G.run != null and bool(G.run.node_mods.get("dusk", false)):
+		G.game.set_dark(minf(DARK[biome] + 0.18, 0.72))
 	_field_floor()
 	_edge_walls()
 	_scatter_decals_big()
@@ -27,7 +30,8 @@ func build_arena(biome_idx: int) -> void:
 			continue
 		spawn_special(["vacuum", "bomb", "freeze", "boost", "guard"][i % 5], p)
 	G.audio.play_music("mus_%d" % biome)
-	G.ui.banner(BIOME_NAME[biome], "kovan akıyor — hayatta kal")
+	var nn := str(G.run.node_name) if G.run != null else ""
+	G.ui.banner(nn if nn != "" else BIOME_NAME[biome], "kovan akıyor — hayatta kal")
 
 func spawn_point() -> Vector2:
 	return Vector2.ZERO
