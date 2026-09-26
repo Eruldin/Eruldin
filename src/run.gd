@@ -114,7 +114,11 @@ func start_run() -> void:
 func _process(_d: float) -> void:
 	if pending_drafts > 0 and G.state == G.State.ROOM and is_instance_valid(G.ui) and not G.ui.overlay_open():
 		pending_drafts -= 1
-		G.ui.levelup_draft()
+		# her 5. seviye bir lütuf taslağı açar — kilometre taşı ödülü
+		if int(G.player.level) % 5 == 0:
+			G.ui.boon_choice()
+		else:
+			G.ui.levelup_draft()
 	if streak_t > 0.0:
 		streak_t -= get_process_delta_time()
 		if streak_t <= 0.0:
@@ -235,6 +239,13 @@ func _write_last_run(win: bool) -> void:
 		G.meta.data["kind_kills"] = mk
 		G.meta.save()
 	G.meta.data["best_evos"] = maxi(int(G.meta.data.get("best_evos", 0)), int(stats.get("evos", 0)))
+	# koşu skoru: kesim + seviye + süre + evrim + azap çarpanı — rekor meta'da tutulur
+	var score := int(stats.get("kills", 0)) * 10 + int(stats.get("level", 1)) * 120 + int(time) * 3 + int(stats.get("evos", 0)) * 500 + curse * 250
+	stats["score"] = score
+	if score > int(G.meta.data.get("best_score", 0)):
+		G.meta.data["best_score"] = score
+		stats["new_record"] = true
+		G.meta.save()
 	if win and curse >= 2:
 		G.meta.data["curse_wins"] = int(G.meta.data.get("curse_wins", 0)) + 1
 		G.meta.save()
