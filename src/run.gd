@@ -217,6 +217,15 @@ func open_chest() -> void:
 func apply_evo(spec: Dictionary) -> void:
 	Weapons.apply_evo(spec, G.player)
 	Quests.tick("evos")
+	# evrim şöleni — dönüşüm koşuda görünür bir an olsun
+	if is_instance_valid(G.player):
+		G.fx.flash(Px.C("ffd75f"), 0.22)
+		G.fx.burst(G.player.pos + Vector2(0, -20), Px.C("ffd75f"), 34, 260.0, 5.0, 0.8)
+		G.fx.boom(G.player.pos, Px.C("fff2b0"), 90.0)
+		G.fx.light_flash(G.player.pos + Vector2(0, -24), Px.C("fff2b0"), 2.2, 3.4, 0.4)
+		G.fx.shake(0.14, 0.3)
+		G.fx.hitstop(0.06)
+		G.audio.jingle("victory")
 
 func next_room(reward: int) -> void:
 	depth += 1

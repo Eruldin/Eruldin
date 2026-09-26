@@ -6,6 +6,8 @@ extends Actor
 
 enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER }
 
+# tür-bazlı ölüm patlaması rengi — kesimden kimin öldüğü görsel okunur
+const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700"}
 const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
@@ -445,11 +447,13 @@ func die(h: Dictionary) -> void:
 		Quests.tick("kind", kn)
 	G.audio.play("die", G.rf(0.9, 1.2), 0.6)
 	G.fx.light_flash(pos + Vector2(0, -12), Color(1, 0.5, 0.3), 1.4, 2.4, 0.2)
-	G.fx.burst(pos + Vector2(0, -10), Color(0.5, 0.05, 0.05), 30 if elite else 16, 190.0, 5.0, 0.6, 6.0)
-	G.fx.burst(pos + Vector2(0, -10), Color(0.9, 0.7, 0.4), 8 if elite else 4, 210.0, 3.0, 0.3)
+	var kcol := Px.C(str(KIND_COL.get(kind, "801020")))
+	G.fx.burst(pos + Vector2(0, -10), kcol.darkened(0.45), 30 if elite else 16, 190.0, 5.0, 0.6, 6.0)
+	G.fx.burst(pos + Vector2(0, -10), kcol.lerp(Color(1, 0.9, 0.6), 0.4), 8 if elite else 4, 210.0, 3.0, 0.3)
 	if elite:
 		G.fx.hitstop(0.05)
-	G.fx.splat(pos + Vector2(0, 4), Color(0.4, 0.03, 0.03), 1.4 if elite else 0.8)
+		G.fx.boom(pos, Px.C("ffb74d"), 80.0)
+	G.fx.splat(pos + Vector2(0, 4), kcol.darkened(0.6), 1.4 if elite else 0.8)
 	if kind == EKind.DRONE or kind == EKind.SPITTER:
 		G.fx.burst(pos + Vector2(0, -6), Px.C("00E676"), 12, 130.0, 4.0, 0.5)
 	if splits > 0 and is_instance_valid(G.room) and G.state == G.State.ROOM:

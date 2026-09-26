@@ -334,5 +334,6 @@ func _rain_strike(p: Vector2, cfg: Dictionary) -> void:
 				e.take_hit({"dmg": 70.0 + G.run.depth * 8.0, "type": pt, "from": pp, "knock": 10.0, "source": G.player})
 		G.fx.burst(pp, col, 18, 240.0, 6.0, 0.4)
 		G.fx.boom(pp, col, r)
+		G.fx.splat(pp, col.darkened(0.62), r / 52.0)   # yanık izi — vuruş yerleri zeminde kalır
 		G.fx.light_flash(pp, col, 1.6, 2.6, 0.16)
 		G.audio.play("explode", 1.1, 0.3))
