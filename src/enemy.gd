@@ -491,6 +491,9 @@ func die(h: Dictionary) -> void:
 			# veri kütüğü: ÖYKÜ codex'ini besleyen lore parçası
 			if G.chance(0.07) and (G.meta.data.get("lore", []) as Array).size() < Quests.LORE.size():
 				G.room.spawn_special("lore", pos + Vector2(0, 16))
+			# lanetli sandık: ödülü pusuya bağlı riskli ganimet (BG2 mimic)
+			if G.chance(0.05):
+				G.room.spawn_special("cursed", pos + Vector2(-18, 0))
 		elif G.chance(0.12):
 			G.run.drop_fragments(pos, G.ri(1, 3))
 	# volatile elite: telegraphed blast after death

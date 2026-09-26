@@ -27,6 +27,7 @@ var data := {
 	"runs": 0,
 	"kills": 0,
 	"victories": 0,
+	"ng": 0,
 	"best_depth": 0,
 	"bosses": [],          # defeated boss ids: "rex","host","twins","final"
 	"upg": {"hp":0,"dmg":0,"dash":0,"revive":0,"frag":0,"shield":0,"spd":0,"mag":0,"luck":0},
@@ -124,6 +125,7 @@ func achievements() -> Array:
 		{"name": "KOLEKSİYONER", "desc": "zula + ekipmanda 10+ eşya", "done": (data.get("stash", []) as Array).size() + (data.get("equip", {}) as Dictionary).size() >= 10, "rew": 100},
 		{"name": "GÖREV ERİ", "desc": "8 görevi teslim et", "done": _claimed_count() >= 8, "rew": 150},
 		{"name": "ARŞİVCİ", "desc": "8 veri kütüğünü topla", "done": (data.get("lore", []) as Array).size() >= Quests.LORE.size(), "rew": 200},
+		{"name": "DERİN SEÇİLMİŞ", "desc": "3. derinliğe ulaş (3 zafer)", "done": int(data.get("ng", 0)) >= 3, "rew": 300},
 	]
 
 func _claimed_count() -> int:
