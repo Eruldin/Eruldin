@@ -222,3 +222,17 @@ static func prog_text(q: Dictionary) -> String:
 	var o: Dictionary = q.obj
 	var need := int(o.get("n", 1))
 	return "%d / %d" % [mini(prog(q.id), need), need]
+
+# ---------------------------------------------------------------- veri kütükleri
+# Sahada nadiren düşen kalıcı lore parçaları — meta.data["lore"] listesine yazar,
+# Zirkon'un kayıtlarındaki ÖYKÜ codex'inde okunur (BG2 kitap/not sistemi).
+const LORE := [
+	{"id": "l_protokol", "name": "KÜTÜK: PROTOKOLÜN DOĞUŞU", "txt": "Choralim protokolü bir silah değildi — bir vaatti. Viator ilk praetorianı gömdüğünde rezonans bir daha susmadı."},
+	{"id": "l_kovan",    "name": "KÜTÜK: KOVANIN İLKİ",     "txt": "Kovan önce böcek değildi. İmparatorluk savas uşaklarını korozyona saldı; korozyon onları geri gönderdi — değişmiş olarak."},
+	{"id": "l_alfa05",   "name": "KÜTÜK: ALFA-05'İN SONU",  "txt": "Beşinci praetorian Endusterra'da düştü. Kraterdeki zırh hâlâ sıcak — kovan cesedine dokunmaya korkuyor."},
+	{"id": "l_viator",   "name": "KÜTÜK: VIATOR ANDI",      "txt": "'Kırılan geri döner, dönen tekrar kırılır.' Viator kampı bu andın üstüne kuruldu — ateş hiç sönmez."},
+	{"id": "l_simithar", "name": "KÜTÜK: SİMİTHAR",         "txt": "Maden cevheri sadece metal değil — damarların içinde eski imparatorluğun belleği saklı. Kes ve anılar sana akar."},
+	{"id": "l_masa",     "name": "KÜTÜK: SON MASA",         "txt": "Efendiler bir masanın etrafında oturur: Rex, Host, Nahum & Tuman, Kirin & Constantin. Boş sandalye sizin için ayrılmış."},
+	{"id": "l_neva",     "name": "KÜTÜK: NEVA'NIN ŞARKISI", "txt": "Neva'nın türküsü dua değil, talimattır. Rezonans onu dinler — seni geri getiren o frekans."},
+	{"id": "l_sis",      "name": "KÜTÜK: SİS PERDESİ",      "txt": "Batıdaki sis hava değil — bataklığın nefesi. Göçebeler oraya 'duvar' der; kistler içinde şarkı söyler."},
+]

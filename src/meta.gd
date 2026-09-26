@@ -45,6 +45,7 @@ var data := {
 	"loot_found": 0,       # lifetime item drops
 	"seen_story": [],      # cinematic cards already shown (one-shot story beats)
 	"story_done": [],      # tamamlanan hikaye düğümleri — haritada tek seferlik duraklar,
+	"lore": [],            # bulunan veri kütükleri (ÖYKÜ codex'i besler)
 	"hyper": false,        # AŞILAMA: sürü hızlı/kalabalık akar, ödeme ×1.5
 	"dark": false,         # KARANLIK: şifa küresi düşmez, ödeme ×1.25
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır

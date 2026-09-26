@@ -1824,6 +1824,22 @@ func records_panel() -> void:
 		any_lore = true
 	if any_lore:
 		cols.add_child(lore_col)
+	# VERİ KÜTÜKLERİ — sahada toplanan lore parçaları (meta.data["lore"])
+	var klore := VBoxContainer.new()
+	klore.add_theme_constant_override("separation", 5)
+	klore.add_child(_lbl("— VERİ KÜTÜKLERİ —", Vector2.ZERO, 12, Px.C("8fd4ff")))
+	var lf: Array = G.meta.data.get("lore", [])
+	for le in Quests.LORE:
+		var has := lf.has(str(le.id))
+		var txt: String = str(le.txt)
+		if txt.length() > 110:
+			txt = txt.substr(0, 107) + "..."
+		var kl := _lbl("%s\n%s" % [str(le.name), txt if has else "— sahada bulunmadı —"], Vector2.ZERO, 9,
+			Color(0.75, 0.85, 0.95) if has else Color(0.4, 0.4, 0.5))
+		kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		kl.custom_minimum_size = Vector2(190, 0)
+		klore.add_child(kl)
+	cols.add_child(klore)
 	v.add_child(cols)
 	# görev defteri — kabul edilen / biten / teslim edilenler
 	var qsep := _lbl("— GÖREV DEFTERİ —", Vector2.ZERO, 12, Px.C("c9a227"))
