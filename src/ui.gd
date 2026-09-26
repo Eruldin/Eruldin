@@ -1583,6 +1583,84 @@ func shop_panel() -> void:
 	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h2)
 
+# BG2 "you have been waylaid" — kampa varmadan önce yol karşılaşması.
+# kind "waylay" kapatılamaz: oyuncu iki seçenekten birini seçmek zorunda.
+const WAYLAY := {
+	"pusu":   {"name": "PUSU", "col": "ff5252",
+		"sub": "Sis perdesi aralandı — konakçı avcıları yolu kesti. Sinyal çok yakın; kuşatmadan çıkmak için ya savaş ya haraç.",
+		"opts": ["SAVAŞ — arenaya kuşatılmış gir, frag bereketi ×1.35", "HARAÇ ÖDE — ◆40, yol temiz"]},
+	"kervan": {"name": "YARALI KERVAN", "col": "ffd700",
+		"sub": "Devrik bir kervan: sürücüler yaralı, mallar savunmasız. Viator kanunu yardımı ister — kovan kanunu yağmayı.",
+		"opts": ["YARDIM ET — bedava lütuf + kalıcı şans", "YAĞMALA — ◈80 parçacık, azap +1"]},
+	"harabe": {"name": "YOLKENARI HARABE", "col": "8fd4ff",
+		"sub": "Çöken bir karakol kalıntısı yolu kesiyor. Molozun altında eşya olabilir — ya da sadece düşen taşlar.",
+		"opts": ["ARAŞTIR — şansına: eşya ya da enkaz hasarı", "GEÇ — durmaya değmez"]},
+}
+
+func travel_event(wkind: String, dest: String) -> void:
+	_pause(true)
+	var d: Dictionary = WAYLAY.get(wkind, WAYLAY["pusu"])
+	var v := _show_panel("waylay", "YOL OLAYI — " + dest, Px.C(str(d.col)))
+	var nm := _lbl(str(d.name), Vector2.ZERO, 16, Px.C(str(d.col)))
+	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(nm)
+	var sub := _lbl(str(d.sub), Vector2.ZERO, 13, Color(0.85, 0.85, 0.92))
+	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sub.custom_minimum_size = Vector2(560, 0)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sub)
+	var cho_lbl := _lbl("◆ %d" % int(G.meta.data.get("choralim", 0)), Vector2.ZERO, 12, Px.C("c26bff"))
+	cho_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(cho_lbl)
+	for i in 2:
+		var ob := Button.new()
+		ob.text = str(d.opts[i])
+		ob.add_theme_font_override("font", ui_font())
+		ob.custom_minimum_size = Vector2(480, 34)
+		# pusuda haraç: choralim yetmezse tek çıkış savaş
+		if wkind == "pusu" and i == 1 and int(G.meta.data.get("choralim", 0)) < 40:
+			ob.disabled = true
+			ob.modulate = Color(0.45, 0.45, 0.5)
+		var oc := CenterContainer.new()
+		oc.add_child(ob)
+		v.add_child(oc)
+		var idx := i
+		ob.pressed.connect(func(): _waylay_pick(wkind, idx))
+
+func _waylay_pick(wkind: String, idx: int) -> void:
+	match wkind:
+		"pusu":
+			if idx == 0:
+				G.run.pending_ambush = true
+				G.run.frag_node *= 1.35
+				toast("PUSU — kuşatılmış giriş, frag bereketi arttı")
+			else:
+				G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - 40
+				G.meta.save()
+				toast("haraç ödendi — avcılar geri çekildi")
+		"kervan":
+			if idx == 0:
+				G.run.luck += 0.2
+				G.run.take_boon(G.pick(Boons.all()))
+				toast("kervan teşekkür etti — lütuf + şans")
+			else:
+				G.run.fragments += 80
+				G.run.curse += 1
+				toast("kervan yağmalandı — ◈+80, AZAP +1")
+		"harabe":
+			if idx == 0:
+				if randf() < 0.6:
+					Items.drop_to_run(Items.roll(G.run.luck))
+					toast("molozun altında eşya buldun")
+				else:
+					G.run.pending_dmg = 18.0
+					toast("harabe çöktü — girişte yara alacaksın")
+			else:
+				toast("harabe geçildi")
+	G.audio.jingle("boon")
+	_close_overlay()
+	G.run._enter_arena()
+
 func records_panel() -> void:
 	_pause(true)
 	var v := _show_panel("records", "KAMP KAYITLARI — Vezir Zirkon", Px.C("c9a227"))

@@ -83,6 +83,10 @@ func _tick_spawn(d: float) -> void:
 
 func _tick_events(d: float) -> void:
 	var m := t / 60.0
+	# YOL OLAYI pusu: arenaya kuşatılmış giriş (ilk yarım saniyede çözülür)
+	if G.run.pending_ambush and t > 0.5:
+		G.run.pending_ambush = false
+		_ambush()
 	# dakika kilometre taşı duyurusu
 	if int(m) > _min_ann:
 		_min_ann = int(m)
@@ -237,6 +241,19 @@ func _ring_pos() -> Vector2:
 		if ok:
 			return p
 	return Vector2.INF
+
+# YOL OLAYI pusu karşılaşması: yakın çember kuşatma + başlarında bir elit
+func _ambush() -> void:
+	G.audio.play("roar", 0.9, 0.4)
+	G.fx.shake(0.35, 0.7)
+	G.ui.banner("PUSU!", "konakçı avcıları yolu kesti")
+	var e := _spawn(Enemy.EKind.ALFA, true)
+	if e != null:
+		G.ui.toast("%s — pusunun başı" % e.actor_name)
+	for i in 12:
+		var p := G.player.pos + Vector2.from_angle(TAU * i / 12.0) * G.rf(280.0, 400.0)
+		if G.room.BOUNDS.grow(-40.0).has_point(p):
+			Enemy.spawn(Enemy.EKind.HUSK, p, false, _hp_scale(), _dmg_scale(), G.room)
 
 # surge şekilleri: halka (VS klasik), duvar (bir yönden akan hat), pusu (yakın çember)
 func _surge(m: float) -> void:
