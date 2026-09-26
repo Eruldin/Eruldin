@@ -24,6 +24,8 @@ var endless := false      # victory'den sonra SONSUZ mod — kovan geri döner, 
 var time := 0.0           # seconds survived this run (Director drives it)
 var pending_drafts := 0     # queued level-up drafts
 var draft_reroll := false   # one card reroll available per level-up draft
+var draft_banish := false   # one card banish available per level-up draft
+var banished: Array = []    # ids kovulanlar — bu koşuda draft'a girmez
 var stats := {"kills": 0, "rooms": 0}
 
 func _init(g: Node2D) -> void:
@@ -57,6 +59,7 @@ func start_run() -> void:
 	endless = false
 	time = 0.0
 	pending_drafts = 0
+	banished.clear()
 	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
 	G.meta.save()

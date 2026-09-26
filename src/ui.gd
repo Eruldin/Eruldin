@@ -1001,6 +1001,7 @@ func levelup_draft() -> void:
 		G.run.pending_drafts += 1
 		return
 	G.run.draft_reroll = true
+	G.run.draft_banish = true
 	_open_draft()
 
 func _open_draft() -> void:
@@ -1011,6 +1012,8 @@ func _open_draft() -> void:
 	var all := opts.duplicate()
 	if G.run.draft_reroll:
 		all.append({"kind": "reroll", "id": "rr", "name": "YENİLE", "icon": "icn_dash", "col": "00E5FF", "desc": "kartları yeniden dağıt — taslak başına bir kez", "top": "ŞANS", "w": 1.0})
+	if G.run.draft_banish:
+		all.append({"kind": "banish", "id": "ban", "name": "KOV", "icon": "icn_kovan", "col": "ff5533", "desc": "bir kartı bu koşudan tamamen sil — sonra normal seç", "top": "KOV", "w": 1.0})
 	all.append({"kind": "gift", "id": "skip", "name": "GEÇ", "icon": "ico_frag", "col": "9aa0b0", "desc": "+15 parçacık — hiçbirini alma", "top": "SEÇME", "w": 1.0})
 	_show_cards("draft", "SEVİYE %d — güçlendirme seç  [1-%d]" % [G.player.level, all.size()], Px.C("00E5FF"), all)
 
@@ -1081,6 +1084,28 @@ func _pick_card(o: Dictionary) -> void:
 	var kind := str(_overlay.get_meta("kind", ""))
 	if kind != "draft" and kind != "chest" and kind != "boon" and kind != "biomesel":
 		return
+	# KOV akışı: önce KOV kartı seçilir, sonra kovulan kart işaretlenir
+	if kind == "draft":
+		if str(o.get("kind", "")) == "banish" and not bool(_overlay.get_meta("ban_mode", false)):
+			_overlay.set_meta("ban_mode", true)
+			toast("kovulacak kartı seç — koşunun geri kalanında çıkmaz")
+			return
+		if bool(_overlay.get_meta("ban_mode", false)) and str(o.get("kind", "")) == "banish":
+			_overlay.set_meta("ban_mode", false)
+			toast("kovma iptal — normal seçim")
+			return
+		if bool(_overlay.get_meta("ban_mode", false)) and str(o.get("kind", "")) in ["wpn", "psv", "boon"]:
+			G.run.banished.append(str(o.get("id", "")))
+			G.run.draft_banish = false
+			var rem: Array = []
+			for x in _overlay.get_meta("opts", []):
+				if str(x.get("id", "")) != str(o.get("id", "")) and str(x.get("id", "")) != "ban":
+					rem.append(x)
+			_close_overlay()
+			toast("kovalandı: %s" % str(o.get("name", "?")))
+			_pause(true)
+			_show_cards("draft", "SEVİYE %d — güçlendirme seç  [1-%d]" % [G.player.level, rem.size()], Px.C("00E5FF"), rem)
+			return
 	_close_overlay()
 	if kind == "biomesel":
 		var bid := int(o.get("id", 0))
