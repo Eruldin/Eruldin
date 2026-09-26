@@ -452,6 +452,9 @@ func die(h: Dictionary) -> void:
 				G.meta.save()
 			if G.chance(0.12):
 				G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard"]), pos)
+			# altın nüve: nadir kalıcı güç düşüşü (VS golden egg)
+			if G.chance(0.03):
+				G.room.spawn_special("egg", pos)
 		elif G.chance(0.12):
 			G.run.drop_fragments(pos, G.ri(1, 3))
 	# volatile elite: telegraphed blast after death
@@ -477,7 +480,7 @@ func die(h: Dictionary) -> void:
 			G.fx.light_flash(blast_pos, Color(1, 0.6, 0.2), 2.2, 3.0, 0.25)
 			G.audio.play("explode", 0.9, 0.7)
 			G.fx.shake(0.18, 0.2))
-		if G.chance(0.045) and not G.run.dark:
+		if G.chance(0.045 * (2.0 if is_instance_valid(G.player) and G.player.has_meta("heal_luck") else 1.0)) and not G.run.dark:
 			G.room.spawn_heal(pos)
 		G.room.on_enemy_dead(self)
 	queue_free()

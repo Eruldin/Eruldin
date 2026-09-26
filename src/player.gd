@@ -551,12 +551,14 @@ func reset_for_run() -> void:
 	magnet_r = 95.0; xp_mult = 1.0; cd_mult = 1.0; area_mult = 1.0; proj_spd = 1.0; bonus_proj = 0
 	_attack_slow = 1.0; _pulse_t = 0.0
 	_apply_stance()
-	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer", "streak_spd", "elite_heal"]:
+	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer", "streak_spd", "elite_heal", "heal_luck", "drones"]:
 		remove_meta(k)
 	max_hp = 100 + G.meta.upg(Meta.U.HP) * 20
 	hp = max_hp
 	armor = G.meta.upg(Meta.U.SHIELD) * 1.0
 	dmg_mult += G.meta.upg(Meta.U.DMG) * 0.08
+	# altın nüveler: kalıcı koşu-başı hasar artışı (VS golden egg)
+	dmg_mult += float(G.meta.data.get("eggs", 0)) * 0.005
 	dash_max = 1 + G.meta.upg(Meta.U.DASH)
 	dash_charges = dash_max
 	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)

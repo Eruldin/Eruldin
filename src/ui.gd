@@ -451,6 +451,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "ico_boon", "col": "ffb74d", "s": 22.0})
 			elif k == "vacuum" or k == "bomb" or k == "freeze" or k == "boost" or k == "guard":
 				out.append({"p": pk.position, "icon": "ico_frag", "col": "00E5FF", "s": 18.0})
+			elif k == "egg":
+				out.append({"p": pk.position, "icon": "icn_crown", "col": "ffd700", "s": 20.0})
 			elif k == "tome":
 				out.append({"p": pk.position, "icon": "ico_boon", "col": "c9a227", "s": 24.0})
 		if G.room.mono_active:
@@ -941,6 +943,7 @@ func records_panel() -> void:
 		"koşu: %d   zafer: %d   düşüş: %d" % [int(d.get("runs", 0)), int(d.get("victories", 0)), int(d.get("deaths", 0))],
 		"toplam kesim: %d   ·   en derin: %d" % [int(d.get("kills", 0)), int(d.get("best_depth", 0))],
 		"choralim rezervi: ◆ %d" % int(d.get("choralim", 0)),
+		"altın nüve: %d   (+%0.1f%% kalıcı hasar)" % [int(d.get("eggs", 0)), int(d.get("eggs", 0)) * 0.5],
 	]
 	for r in rows:
 		var l := _lbl(r, Vector2.ZERO, 14, Color(0.85, 0.85, 0.92))
