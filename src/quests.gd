@@ -48,6 +48,7 @@ const DEFS := [
 	{"id": "q_skor",  "giver": "rhasa",   "name": "SKOR VERGİSİ",        "desc": "Kovan rekor sever. Tek koşuda 4000 skor yap — oranını yükseltirim.", "obj": {"type": "score", "n": 4000}, "rew": {"cho": 260}, "prereq": "q_kan2"},
 	{"id": "q_frag",  "giver": "saphire", "name": "PARÇACIK HASADI",     "desc": "Tezgâh parçacıksız dönmez. Tek koşuda 600 parçacık topla — kesende dursun, teslime gerek yok.", "obj": {"type": "frag", "n": 600}, "rew": {"cho": 140}, "prereq": "q_loot"},
 	{"id": "q_glaive","giver": "ehnar",   "name": "AĞIR TAHMİS",         "desc": "Sırp diskleri depoda paslanıyor. Tek koşuda 400 kesim yaparsan birini sana kalibrarım.", "obj": {"type": "kills", "n": 400}, "rew": {"cho": 150, "wep": "glaive"}, "prereq": "q_nobet2"},
+	{"id": "q_deneme","giver": "ehnar",   "name": "DENEME KANITI",       "desc": "Sahalardaki eski deneme totemleri hâlâ sayıyor. İkisini tamamla — ikisinin de elitleri düşsün.", "obj": {"type": "totem", "n": 2}, "rew": {"cho": 170, "item": "i_koro"}, "prereq": "q_elit"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -236,6 +237,7 @@ static func obj_text(q: Dictionary) -> String:
 		"biomes": return "%d farklı saha" % need
 		"score":  return "%d skor" % need
 		"frag":   return "%d parçacık topla" % need
+		"totem":  return "%d deneme totemi tamamla" % need
 	return "?"
 
 static func prog_text(q: Dictionary) -> String:

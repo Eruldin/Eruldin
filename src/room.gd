@@ -584,6 +584,7 @@ func _process(d: float) -> void:
 	_tick_hazards(d)
 	_tick_pickups(d)
 	_tick_monolith(d)
+	_tick_trial()
 	_tick_merchant(d)
 	_tick_stray(d)
 	_tick_critters(d)
@@ -595,6 +596,23 @@ func _process(d: float) -> void:
 	if has_meta("fire_light") and is_instance_valid(get_meta("fire_light")):
 		var l: PointLight2D = get_meta("fire_light")
 		l.energy = 1.0 + sin(Time.get_ticks_msec() * 0.013) * 0.16 + sin(Time.get_ticks_msec() * 0.041) * 0.07
+
+var _trial_elites: Array = []
+var _trial_pos := Vector2.ZERO
+
+# DENEME TOTEMİ: iki elit doğar — ikisi de düşünce sandık+eşya öder
+func _tick_trial() -> void:
+	if _trial_elites.is_empty():
+		return
+	_trial_elites = _trial_elites.filter(func(e): return is_instance_valid(e) and not e.dead)
+	if _trial_elites.is_empty():
+		G.ui.toast("DENEME TAMAM — sandık düştü")
+		G.audio.jingle("boon")
+		Quests.tick("totem")
+		spawn_chest(_trial_pos)
+		var tiid := Items.roll(G.run.luck + 0.2)
+		if tiid != "":
+			spawn_loot(tiid, _trial_pos + Vector2(40, 0))
 
 func _tick_motes(d: float) -> void:
 	var t := Time.get_ticks_msec() * 0.001
@@ -1038,6 +1056,18 @@ func _collect(pk: Node) -> void:
 			G.audio.jingle("boon")
 			G.fx.light_flash(pk.position, Px.C("9be8ff"), 1.8, 2.4, 0.4)
 			Quests.tick("ceset")
+		"totem":
+			if not _trial_elites.is_empty():
+				return
+			_trial_pos = pk.position
+			G.ui.toast("DENEME TOTEMİ — iki elit doğuyor; ikisini de kes")
+			G.audio.play("alarm", 1.1, 0.6)
+			G.fx.tele_ring(pk.position, 220.0, 0.9, Color(1.0, 0.4, 0.2, 0.45))
+			for i in 2:
+				var ang := TAU * float(i) / 2.0 + G.rf(0.0, 0.5)
+				var sp := clamp_pos(pk.position + Vector2.from_angle(ang) * 220.0, 40.0)
+				var ek: int = G.pick([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI])
+				_trial_elites.append(Enemy.spawn(ek, sp, true, G.director._hp_scale() * 1.1, G.director._dmg_scale(), self))
 		"chest":
 			G.run.open_chest()
 		"loot":
@@ -1118,6 +1148,9 @@ func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 		"ceset":
 			pk.texture = Px.S2("por_rex") if Px.S2("por_rex") != null else Px.S("dot")
 			col = "9be8ff"
+		"totem":
+			pk.texture = Px.S2("icn_skull") if Px.S2("icn_skull") != null else Px.S("dot")
+			col = "ff6d3d"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	pk.scale = Vector2.ONE * (0.95 if kind == "cursed" else 0.8)
 	pk.modulate = Px.C(col)
