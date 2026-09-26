@@ -40,6 +40,20 @@ const NODES := [
 	 ]},
 ]
 
+# günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
+const DAILY := [
+	{"name": "KALABALIK GÜN", "desc": "sürü %25 daha kalabalık akar", "mods": {"spawn": 1.25}, "rew": 1.1},
+	{"name": "ZIRHLI SÜRÜ",   "desc": "kovan %20 daha dayanıklı",      "mods": {"hp": 1.2}, "rew": 1.15},
+	{"name": "ACIMASIZ GÜN",  "desc": "kovan %20 daha sert vurur",     "mods": {"dmg": 1.2}, "rew": 1.15},
+	{"name": "BEREKET",       "desc": "parçacık düşüşü +%40",          "mods": {"frag": 1.4}, "rew": 1.0},
+	{"name": "ŞANSLI GÜN",    "desc": "eşya/kalite şansı +0.2",        "luck": 0.2, "rew": 1.0},
+	{"name": "ELİT NÖBETİ",   "desc": "elitler sık doğar",             "mods": {"elite_t": 0.7}, "rew": 1.1},
+]
+
+static func daily() -> Dictionary:
+	var dk := Time.get_date_string_from_system()
+	return DAILY[abs(dk.hash()) % DAILY.size()]
+
 # harita üstünde çizilen seyahat hatları (BG2 bağlantıları)
 const EDGES := [
 	["kamp", "b0"], ["kamp", "pazar"], ["kamp", "tarla"], ["kamp", "yol"],
