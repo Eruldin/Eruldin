@@ -75,6 +75,20 @@ func start_run() -> void:
 		G.meta.data["blessing"] = false
 		G.meta.save()
 		take_boon(G.pick(Boons.all()))
+	# kilitli silahlar koşulu ilk kez tutunca duyurulur
+	var seen: Array = G.meta.data.get("unlocked_w", [])
+	var changed := false
+	for wid in Weapons.DEFS:
+		var dd: Dictionary = Weapons.DEFS[wid]
+		if dd.get("hidden", false) or dd.get("req", {}).is_empty():
+			continue
+		if Weapons.unlocked(wid) and not seen.has(wid):
+			seen.append(wid)
+			changed = true
+			G.ui.toast("yeni silah açıldı: %s" % dd.name)
+	if changed:
+		G.meta.data["unlocked_w"] = seen
+		G.meta.save()
 	var dr := Director.new()
 	dr.biome = biome
 	add_child(dr)

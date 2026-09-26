@@ -853,6 +853,16 @@ func records_panel() -> void:
 		var l := _lbl("%s  %s" % ["◆" if done else "◇", "%s — %s" % [BIOME_NAME[i], Run.BOSS_NAMES[i]]],
 			Vector2.ZERO, 13, Color(0.95, 0.85, 0.4) if done else Color(0.5, 0.5, 0.6))
 		v.add_child(l)
+	var sep2 := _lbl("— ARSENAL —", Vector2.ZERO, 12, Px.C("c9a227"))
+	v.add_child(sep2)
+	for wid in Weapons.DEFS:
+		var wd: Dictionary = Weapons.DEFS[wid]
+		if wd.get("hidden", false):
+			continue
+		var ok := Weapons.unlocked(wid)
+		var l := _lbl("%s  %s%s" % ["◆" if ok else "◇", str(wd.name), "" if ok else "  — " + Weapons.req_text(wid)],
+			Vector2.ZERO, 12, Color(0.9, 0.85, 0.6) if ok else Color(0.45, 0.45, 0.55))
+		v.add_child(l)
 	var ld: Dictionary = d.get("last_death", {})
 	if not ld.is_empty() and str(ld.get("killer", "")) != "":
 		var l := _lbl("son düşüş: %s @ %s" % [str(ld.get("killer")), BIOME_NAME[int(ld.get("biome", 0))]], Vector2.ZERO, 11, Color(0.6, 0.55, 0.6))

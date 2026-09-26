@@ -89,6 +89,7 @@ const DEFS := {
 		"inc": {"dmg": 2.2, "r": 5.0, "dur": 0.3},
 		"feats": {5: {"n": 1.0}},
 		"evo": "core", "into": "spit_x",
+		"req": {"kills": 250},
 	},
 	"spit_x": {
 		"name": "ASİT SELİ", "icon": "ico_heal", "col": "7dff4d",
@@ -103,6 +104,7 @@ const DEFS := {
 		"inc": {"dmg": 2.4, "n": 0.34, "cd": -0.03},
 		"feats": {6: {"n": 1.0}},
 		"evo": "plating", "into": "dagger_x",
+		"req": {"kills": 800},
 	},
 	"dagger_x": {
 		"name": "ÇELİK YAĞMURU", "icon": "icn_stance_duel", "col": "cfe8ff",
@@ -116,6 +118,7 @@ const DEFS := {
 		"b": {"dmg": 30.0, "cd": 2.1, "len": 620.0, "w": 26.0},
 		"inc": {"dmg": 8.0, "len": 14.0, "w": 1.6, "cd": -0.05},
 		"evo": "regen", "into": "ray_x",
+		"req": {"bosses": 1},
 	},
 	"ray_x": {
 		"name": "GAMA ERİYİĞİ", "icon": "icn_upg_dmg", "col": "fff3c0",
@@ -130,6 +133,7 @@ const DEFS := {
 		"inc": {"dmg": 4.2, "n": 0.5, "cd": -0.06},
 		"feats": {5: {"n": 1.0}, 8: {"n": 1.0}},
 		"evo": "warp", "into": "seeker_x",
+		"req": {"wins": 1},
 	},
 	"seeker_x": {
 		"name": "KÜME SAĞANAĞI", "icon": "ico_exit", "col": "ffe9a0",
@@ -218,6 +222,30 @@ static func evo_ready(p: Player) -> Array:
 static func _opt(kind: String, id: String, lvl: int, name: String, icon: String, col: String, desc: String, w: float, top: String = "") -> Dictionary:
 	return {"kind": kind, "id": id, "lvl": lvl, "name": name, "icon": icon, "col": col, "desc": desc, "top": top, "w": w}
 
+# VS achievement gating: gated weapons only draft once the meta goal is met
+static func unlocked(wid: String) -> bool:
+	var req: Dictionary = DEFS.get(wid, {}).get("req", {})
+	if req.is_empty():
+		return true
+	var d: Dictionary = G.meta.data
+	if int(req.get("kills", 0)) > int(d.get("kills", 0)):
+		return false
+	if int(req.get("wins", 0)) > int(d.get("victories", 0)):
+		return false
+	if int(req.get("bosses", 0)) > int(d.get("bosses", []).size()):
+		return false
+	return true
+
+static func req_text(wid: String) -> String:
+	var req: Dictionary = DEFS.get(wid, {}).get("req", {})
+	if req.has("wins"):
+		return "1 zafer gerekir"
+	if req.has("bosses"):
+		return "%d efendi düşür" % int(req.get("bosses", 0))
+	if req.has("kills"):
+		return "%d toplam kesim" % int(req.get("kills", 0))
+	return ""
+
 static func draft_opts(p: Player, luck: float) -> Array:
 	var pool: Array = []
 	for w in p.weapons:
@@ -227,7 +255,7 @@ static func draft_opts(p: Player, luck: float) -> Array:
 	if p.weapons.size() < WPN_SLOTS:
 		for wid in DEFS:
 			var d: Dictionary = DEFS[wid]
-			if d.get("hidden", false) or has_w(p, wid):
+			if d.get("hidden", false) or has_w(p, wid) or not unlocked(wid):
 				continue
 			pool.append(_opt("wpn", wid, 1, d.name, d.icon, d.col, str(d.desc) + "  (yeni silah)", 7.0, "YENİ"))
 	for ps in p.passives:
