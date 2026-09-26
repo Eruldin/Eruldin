@@ -33,6 +33,7 @@ var data := {
 	"seen_lines": [],
 	"stance": "",          # chosen doctrine from Rhasa
 	"hero": "ely",         # chosen chassis — "ely" or heavy "elyb"
+	"unlocked_w": [],      # gated silahların duyurulduğu id'ler (toast bir kez)
 	"arena_biome": 0,      # arena sector picked via David (İz Sürücü)
 	"hyper": false,        # AŞILAMA: sürü hızlı/kalabalık akar, ödeme ×1.5
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır
