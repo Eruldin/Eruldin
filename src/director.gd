@@ -135,6 +135,13 @@ func _comp(m: float) -> int:
 		pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.CEREB])
 	if m >= 8.5:
 		pool.append_array([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.DRONE, Enemy.EKind.KONAKCI])
+	# each sector leans on its own brood: Simithar rains fire (spitters/drones),
+	# Wreckage swarms with husks/varls, Aeterna fields its elite dead
+	if m >= 2.0:
+		match biome:
+			1: pool.append_array([Enemy.EKind.SPITTER, Enemy.EKind.DRONE])
+			2: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.HUSK])
+			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA])
 	return G.pick(pool)
 
 func _hp_scale() -> float:
