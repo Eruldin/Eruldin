@@ -33,6 +33,7 @@ const NODES := [
 	 	{"tex": "por_neva", "title": "NEVA", "sub": "Bunu hissettin değil mi? Kaya korosuna katıldın — artık düşersen bir kaydın var. Parçacıklarını al, git."},
 	 ]},
 	{"id": "sisgecidi", "name": "SİS GEÇİDİ",      "icon": "icn_dash",    "pos": Vector2(160, 480), "col": "a5d6a7", "kind": "arena", "biome": 4, "unlock": "node", "desc": "Batıdaki sis perdesi — kasılmak isteyenlerin geçidi: sürü bol, frag ve ganimet bereketli.", "lore": "Bataklığın sisi burada duvar gibi. İçinde kistler şarkı söylüyor; göçebe Ahusk bu yolu gençliğinde kaçarak geçti.", "mods": {"spawn": 1.25, "frag": 1.45, "loot": 1.4, "dusk": true}},
+	{"id": "avlis",  "name": "EFENDİ AVLISI",   "icon": "icn_crown",   "pos": Vector2(1230, 90),  "col": "ffd75f", "kind": "arena", "biome": 5, "unlock": "boss twins", "desc": "Boss-rush: altı efendi arka arkaya — zincirin sonu zafer.", "lore": "Kirin ve Constantin düştükten sonra açılan arena: protokolün bütün efendileri burada nöbet sırası bekliyor. Altısını da tek koşuda düşür.", "mods": {"rush": 1, "frag": 2.0, "loot": 2.0}},
 	{"id": "kulovasi", "name": "KÜL OVASI",        "icon": "icn_mine",    "pos": Vector2(1160, 260), "col": "ff7722", "kind": "arena", "biome": 5, "unlock": "node", "desc": "Praetorian yangınının külü — lav püskürtücüler, kor hücreleri, çok sert kovan.", "lore": "İmparatorluk burasını yakarak temizledi; kül hâlâ sıcak. Yerdeki her çatlak kor saklıyor — kovan ateşi sevdiği için burada en kalını.", "mods": {"hp": 1.55, "dmg": 1.35, "spawn": 1.2, "frag": 1.7, "loot": 1.8}},
 	{"id": "krater", "name": "DÜŞÜK KRATER",       "icon": "icn_mine",    "pos": Vector2(860, 650), "col": "ffb74d", "kind": "story", "unlock": "boss rex","desc": "İlk efendinin düştüğü yerde bir krater — içinde hâlâ ışık yanıyor.", "rew": {"cho": 120, "item": "i_palto"},
 	 "cards": [
@@ -67,6 +68,7 @@ const EDGES := [
 	["mabed", "krater"], ["vatika", "krater"],
 	["kayalik", "sisgecidi"], ["kamp", "sisgecidi"],
 	["kuyu", "kulovasi"], ["mezarlik", "kulovasi"],
+	["kulovasi", "avlis"],
 ]
 
 static func node(id: String) -> Dictionary:

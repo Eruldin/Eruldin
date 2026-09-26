@@ -28,6 +28,10 @@ var running := true
 
 var _spawn_t := 0.0
 var _elite_t := 95.0
+# EFENDİ AVLISI: node_mods.rush — altı efendi arka arkaya; zafer zincirin sonunda
+var _rush_order := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.NAHUM, Boss.BKind.TUMAN, Boss.BKind.KIRIN, Boss.BKind.CONST]
+var _rush_idx := 0
+var _rush_next := 8.0
 var _surge_t := 85.0
 var _mono_fired := false   # resonance cluster side objective — once per run
 var _tome_t := 275.0       # bilgelik tomu — ~4:35'te ilki, sonra ~4dk'da bir
@@ -40,6 +44,8 @@ const RAIN_CFG := [
 	{"t": "KAYA SAĞANAĞI — madenin tavanı çözülüyor!", "col": "b08850", "r": 105.0, "n": 6, "pdmg": 30.0, "ptype": "MELEE"},
 	{"t": "ARK FIRTINASI — enkaz elektrik boşalıyor!", "col": "42d4f4", "r": 70.0, "n": 10, "pdmg": 18.0, "ptype": "SHOCK"},
 	{"t": "IŞIK HÜZMESİ — kubbe odaklanıyor!", "col": "ffe9a8", "r": 62.0, "n": 9, "pdmg": 22.0, "ptype": "PURE"},
+	{"t": "SPOR PATLAMASI — şişkin mantarlar doluyor!", "col": "66bb6a", "r": 80.0, "n": 8, "pdmg": 20.0, "ptype": "EXPLOSION"},
+	{"t": "KOR YAĞMURU — gökyüzü kül kusuyor!", "col": "ff7722", "r": 90.0, "n": 8, "pdmg": 26.0, "ptype": "EXPLOSION"},
 ]
 var _min_ann := 0          # son duyurulan dakika kilometre taşı
 var _mini := false
@@ -78,6 +84,8 @@ func _tick_spawn(d: float) -> void:
 	var inf: bool = G.run.endless
 	_spawn_t = lerpf(1.6, 0.34, clampf(t / 540.0, 0.0, 1.0)) * (0.72 if hyp else 1.0) * (0.7 if inf else 1.0)
 	_spawn_t /= float(G.run.node_mods.get("spawn", 1.0))
+	if _rush():
+		_spawn_t *= 1.8  # boss-rush: hafif sürü basıncı, odak zincirde
 	var cap := mini(230, int((60 + m * 13.0) * (1.4 if hyp else 1.0) * (1.3 if inf else 1.0)))
 	var batch := mini(6, 2 + int(t / 140.0)) + (1 if hyp else 0)
 	while batch > 0 and G.enemies.size() < cap:
@@ -170,13 +178,21 @@ func _tick_events(d: float) -> void:
 				G.fx.mk_light(e, Vector2(0, -18), Px.C("ff2222"), 0.8, 2.4)
 				G.ui.toast("HASATÇI peşine düştü — kaç ya da öldür")
 				G.audio.jingle("boss")
+	# boss-rush: zamanlı mini/final yerine zincir — önceki düşünce 16sn sonra sıradaki
+	if _rush():
+		if not _won and _rush_idx < _rush_order.size() and t >= _rush_next and not _boss_alive():
+			var bk := int(_rush_order[_rush_idx])
+			var rb := _boss(bk, 1.7 + _rush_idx * 0.5 + biome * 0.15, "EFENDİ %d/6 — %s" % [_rush_idx + 1, Boss.NAMES[bk]])
+			if rb != null:
+				rb.set_meta("rush_boss", true)
+				_rush_next = INF
 	# miniboss
-	if not _mini and t >= MINI_T:
+	if not _rush() and not _mini and t >= MINI_T:
 		_mini = true
 		var mk := int(MINI_KIND[clampi(biome, 0, MINI_KIND.size() - 1)])
 		_boss(mk, 1.0 + m * 0.10 + biome * 0.35, "%s geliyor" % Boss.NAMES[mk])
 	# final boss — kill it to clear the stage
-	if not _final and t >= FINAL_T:
+	if not _rush() and not _final and t >= FINAL_T:
 		_final = true
 		var kinds: Array = FINAL_KIND[clampi(biome, 0, FINAL_KIND.size() - 1)]
 		var first: Boss = null
@@ -354,6 +370,25 @@ func _on_boss_dead(b) -> void:
 			G.room.spawn_loot(miid, b.pos + Vector2(0, -50))
 		G.ui.toast("%s düştü — sandıklar yere saçıldı" % b.actor_name)
 		G.audio.jingle("boss")
+		if b.has_meta("rush_boss"):
+			_rush_idx += 1
+			if _rush_idx >= _rush_order.size():
+				if not _won:
+					_won = true
+					G.ui.banner("ZİNCİR KIRILDI", "altı efendi tek koşuda düştü")
+					G.run.victory()
+			else:
+				_rush_next = t + 16.0
+				G.ui.toast("EFENDİ %d/6 düştü — sıradaki yaklaşıyor" % _rush_idx)
+
+func _rush() -> bool:
+	return G.run != null and float(G.run.node_mods.get("rush", 0.0)) > 0.0
+
+func _boss_alive() -> bool:
+	for e in G.enemies:
+		if e is Boss and not e.dead:
+			return true
+	return false
 
 # göktaşı yağmuru olayı: oyuncu çevresine telegraph'lı vuruşlar — iki tarafı da vurur
 func _rain() -> void:
