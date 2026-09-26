@@ -1992,6 +1992,32 @@ func blessing_panel() -> void:
 			G.audio.play("boon", 1.1, 0.6)
 			_close_overlay()
 			blessing_panel())
+	# ikinci hizmet: YOLDAŞ — koşu boyunca yanında ateş eden muhafız dronu
+	var sep := _lbl("— ya da —", Vector2.ZERO, 11, Color(0.5, 0.5, 0.6))
+	sep.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sep)
+	var has2 := bool(G.meta.data.get("hired", false))
+	var l2b := _lbl("muhafız dronu kirala — koşu boyunca yanında süzülür, kendi ateş eder", Vector2.ZERO, 12, Color(0.8, 0.85, 0.8))
+	l2b.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l2b)
+	var btn2 := Button.new()
+	btn2.text = "✓ KİRALANDI" if has2 else "◆ 150 — YOLDAŞ KİRALA"
+	btn2.disabled = has2 or G.meta.data.choralim < 150
+	btn2.custom_minimum_size = Vector2(200, 30)
+	btn2.add_theme_font_override("font", ui_font())
+	if btn2.disabled:
+		btn2.modulate = Color(0.55, 0.55, 0.6)
+	var bc2 := CenterContainer.new()
+	bc2.add_child(btn2)
+	v.add_child(bc2)
+	btn2.pressed.connect(func():
+		if not has2 and G.meta.data.choralim >= 150:
+			G.meta.data["choralim"] -= 150
+			G.meta.data["hired"] = true
+			G.meta.save()
+			G.audio.jingle("boon")
+			_close_overlay()
+			blessing_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)

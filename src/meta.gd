@@ -51,6 +51,7 @@ var data := {
 	"hyper": false,        # AŞILAMA: sürü hızlı/kalabalık akar, ödeme ×1.5
 	"dark": false,         # KARANLIK: şifa küresi düşmez, ödeme ×1.25
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır
+	"hired": false,        # Ahusk yoldaşı — koşu boyunca muhafız dronu
 	"intro_seen": false,   # açılış sinematik kartları bir kez oynatılır
 	"contract": {},        # Ehnar's aktif görevi: {key,need,reward}
 	"feats_seen": [],      # duyurulmuş başarımlar (toast bir kez)
