@@ -108,7 +108,7 @@ func init() -> void:
 	body = Sprite2D.new()
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(body)
-	_load_frames("c_elyb" if str(G.meta.data.get("hero", "ely")) == "elyb" else "ely", 7.0)
+	_load_frames(_hero_set(), 7.0)
 	Px.fit(body, 94.0)
 	_aura = G.fx.mk_light(self, Vector2(0, -20), Px.C("00E5FF"), 0.45, 2.0)
 	blade = Sprite2D.new()
@@ -263,16 +263,29 @@ func _tick_dash(d: float) -> void:
 
 var _space_held := false
 
-# B-serisi ağır şasi: daha az can, daha çok hasar, daha yavaş — başka bir oynanış
+# şasi farkları oynanışı değiştirir: elyb ağır topçu, via hızlı keskin
 func _apply_hero() -> void:
-	if str(G.meta.data.get("hero", "ely")) != "elyb":
-		actor_name = "Ely"
-		return
-	actor_name = "Ely-B"
-	max_hp = maxi(40, max_hp - 20)
-	hp = max_hp
-	dmg_mult += 0.12
-	speed *= 0.92
+	var hk := str(G.meta.data.get("hero", "ely"))
+	actor_name = "Ely"
+	match hk:
+		"elyb":
+			actor_name = "Ely-B"
+			max_hp = maxi(40, max_hp - 20)
+			hp = max_hp
+			dmg_mult += 0.12
+			speed *= 0.92
+		"via":
+			actor_name = "V-Serkay"
+			max_hp = maxi(40, max_hp - 12)
+			hp = max_hp
+			speed *= 1.08
+			crit_ch += 0.08
+
+func _hero_set() -> String:
+	return {"elyb": "c_elyb", "via": "c_viawar"}.get(str(G.meta.data.get("hero", "ely")), "ely")
+
+func _hero_start() -> String:
+	return {"elyb": "plasma", "via": "dagger"}.get(str(G.meta.data.get("hero", "ely")), "blade")
 
 func _apply_stance() -> void:
 	st_arc = 1.0; st_dmg = 1.0; st_spd = 1.0; st_parry = 0.0; st_reach = 0.0
@@ -526,7 +539,7 @@ func reset_for_run() -> void:
 		for pl in w.get("pools", []):
 			if is_instance_valid(pl.get("node")):
 				pl.node.queue_free()
-	var start_id := "plasma" if str(G.meta.data.get("hero", "ely")) == "elyb" else "blade"
+	var start_id := _hero_start()
 	weapons = [{"id": start_id, "lvl": 1, "t": 0.35, "orbs": [], "pools": [], "tk": 0.0, "ang": 0.0}]
 	passives = []
 	level = 1
@@ -546,7 +559,7 @@ func reset_for_run() -> void:
 	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)
 	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
 	_apply_hero()
-	_load_frames("c_elyb" if str(G.meta.data.get("hero", "ely")) == "elyb" else "ely", 7.0)
+	_load_frames(_hero_set(), 7.0)
 	Px.fit(body, 94.0)
 	_combo = 0; _combo_t = 0.0; _combo_lock = 0.0; _plasma_charge = -1.0
 

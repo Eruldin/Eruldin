@@ -1423,6 +1423,8 @@ const HEROES := {
 		"desc": "Standart şasi. Başlangıç: Enerji Kılıcı. Dengeli gövde — kovanın ilk düşüşünden kalan."},
 	"elyb": {"name": "ELY-B", "por": "por_elyb", "col": "9db4c8",
 		"desc": "Ağır B-serisi. Başlangıç: Plazma Dizisi. −20 can · +%12 hasar · −%8 hız."},
+	"via": {"name": "V-SERKAY", "por": "por_c_viawar", "col": "ffb74d",
+		"desc": "Viator keşif kasası. Başlangıç: Fitil Bıçağı. −12 can · +%8 hız · +%8 kritik."},
 }
 
 func hero_panel() -> void:
