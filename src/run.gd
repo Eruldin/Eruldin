@@ -489,7 +489,15 @@ func on_player_death(h: Dictionary) -> void:
 	fragments = 0
 	for f in G.meta.new_feats():
 		G.ui.toast("BAŞARIM: %s" % f)
-	G.ui.death_screen(killer, gained)
+	# ölüm sinematiği: solgun biome kartı + Neva repliği, sonra ölüm paneli
+	var ci2 := clampi(biome, 0, 5)
+	var dtex := "cine_%d_0" % ci2
+	G.ui.cine_seq([
+		{"tex": dtex, "title": "DÜŞTÜN", "sub": "%s seni kovana kattı." % killer},
+		{"tex": "por_neva", "title": "NEVA", "sub": "Rezonans tuttu seni. Bir parçan eksik — ama döndün."},
+	], func(): G.ui.death_screen(killer, gained))
+	if not G.ui.overlay_open():
+		G.ui.death_screen(killer, gained)
 
 func abandon_to_hub() -> void:
 	if not alive:
