@@ -57,6 +57,7 @@ var data := {
 	"contract": {},        # Ehnar's aktif görevi: {key,need,reward}
 	"feats_seen": [],      # duyurulmuş başarımlar (toast bir kez)
 	"reapers": 0,          # kesilen HASATÇI sayısı
+	"champs": 0,           # kesilen ŞAMPİYON elit sayısı
 	"best_evos": 0,        # tek koşuda en çok evrim
 	"curse_wins": 0,       # 2+ sözleşmeyle kazanılan zafer
 	"eggs": 0,             # toplanan altın nüve (kalıcı +%0.5 hasar/adet)
@@ -125,6 +126,7 @@ func achievements() -> Array:
 		{"name": "İNATÇI", "desc": "10 koşuya çık", "done": int(data["runs"]) >= 10, "rew": 80},
 		{"name": "TAM ARSENAL", "desc": "tüm silahların kilidini aç", "done": arsenal, "rew": 250},
 		{"name": "HASAT AVCISI", "desc": "bir HASATÇI'yı kes", "done": int(data.get("reapers", 0)) > 0, "rew": 150},
+		{"name": "ŞAMPİYON AVCISI", "desc": "bir altın ŞAMPİYON elit kes", "done": int(data.get("champs", 0)) > 0, "rew": 180},
 		{"name": "EVRİM MİMARI", "desc": "tek koşuda 3 evrim tamamla", "done": int(data.get("best_evos", 0)) >= 3, "rew": 120},
 		{"name": "NÜVE AVCISI", "desc": "10 altın nüve topla", "done": int(data.get("eggs", 0)) >= 10, "rew": 120},
 		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0, "rew": 150},

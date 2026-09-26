@@ -36,6 +36,7 @@ const KIND_LORE := {
 
 var kind: int = EKind.HUSK
 var elite := false
+var champ := false        # nadir altın katman — ×5 can, garanti eşya + ekstra sandık
 var affix := ""            # elite modifier: armored / volatile / swift / sparked
 var _spk_t := 0.0
 var _sum_t := 0.0   # çağırıcı elit: döl saçma sayacı
@@ -184,6 +185,21 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if G.run != null and G.run.slow_all:
 		speed *= 0.9
 	hp = max_hp
+
+# dakika 8+ nadir altın katman: daha büyük/sert, ölünce garanti eşya + ikinci sandık
+func promote_champ() -> void:
+	champ = true
+	max_hp *= 5.0
+	hp = max_hp
+	touch_dmg *= 1.35
+	proj_dmg *= 1.3
+	actor_name = "ŞAMPİYON " + actor_name
+	base_color = Color(1.0, 0.8, 0.3)
+	if is_instance_valid(body):
+		Px.fit(body, 150.0)
+	G.fx.mk_light(self, Vector2(0, -18), Px.C("ffd700"), 0.85, 2.2)
+	G.fx.flash(Px.C("ffd700"), 0.18)
+	G.audio.play("roar", 0.5, 0.55)
 
 func init() -> void:
 	super.init()
@@ -555,6 +571,16 @@ func die(h: Dictionary) -> void:
 		if elite:
 			G.room.spawn_chest(pos)
 			G.run.drop_fragments(pos, G.ri(8, 14))
+			if champ:
+				# altın katman ödülü: ikinci sandık + garanti eşya + ağır parçacık
+				G.room.spawn_chest(pos + Vector2(30, 0))
+				G.run.drop_fragments(pos + Vector2(0, 12), G.ri(30, 45))
+				var iid2 := Items.roll(G.run.luck + 0.4)
+				if iid2 != "":
+					G.room.spawn_loot(iid2, pos + Vector2(0, -26))
+				G.run.stats["champ_kills"] = int(G.run.stats.get("champ_kills", 0)) + 1
+				G.meta.data["champs"] = int(G.meta.data.get("champs", 0)) + 1
+				G.fx.shake(0.3, 0.45)
 			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
 			Quests.tick("elites")
 			G.fx.flash(Px.C("ffd75f"), 0.13)
