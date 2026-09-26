@@ -436,7 +436,7 @@ func die(h: Dictionary) -> void:
 			G.fx.light_flash(blast_pos, Color(1, 0.6, 0.2), 2.2, 3.0, 0.25)
 			G.audio.play("explode", 0.9, 0.7)
 			G.fx.shake(0.18, 0.2))
-		if G.chance(0.045):
+		if G.chance(0.045) and not G.run.dark:
 			G.room.spawn_heal(pos)
 		G.room.on_enemy_dead(self)
 	queue_free()

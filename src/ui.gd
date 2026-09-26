@@ -404,7 +404,7 @@ func _tick_hud() -> void:
 	_lvl_lbl.text = "SEV %d" % p.level
 	var tt := int(G.run.time)
 	_time_lbl.text = ("%02d:%02d" % [tt / 60, tt % 60]) + ("   AZAP ×%d" % int(G.run.curse) if int(G.run.curse) > 0 else "")
-	_time_lbl.add_theme_color_override("font_color", Px.C("c26bff") if G.run.endless else (Px.C("ff5533") if G.run.hyper else Color(0.9, 0.95, 1)))
+	_time_lbl.add_theme_color_override("font_color", Px.C("c26bff") if G.run.endless else (Px.C("ff5533") if (G.run.hyper or G.run.dark) else Color(0.9, 0.95, 1)))
 	_kills_lbl.text = "%d kesim" % int(G.run.stats.get("kills", 0))
 	if G.run.streak >= 10:
 		_kills_lbl.text += "  x%d" % G.run.streak
@@ -918,7 +918,11 @@ func biome_panel() -> void:
 	opts.append({"kind": "biome", "id": -1, "name": "AŞILAMA\n%s" % ("◈ AÇIK" if hyp else "MOD"),
 		"icon": "icn_kovan", "col": "ff5533",
 		"desc": "kovan hızlı ve kalabalık akar\nparçacık ödemesi ×1.5", "top": "", "w": 1.0})
-	_show_cards("biomesel", "SAHA SEÇİMİ — David'in izleri  [1-5]", Px.C("00E5FF"), opts)
+	var drk := bool(G.meta.data.get("dark", false))
+	opts.append({"kind": "biome", "id": -2, "name": "KARANLIK\n%s" % ("◈ AÇIK" if drk else "MOD"),
+		"icon": "icn_skull", "col": "7c4dff",
+		"desc": "şifa küresi düşmez\nparçacık ödemesi ×1.25", "top": "", "w": 1.0})
+	_show_cards("biomesel", "SAHA SEÇİMİ — David'in izleri  [1-6]", Px.C("00E5FF"), opts)
 
 func _biome_desc(b: int) -> String:
 	return ["Proterian çoraklığı — Alfa-05'in izi.",
@@ -1179,6 +1183,11 @@ func _pick_card(o: Dictionary) -> void:
 			G.meta.data["hyper"] = hyp
 			G.meta.save()
 			G.ui.toast("aşılama %s — kovan %s" % ["AÇILDI" if hyp else "kapatıldı", "hızlı ve kalabalık akacak" if hyp else "normal akacak"])
+		elif bid == -2:
+			var drk := not bool(G.meta.data.get("dark", false))
+			G.meta.data["dark"] = drk
+			G.meta.save()
+			G.ui.toast("karanlık %s — %s" % ["AÇILDI" if drk else "kapatıldı", "şifa küresi düşmeyecek" if drk else "şifa küreleri geri döndü"])
 		else:
 			G.meta.data["arena_biome"] = bid
 			G.meta.save()
