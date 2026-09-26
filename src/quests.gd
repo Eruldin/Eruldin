@@ -42,6 +42,7 @@ const DEFS := [
 	{"id": "q_sinir",  "giver": "david",   "name": "HARİTA SINIRI",      "desc": "Haritanın tamamı yankılanmalı. Beş farklı sahada koşu yap.", "obj": {"type": "biomes", "n": 5}, "rew": {"cho": 150}, "prereq": "q_batak"},
 	{"id": "q_nobet2", "giver": "ehnar",   "name": "NÖBETÇİNİN KİLİDİ",  "desc": "Elitler defterde iz bırakır. Tek koşuda 15 elit kes — rekoru kır.", "obj": {"type": "elites", "n": 15}, "rew": {"cho": 140, "item": "i_gocek"}, "prereq": "q_nobet"},
 	{"id": "q_lanet", "giver": "saphire", "name": "LANETLİ MALLAR",    "desc": "Kızıl sandıklar pusu taşıyor ama içi dolu. 3 lanetli sandık aç — pusuya değer.", "obj": {"type": "cursed", "n": 3}, "rew": {"cho": 130, "item": "i_bosluk"}, "prereq": "q_loot"},
+	{"id": "q_kul",   "giver": "david",   "name": "KÜL ROTASI",         "desc": "Kuyu'nun doğusunda kül hâlâ yanıyor — Alfa Şövalyeleri orada toplanıyor. 10 tanesini kes, rotayı çıkarayım.", "obj": {"type": "kind", "k": "Alfa Şövalye", "n": 10}, "rew": {"cho": 150, "node": "kulovasi"}, "prereq": "q_sinir"},
 	{"id": "q_iz",    "giver": "neva",    "name": "YANKININ İZİ",       "desc": "Düştüğün yerde parçacıkların kalır. Öldüğün sahaya geri dön, eski cesedinden yükünü geri al — iki kez.", "obj": {"type": "ceset", "n": 2}, "rew": {"cho": 140, "item": "i_koro"}, "prereq": "q_surv"},
 ]
 

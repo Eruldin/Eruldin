@@ -12,7 +12,7 @@ var W := 1180.0
 var H := 660.0
 var BOUNDS := Rect2(-540, -290, 1080, 580)
 
-const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK"]
+const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK", "KÜL OVASI"]
 # biome'a ozgu uretilmis prop setleri (prop_<key>_<i>) — BG2 tarzi scatter
 const PROP_SPR := {
 	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5"],
@@ -21,6 +21,8 @@ const PROP_SPR := {
 	"3": ["prop_3_0", "prop_3_1", "prop_3_2", "prop_3_3", "prop_3_4", "prop_3_5"],
 	# Çürük Bataklik: Simithar'in mantar/kristal setini ödünç alır — fungal örtü
 	"4": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
+	# Kül Ovası: obsidiyan/bazalt/kor seti
+	"5": ["prop_5_0", "prop_5_1", "prop_5_2", "prop_5_3", "prop_5_4", "prop_5_5"],
 	"hub": ["prop_hub_0", "prop_hub_1", "prop_hub_2", "prop_hub_3", "prop_hub_4", "prop_hub_5"],
 }
 # isik veren prop'lar (kristal, mantar, fener, turbin, obelisk, ateslik)
@@ -28,6 +30,7 @@ const PROP_LIGHT := {
 	"prop_1_0": Color(0.3, 0.9, 1.0), "prop_1_2": Color(0.7, 0.5, 1.0), "prop_1_5": Color(1.0, 0.7, 0.3),
 	"prop_2_3": Color(1.0, 0.5, 0.2),
 	"prop_3_3": Color(0.6, 0.4, 1.0), "prop_3_4": Color(1.0, 0.65, 0.25),
+	"prop_5_0": Color(1.0, 0.45, 0.12), "prop_5_2": Color(1.0, 0.55, 0.15), "prop_5_4": Color(1.0, 0.5, 0.1),
 }
 # atmosfer motes: renk + yon egilimi (biome basina)
 const MOTE_COL := {
@@ -36,6 +39,7 @@ const MOTE_COL := {
 	"2": Color(1.0, 0.55, 0.25, 0.45),
 	"3": Color(0.7, 0.5, 1.0, 0.35),
 	"4": Color(0.45, 0.9, 0.5, 0.4),
+	"5": Color(1.0, 0.5, 0.2, 0.4),
 	"hub": Color(1.0, 0.75, 0.45, 0.35),
 }
 var motes: Array = []   # [{s, vel}] atmosfer parcaciklari
@@ -91,6 +95,7 @@ const DARK := [
 	Color(0.60, 0.53, 0.46),   # Sol Primus — rusted gloom
 	Color(0.55, 0.51, 0.66),   # Aeterna — imperial night
 	Color(0.44, 0.52, 0.42),   # Çürük Bataklık — murky fungal gloom
+	Color(0.50, 0.42, 0.38),   # Kül Ovası — kor altında koyu kül
 ]
 const HUB_DARK := Color(0.62, 0.56, 0.47)
 
@@ -343,6 +348,12 @@ func _place_hazards(depth: int) -> void:
 				add_slowzone(p, 52.0, -1.0)                                # radiation field
 			4:
 				add_slowzone(p, 60.0, -1.0)                                # batak çamuru — çeken balçık
+			5:
+				# Kül Ovası: lav fışkırtıcı — turuncu telegraph'lı püskürme
+				var t5 := G.fx.tele_circle(p, 52, 9999.0, Color(1.0, 0.45, 0.1, 0.25))
+				t5.sr.modulate.a = 0.12
+				G.fx.mk_light(self, p, Px.C("ff7722"), 0.4, 1.5)
+				hazards.append({"pos": p, "r": 52.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(2, 6), "tele": t5, "erupt": 0.0, "col": "ff7722"})
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))   # void pool
 
@@ -877,7 +888,7 @@ func _tick_hazards(d: float) -> void:
 					h.t = rng.randf_range(4.0, 7.0)
 					if is_instance_valid(h.tele.sr):
 						h.tele.sr.modulate.a = 0.12
-					G.fx.burst(h.pos, Px.C("00E676"), 14, 130.0, 4.0, 0.4)
+					G.fx.burst(h.pos, Px.C(str(h.get("col", "00E676"))), 14, 130.0, 4.0, 0.4)
 					G.audio.play("explode", 1.6, 0.3)
 				elif is_instance_valid(h.tele.sr):
 					h.tele.sr.modulate.a = 0.5  # warning flare
