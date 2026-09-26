@@ -17,6 +17,8 @@ func build_arena(biome_idx: int) -> void:
 	_edge_walls()
 	_scatter_decals_big()
 	_scatter_props_big()
+	_vignette_arena()
+	_atmos()
 	_place_hazards_arena()
 	# a few field items scattered like VS floor pickups
 	for i in 6:
@@ -31,42 +33,26 @@ func spawn_point() -> Vector2:
 	return Vector2.ZERO
 
 func _field_floor() -> void:
-	# painted biome vista fills the void around the field
-	var bg_tex := Px.S2("bg_%d" % biome)
-	if bg_tex != null:
-		var bg := Sprite2D.new()
-		bg.texture = bg_tex
-		bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-		bg.scale = Vector2.ONE * maxf(
-			(W + 2400.0) / maxf(float(bg_tex.get_width()), 1.0),
-			(H + 2400.0) / maxf(float(bg_tex.get_height()), 1.0))
-		bg.modulate = Color(0.85, 0.82, 0.9)
-		bg.z_index = -4000
-		add_child(bg)
-	# one tiled TextureRect instead of ~1000 tile sprites — confined to the
-	# field itself so the vista reads beyond the walls
-	var ground := TextureRect.new()
+	# BG2 tarzi: tek buyuk boyanmis zemin resmi sahayi kaplar; kenarlari
+	# karanliga gomulur, disarida kalan alanlar saf karanlik (vista yok)
+	var bg := Sprite2D.new()
+	bg.texture = Px.S2("gr_%d" % biome)
+	bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	bg.scale = Vector2.ONE * maxf(
+		(W + 2000.0) / maxf(float(bg.texture.get_width()), 1.0),
+		(H + 2000.0) / maxf(float(bg.texture.get_height()), 1.0))
+	bg.modulate = Color(1.0, 0.98, 1.0)
+	bg.z_index = -2100
+	add_child(bg)
+	var ground := Sprite2D.new()
 	ground.name = "ground"
-	ground.texture = Px.S2("t2_%s_0" % str(biome))
-	ground.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	ground.stretch_mode = TextureRect.STRETCH_TILE
-	ground.scale = Vector2.ONE * 2.0
-	ground.size = Vector2((W + 160.0) / 2.0, (H + 160.0) / 2.0)
-	ground.position = -ground.size
-	ground.modulate = Color(0.72, 0.7, 0.78)
+	ground.texture = Px.S2("gr_%d" % biome)
+	ground.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	ground.scale = Vector2.ONE * maxf(
+		(W + 340.0) / maxf(float(ground.texture.get_width()), 1.0),
+		(H + 340.0) / maxf(float(ground.texture.get_height()), 1.0))
 	ground.z_index = -2000
-	ground.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(ground)
-	# a second sparse layer of variant tiles for texture break-up
-	for i in 90:
-		var s := Sprite2D.new()
-		s.texture = Px.S2("t2_%s_%d" % [str(biome), G.ri(1, 2)])
-		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		s.scale = Vector2.ONE * 2.0
-		s.position = Vector2(G.rf(-W * 0.5, W * 0.5), G.rf(-H * 0.5, H * 0.5))
-		s.modulate = Color(0.6, 0.58, 0.66)
-		s.z_index = -1999
-		add_child(s)
 
 func _edge_walls() -> void:
 	# visual fence around BOUNDS: wall band on top/bottom, pillars on the sides
@@ -116,19 +102,41 @@ func _scatter_decals_big() -> void:
 		add_child(s)
 
 func _scatter_props_big() -> void:
-	var n := 26
+	var n := 46
 	var tries := 0
-	while props.size() < n and tries < 400:
+	while props.size() < n and tries < 500:
 		tries += 1
 		var p := Vector2(rng.randf_range(BOUNDS.position.x + 60, BOUNDS.end.x - 60), rng.randf_range(BOUNDS.position.y + 60, BOUNDS.end.y - 60))
 		if p.distance_to(Vector2.ZERO) < 260.0:
 			continue
 		var ok := true
 		for q in props:
-			if p.distance_to(q.pos) < 120.0:
+			if p.distance_to(q.pos) < 130.0:
 				ok = false
 		if ok:
-			_prop(p, rng.randf_range(10, 22), PROP_SPR[biome][rng.randi() % PROP_SPR[biome].size()])
+			var set: Array = PROP_SPR[str(biome)]
+			_prop(p, rng.randf_range(12, 24), set[rng.randi() % set.size()])
+
+func _vignette_arena() -> void:
+	# buyuk saha icin kenar karartmasi: duvar bandinin disi + ic kenar yumusatma
+	var t := 320.0
+	var ov := 170.0
+	var edges := [
+		[Vector2(0, -H * 0.5 - t * 0.5 + ov), Vector2((W + 700.0) / 4.0, t / 256.0), 0.0],
+		[Vector2(0, H * 0.5 + t * 0.5 - ov), Vector2((W + 700.0) / 4.0, t / 256.0), PI],
+		[Vector2(-W * 0.5 - t * 0.5 + ov, 0), Vector2((H + 700.0) / 4.0, t / 256.0), -PI * 0.5],
+		[Vector2(W * 0.5 + t * 0.5 - ov, 0), Vector2((H + 700.0) / 4.0, t / 256.0), PI * 0.5],
+	]
+	for e in edges:
+		var s := Sprite2D.new()
+		s.texture = Px.S("grad")
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		s.position = e[0]
+		s.scale = e[1]
+		s.rotation = e[2]
+		s.modulate = Color(0.01, 0.01, 0.02, 0.9)
+		s.z_index = -1850
+		add_child(s)
 
 func _place_hazards_arena() -> void:
 	for i in 9:
