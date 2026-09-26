@@ -41,6 +41,7 @@ const DEFS := [
 	{"id": "q_sis",    "giver": "ahusk",   "name": "SİS PERDESİ",        "desc": "Kistlerin şarkısı batıda bir geçidi işaretliyor. 12 Cerebellum Kisti kes — geçidi bulayım.", "obj": {"type": "kind", "k": "Cerebellum Kisti", "n": 12}, "rew": {"cho": 100, "node": "sisgecidi"}, "prereq": "q_dua"},
 	{"id": "q_sinir",  "giver": "david",   "name": "HARİTA SINIRI",      "desc": "Haritanın tamamı yankılanmalı. Beş farklı sahada koşu yap.", "obj": {"type": "biomes", "n": 5}, "rew": {"cho": 150}, "prereq": "q_batak"},
 	{"id": "q_nobet2", "giver": "ehnar",   "name": "NÖBETÇİNİN KİLİDİ",  "desc": "Elitler defterde iz bırakır. Tek koşuda 15 elit kes — rekoru kır.", "obj": {"type": "elites", "n": 15}, "rew": {"cho": 140, "item": "i_gocek"}, "prereq": "q_nobet"},
+	{"id": "q_lanet", "giver": "saphire", "name": "LANETLİ MALLAR",    "desc": "Kızıl sandıklar pusu taşıyor ama içi dolu. 3 lanetli sandık aç — pusuya değer.", "obj": {"type": "cursed", "n": 3}, "rew": {"cho": 130, "item": "i_bosluk"}, "prereq": "q_loot"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}

@@ -1019,6 +1019,7 @@ func _collect(pk: Node) -> void:
 			var ciid := Items.roll(G.run.luck + 0.15)
 			if ciid != "":
 				spawn_loot(ciid, pk.position + Vector2(30, 10))
+			Quests.tick("cursed")
 		"chest":
 			G.run.open_chest()
 		"loot":
