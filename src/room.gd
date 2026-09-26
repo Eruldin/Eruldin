@@ -50,6 +50,10 @@ var pickups_node: Node2D
 var mono: Dictionary = {}      # rezonans kümesi: {pos,t,need,node,ring} — yakınında durarak şarj edilir
 var mono_pos := Vector2.ZERO   # kenar işareti okur
 var mono_active := false
+var merchant: Dictionary = {}  # gezgin tüccar: {node,tag} — tek alışverişlik koşu içi dükkân
+var merchant_pos := Vector2.ZERO
+var merchant_active := false
+var _merch_armed := true
 var _merge_t := 80.0            # kristal konsolidasyonu sayacı
 var decals: Node2D
 var pending_reward: int = Reward.FRAGMENTS
@@ -538,6 +542,7 @@ func _process(d: float) -> void:
 	_tick_hazards(d)
 	_tick_pickups(d)
 	_tick_monolith(d)
+	_tick_merchant(d)
 	_tick_doors()
 	_tick_motes(d)
 	_sort_children()
@@ -605,6 +610,59 @@ func _tick_monolith(d: float) -> void:
 			G.fx.flash(Px.C("7B1FA2"), 0.35)
 			G.audio.jingle("boss")
 			G.ui.toast("küme çözüldü — çift sandık")
+
+# Gezgin Tüccar: koşu ortasında beliren tek-alışverişlik dükkân. Yanına
+# yürümek paneli açar; satın alınca kovar, almadan çıkarsan geri dönebilirsin.
+func spawn_merchant(p: Vector2) -> void:
+	if merchant_active:
+		return
+	merchant_active = true
+	merchant_pos = p
+	_merch_armed = true
+	var node := Sprite2D.new()
+	node.texture = Px.S2("npc2_ahusk")
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	node.offset = Vector2(0, -node.texture.get_height() * 0.5)
+	Px.fit(node, 72.0)
+	node.position = p
+	node.z_index = int(p.y)
+	add_child(node)
+	var tag := Label.new()
+	tag.text = "GEZGİN TÜCCAR"
+	tag.add_theme_font_size_override("font_size", 11)
+	tag.add_theme_font_override("font", Ui.ui_font())
+	tag.add_theme_color_override("font_color", Px.C("ffd700"))
+	tag.add_theme_color_override("font_outline_color", Color.BLACK)
+	tag.add_theme_constant_override("outline_size", 3)
+	tag.position = p + Vector2(-52, -88)
+	tag.z_index = 500
+	add_child(tag)
+	G.fx.mk_light(node, Vector2(0, -18), Px.C("ffd700"), 0.8, 2.0)
+	merchant = {"node": node, "tag": tag}
+	G.audio.jingle("boon")
+	G.ui.toast("GEZGİN TÜCCAR sahada — yanına git")
+
+func despawn_merchant() -> void:
+	merchant_active = false
+	merchant_pos = Vector2.ZERO
+	if is_instance_valid(merchant.get("node")):
+		merchant.node.queue_free()
+	if is_instance_valid(merchant.get("tag")):
+		merchant.tag.queue_free()
+	merchant = {}
+
+func _tick_merchant(_d: float) -> void:
+	if not merchant_active or G.player == null or G.player.dead:
+		return
+	var dist := G.player.pos.distance_to(merchant_pos)
+	# panel ancak oyuncu uzaklaşınca tekrar kurulur — dibinde kapanıp-açılma yok
+	if dist > 160.0:
+		_merch_armed = true
+	if not _merch_armed or G.ui.overlay_open():
+		return
+	if dist < 52.0:
+		_merch_armed = false
+		G.ui.merchant_panel()
 
 func _tick_doors() -> void:
 	if G.player == null or G.player.dead or _door_cd > 0:

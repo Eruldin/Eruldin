@@ -18,6 +18,9 @@ var _tome_ck := false
 var _tome_boons := 0
 var _loot_done := false
 var _loot_ck := false
+var _merch_done := false
+var _merch_ck := false
+var _merch_close := false
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -166,6 +169,25 @@ func _process(_d: float) -> void:
 				_loot_ck = true
 				var bag := (G.run.stats.get("loot", []) as Array).size()
 				print("[probe] loot bag=%d elite_kills=%d" % [bag, int(G.run.stats.get("elite_kills", 0))])
+			# gezgin tüccar kapsaması: frag ver, dibinde doğur -> panel açılmalı
+			if not _merch_done and t >= 142.0:
+				_merch_done = true
+				G.run.fragments = 800
+				G.room.spawn_merchant(G.player.pos + Vector2(8, 0))
+				_merch_ck = true
+				print("[probe] merchant spawned")
+			# panel açılınca koşu durur — t bazlı beklemek kilitlenirdi; her frame bak
+			if _merch_ck and is_instance_valid(G.ui) and is_instance_valid(G.ui._overlay) and str(G.ui._overlay.get_meta("kind", "")) == "merchant":
+				_merch_ck = false
+				_merch_close = true      # shot deferred — kapanış bir frame sonra
+				print("[probe] merchant panel=merchant")
+				_shoot()
+			elif _merch_close:
+				_merch_close = false
+				G.ui._advance_overlay()
+			if _merch_ck and t >= 146.0:
+				_merch_ck = false
+				print("[probe] WARN merchant panel didn't open")
 			if t >= _shot_at:
 				_shot_at = t + 15.0
 				_shoot()
