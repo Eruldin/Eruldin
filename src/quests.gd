@@ -29,6 +29,12 @@ const DEFS := [
 	{"id": "q_final",  "giver": "zirkon",  "name": "SON KAYIT",        "desc": "Masadaki son iki isim: Kirin ve Constantin'i düşür.",      "obj": {"type": "boss", "k": "final"}, "rew": {"cho": 250, "item": "i_final"}},
 	{"id": "q_zafer",  "giver": "ahusk",   "name": "GÖÇEBENİN İNADI",  "desc": "Kovandan kaçan yaşar, kovana dönen kazanır. Bir zafer getir.", "obj": {"type": "win"}, "rew": {"cho": 100, "item": "i_kantas"}},
 	{"id": "q_deep",   "giver": "vane",    "name": "DERİN PROTOKOL",   "desc": "Aeterna'nın altında bir şey sinyal veriyor — Kirin sonrası açılır.", "obj": {"type": "boss", "k": "final"}, "rew": {"node": "kuyu"}, "prereq": "q_final"},
+	# — zincir görevler: ilk halka teslim edilince ikincisi açılır —
+	{"id": "q_varl2",  "giver": "ehnar",   "name": "SINIR TEMİZLİĞİ",  "desc": "Sınır hâlâ sıcak. 40 Çölayan Varl daha kes — bu sefer kökünden.", "obj": {"type": "kind", "k": "Çölayan Varl", "n": 40}, "rew": {"cho": 80, "item": "i_ruzgar"}, "prereq": "q_varl"},
+	{"id": "q_kan2",   "giver": "rhasa",   "name": "KAN ORANI",        "desc": "Vergi büyüdü. Tek koşuda 300 kesim — kovan bunu hissedecek.",  "obj": {"type": "kills", "n": 300},  "rew": {"cho": 120, "item": "i_halka2"}, "prereq": "q_kan"},
+	{"id": "q_surv2",  "giver": "neva",    "name": "UZUN TÜRKÜ",       "desc": "Şarkı sekiz dakikaya uzuyor — bir koşuda 480 sn hayatta kal.",  "obj": {"type": "time", "n": 480},   "rew": {"cho": 130, "item": "i_aegis"}, "prereq": "q_surv"},
+	{"id": "q_loot2",  "giver": "saphire", "name": "KOLEKSİYONCUNUN GÖZÜ", "desc": "Tezgâh doluyor ama hâlâ eksik. Bir koşuda 6 eşya bul — karşılığında bilinen bir rota var.", "obj": {"type": "loot", "n": 6}, "rew": {"cho": 120, "node": "yuvalar"}, "prereq": "q_loot"},
+	{"id": "q_vatika", "giver": "neva",    "name": "SESSİZ VATİKA",    "desc": "Aeterna dibinde bir sığınak var. Uzun Türkü'nü bitirene yolu açarım.", "obj": {"type": "boss", "k": "twins"}, "rew": {"node": "vatika"}, "prereq": "q_surv2"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
