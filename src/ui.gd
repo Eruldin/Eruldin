@@ -397,6 +397,11 @@ func _tick_hud() -> void:
 	_time_lbl.text = "%02d:%02d" % [tt / 60, tt % 60]
 	_time_lbl.add_theme_color_override("font_color", Px.C("c26bff") if G.run.endless else (Px.C("ff5533") if G.run.hyper else Color(0.9, 0.95, 1)))
 	_kills_lbl.text = "%d kesim" % int(G.run.stats.get("kills", 0))
+	if G.run.streak >= 10:
+		_kills_lbl.text += "  x%d" % G.run.streak
+		_kills_lbl.add_theme_color_override("font_color", Px.C("ffb74d"))
+	else:
+		_kills_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.9))
 	_sync_gear_rows(p)
 	while _boon_row.get_child_count() < G.run.boon_ids.size():
 		var idx := _boon_row.get_child_count()
