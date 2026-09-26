@@ -126,6 +126,7 @@ var _wpn_row: HBoxContainer
 var _psv_row: HBoxContainer
 var _gear_sig := ""
 var _pulse := 0.0
+var _edge_pool: Array = []   # ekran dışı hedef işaretleri (elit/boss/sandık/özel eşya)
 
 func _ready() -> void:
 	layer = 100
@@ -361,6 +362,7 @@ func _process(d: float) -> void:
 	_tick_banner(d)
 	_tick_boss_bar()
 	_toast_keys()
+	_tick_edge()
 
 func _tick_hud() -> void:
 	if G.player == null or not is_instance_valid(G.player) or G.run == null:
@@ -416,6 +418,52 @@ func _tick_hud() -> void:
 		_room_lbl.text = "VIATOR KAMPI"
 	else:
 		_room_lbl.text = ""
+
+# ekran dışı hedefler için kenar işaretleri (HoT objective markers): elitler,
+# boss, sandıklar ve saha özel eşyaları dünya konumundan kenara yansıtılır
+func _edge_targets() -> Array:
+	var out: Array = []
+	if G.state != G.State.ROOM or not is_instance_valid(G.cam) or not is_instance_valid(G.room):
+		return out
+	for e in G.enemies:
+		if is_instance_valid(e) and not e.dead and e.elite:
+			out.append({"p": e.pos, "icon": "icn_skull", "col": "ffb74d", "s": 26.0})
+	if is_instance_valid(G.room.boss):
+		out.append({"p": G.room.boss.pos, "icon": "icn_skull", "col": "ff5533", "s": 36.0})
+	if is_instance_valid(G.room.pickups_node):
+		for pk in G.room.pickups_node.get_children():
+			var k := str(pk.get_meta("kind", ""))
+			if k == "chest":
+				out.append({"p": pk.position, "icon": "ico_boon", "col": "ffb74d", "s": 22.0})
+			elif k == "vacuum" or k == "bomb" or k == "freeze":
+				out.append({"p": pk.position, "icon": "ico_frag", "col": "00E5FF", "s": 18.0})
+	return out
+
+func _tick_edge() -> void:
+	var i := 0
+	if G.state == G.State.ROOM and is_instance_valid(G.cam):
+		var zoom: float = G.cam.zoom.x
+		for t in _edge_targets():
+			var sp: Vector2 = ((t["p"] as Vector2) - G.cam.global_position) * zoom + Vector2(640, 360)
+			if Rect2(Vector2(50, 50), Vector2(1180, 620)).has_point(sp):
+				continue
+			while _edge_pool.size() <= i:
+				var m := TextureRect.new()
+				m.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				m.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				m.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+				root.add_child(m)
+				_edge_pool.append(m)
+			var mk: TextureRect = _edge_pool[i]
+			mk.texture = Px.S2(str(t["icon"]))
+			mk.modulate = Px.C(str(t["col"]))
+			var s: float = t["s"]
+			mk.size = Vector2(s, s)
+			mk.position = sp.clamp(Vector2(20, 20), Vector2(1260, 700)) - Vector2(s, s) * 0.5
+			mk.visible = true
+			i += 1
+	for j in range(i, _edge_pool.size()):
+		_edge_pool[j].visible = false
 
 func _sync_gear_rows(p: Player) -> void:
 	var sig := ""
