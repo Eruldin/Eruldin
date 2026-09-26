@@ -13,12 +13,29 @@ var H := 660.0
 var BOUNDS := Rect2(-540, -290, 1080, 580)
 
 const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE"]
-const PROP_SPR := [
-	["rock", "pillar", "crate", "pod"],
-	["rock", "vent", "vat", "crystal"],
-	["wreck", "crate", "vent", "pillar"],
-	["pillar", "statue", "crystal", "pod"],
-]
+# biome'a ozgu uretilmis prop setleri (prop_<key>_<i>) — BG2 tarzi scatter
+const PROP_SPR := {
+	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5"],
+	"1": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
+	"2": ["prop_2_0", "prop_2_1", "prop_2_2", "prop_2_3", "prop_2_4", "prop_2_5"],
+	"3": ["prop_3_0", "prop_3_1", "prop_3_2", "prop_3_3", "prop_3_4", "prop_3_5"],
+	"hub": ["prop_hub_0", "prop_hub_1", "prop_hub_2", "prop_hub_3", "prop_hub_4", "prop_hub_5"],
+}
+# isik veren prop'lar (kristal, mantar, fener, turbin, obelisk, ateslik)
+const PROP_LIGHT := {
+	"prop_1_0": Color(0.3, 0.9, 1.0), "prop_1_2": Color(0.7, 0.5, 1.0), "prop_1_5": Color(1.0, 0.7, 0.3),
+	"prop_2_3": Color(1.0, 0.5, 0.2),
+	"prop_3_3": Color(0.6, 0.4, 1.0), "prop_3_4": Color(1.0, 0.65, 0.25),
+}
+# atmosfer motes: renk + yon egilimi (biome basina)
+const MOTE_COL := {
+	"0": Color(0.85, 0.65, 0.4, 0.35),
+	"1": Color(0.4, 0.9, 1.0, 0.4),
+	"2": Color(1.0, 0.55, 0.25, 0.45),
+	"3": Color(0.7, 0.5, 1.0, 0.35),
+	"hub": Color(1.0, 0.75, 0.45, 0.35),
+}
+var motes: Array = []   # [{s, vel}] atmosfer parcaciklari
 const REWARD_ICON := ["ico_boon", "ico_heal", "ico_frag"]
 
 var biome := 0
@@ -74,14 +91,14 @@ func build_hub() -> void:
 	_build_floor_named("hub")
 	_build_walls_named("hub")
 	_scatter_decals()
-	_prop(Vector2(-300, -140), 30, "tent")
-	_prop(Vector2(300, -100), 30, "tent")
-	_prop(Vector2(-420, 60), 20, "crate")
-	_prop(Vector2(400, 140), 20, "crate")
-	_prop(Vector2(-150, -220), 16, "rock")
-	_prop(Vector2(190, -200), 14, "rock")
-	_prop(Vector2(-350, 200), 12, "crystal")
-	_prop(Vector2(430, -180), 12, "crystal")
+	_prop(Vector2(-300, -140), 30, "prop_hub_0")
+	_prop(Vector2(300, -100), 30, "prop_hub_0")
+	_prop(Vector2(-420, 60), 20, "prop_hub_1")
+	_prop(Vector2(400, 140), 20, "prop_hub_1")
+	_prop(Vector2(-150, -220), 16, "prop_hub_2")
+	_prop(Vector2(190, -200), 14, "prop_hub_3")
+	_prop(Vector2(-350, 200), 12, "prop_hub_5")
+	_prop(Vector2(430, -180), 12, "prop_hub_4")
 	_prop(Vector2(60, -190), 12, "medic")
 	_fire(Vector2(0, -60))
 	# Resonance Gate — south edge, starts the run
@@ -134,54 +151,64 @@ func _room_subtitle(depth: int) -> String:
 	return "oda %d" % (depth + 1)
 
 func _backdrop() -> void:
-	# painted vista below the room: the void under the floor becomes the
-	# biome's depths — the room floats over what you descend into
-	var s := Sprite2D.new()
-	var vk := "cbv_hub" if is_hub else ("cbv_" + _biome_key() + "_0")
-	s.texture = Px.S2(vk)
-	if s.texture == null:
-		s.texture = Px.S2("bg_" + _biome_key())
-	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	var tw := float(s.texture.get_width())
-	var th := float(s.texture.get_height())
-	s.scale = Vector2.ONE * (W / maxf(tw, 1.0))
-	s.position = Vector2(0, H * 0.5 + th * s.scale.x * 0.5 - 30.0)
-	s.z_index = -1950
-	s.modulate = Color(0.62, 0.6, 0.66)
-	add_child(s)
-	# thin painted sliver above the wall line too (peeks over the room)
-	var s2 := Sprite2D.new()
-	s2.texture = Px.S2("cbg_hub" if is_hub else ("cbg_" + _biome_key() + "_0"))
-	s2.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	s2.scale = s.scale
-	s2.position = Vector2(0, -H * 0.5 - th * s2.scale.x * 0.5 + 120.0)
-	s2.z_index = -1950
-	s2.modulate = Color(0.5, 0.48, 0.55)
-	add_child(s2)
+	# BG2 tarzi: oyun alani boyanmis zemine gomulur, disariya karanliga kayar
+	var void_s := Sprite2D.new()
+	void_s.texture = Px.S("px1")
+	void_s.scale = Vector2(5200, 4200)
+	void_s.modulate = Color(0.02, 0.02, 0.035)
+	void_s.z_index = -2200
+	add_child(void_s)
+	_vignette()
+	_atmos()
+
+func _vignette() -> void:
+	# kenar karartmasi: zemin disariya yumusak bir karalikla kaybolur
+	var t := 260.0
+	var ov := 150.0
+	var edges := [
+		[Vector2(0, -H * 0.5 - t * 0.5 + ov), Vector2((W + 560.0) / 4.0, t / 256.0), 0.0],
+		[Vector2(0, H * 0.5 + t * 0.5 - ov), Vector2((W + 560.0) / 4.0, t / 256.0), PI],
+		[Vector2(-W * 0.5 - t * 0.5 + ov, 0), Vector2((H + 560.0) / 4.0, t / 256.0), -PI * 0.5],
+		[Vector2(W * 0.5 + t * 0.5 - ov, 0), Vector2((H + 560.0) / 4.0, t / 256.0), PI * 0.5],
+	]
+	for e in edges:
+		var s := Sprite2D.new()
+		s.texture = Px.S("grad")
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		s.position = e[0]
+		s.scale = e[1]
+		s.rotation = e[2]
+		s.modulate = Color(0.01, 0.01, 0.02, 0.92)
+		s.z_index = -1880
+		add_child(s)
+
+func _atmos() -> void:
+	# ortam motesleri: biome'a ozel renk, yavas suzulme
+	var col: Color = MOTE_COL.get(_biome_key(), Color(0.8, 0.7, 0.5, 0.3))
+	for i in 18:
+		var s := Sprite2D.new()
+		s.texture = Px.S("dot")
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		s.scale = Vector2.ONE * rng.randf_range(0.5, 1.4)
+		s.modulate = col
+		s.modulate.a *= rng.randf_range(0.5, 1.0)
+		s.position = Vector2(rng.randf_range(-W * 0.5, W * 0.5), rng.randf_range(-H * 0.5, H * 0.5))
+		s.z_index = 1500
+		add_child(s)
+		var base := Vector2(rng.randf_range(-6, 10), rng.randf_range(-14, -4))
+		if _biome_key() == "2": base = Vector2(rng.randf_range(-4, 4), rng.randf_range(-26, -12))
+		motes.append({"s": s, "vel": base, "ph": rng.randf() * TAU})
 
 func _build_floor_named(key: String) -> void:
-	var variants: Array[Texture2D] = [Px.S2("t2_%s_0" % key), Px.S2("t2_%s_1" % key), Px.S2("t2_%s_2" % key)]
-	var ground := Node2D.new()
-	ground.name = "ground"
-	ground.z_index = -2000
-	add_child(ground)
-	# square-tile floor (DCSS 32px tiles at 2x)
-	var cell := 64.0
-	var sc := cell / 32.0
-	var y := -H * 0.5 - cell * 0.5
-	while y <= H * 0.5 + cell * 0.5:
-		var x := -W * 0.5 - cell * 0.5
-		while x <= W * 0.5 + cell * 0.5:
-			var s := Sprite2D.new()
-			var r := G.rng.randf()
-			s.texture = variants[0] if r < 0.62 else (variants[1] if r < 0.85 else variants[2])
-			s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-			s.scale = Vector2.ONE * sc
-			s.position = Vector2(x, y)
-			s.modulate = Color(0.72, 0.7, 0.78)
-			ground.add_child(s)
-			x += cell
-		y += cell
+	# tam-sahne boyanmis zemin (kenarlari karanliga gomulu)
+	var s := Sprite2D.new()
+	s.texture = Px.S2("gr_" + key)
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	var sc := maxf((W + 320.0) / s.texture.get_width(), (H + 300.0) / s.texture.get_height())
+	s.scale = Vector2.ONE * sc
+	s.position = Vector2.ZERO
+	s.z_index = -2000
+	add_child(s)
 
 func _build_walls_named(key: String) -> void:
 	var tex := Px.S2("w2_" + key)
@@ -233,19 +260,15 @@ func _prop(p: Vector2, r: float, spr: String) -> void:
 	add_child(sh)
 	var s := Sprite2D.new()
 	s.texture = Px.S(spr)
-	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	s.position = p
-	s.scale = Vector2.ONE * clampf(r / 11.0, 1.0, 2.4)
+	s.scale = Vector2.ONE * r * 4.2 / 120.0
 	s.offset = Vector2(0, -s.texture.get_height() * 0.5)
 	s.z_index = int(p.y)
 	add_child(s)
 	props.append({"pos": p, "r": r})
-	# emissive props get a small light
-	match spr:
-		"crystal": G.fx.mk_light(self, p + Vector2(0, -16), Px.C("7B1FA2"), 0.6, 1.6)
-		"vat": G.fx.mk_light(self, p + Vector2(0, -10), Px.C("39ff14"), 0.5, 1.4)
-		"vent": G.fx.mk_light(self, p + Vector2(0, -8), Px.C("ff5522"), 0.45, 1.3)
-		"pod": G.fx.mk_light(self, p + Vector2(0, -12), Px.C("00E676"), 0.4, 1.2)
+	if PROP_LIGHT.has(spr):
+		G.fx.mk_light(self, p + Vector2(0, -r * 1.4), PROP_LIGHT[spr], 0.55, 1.6)
 
 func _scatter_props() -> void:
 	var n := 8 + biome * 2 + (6 if rtype == Type.ELITE else 0)
@@ -262,7 +285,8 @@ func _scatter_props() -> void:
 			if p.distance_to(q.pos) < 90: ok = false
 		if not ok:
 			continue
-		_prop(p, rng.randf_range(10, 20), PROP_SPR[biome][rng.randi() % PROP_SPR[biome].size()])
+		var set: Array = PROP_SPR[_biome_key()]
+		_prop(p, rng.randf_range(10, 20), set[rng.randi() % set.size()])
 
 func DOOR_POS() -> Array:
 	return [Vector2(0, -H * 0.5 + 24), Vector2(-W * 0.5 + 44, -60), Vector2(W * 0.5 - 44, -60)]
@@ -515,11 +539,23 @@ func _process(d: float) -> void:
 	_tick_pickups(d)
 	_tick_monolith(d)
 	_tick_doors()
+	_tick_motes(d)
 	_sort_children()
 	# campfire flicker
 	if has_meta("fire_light") and is_instance_valid(get_meta("fire_light")):
 		var l: PointLight2D = get_meta("fire_light")
 		l.energy = 1.0 + sin(Time.get_ticks_msec() * 0.013) * 0.16 + sin(Time.get_ticks_msec() * 0.041) * 0.07
+
+func _tick_motes(d: float) -> void:
+	var t := Time.get_ticks_msec() * 0.001
+	for m in motes:
+		var s: Sprite2D = m.s
+		s.position += m.vel * d
+		s.position.x += sin(t + m.ph) * 6.0 * d
+		if s.position.x < -W * 0.5 - 40: s.position.x = W * 0.5 + 40
+		if s.position.x > W * 0.5 + 40: s.position.x = -W * 0.5 - 40
+		if s.position.y < -H * 0.5 - 40: s.position.y = H * 0.5 + 40
+		if s.position.y > H * 0.5 + 40: s.position.y = -H * 0.5 - 40
 
 # HoT-style side objective: stand by the resonance cluster to charge it;
 # a full charge cracks it open into two chests. Progress persists.
