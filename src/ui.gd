@@ -2777,6 +2777,18 @@ func pause_panel() -> void:
 		qb.pressed.connect(func():
 			_close_overlay()
 			G.run.abandon_to_hub())
+	var kl := _lbl("WASD hareket · SPACE kaçış · silahlar otomatik ateş eder", Vector2.ZERO, 10, Color(0.5, 0.55, 0.68))
+	kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(kl)
+	var tb := Button.new()
+	tb.text = "İPUÇLARINI TEKRAR GÖSTER"
+	tb.custom_minimum_size = Vector2(240, 24)
+	tb.add_theme_font_override("font", ui_font())
+	v.add_child(tb)
+	tb.pressed.connect(func():
+		G.meta.data["tut"] = false
+		G.meta.save()
+		toast("ipuçları sıfırlandı — sonraki koşuda gösterilecek"))
 	var h := _lbl("[ESC / E / tık] devam et", Vector2.ZERO, 11, Color(0.5, 0.5, 0.62))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
