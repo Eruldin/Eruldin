@@ -217,6 +217,10 @@ func _write_last_run(win: bool) -> void:
 		"level": G.player.level if is_instance_valid(G.player) else 1,
 		"win": win,
 	}
+	G.meta.data["best_evos"] = maxi(int(G.meta.data.get("best_evos", 0)), int(stats.get("evos", 0)))
+	if win and curse >= 2:
+		G.meta.data["curse_wins"] = int(G.meta.data.get("curse_wins", 0)) + 1
+		G.meta.save()
 
 func _contract_met(c: Dictionary, lr: Dictionary) -> bool:
 	if c.is_empty() or lr.is_empty():

@@ -195,6 +195,9 @@ func _move(d: float) -> void:
 		pos += _dash_dir * 560.0 * d
 		return
 	var sp := speed * _attack_slow * (G.room.slow_at(pos) if is_instance_valid(G.room) else 1.0) * (1.05 if stealth_t > 0 else 1.0)
+	# Seri Ritim lütfu: katliam serisi x30 üstünde hız patlaması
+	if has_meta("streak_spd") and G.run != null and int(G.run.streak) >= 30:
+		sp *= 1.30
 	pos += move_dir * sp * d
 	if is_instance_valid(G.room):
 		pos = G.room.clamp_pos(pos, radius)
@@ -548,7 +551,7 @@ func reset_for_run() -> void:
 	magnet_r = 95.0; xp_mult = 1.0; cd_mult = 1.0; area_mult = 1.0; proj_spd = 1.0; bonus_proj = 0
 	_attack_slow = 1.0; _pulse_t = 0.0
 	_apply_stance()
-	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer"]:
+	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer", "streak_spd", "elite_heal"]:
 		remove_meta(k)
 	max_hp = 100 + G.meta.upg(Meta.U.HP) * 20
 	hp = max_hp

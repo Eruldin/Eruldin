@@ -394,6 +394,7 @@ static func apply_opt(opt: Dictionary, p: Player) -> void:
 				_: p.heal(p.max_hp * 0.4)
 
 static func apply_evo(spec: Dictionary, p: Player) -> void:
+	G.run.stats["evos"] = int(G.run.stats.get("evos", 0)) + 1
 	for w in p.weapons:
 		if w.id == spec.from:
 			w.id = spec.into
