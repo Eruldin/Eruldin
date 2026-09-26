@@ -16,6 +16,8 @@ const KIND_SET := {
 
 var kind: int = EKind.HUSK
 var elite := false
+var affix := ""            # elite modifier: armored / volatile / swift / sparked
+var _spk_t := 0.0
 var speed := 100.0
 var touch_dmg := 10.0
 var touch_r := 36.0
@@ -97,6 +99,19 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
+		affix = ["armored", "volatile", "swift", "sparked"][randi() % 4]
+		match affix:
+			"armored":
+				armor += 5.0
+				actor_name = "ZIRHLI " + actor_name
+			"volatile":
+				actor_name = "PATLAYICI " + actor_name
+			"swift":
+				speed *= 1.45; attack_cd *= 0.8
+				actor_name = "HIZLI " + actor_name
+			"sparked":
+				_spk_t = 1.2
+				actor_name = "ŞİMŞEKLİ " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -120,7 +135,8 @@ func _make_body() -> void:
 	Px.fit(body, 118.0 if elite else (108.0 if kind == EKind.KONAKCI else 86.0))
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		G.fx.mk_light(self, Vector2(0, -18), Px.C("7B1FA2"), 0.5, 1.6)
+		var lc := {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066"}.get(affix, "7B1FA2")
+		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 	body.modulate = Color(0.2, 0.2, 0.2, 0)
 	_orbit = -1.0 if G.chance(0.5) else 1.0
 
@@ -152,6 +168,15 @@ func _process(_d: float) -> void:
 				_st = St.SEEK
 				_release_tok()
 				_set_anim("idle", 5.0)
+	# sparked elite: periodic lightning strike on a close player
+	if affix == "sparked":
+		_spk_t -= d
+		if _spk_t <= 0.0:
+			_spk_t = 2.4
+			if pos.distance_to(G.player.pos) < 240.0:
+				G.player.take_hit({"dmg": maxf(4.0, touch_dmg * 0.5), "type": G.DamageType.SHOCK, "from": pos + Vector2(0, -40), "knock": 0.0, "source": self})
+				G.fx.light_flash(G.player.pos + Vector2(0, -24), Px.C("ffe066"), 1.2, 1.6, 0.12)
+				G.fx.directional(G.player.pos + Vector2(0, -60), Vector2.DOWN, Px.C("ffe066"), 4, 200.0, 2.5, 0.14)
 	if _cd_t > 0:
 		_cd_t -= d
 	_tick_anim(d)
@@ -347,6 +372,29 @@ func die(h: Dictionary) -> void:
 			G.run.drop_fragments(pos, G.ri(8, 14))
 		elif G.chance(0.12):
 			G.run.drop_fragments(pos, G.ri(1, 3))
+	# volatile elite: telegraphed blast after death
+	if elite and affix == "volatile":
+		var warn := Sprite2D.new()
+		warn.texture = Px.S("ring")
+		warn.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		warn.modulate = Color(1.0, 0.35, 0.2, 0.8)
+		warn.position = pos
+		warn.z_index = 40
+		var host: Node = G.room if is_instance_valid(G.room) else G.game.world
+		host.add_child(warn)
+		var blast_pos := pos
+		var bd := touch_dmg * 1.2
+		var tw := warn.create_tween()
+		tw.tween_property(warn, "scale", Vector2.ONE * (236.0 / 72.0), 0.55)
+		tw.tween_callback(func():
+			if is_instance_valid(warn):
+				warn.queue_free()
+			if is_instance_valid(G.player) and not G.player.dead and G.player.pos.distance_to(blast_pos) < 118.0:
+				G.player.take_hit({"dmg": bd, "type": G.DamageType.EXPLOSION, "from": blast_pos, "knock": 14.0, "source": null})
+			G.fx.burst(blast_pos, Color(1.0, 0.45, 0.15), 26, 240.0, 6.0, 0.5)
+			G.fx.light_flash(blast_pos, Color(1, 0.6, 0.2), 2.2, 3.0, 0.25)
+			G.audio.play("explode", 0.9, 0.7)
+			G.fx.shake(0.18, 0.2))
 		if G.chance(0.045):
 			G.room.spawn_heal(pos)
 		G.room.on_enemy_dead(self)
