@@ -558,7 +558,7 @@ static func _ray(st: Dictionary, p: Player) -> void:
 # rosette of homing missiles — each curves into the swarm on its own
 static func _seeker(st: Dictionary, p: Player) -> void:
 	var n := maxi(1, roundi(float(st.n)))
-	var pierce := st.get("pierce", 0.0) > 0.0
+	var pierce: bool = st.get("pierce", 0.0) > 0.0
 	for i in n:
 		var dir := Vector2.from_angle(TAU * i / n + G.rf(-0.2, 0.2))
 		var pr := Projectile.new()
