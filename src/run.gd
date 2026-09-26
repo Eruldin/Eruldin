@@ -31,6 +31,9 @@ var banished: Array = []    # ids kovulanlar — bu koşuda draft'a girmez
 var arcana := ""           # koşu başında seçilen KOZ kartı (VS arcana)
 var elite_fever := false   # SARI HAT: elitler %20 sık doğar
 var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
+var pending_ambush := false # YOL OLAYI pusu: arenaya kuşatılmış girilir
+var pending_dmg := 0.0     # YOL OLAYI harabe: girişte alınan enkaz hasarı
+var force_waylay := ""     # probe/debug: yol olayını zorla
 var stats := {"kills": 0, "rooms": 0}
 var node_id := "b0"       # wmap node this run entered through
 var node_name := ""       # banner'da node adı (fallback: biome adı)
@@ -114,6 +117,8 @@ func start_run() -> void:
 	elite_fever = false
 	slow_all = false
 	curse = 0
+	pending_ambush = false
+	pending_dmg = 0.0
 	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
 	# saha keşfi: görevler için distinct biome sayısı birikir
@@ -128,6 +133,18 @@ func start_run() -> void:
 		G.meta.data["visited_nodes"] = vn
 	G.meta.save()
 	Quests.tick("biomes")
+	# seyahat olayı (BG2 "waylaid"): arenaya girmeden önce rastgele karşılaşma
+	var wk := force_waylay
+	force_waylay = ""
+	if wk == "" and randf() < 0.35:
+		wk = G.pick(["pusu", "kervan", "harabe"])
+	if wk != "":
+		G.ui.travel_event(wk, node_name)
+	else:
+		_enter_arena()
+
+# yol olayı seçimi yapıldıktan (ya da olaysız) arenayı kurar
+func _enter_arena() -> void:
 	G.fx.transition()
 	_room_to(G.room)
 	var a := Arena.new()
@@ -148,6 +165,10 @@ func start_run() -> void:
 		G.meta.save()
 		G.player.xp_mult *= 1.15
 		G.ui.toast("NEVA'NIN ŞARKISI — bu koşuda +%15 XP")
+	if pending_dmg > 0.0:
+		G.player.hp = maxf(1.0, G.player.hp - pending_dmg)
+		pending_dmg = 0.0
+		G.ui.toast("enkaz altında kaldın")
 	# kilitli silahlar koşulu ilk kez tutunca duyurulur
 	var seen: Array = G.meta.data.get("unlocked_w", [])
 	var changed := false

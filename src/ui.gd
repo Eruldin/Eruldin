@@ -1494,6 +1494,163 @@ func barter_panel() -> void:
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
+
+# Saphire'in pazar tezgâhı — koşu başına yenilenen stok, choralim karşılığı eşya
+func shop_panel() -> void:
+	_pause(true)
+	var v := _show_panel("shop", "PAZAR TEZGÂHI — Saphire'in malları", Px.C("ff9e4d"))
+	var money := _lbl("Saf Choralim: ◆ %d" % int(G.meta.data.get("choralim", 0)), Vector2.ZERO, 13, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
+	var hint := _lbl("stok her koşu dönüşünde yenilenir — sahipsiz eşyalar gelir", Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(hint)
+	var stock := Items.shop_stock()
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	v.add_child(grid)
+	if stock.is_empty():
+		var l := _lbl("stok boş — yeni koşudan sonra tezgâh yenilenir", Vector2.ZERO, 12, Color(0.5, 0.5, 0.6))
+		grid.add_child(l)
+	for iid in stock:
+		var d: Dictionary = Items.DEFS.get(str(iid), {})
+		if d.is_empty():
+			continue
+		var cell := PanelContainer.new()
+		var rc := Px.C(Items.RARITY_COL[int(d.r)])
+		cell.add_theme_stylebox_override("panel", _style_panel(Color(0.05, 0.04, 0.08, 0.95), rc, 2, 3))
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 2)
+		cell.add_child(cv)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		cv.add_child(row)
+		var ic := TextureRect.new()
+		ic.texture = Px.S2(str(d.icon))
+		ic.custom_minimum_size = Vector2(24, 24)
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.modulate = rc
+		row.add_child(ic)
+		var nm := _lbl(str(d.name), Vector2.ZERO, 10, Color(0.9, 0.9, 0.94))
+		row.add_child(nm)
+		var rt := _lbl(Items.RARITY_NAME[int(d.r)], Vector2.ZERO, 8, rc)
+		cv.add_child(rt)
+		var md := _lbl(Items.stat_text(str(iid)), Vector2.ZERO, 9, Color(0.65, 0.75, 0.85))
+		cv.add_child(md)
+		var price := Items.buy_price(str(iid))
+		var bb := Button.new()
+		bb.text = "SATIN AL ◆%d" % price
+		bb.add_theme_font_override("font", ui_font())
+		bb.custom_minimum_size = Vector2(120, 22)
+		bb.disabled = int(G.meta.data.get("choralim", 0)) < price
+		if bb.disabled:
+			bb.modulate = Color(0.5, 0.5, 0.55)
+		cv.add_child(bb)
+		var id0 := str(iid)
+		var dname := str(d.name)
+		bb.pressed.connect(func():
+			var paid := Items.buy(id0)
+			if paid > 0:
+				G.audio.jingle("boon")
+				toast("%s alındı: ◆-%d" % [dname, paid])
+				_close_overlay()
+				shop_panel())
+		grid.add_child(cell)
+	var back2 := Button.new()
+	back2.text = "← TEÇHİZAT"
+	back2.add_theme_font_override("font", ui_font())
+	back2.custom_minimum_size = Vector2(160, 26)
+	var bc := CenterContainer.new()
+	bc.add_child(back2)
+	v.add_child(bc)
+	back2.pressed.connect(func():
+		_close_overlay()
+		inventory_panel())
+	var h2 := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h2)
+
+# BG2 "you have been waylaid" — kampa varmadan önce yol karşılaşması.
+# kind "waylay" kapatılamaz: oyuncu iki seçenekten birini seçmek zorunda.
+const WAYLAY := {
+	"pusu":   {"name": "PUSU", "col": "ff5252",
+		"sub": "Sis perdesi aralandı — konakçı avcıları yolu kesti. Sinyal çok yakın; kuşatmadan çıkmak için ya savaş ya haraç.",
+		"opts": ["SAVAŞ — arenaya kuşatılmış gir, frag bereketi ×1.35", "HARAÇ ÖDE — ◆40, yol temiz"]},
+	"kervan": {"name": "YARALI KERVAN", "col": "ffd700",
+		"sub": "Devrik bir kervan: sürücüler yaralı, mallar savunmasız. Viator kanunu yardımı ister — kovan kanunu yağmayı.",
+		"opts": ["YARDIM ET — bedava lütuf + kalıcı şans", "YAĞMALA — ◈80 parçacık, azap +1"]},
+	"harabe": {"name": "YOLKENARI HARABE", "col": "8fd4ff",
+		"sub": "Çöken bir karakol kalıntısı yolu kesiyor. Molozun altında eşya olabilir — ya da sadece düşen taşlar.",
+		"opts": ["ARAŞTIR — şansına: eşya ya da enkaz hasarı", "GEÇ — durmaya değmez"]},
+}
+
+func travel_event(wkind: String, dest: String) -> void:
+	_pause(true)
+	var d: Dictionary = WAYLAY.get(wkind, WAYLAY["pusu"])
+	var v := _show_panel("waylay", "YOL OLAYI — " + dest, Px.C(str(d.col)))
+	var nm := _lbl(str(d.name), Vector2.ZERO, 16, Px.C(str(d.col)))
+	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(nm)
+	var sub := _lbl(str(d.sub), Vector2.ZERO, 13, Color(0.85, 0.85, 0.92))
+	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sub.custom_minimum_size = Vector2(560, 0)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sub)
+	var cho_lbl := _lbl("◆ %d" % int(G.meta.data.get("choralim", 0)), Vector2.ZERO, 12, Px.C("c26bff"))
+	cho_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(cho_lbl)
+	for i in 2:
+		var ob := Button.new()
+		ob.text = str(d.opts[i])
+		ob.add_theme_font_override("font", ui_font())
+		ob.custom_minimum_size = Vector2(480, 34)
+		# pusuda haraç: choralim yetmezse tek çıkış savaş
+		if wkind == "pusu" and i == 1 and int(G.meta.data.get("choralim", 0)) < 40:
+			ob.disabled = true
+			ob.modulate = Color(0.45, 0.45, 0.5)
+		var oc := CenterContainer.new()
+		oc.add_child(ob)
+		v.add_child(oc)
+		var idx := i
+		ob.pressed.connect(func(): _waylay_pick(wkind, idx))
+
+func _waylay_pick(wkind: String, idx: int) -> void:
+	match wkind:
+		"pusu":
+			if idx == 0:
+				G.run.pending_ambush = true
+				G.run.frag_node *= 1.35
+				toast("PUSU — kuşatılmış giriş, frag bereketi arttı")
+			else:
+				G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - 40
+				G.meta.save()
+				toast("haraç ödendi — avcılar geri çekildi")
+		"kervan":
+			if idx == 0:
+				G.run.luck += 0.2
+				G.run.take_boon(G.pick(Boons.all()))
+				toast("kervan teşekkür etti — lütuf + şans")
+			else:
+				G.run.fragments += 80
+				G.run.curse += 1
+				toast("kervan yağmalandı — ◈+80, AZAP +1")
+		"harabe":
+			if idx == 0:
+				if randf() < 0.6:
+					Items.drop_to_run(Items.roll(G.run.luck))
+					toast("molozun altında eşya buldun")
+				else:
+					G.run.pending_dmg = 18.0
+					toast("harabe çöktü — girişte yara alacaksın")
+			else:
+				toast("harabe geçildi")
+	G.audio.jingle("boon")
+	_close_overlay()
+	G.run._enter_arena()
+
 func records_panel() -> void:
 	_pause(true)
 	var v := _show_panel("records", "KAMP KAYITLARI — Vezir Zirkon", Px.C("c9a227"))

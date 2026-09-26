@@ -5,6 +5,7 @@ extends Node
 # user://probe/, logs status lines, then quits.
 
 var _step := 0
+var _way_sub := -1
 var _sub := 0
 var _shot_at := -1.0
 var _msg_at := 0.0
@@ -110,11 +111,20 @@ func _process(_d: float) -> void:
 					19:
 						_shoot()                    # faz-2 hikaye kartı görünürken
 					_:
+						G.run.force_waylay = "pusu"   # yol olayı zorlanır
 						G.player.pos = G.room.doors[0].pos + Vector2(0, 6)
 						_step = 2
 						_sub = -1
 				_sub += 1
 		2:
+			if G.ui.overlay_open() and str(G.ui._overlay.get_meta("kind", "")) == "waylay":
+				_way_sub += 1
+				if _way_sub == 0:
+					_shoot()                    # yol olayı kartı
+				elif _way_sub == 1:
+					G.ui._waylay_pick("pusu", 0)
+					print("[probe] waylay pusu -> savas secildi")
+				return
 			if G.state == G.State.ROOM:
 				G.run.dbg_god()
 				_step = 3
