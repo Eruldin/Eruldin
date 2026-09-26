@@ -501,6 +501,7 @@ func take_hit(h: Dictionary) -> void:
 	G.fx.shake(0.16, 0.2)
 	G.fx.float_text(pos + Vector2(0, -32), str(roundi(dmg)), Color(1, 0.35, 0.3), 1.0)
 	G.ui.hurt_flash()
+	G.ui.hurt_dir(from)
 	invuln = maxf(invuln, 0.55)
 	if hp <= 0:
 		var rev_meta := G.meta.upg(Meta.U.REVIVE) > 0 and not revived
