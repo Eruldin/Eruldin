@@ -18,6 +18,7 @@ var piercing := false
 var aoe := 0.0              # >0: lobbed shot, explodes in an area on impact/expiry
 var life0 := 0.0            # lobbed shots: initial life, drives the fake arc
 var boomerang := false      # returns to the player at half-life, piercing all the way
+var wpn := ""               # weapon id that fired it — feeds the per-weapon damage tally
 var _boom_flip := false
 var col := Color.WHITE
 var dmg_type: int = G.DamageType.PROJECTILE
@@ -99,7 +100,8 @@ func _process(_d: float) -> void:
 					"dmg": dmg * (G.player.crit_mult if crit else 1.0),
 					"type": dmg_type, "from": global_position - vel.normalized() * 4.0,
 					"knock": knock, "stagger": stag,
-					"source": source if source != null else G.player, "crit": crit
+					"source": source if source != null else G.player, "crit": crit,
+					"wpn": wpn
 				}
 				e.take_hit(h)
 				G.player.on_dealt_damage(e, h)

@@ -390,9 +390,12 @@ static func tick(p: Player, d: float) -> void:
 			w.t = maxf(0.12, float(st.get("cd", 1.0)) * p.cd_mult / maxf(p.atk_speed, 0.5))
 			_fire(wid, st, p, w)
 
+static var _fwpn := ""   # id of the weapon currently firing — stamps spawned projectiles/hits for the damage tally
+
 static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void:
+	_fwpn = wid
 	match wid:
-		"blade", "blade_x": _blade(st, p)
+		"blade", "blade_x": _blade(st, p, wid)
 		"plasma", "plasma_x": _plasma(st, p)
 		"bolt", "bolt_x": _bolt(st, p)
 		"nova", "nova_x": _nova(st, p)
@@ -414,7 +417,7 @@ static func _nearest(p: Vector2, max_r: float) -> Enemy:
 			best = e
 	return best
 
-static func _blade(st: Dictionary, p: Player) -> void:
+static func _blade(st: Dictionary, p: Player, wid: String) -> void:
 	var tgt := _nearest(p.pos, 420.0)
 	var ang := p.move_dir.angle() if tgt == null else (tgt.pos - p.pos).angle()
 	if tgt == null and p.move_dir.length_squared() < 0.01:
@@ -423,14 +426,14 @@ static func _blade(st: Dictionary, p: Player) -> void:
 	var reach := float(st.reach) * p.area_mult
 	var dmg := float(st.dmg) * p.dmg_mult * p.st_dmg * (p.melee_dmg / 14.0)
 	var heavy: bool = float(st.get("heavy", 0.0)) > 0.0
-	p.auto_swing(ang, reach, arc_deg, dmg, heavy)
+	p.auto_swing(ang, reach, arc_deg, dmg, heavy, wid)
 	if st.get("echo", 0.0) > 0.0:
 		var p2 := p
 		p.get_tree().create_timer(0.14, false).timeout.connect(func():
 			if is_instance_valid(p2) and not p2.dead:
 				var t2 := _nearest(p2.pos, 420.0)
 				var a2 := (t2.pos - p2.pos).angle() if t2 != null else ang + PI
-				p2.auto_swing(a2, reach, arc_deg, dmg, heavy))
+				p2.auto_swing(a2, reach, arc_deg, dmg, heavy, wid))
 
 static func _plasma(st: Dictionary, p: Player) -> void:
 	var n := maxi(1, roundi(float(st.n)))
@@ -455,6 +458,7 @@ static func _plasma(st: Dictionary, p: Player) -> void:
 		G.game.world.add_child(pr)
 		pr.setup(G.Team.PLAYER, p.pos + dir * 22.0, dir * float(st.spd) * p.proj_spd,
 			float(st.dmg) * p.dmg_mult * p.plasma_mult, 9.0 * p.plasma_size, Px.C("00E5FF"), "dot")
+		pr.wpn = _fwpn
 		pr.homing = p.b_homing or st.get("home", 0.0) > 0.0
 		pr.piercing = st.get("pierce", 0.0) > 0.0
 		pr.knock = 4.0
@@ -486,7 +490,7 @@ static func _strike(e: Enemy, dmg: float, p: Player, chain: int) -> void:
 	while cur != null and c <= chain:
 		seen[cur] = true
 		var crit := G.chance(p.crit_ch)
-		var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.SHOCK, "from": cur.pos + Vector2(0, -60), "knock": 2.0, "stagger": 0.3, "source": p, "crit": crit}
+		var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.SHOCK, "from": cur.pos + Vector2(0, -60), "knock": 2.0, "stagger": 0.3, "source": p, "crit": crit, "wpn": _fwpn}
 		cur.take_hit(h)
 		p.on_dealt_damage(cur, h)
 		G.fx.light_flash(cur.pos + Vector2(0, -20), Px.C("ffe066"), 1.6, 1.8, 0.12)
@@ -524,7 +528,7 @@ static func _nova(st: Dictionary, p: Player) -> void:
 			continue
 		if p.pos.distance_to(e.pos) < r + e.hit_radius:
 			var crit := G.chance(p.crit_ch)
-			var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.EXPLOSION, "from": p.pos, "knock": float(st.knock), "stagger": 0.5, "source": p, "crit": crit}
+			var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.EXPLOSION, "from": p.pos, "knock": float(st.knock), "stagger": 0.5, "source": p, "crit": crit, "wpn": _fwpn}
 			e.take_hit(h)
 			p.on_dealt_damage(e, h)
 			if st.get("slow", 0.0) > 0.0:
@@ -549,7 +553,7 @@ static func _spit(st: Dictionary, p: Player, w: Dictionary) -> void:
 			G.room.add_child(node)
 		else:
 			G.game.world.add_child(node)
-		w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0})
+		w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0, "wpn": str(w.id)})
 	G.audio.play("shoot", 0.7, 0.45)
 
 static func _dagger(st: Dictionary, p: Player) -> void:
@@ -563,6 +567,7 @@ static func _dagger(st: Dictionary, p: Player) -> void:
 		G.game.world.add_child(pr)
 		pr.setup(G.Team.PLAYER, p.pos + dir * 20.0, dir * float(st.spd) * p.proj_spd,
 			float(st.dmg) * p.dmg_mult, 7.0, Px.C("cfe8ff"), "spark")
+		pr.wpn = _fwpn
 		pr.piercing = st.get("pierce", 0.0) > 0.0
 		pr.knock = 2.0
 		pr.stag = 0.15
@@ -585,7 +590,7 @@ static func _ray(st: Dictionary, p: Player) -> void:
 		var t := clampf((e.pos - a).dot(dir), 0.0, len)
 		if (a + dir * t).distance_to(e.pos) < wid * 0.5 + e.hit_radius:
 			var crit := G.chance(p.crit_ch)
-			var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.SHOCK, "from": a, "knock": 3.0, "stagger": 0.2, "source": p, "crit": crit}
+			var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.SHOCK, "from": a, "knock": 3.0, "stagger": 0.2, "source": p, "crit": crit, "wpn": _fwpn}
 			e.take_hit(h)
 			p.on_dealt_damage(e, h)
 	var beam := Sprite2D.new()
@@ -613,6 +618,7 @@ static func _seeker(st: Dictionary, p: Player) -> void:
 		G.game.world.add_child(pr)
 		pr.setup(G.Team.PLAYER, p.pos + dir * 20.0, dir * float(st.spd) * p.proj_spd,
 			float(st.dmg) * p.dmg_mult, 7.5, Px.C("ffd166"), "spark")
+		pr.wpn = _fwpn
 		pr.homing = true
 		pr.piercing = pierce
 		pr.knock = 5.0
@@ -633,6 +639,7 @@ static func _glaive(st: Dictionary, p: Player, w: Dictionary) -> void:
 		var reach := float(st.get("range", 300.0)) * p.area_mult
 		pr.setup(G.Team.PLAYER, p.pos + dir * 20.0, dir * float(st.spd) * p.proj_spd,
 			float(st.dmg) * p.dmg_mult, 9.5 * p.area_mult, Px.C(str(DEFS.get(str(w.id), {}).get("col", "7fe0c3"))), "ring")
+		pr.wpn = _fwpn
 		pr.piercing = true
 		pr.boomerang = true
 		pr.life = 2.0 * reach / (float(st.spd) * p.proj_spd)
@@ -676,7 +683,7 @@ static func _tick_orbit(w: Dictionary, p: Player, d: float) -> void:
 					continue
 				if op.distance_to(e.pos) < 24.0 + e.hit_radius:
 					var crit := G.chance(p.crit_ch)
-					var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.SHOCK, "from": p.pos, "knock": 2.5, "stagger": 0.12, "source": p, "crit": crit}
+					var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.SHOCK, "from": p.pos, "knock": 2.5, "stagger": 0.12, "source": p, "crit": crit, "wpn": str(w.id)}
 					e.take_hit(h)
 					p.on_dealt_damage(e, h)
 					G.fx.burst(e.pos + Vector2(0, -8), Px.C("c26bff"), 2, 70.0, 2.5, 0.2)
@@ -701,7 +708,7 @@ static func _tick_pools(w: Dictionary, p: Player, d: float) -> void:
 				if not is_instance_valid(e) or e.dead:
 					continue
 				if (pl.pos as Vector2).distance_to(e.pos) < float(pl.r) + e.hit_radius:
-					var h := {"dmg": tick_dmg, "type": G.DamageType.POISON, "from": pl.pos, "knock": 0.0, "source": p}
+					var h := {"dmg": tick_dmg, "type": G.DamageType.POISON, "from": pl.pos, "knock": 0.0, "source": p, "wpn": str(pl.get("wpn", ""))}
 					e.take_hit(h)
 					p.on_dealt_damage(e, h)
 	w.pools = pools
