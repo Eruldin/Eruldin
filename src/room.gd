@@ -30,6 +30,9 @@ var hazards: Array = []        # [{pos, r, dps, node, kind, t, tele, erupt}]
 var slows: Array = []          # [{pos, r, t?}]
 var doors: Array = []          # [{pos, node, icon, reward, locked, gate, descend}]
 var pickups_node: Node2D
+var mono: Dictionary = {}      # rezonans kümesi: {pos,t,need,node,ring} — yakınında durarak şarj edilir
+var mono_pos := Vector2.ZERO   # kenar işareti okur
+var mono_active := false
 var decals: Node2D
 var pending_reward: int = Reward.FRAGMENTS
 var cleared := false
@@ -509,12 +512,62 @@ func _process(d: float) -> void:
 	_door_cd = maxf(0, _door_cd - d)
 	_tick_hazards(d)
 	_tick_pickups(d)
+	_tick_monolith(d)
 	_tick_doors()
 	_sort_children()
 	# campfire flicker
 	if has_meta("fire_light") and is_instance_valid(get_meta("fire_light")):
 		var l: PointLight2D = get_meta("fire_light")
 		l.energy = 1.0 + sin(Time.get_ticks_msec() * 0.013) * 0.16 + sin(Time.get_ticks_msec() * 0.041) * 0.07
+
+# HoT-style side objective: stand by the resonance cluster to charge it;
+# a full charge cracks it open into two chests. Progress persists.
+func spawn_monolith(p: Vector2) -> void:
+	if mono_active:
+		return
+	mono_active = true
+	mono_pos = p
+	var node := Sprite2D.new()
+	node.texture = Px.S("crystal")
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	node.modulate = Px.C("c26bff")
+	node.scale = Vector2.ONE * 1.8
+	node.position = p
+	node.z_index = int(p.y)
+	add_child(node)
+	var ring := Sprite2D.new()
+	ring.texture = Px.S("ring")
+	ring.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	ring.modulate = Color(0.76, 0.42, 1.0, 0.35)
+	ring.scale = Vector2.ONE * (140.0 * 2.0 / 96.0)
+	ring.position = p
+	ring.z_index = -2000
+	add_child(ring)
+	G.fx.mk_light(node, Vector2(0, -10), Px.C("c26bff"), 0.9, 2.2)
+	mono = {"pos": p, "t": 0.0, "need": 14.0, "node": node, "ring": ring}
+	G.audio.jingle("boon")
+	G.ui.toast("REZONANS KÜMESİ doğdu — yakınında dur, şarj et")
+
+func _tick_monolith(d: float) -> void:
+	if not mono_active or G.player == null or G.player.dead:
+		return
+	var p: Vector2 = mono.pos
+	if G.player.pos.distance_to(p) < 140.0:
+		mono.t = float(mono.t) + d
+		mono.node.scale = Vector2.ONE * (1.8 + 0.4 * (float(mono.t) / float(mono.need)))
+		mono.ring.modulate.a = 0.2 + 0.6 * (float(mono.t) / float(mono.need))
+		if float(mono.t) >= float(mono.need):
+			mono_active = false
+			mono_pos = Vector2.ZERO
+			mono.node.queue_free()
+			mono.ring.queue_free()
+			mono = {}
+			spawn_chest(p + Vector2(-40, 0))
+			spawn_chest(p + Vector2(40, 0))
+			G.fx.burst(p + Vector2(0, -20), Px.C("c26bff"), 30, 260.0, 6.0, 0.7)
+			G.fx.flash(Px.C("7B1FA2"), 0.35)
+			G.audio.jingle("boss")
+			G.ui.toast("küme çözüldü — çift sandık")
 
 func _tick_doors() -> void:
 	if G.player == null or G.player.dead or _door_cd > 0:
