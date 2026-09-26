@@ -59,6 +59,7 @@ var stray_pos := Vector2.ZERO
 var stray_active := false
 var _stray_armed := true
 var _merge_t := 80.0            # kristal konsolidasyonu sayacı
+var critters: Array = []        # [{s, vel}] — zararsiz yaban hayatı; üstüne koşarsan yakalanır
 var decals: Node2D
 var pending_reward: int = Reward.FRAGMENTS
 var cleared := false
@@ -142,6 +143,7 @@ func build(biome_idx: int, rt: int, promise: int, depth: int, seed_val: int) -> 
 	_build_walls_named(str(biome))
 	_scatter_decals()
 	_scatter_props()
+	_scatter_critters()
 	_place_hazards(depth)
 	_make_doors()
 	G.audio.play_music("mus_boss" if rt == Type.BOSS else "mus_%d" % biome)
@@ -548,6 +550,7 @@ func _process(d: float) -> void:
 	_tick_monolith(d)
 	_tick_merchant(d)
 	_tick_stray(d)
+	_tick_critters(d)
 	_tick_doors()
 	_tick_motes(d)
 	_sort_children()
@@ -696,6 +699,49 @@ func despawn_stray() -> void:
 	if is_instance_valid(stray.get("tag")):
 		stray.tag.queue_free()
 	stray = {}
+
+# zararsiz saha yasami: arena basina birkac sürüngen gezer; oyuncudan kaçar,
+# yakalanirsa ufak parçacık bırakır (BG2 yaban hayatı — dünyayı canlı tutar)
+func _scatter_critters() -> void:
+	var ft: Array = Px.F("c_varl").get("idle", [])
+	for i in 6:
+		var s := Sprite2D.new()
+		s.texture = ft[0] if not ft.is_empty() else Px.S("dot")
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		Px.fit(s, 20.0)
+		s.modulate = Color(0.95, 0.85, 0.5, 0.85)
+		s.position = Vector2(rng.randf_range(BOUNDS.position.x + 90, BOUNDS.end.x - 90), rng.randf_range(BOUNDS.position.y + 90, BOUNDS.end.y - 90))
+		s.z_index = 30
+		add_child(s)
+		critters.append({"s": s, "vel": Vector2(rng.randf_range(-30, 30), rng.randf_range(-30, 30))})
+
+func _tick_critters(d: float) -> void:
+	if critters.is_empty() or G.player == null or G.player.dead:
+		return
+	for i in range(critters.size() - 1, -1, -1):
+		var c: Dictionary = critters[i]
+		var s: Sprite2D = c.s
+		if not is_instance_valid(s):
+			critters.remove_at(i)
+			continue
+		var to_p: Vector2 = s.position - G.player.pos
+		var dist := to_p.length()
+		if dist < 24.0:
+			critters.remove_at(i)
+			G.run.drop_fragments(s.position, 3)
+			G.fx.burst(s.position, Px.C("e8c468"), 8, 90.0, 3.0, 0.4)
+			G.audio.play("pickup", G.rf(1.2, 1.4), 0.35)
+			s.queue_free()
+			continue
+		if dist < 110.0:
+			c.vel = to_p.normalized() * 130.0
+		elif rng.randf() < 0.02:
+			c.vel = Vector2(rng.randf_range(-40, 40), rng.randf_range(-40, 40))
+		s.position += c.vel * d
+		if not inside(s.position, 30.0):
+			c.vel = -c.vel
+			s.position = clamp_pos(s.position, 30.0)
+		s.flip_h = c.vel.x < 0
 
 func _tick_stray(_d: float) -> void:
 	if not stray_active or G.player == null or G.player.dead:

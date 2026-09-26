@@ -1736,7 +1736,7 @@ func records_panel() -> void:
 	var sep3 := _lbl("— BAŞARIMLAR —", Vector2.ZERO, 12, Px.C("c9a227"))
 	right.add_child(sep3)
 	for a in G.meta.achievements():
-		var l := _lbl("%s  %s\n        %s" % ["◆" if a.done else "◇", str(a.name), str(a.desc)],
+		var l := _lbl("%s  %s\n        %s%s" % ["◆" if a.done else "◇", str(a.name), str(a.desc), "  · ödül ◆%d" % int(a.get("rew", 0))],
 			Vector2.ZERO, 11, Color(0.95, 0.8, 0.4) if a.done else Color(0.45, 0.45, 0.55))
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size = Vector2(240, 0)
