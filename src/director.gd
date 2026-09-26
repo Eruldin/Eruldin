@@ -52,8 +52,9 @@ func _tick_spawn(d: float) -> void:
 		return
 	var m := t / 60.0
 	var hyp: bool = G.run.hyper
-	_spawn_t = lerpf(1.6, 0.34, clampf(t / 540.0, 0.0, 1.0)) * (0.72 if hyp else 1.0)
-	var cap := mini(210, int((60 + m * 13.0) * (1.4 if hyp else 1.0)))
+	var inf: bool = G.run.endless
+	_spawn_t = lerpf(1.6, 0.34, clampf(t / 540.0, 0.0, 1.0)) * (0.72 if hyp else 1.0) * (0.7 if inf else 1.0)
+	var cap := mini(230, int((60 + m * 13.0) * (1.4 if hyp else 1.0) * (1.3 if inf else 1.0)))
 	var batch := mini(6, 2 + int(t / 140.0)) + (1 if hyp else 0)
 	while batch > 0 and G.enemies.size() < cap:
 		_spawn(_comp(m), false)

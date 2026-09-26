@@ -20,6 +20,7 @@ var fragments := 0        # impure choralim gathered this run → purified on de
 var boon_ids: Array = []
 var luck := 0.0           # raised by elites; sways epic boon rolls
 var alive := true
+var endless := false      # victory'den sonra SONSUZ mod — kovan geri döner, ödül bankada
 var time := 0.0           # seconds survived this run (Director drives it)
 var pending_drafts := 0     # queued level-up drafts
 var draft_reroll := false   # one card reroll available per level-up draft
@@ -53,6 +54,7 @@ func start_run() -> void:
 	boon_ids.clear()
 	luck = G.meta.upg(Meta.U.LUCK) * 0.15
 	alive = true
+	endless = false
 	time = 0.0
 	pending_drafts = 0
 	stats = {"kills": 0, "rooms": 0}
@@ -223,6 +225,17 @@ func victory() -> void:
 	G.audio.jingle("boss")
 	G.ui.victory_screen(stats)
 
+# zaferden sonra devam — kovan sonsuz ölçeklenmeye döner, sonraki ölüm normal öder
+func continue_endless() -> void:
+	if endless:
+		return
+	endless = true
+	alive = true
+	G.state = G.State.ROOM
+	if is_instance_valid(G.director):
+		G.director.running = true
+	G.ui.toast("SONSUZ — kovan geri akıyor; ölüm hâlâ öder")
+
 func on_player_death(h: Dictionary) -> void:
 	if not alive:
 		return
@@ -236,7 +249,8 @@ func on_player_death(h: Dictionary) -> void:
 	if is_instance_valid(G.director):
 		G.director.running = false
 	G.ui.boss_bar(false, null)
-	_write_last_run(false)
+	# endless'te zafer çoktan bankada — sözleşmeler/özet zaferi korur
+	_write_last_run(endless)
 	G.meta.record_death(killer, biome, int(time), was_boss)
 	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
 	G.meta.add_choralim(gained)

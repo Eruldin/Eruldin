@@ -393,7 +393,7 @@ func _tick_hud() -> void:
 	_lvl_lbl.text = "SEV %d" % p.level
 	var tt := int(G.run.time)
 	_time_lbl.text = "%02d:%02d" % [tt / 60, tt % 60]
-	_time_lbl.add_theme_color_override("font_color", Px.C("ff5533") if G.run.hyper else Color(0.9, 0.95, 1))
+	_time_lbl.add_theme_color_override("font_color", Px.C("c26bff") if G.run.endless else (Px.C("ff5533") if G.run.hyper else Color(0.9, 0.95, 1)))
 	_kills_lbl.text = "%d kesim" % int(G.run.stats.get("kills", 0))
 	_sync_gear_rows(p)
 	while _boon_row.get_child_count() < G.run.boon_ids.size():
@@ -1116,6 +1116,17 @@ func victory_screen(stats: Dictionary) -> void:
 	var h := _lbl("[E / tık] — kampa dön (yeni döngü)", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
+	# VS endless: banked the payout; the swarm comes back hotter until you fall
+	var btn := Button.new()
+	btn.text = "∞ SONSUZ — kovana geri dön (ölüm hâlâ öder)"
+	btn.custom_minimum_size = Vector2(340, 32)
+	btn.add_theme_font_override("font", ui_font())
+	var bc := CenterContainer.new()
+	bc.add_child(btn)
+	v.add_child(bc)
+	btn.pressed.connect(func():
+		_close_overlay()
+		G.run.continue_endless())
 
 func death_reaction() -> void:
 	var ld: Dictionary = G.meta.data.last_death
