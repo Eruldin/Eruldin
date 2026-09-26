@@ -986,6 +986,26 @@ func _collect(pk: Node) -> void:
 			G.player.dmg_mult *= 1.005
 			G.audio.play("boon", 1.4, 0.7)
 			G.ui.toast("ALTIN NÜVE — kalıcı +%%0.5 hasar (toplam %d)" % int(G.meta.data["eggs"]))
+		"lore":
+			# veri kütüğü: bulunmamış ilk kaydı ÖYKÜ codex'ine yazar
+			var found: Array = G.meta.data.get("lore", [])
+			var nxt := ""
+			for le in Quests.LORE:
+				if not found.has(str(le.id)):
+					nxt = str(le.id)
+					break
+			if nxt == "":
+				G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) + 20
+				G.ui.toast("kütük zaten kayıtlı — ◆20")
+			else:
+				found.append(nxt)
+				G.meta.data["lore"] = found
+				for le in Quests.LORE:
+					if str(le.id) == nxt:
+						G.ui.toast("VERİ KÜTÜĞÜ — %s (Zirkon'da oku)" % str(le.name))
+						break
+			G.meta.save()
+			G.audio.play("boon", 1.3, 0.6)
 		"chest":
 			G.run.open_chest()
 		"loot":
@@ -1057,6 +1077,9 @@ func spawn_special(kind: String, p: Vector2) -> void:
 		"egg":
 			pk.texture = Px.S("icn_crown")
 			col = "ffd700"
+		"lore":
+			pk.texture = Px.S2("ico_quest") if Px.S2("ico_quest") != null else Px.S("dot")
+			col = "8fd4ff"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	pk.scale = Vector2.ONE * 0.8
 	pk.modulate = Px.C(col)

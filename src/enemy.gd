@@ -488,6 +488,9 @@ func die(h: Dictionary) -> void:
 			# altın nüve: nadir kalıcı güç düşüşü (VS golden egg)
 			if G.chance(0.03):
 				G.room.spawn_special("egg", pos)
+			# veri kütüğü: ÖYKÜ codex'ini besleyen lore parçası
+			if G.chance(0.07) and (G.meta.data.get("lore", []) as Array).size() < Quests.LORE.size():
+				G.room.spawn_special("lore", pos + Vector2(0, 16))
 		elif G.chance(0.12):
 			G.run.drop_fragments(pos, G.ri(1, 3))
 	# volatile elite: telegraphed blast after death
