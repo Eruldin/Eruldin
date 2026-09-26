@@ -10,7 +10,7 @@ static func all() -> Array:
 		{"id":"crushing","patron":"Rhasa","name":"Ezici Vuruşlar","desc":"+%20 kılıç hasarı","rarity":0,"color":Px.C("a8842f")},
 		{"id":"shredder","patron":"Rhasa","name":"Zırh Kemiren","desc":"Vuruşlar zırhı yok sayar, +4 düz hasar","rarity":1,"color":Px.C("a8842f")},
 		{"id":"veteran","patron":"Rhasa","name":"Kıdemli Kavrama","desc":"+%12 saldırı hızı","rarity":0,"color":Px.C("a8842f")},
-		{"id":"bulwark","patron":"Rhasa","name":"Siper Doktrini","desc":"+2 zırh, parry penceresi +0.05sn","rarity":1,"color":Px.C("a8842f")},
+		{"id":"bulwark","patron":"Rhasa","name":"Siper Doktrini","desc":"+2 zırh, -%8 alınan hasar","rarity":1,"color":Px.C("a8842f")},
 		{"id":"shockslam","patron":"Rhasa","name":"Şok Darbesi","desc":"Ağır vuruşlar alan şoku salar","rarity":2,"color":Px.C("a8842f")},
 		# --- Neva Rezonansı (telekinesis) ---
 		{"id":"well","patron":"Neva","name":"Yerçekimi Anomalisi","desc":"Vuruşlar %25 ihtimalle düşmanları çeker","rarity":1,"color":Px.C("7B1FA2")},
@@ -27,7 +27,7 @@ static func all() -> Array:
 		{"id":"emp","patron":"Rex","name":"EMP Patlaması","desc":"Vuruşlar %20 ihtimalle zincir şok salar","rarity":1,"color":Px.C("ff4444")},
 		{"id":"overcharge","patron":"Rex","name":"Aşırı Isınma","desc":"+%35 plazma hasarı, daha hızlı dolum","rarity":1,"color":Px.C("ff4444")},
 		{"id":"static","patron":"Rex","name":"Statik Alan","desc":"Yakındaki düşmanlar saniyede 6 şok hasarı alır","rarity":0,"color":Px.C("ff4444")},
-		{"id":"parryemp","patron":"Rex","name":"Kafa Karıştıran","desc":"Parry etrafında şok dalgası patlatır","rarity":2,"color":Px.C("ff4444")},
+		{"id":"parryemp","patron":"Rex","name":"Kafa Karıştıran","desc":"Her 6sn etrafında şok dalgası patlatır","rarity":2,"color":Px.C("ff4444")},
 		# --- Kovan Mutasyonu (chaos — bedelli) ---
 		{"id":"bloodlust","patron":"Kovan","name":"Kan Hırsı","desc":"+%40 hasar — ama +%15 hasar alırsın","rarity":1,"color":Px.C("39ff14")},
 		{"id":"frenzy","patron":"Kovan","name":"Kuduz","desc":"+%18 saldırı hızı — ama -15 azami can","rarity":0,"color":Px.C("39ff14")},
@@ -70,7 +70,9 @@ static func apply(id: String, p: Player) -> void:
 		"crushing": p.melee_dmg *= 1.20
 		"shredder": p.melee_dmg += 4.0; p.set_meta("shred", true)
 		"veteran": p.atk_speed *= 1.12
-		"bulwark": p.armor += 2.0
+		"bulwark":
+			p.armor += 2.0
+			p.dmg_taken_mult *= 0.92
 		"shockslam": p.set_meta("shockslam", true)
 		"well": p.b_gravity_well = true
 		"homing": p.b_homing = true
@@ -84,7 +86,7 @@ static func apply(id: String, p: Player) -> void:
 		"emp": p.b_emp = true
 		"overcharge": p.plasma_mult *= 1.35; p.charge_rate *= 1.45
 		"static": p.set_meta("static", 6.0)
-		"parryemp": p.b_parry_shock = true
+		"parryemp": p.set_meta("pulse", 6.0)
 		"bloodlust": p.dmg_mult *= 1.40; p.dmg_taken_mult *= 1.15
 		"frenzy": p.atk_speed *= 1.18; p.max_hp = maxf(20.0, p.max_hp - 15); p.hp = minf(p.hp, p.max_hp)
 		"carapace": p.lifesteal += 0.08; p.max_hp = maxf(20.0, p.max_hp * 0.9); p.hp = minf(p.hp, p.max_hp)

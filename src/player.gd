@@ -1,8 +1,8 @@
 class_name Player
 extends Actor
 
-# Ely (Alfa-04): 8-way movement, 3-hit blade combo, charged plasma shot,
-# dash with i-frames (12f), timed parry (6f). World units are pixels.
+# Ely (Alfa-04): survivors-style — player only moves/dashes; weapons fire
+# automatically on their own cooldowns. World units are pixels.
 
 var speed := 205.0
 var melee_dmg := 14.0
@@ -47,6 +47,19 @@ var revived := false
 var _swing_hit_done := false
 var charge_rate := 1.0       # plasma charge speed (Rex overcharge boon)
 var _charge_full := false
+
+# survivors systems: auto-weapons, passives, XP/level, pickup magnet
+var weapons: Array = []        # [{id, lvl, t, orbs, pools, tk, ang}]
+var passives: Array = []       # [{id, lvl}]
+var level := 1
+var xp := 0.0
+var xp_next := 8.0
+var magnet_r := 95.0
+var xp_mult := 1.0
+var cd_mult := 1.0
+var area_mult := 1.0
+var proj_spd := 1.0
+var _pulse_t := 0.0
 
 # doctrine (Rhasa stance): cleave = wide arcs / duelist = fast single-target
 var st_arc := 1.0
@@ -109,8 +122,14 @@ func _process(_d: float) -> void:
 		return
 	_read_input()
 	_tick_dash(d)
-	_tick_combat(d)
-	_tick_plasma(d)
+	_auto_aim()
+	if G.state == G.State.ROOM:
+		Weapons.tick(self, d)
+	if _combo_lock > 0:
+		_combo_lock -= d
+		if _combo_lock <= 0:
+			_attack_slow = 1.0
+			blade.modulate = Color(0.45, 0.9, 1, 0)
 	_move(d)
 	_tick_anim(d)
 	_pick_anim()
@@ -127,6 +146,12 @@ func _process(_d: float) -> void:
 				if pos.distance_to(e.pos) < 95.0:
 					e.take_hit({"dmg": get_meta("static") * 0.5, "type": G.DamageType.SHOCK, "from": pos, "source": self})
 					G.fx.burst(e.pos + Vector2(0, -10), Px.C("00E5FF"), 2, 60.0, 2.5, 0.2)
+	# Rex EMP boon repurposed as a periodic shock pulse
+	if has_meta("pulse") and G.state == G.State.ROOM:
+		_pulse_t -= d
+		if _pulse_t <= 0:
+			_pulse_t = float(get_meta("pulse"))
+			_pulse()
 
 var _static_t := 0.0
 
@@ -138,10 +163,24 @@ func _read_input() -> void:
 	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT): move_dir.x += 1
 	if move_dir.length_squared() > 1:
 		move_dir = move_dir.normalized()
-	var mw := get_global_mouse_position()
-	aim_dir = (mw - pos).normalized()
-	if is_instance_valid(body):
-		body.flip_h = mw.x < pos.x - 2
+	if is_instance_valid(body) and move_dir.length_squared() > 0.01:
+		body.flip_h = move_dir.x < -0.1
+
+# weapons aim themselves at the nearest threat; the mouse only matters in camp
+func _auto_aim() -> void:
+	if G.state != G.State.ROOM:
+		return
+	var best: Enemy = null
+	var bd := 460.0 * 460.0
+	for e in G.enemies:
+		if not is_instance_valid(e) or e.dead:
+			continue
+		var dd := pos.distance_squared_to(e.pos)
+		if dd < bd:
+			bd = dd
+			best = e
+	if best != null:
+		aim_dir = (best.pos - pos).normalized()
 
 func _move(d: float) -> void:
 	if _dash_t > 0:
@@ -215,54 +254,6 @@ func _tick_dash(d: float) -> void:
 			blade.modulate = Color(0.45, 0.9, 1, 0)
 
 var _space_held := false
-
-func _tick_combat(d: float) -> void:
-	if _parry_cd > 0: _parry_cd -= d
-	if _parry_t > 0: _parry_t -= d
-	if _combo_t > 0:
-		_combo_t -= d
-		if _combo_t <= 0: _combo = 0
-	if _combo_lock > 0:
-		_combo_lock -= d
-		if _combo_lock <= 0:
-			_attack_slow = 1.0
-			blade.modulate = Color(0.45, 0.9, 1, 0)
-			if _combo_queued:
-				_combo_queued = false
-				_start_swing()
-
-	# parry — buffered edge press
-	if _buf_parry > 0:
-		_buf_parry -= d
-	var parry_now := Input.is_key_pressed(KEY_Q) or Input.is_key_pressed(KEY_F)
-	if parry_now and not _parry_held:
-		_buf_parry = BUF_T
-	_parry_held = parry_now
-	if _buf_parry > 0 and _parry_cd <= 0 and G.state == G.State.ROOM:
-		_buf_parry = 0
-		_parry_t = parry_window + Boons.parry_bonus() + st_parry
-		_parry_cd = parry_cd
-		G.audio.play("parry", 1.1, 0.7)
-		G.fx.burst(pos + Vector2(0, -10) + aim_dir * 16.0, Px.C("00E5FF"), 6, 90.0, 3.0, 0.2)
-
-	# melee — buffered edge-detect LMB
-	if _buf_lmb > 0:
-		_buf_lmb -= d
-	var lmb := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	if lmb and not _lmb_held and G.state == G.State.ROOM:
-		_buf_lmb = BUF_T
-	_lmb_held = lmb
-	if _buf_lmb > 0:
-		if _combo_lock > 0:
-			if not _combo_queued:
-				_combo_queued = true
-				_buf_lmb = 0
-		else:
-			_buf_lmb = 0
-			_start_swing()
-
-var _parry_held := false
-var _lmb_held := false
 
 func _apply_stance() -> void:
 	st_arc = 1.0; st_dmg = 1.0; st_spd = 1.0; st_parry = 0.0; st_reach = 0.0
@@ -389,41 +380,51 @@ func _emp_chain(first: Actor) -> void:
 		cur = next
 		n += 1
 
-func _tick_plasma(d: float) -> void:
-	var rmb := Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
-	if rmb and _plasma_charge < 0 and G.state == G.State.ROOM and _combo_lock <= 0:
-		_plasma_charge = 0.0
-		G.audio.play("plasmaCharge", 1.0, 0.5)
-	if _plasma_charge >= 0:
-		_plasma_charge += d / (0.85 / charge_rate)
-		_attack_slow = 0.5
-		if _plasma_charge >= 1.0 and not _charge_full:
-			_charge_full = true
-			G.audio.play("chargeFull", 1.0, 0.5)
-			G.fx.burst(pos + Vector2(0, -14), Px.C("00E5FF"), 8, 90.0, 3.5, 0.3)
-		if G.chance(d * 20):
-			G.fx.burst(pos + Vector2(0, -12) + aim_dir * 12.0, Px.C("00E5FF"), 1, 30.0, 3.0, 0.25)
-		if not rmb:
-			var ch := clampf(_plasma_charge, 0.0, 1.0)
-			_plasma_charge = -1.0
-			_charge_full = false
-			_attack_slow = 1.0
-			_fire_plasma(ch)
+# survivors auto-swing: called by the blade weapon with its own numbers
+func auto_swing(ang: float, reach: float, arc_deg: float, dmg: float, heavy: bool) -> void:
+	aim_dir = Vector2.from_angle(ang)
+	_anim = ""
+	_set_anim("atk%d" % G.ri(1, 3), 8.0)
+	_combo_lock = 0.2
+	_attack_slow = 0.55
+	blade.modulate = Color(0.45, 0.9, 1, 0.22)
+	var arc := deg_to_rad(arc_deg) * st_arc
+	var tw := create_tween()
+	var start_rot := ang - arc / 2.0 - PI / 2.0
+	blade.rotation = start_rot
+	tw.tween_property(blade, "rotation", start_rot + arc, 0.16)
+	G.fx.slash_fx(pos, ang, reach, Px.C("7fd4ff"), heavy)
+	G.audio.play("slash", G.rf(0.95, 1.15), 0.55)
+	get_tree().create_timer(0.09, false).timeout.connect(func():
+		if dead:
+			return
+		hit_arc(dmg, ang, reach + st_reach, arc, heavy)
+		G.audio.play("hitHeavy" if heavy else "hit", G.rf(0.9, 1.15), 0.6))
+	tw.tween_callback(func(): blade.modulate = Color(0.45, 0.9, 1, 0))
 
-func _fire_plasma(ch: float) -> void:
-	var p := Projectile.new()
-	G.game.world.add_child(p)
-	var size := plasma_size * lerpf(0.6, 1.5, ch)
-	p.setup(G.Team.PLAYER, pos + aim_dir * 22.0, aim_dir * lerpf(320.0, 420.0, ch),
-		plasma_dmg * plasma_mult * dmg_mult * lerpf(0.5, 1.6, ch),
-		10.0 * size, Px.C("00E5FF"), "dot")
-	p.homing = b_homing
-	p.knock = 4.0
-	p.stag = 0.3
-	G.audio.play("plasma", G.rf(0.9, 1.1))
-	G.fx.directional(pos + Vector2(0, -12), aim_dir, Px.C("00E5FF"), 8, 190.0, 4.0, 0.3)
-	G.fx.light_flash(pos + Vector2(0, -12) + aim_dir * 20.0, Px.C("00E5FF"), 1.6, 2.2, 0.18)
-	ext_vel -= aim_dir * 60.0
+static func xp_for(lvl: int) -> float:
+	return 6.0 + float(lvl - 1) * 5.0 + pow(maxi(0, lvl - 1), 1.7) * 1.2
+
+func add_xp(v: float) -> void:
+	if dead:
+		return
+	xp += v * xp_mult
+	while xp >= xp_next:
+		xp -= xp_next
+		level += 1
+		xp_next = xp_for(level)
+		G.run.pending_drafts += 1
+		G.fx.burst(pos + Vector2(0, -22), Px.C("00E5FF"), 14, 140.0, 4.0, 0.5)
+		G.audio.play("boon", 1.4, 0.5)
+
+func _pulse() -> void:
+	G.fx.burst(pos + Vector2(0, -8), Px.C("7B1FA2"), 18, 240.0, 5.0, 0.4)
+	G.audio.play("parryOk", 1.3, 0.4)
+	for e in G.enemies.duplicate():
+		if not is_instance_valid(e) or e.dead:
+			continue
+		if pos.distance_to(e.pos) < 108.0:
+			e.take_hit({"dmg": 18.0 * dmg_mult, "type": G.DamageType.SHOCK, "from": pos, "knock": 6.0, "stagger": 0.6, "source": self})
 
 func take_hit(h: Dictionary) -> void:
 	if dead or invuln > 0:
@@ -490,8 +491,23 @@ func reset_for_run() -> void:
 	b_emp = false; b_parry_shock = false; b_stealth_dash = false
 	stealth_t = 0.0; revived = false
 	charge_rate = 1.0; _charge_full = false
+	# survivors reset: starter blade, empty passives, level 1
+	for w in weapons:
+		for o in w.get("orbs", []):
+			if is_instance_valid(o):
+				o.queue_free()
+		for pl in w.get("pools", []):
+			if is_instance_valid(pl.get("node")):
+				pl.node.queue_free()
+	weapons = [{"id": "blade", "lvl": 1, "t": 0.35, "orbs": [], "pools": [], "tk": 0.0, "ang": 0.0}]
+	passives = []
+	level = 1
+	xp = 0.0
+	xp_next = xp_for(1)
+	magnet_r = 95.0; xp_mult = 1.0; cd_mult = 1.0; area_mult = 1.0; proj_spd = 1.0
+	_attack_slow = 1.0; _pulse_t = 0.0
 	_apply_stance()
-	for k in ["shred", "shockslam", "aegis", "regen", "static", "killer"]:
+	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer"]:
 		remove_meta(k)
 	max_hp = 100 + G.meta.upg(Meta.U.HP) * 20
 	hp = max_hp

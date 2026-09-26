@@ -134,11 +134,21 @@ func _process(_d: float) -> void:
 func _seek(d: float) -> void:
 	var to_p: Vector2 = G.player.pos - pos
 	var dist := to_p.length()
+	# arena leash: far stragglers recycle back onto the off-screen ring
+	if dist > 1500.0 and G.room is Arena:
+		pos = G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * G.rf(700.0, 860.0)
+		pos = G.room.clamp_pos(pos, radius)
+		to_p = G.player.pos - pos
+		dist = to_p.length()
 	var dir := to_p.normalized()
-	# separation
+	# separation — bounded checks, hordes stay O(n)
+	var _seen := 0
 	for o in G.enemies:
 		if o == self or o.dead:
 			continue
+		_seen += 1
+		if _seen > 10:
+			break
 		var away: Vector2 = pos - o.pos
 		var dd := away.length()
 		if dd < radius + o.radius + 5.0 and dd > 0.01:
@@ -284,6 +294,8 @@ func die(h: Dictionary) -> void:
 	super.die(h)
 	G.enemies.erase(self)
 	G.meta.data.kills += 1
+	if is_instance_valid(G.run):
+		G.run.stats.kills = int(G.run.stats.get("kills", 0)) + 1
 	G.audio.play("die", G.rf(0.9, 1.2), 0.6)
 	G.fx.light_flash(pos + Vector2(0, -12), Color(1, 0.5, 0.3), 1.4, 2.4, 0.2)
 	G.fx.burst(pos + Vector2(0, -10), Color(0.5, 0.05, 0.05), 30 if elite else 16, 190.0, 5.0, 0.6, 6.0)
@@ -293,7 +305,16 @@ func die(h: Dictionary) -> void:
 	G.fx.splat(pos + Vector2(0, 4), Color(0.4, 0.03, 0.03), 1.4 if elite else 0.8)
 	if kind == EKind.DRONE or kind == EKind.SPITTER:
 		G.fx.burst(pos + Vector2(0, -6), Px.C("00E676"), 12, 130.0, 4.0, 0.5)
-	G.run.drop_fragments(pos, G.ri(6, 10) if elite else G.ri(1, 3))
 	if is_instance_valid(G.room):
+		# XP gem every kill; elites also drop a chest; rare heal orb
+		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0][kind] + (10.0 if elite else 0.0)
+		G.room.spawn_gem(pos, xp_val)
+		if elite:
+			G.room.spawn_chest(pos)
+			G.run.drop_fragments(pos, G.ri(8, 14))
+		elif G.chance(0.12):
+			G.run.drop_fragments(pos, G.ri(1, 3))
+		if G.chance(0.045):
+			G.room.spawn_heal(pos)
 		G.room.on_enemy_dead(self)
 	queue_free()
