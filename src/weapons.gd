@@ -300,6 +300,24 @@ static func evo_ready(p: Player) -> Array:
 
 # ---------------------------------------------------------------- draft
 
+# draft-card hints: weapons name their evo pair, passives name the weapons they evolve
+static func _evo_hint(d: Dictionary, p: Player) -> String:
+	var pid := str(d.get("evo", ""))
+	var into := str(d.get("into", ""))
+	if pid == "" or into == "":
+		return ""
+	var pn := str(PDEFS.get(pid, {}).get("name", pid))
+	var en := str(DEFS.get(into, {}).get("name", into))
+	return "\nevrim: %s → %s%s" % [pn, en, " ✓" if has_p(p, pid) else ""]
+
+static func _evo_pairs(pid: String) -> String:
+	var names: Array = []
+	for wid in DEFS:
+		var d: Dictionary = DEFS[wid]
+		if str(d.get("evo", "")) == pid and not d.get("hidden", false):
+			names.append(str(d.name))
+	return "" if names.is_empty() else "\nevrim çifti: " + ", ".join(names)
+
 static func _opt(kind: String, id: String, lvl: int, name: String, icon: String, col: String, desc: String, w: float, top: String = "") -> Dictionary:
 	return {"kind": kind, "id": id, "lvl": lvl, "name": name, "icon": icon, "col": col, "desc": desc, "top": top, "w": w}
 
@@ -333,23 +351,23 @@ static func draft_opts(p: Player, luck: float) -> Array:
 	for w in p.weapons:
 		var d: Dictionary = DEFS.get(str(w.id), {})
 		if int(w.lvl) < WPN_MAX and not d.get("hidden", false) and not ban.has(str(w.id)):
-			pool.append(_opt("wpn", w.id, int(w.lvl) + 1, "%s · Sv.%d" % [d.name, int(w.lvl) + 1], d.icon, d.col, _lvl_desc(w.id, int(w.lvl) + 1), 10.0))
+			pool.append(_opt("wpn", w.id, int(w.lvl) + 1, "%s · Sv.%d" % [d.name, int(w.lvl) + 1], d.icon, d.col, _lvl_desc(w.id, int(w.lvl) + 1) + _evo_hint(d, p), 10.0))
 	if p.weapons.size() < WPN_SLOTS:
 		for wid in DEFS:
 			var d: Dictionary = DEFS[wid]
 			if d.get("hidden", false) or has_w(p, wid) or not unlocked(wid) or ban.has(wid):
 				continue
-			pool.append(_opt("wpn", wid, 1, d.name, d.icon, d.col, str(d.desc) + "  (yeni silah)", 7.0, "YENİ"))
+			pool.append(_opt("wpn", wid, 1, d.name, d.icon, d.col, str(d.desc) + "  (yeni silah)" + _evo_hint(d, p), 7.0, "YENİ"))
 	for ps in p.passives:
 		if int(ps.lvl) < PSV_MAX and not ban.has(str(ps.id)):
 			var d: Dictionary = PDEFS[str(ps.id)]
-			pool.append(_opt("psv", ps.id, int(ps.lvl) + 1, "%s · Sv.%d" % [d.name, int(ps.lvl) + 1], d.icon, d.col, str(d.desc), 9.0))
+			pool.append(_opt("psv", ps.id, int(ps.lvl) + 1, "%s · Sv.%d" % [d.name, int(ps.lvl) + 1], d.icon, d.col, str(d.desc) + _evo_pairs(str(ps.id)), 9.0))
 	if p.passives.size() < PSV_SLOTS:
 		for pid in PDEFS:
 			if has_p(p, pid) or ban.has(pid):
 				continue
 			var d: Dictionary = PDEFS[pid]
-			pool.append(_opt("psv", pid, 1, d.name, d.icon, d.col, str(d.desc) + "  (yeni pasif)", 6.0, "YENİ"))
+			pool.append(_opt("psv", pid, 1, d.name, d.icon, d.col, str(d.desc) + "  (yeni pasif)" + _evo_pairs(pid), 6.0, "YENİ"))
 	for b in Boons.roll(G.run.boon_ids, luck):
 		if not ban.has(str(b.id)):
 			pool.append(_opt("boon", b.id, 0, b.name, "icn_" + str(b.patron).to_lower(), b.color.to_html(false), str(b.desc), 2.2, b.patron + " " + "★".repeat(int(b.rarity) + 1)))
