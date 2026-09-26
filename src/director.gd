@@ -27,6 +27,7 @@ var running := true
 var _spawn_t := 0.0
 var _elite_t := 95.0
 var _surge_t := 85.0
+var _mono_fired := false   # resonance cluster side objective — once per run
 var _mini := false
 var _final := false
 var _won := false
@@ -76,6 +77,18 @@ func _tick_events(d: float) -> void:
 	if _surge_t <= 0.0:
 		_surge_t = G.rf(62.0, 82.0) * (0.8 if G.run.hyper else 1.0)
 		_surge(m)
+	# HoT-style side objective: a resonance cluster spawns once around 3:30
+	if not _mono_fired and m >= 3.5 and is_instance_valid(G.room) and G.player != null and not G.player.dead:
+		_mono_fired = true
+		var pp := Vector2.ZERO
+		for i in 8:
+			var cand := G.player.pos + Vector2(G.rf(-620, 620), G.rf(-420, 420))
+			if G.room.inside(cand, 90.0) and cand.distance_to(G.player.pos) > 260.0:
+				pp = cand
+				break
+		if pp == Vector2.ZERO:
+			pp = G.room.clamp_pos(G.player.pos + Vector2(400, 0), 40.0)
+		G.room.spawn_monolith(pp)
 	# endless reaper — a scaling HASATÇI hunter every ~100s
 	if G.run.endless:
 		_harvest_t -= d
