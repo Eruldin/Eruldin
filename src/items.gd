@@ -36,6 +36,13 @@ const DEFS := {
 	"i_halka2":   {"name": "Cüruf Halkası",    "slot": "yuzuk",   "r": 0, "icon": "icn_mine",       "mods": {"frag": 0.10}},
 	"i_ikiz":     {"name": "İkiz Halka",       "slot": "yuzuk",   "r": 1, "icon": "icn_kovan",      "mods": {"dmg": 0.06, "spd": 0.04}},
 	"i_final":    {"name": "Son Mühür",        "slot": "yuzuk",   "r": 2, "icon": "icn_crown",      "mods": {"dmg": 0.10, "crit": 0.05}},
+	# derinlik dalgası — her slota r1/r2 kapağı
+	"i_gocek":    {"name": "Gözcü Vizörü",     "slot": "bas",     "r": 1, "icon": "icn_zap",        "mods": {"mag": 45.0, "xp": 0.05}},
+	"i_ormek":    {"name": "Örümcek Ağı",      "slot": "govde",   "r": 1, "icon": "icn_kovan",      "mods": {"spd": 0.05, "ls": 0.01}},
+	"i_bilek":    {"name": "Keskin Bileklik",  "slot": "eldiven", "r": 1, "icon": "icn_dagger",     "mods": {"crit": 0.08}},
+	"i_atlama":   {"name": "Atlayıcı Çivisi",  "slot": "cizme",   "r": 1, "icon": "icn_dash",       "mods": {"armor": 1.0, "spd": 0.03}},
+	"i_koro":     {"name": "Koro Madalyonu",   "slot": "kolye",   "r": 1, "icon": "ico_frag",       "mods": {"frag": 0.12}},
+	"i_bosluk":   {"name": "Boşluk Halkası",   "slot": "yuzuk",   "r": 2, "icon": "icn_skull",      "mods": {"ls": 0.03, "crit": 0.04}},
 }
 
 const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700"]
@@ -158,6 +165,33 @@ static func sell(id: String) -> int:
 	G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) + p
 	G.meta.save()
 	return p
+
+# hurda takası: 2 zula eşyası → 1 yeni eşya; nadirlik ≥ ikisinin düşük olanı.
+# koleksiyon doluysa "full" döner ve eşyalar yanmaz.
+static func barter(a: String, b: String) -> String:
+	if a == b:
+		return ""
+	var st: Array = G.meta.data.get("stash", [])
+	if not st.has(a) or not st.has(b):
+		return ""
+	var rmin := mini(int(DEFS.get(a, {}).get("r", 0)), int(DEFS.get(b, {}).get("r", 0)))
+	var pool: Array = []
+	for id in DEFS:
+		if int(DEFS[id].r) >= rmin and not _in_stash(id):
+			pool.append(id)
+	if pool.is_empty():
+		for id in DEFS:
+			if not _in_stash(id):
+				pool.append(id)
+	if pool.is_empty():
+		return "full"
+	st.erase(a)
+	st.erase(b)
+	var nid: String = pool[randi() % pool.size()]
+	st.append(nid)
+	G.meta.data["stash"] = st
+	G.meta.save()
+	return nid
 
 # tek satırlık mod özeti — envanter kartlarında gösterilir
 static func stat_text(id: String) -> String:
