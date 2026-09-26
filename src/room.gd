@@ -60,6 +60,7 @@ var stray_active := false
 var _stray_armed := true
 var _merge_t := 80.0            # kristal konsolidasyonu sayacı
 var critters: Array = []        # [{s, vel}] — zararsiz yaban hayatı; üstüne koşarsan yakalanır
+var caches: Array = []          # gizli gömülü sandıklar — işaretlenmez, yaklaşınca açılır
 var decals: Node2D
 var pending_reward: int = Reward.FRAGMENTS
 var cleared := false
@@ -128,6 +129,11 @@ func build_hub() -> void:
 	NPC.make("ehnar", Vector2(60, -300), self)
 	NPC.make("ahusk", Vector2(-140, -260), self)
 	NPC.make("elyb", Vector2(320, -120), self)
+	# efendi kupaları: düşürülen her boss kamp ateşinin kuzeyinde kafatası bırakır
+	var tb := 0
+	for bid in (G.meta.data.get("bosses", []) as Array):
+		_prop(Vector2(-60 + tb * 44, -330), 7, "icn_skull")
+		tb += 1
 	G.audio.play_music("mus_hub")
 	G.ui.banner("VIATOR KAMPI", "son güvenli toprak — konuşmak için E, kapıya yürü")
 
@@ -144,6 +150,7 @@ func build(biome_idx: int, rt: int, promise: int, depth: int, seed_val: int) -> 
 	_scatter_decals()
 	_scatter_props()
 	_scatter_critters()
+	_scatter_caches()
 	_place_hazards(depth)
 	_make_doors()
 	G.audio.play_music("mus_boss" if rt == Type.BOSS else "mus_%d" % biome)
@@ -551,6 +558,7 @@ func _process(d: float) -> void:
 	_tick_merchant(d)
 	_tick_stray(d)
 	_tick_critters(d)
+	_tick_caches()
 	_tick_doors()
 	_tick_motes(d)
 	_sort_children()
@@ -742,6 +750,43 @@ func _tick_critters(d: float) -> void:
 			c.vel = -c.vel
 			s.position = clamp_pos(s.position, 30.0)
 		s.flip_h = c.vel.x < 0
+
+# gizli zulalar: arena basina 2 gömülü sandık — toprağa gömülü görünür,
+# kenar işareti yok; üstüne yürüyen keşfeder (açık dünya keşif teşviki)
+func _scatter_caches() -> void:
+	for i in 2:
+		var p := Vector2(rng.randf_range(BOUNDS.position.x + 120, BOUNDS.end.x - 120), rng.randf_range(BOUNDS.position.y + 120, BOUNDS.end.y - 120))
+		var s := Sprite2D.new()
+		s.texture = Px.S("crate")
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		s.modulate = Color(0.30, 0.26, 0.21, 0.95)
+		s.scale = Vector2.ONE * 0.68
+		s.position = p
+		s.z_index = int(p.y) - 1
+		add_child(s)
+		caches.append(s)
+
+func _tick_caches() -> void:
+	if caches.is_empty() or G.player == null or G.player.dead:
+		return
+	for i in range(caches.size() - 1, -1, -1):
+		var s: Sprite2D = caches[i]
+		if not is_instance_valid(s):
+			caches.remove_at(i)
+			continue
+		if s.position.distance_to(G.player.pos) < 46.0:
+			caches.remove_at(i)
+			var p := s.position
+			s.queue_free()
+			G.fx.burst(p, Px.C("c9a227"), 20, 160.0, 5.0, 0.6)
+			G.fx.light_flash(p, Px.C("ffd75f"), 1.4, 2.2, 0.3)
+			G.audio.jingle("boon")
+			G.ui.toast("GÖMÜLÜ SANDIK — eski bir zula buldun")
+			G.run.drop_fragments(p, G.ri(10, 18))
+			if G.chance(0.5):
+				var iid := Items.roll(G.run.luck)
+				if iid != "":
+					spawn_loot(iid, p + Vector2(0, -12))
 
 func _tick_stray(_d: float) -> void:
 	if not stray_active or G.player == null or G.player.dead:
