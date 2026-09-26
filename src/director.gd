@@ -166,6 +166,9 @@ func _comp(m: float) -> int:
 		pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.CEREB])
 	if m >= 8.5:
 		pool.append_array([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.DRONE, Enemy.EKind.KONAKCI])
+	# hamal taşıyıcı: nadir yük düşürücü — 4:30'dan sonra havuza sızar
+	if m >= 4.5:
+		pool.append(Enemy.EKind.CARRIER)
 	# each sector leans on its own brood: Simithar rains fire (spitters/drones),
 	# Wreckage swarms with husks/varls, Aeterna fields its elite dead
 	if m >= 2.0:
