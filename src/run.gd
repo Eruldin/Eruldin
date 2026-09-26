@@ -31,7 +31,8 @@ var banished: Array = []    # ids kovulanlar — bu koşuda draft'a girmez
 var arcana := ""           # koşu başında seçilen KOZ kartı (VS arcana)
 var elite_fever := false   # SARI HAT: elitler %20 sık doğar
 var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
-var pending_ambush := false # YOL OLAYI pusu: arenaya kuşatılmış girilir
+var pending_ambush := false  # YOL OLAYI pusu: arenaya kuşatılmış girilir
+var _skip_waylay := false    # TEKRAR DENE: aynı node'a dönerken yol olayı atlanır
 var pending_dmg := 0.0     # YOL OLAYI harabe: girişte alınan enkaz hasarı
 var force_waylay := ""     # probe/debug: yol olayını zorla
 var _first_visit := false   # bu koşu düğüme ilk iniş mi (lore kartı için)
@@ -148,7 +149,10 @@ func start_run() -> void:
 	# seyahat olayı (BG2 "waylaid"): arenaya girmeden önce rastgele karşılaşma
 	var wk := force_waylay
 	force_waylay = ""
-	if wk == "" and randf() < 0.35:
+	if _skip_waylay:
+		_skip_waylay = false
+		wk = ""
+	elif wk == "" and randf() < 0.35:
 		wk = G.pick(["pusu", "kervan", "harabe", "gezgin"])
 	if wk != "":
 		G.ui.travel_event(wk, node_name)
@@ -487,6 +491,12 @@ func abandon_to_hub() -> void:
 		G.meta.add_choralim(gained)
 	fragments = 0
 	respawn_to_hub()
+
+func retry_node() -> void:
+	# ölüm ekranından hızlı dönüş — kamp atlanır, aynı node'a direkt koşu
+	_skip_waylay = true
+	respawn_to_hub()
+	start_run()
 
 func respawn_to_hub() -> void:
 	# purge the dead player shell, rebuild at camp

@@ -2436,6 +2436,14 @@ func death_screen(killer: String, gained: int) -> void:
 		kl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(kl2)
 	_build_recap(v)
+	var rb := Button.new()
+	rb.text = "TEKRAR DENE — %s" % str(Wmap.node(G.run.node_id).get("name", "aynı bölge"))
+	rb.custom_minimum_size = Vector2(280, 30)
+	rb.add_theme_font_override("font", ui_font())
+	v.add_child(rb)
+	rb.pressed.connect(func():
+		_close_overlay()
+		G.run.retry_node())
 	var h := _lbl("Neva'nın rezonansı seni geri çekiyor...\n[E / tık] — Viator Kampı'na dön", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
