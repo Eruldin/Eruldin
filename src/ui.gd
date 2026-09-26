@@ -873,11 +873,19 @@ func levelup_draft() -> void:
 	if overlay_open():
 		G.run.pending_drafts += 1
 		return
+	G.run.draft_reroll = true
+	_open_draft()
+
+func _open_draft() -> void:
 	var opts := Weapons.draft_opts(G.player, G.run.luck)
 	if opts.is_empty():
 		return
 	_pause(true)
-	_show_cards("draft", "SEVİYE %d — güçlendirme seç  [1/2/3]" % G.player.level, Px.C("00E5FF"), opts)
+	var all := opts.duplicate()
+	if G.run.draft_reroll:
+		all.append({"kind": "reroll", "id": "rr", "name": "YENİLE", "icon": "icn_dash", "col": "00E5FF", "desc": "kartları yeniden dağıt — taslak başına bir kez", "top": "ŞANS", "w": 1.0})
+	all.append({"kind": "gift", "id": "skip", "name": "GEÇ", "icon": "ico_frag", "col": "9aa0b0", "desc": "+15 parçacık — hiçbirini alma", "top": "SEÇME", "w": 1.0})
+	_show_cards("draft", "SEVİYE %d — güçlendirme seç  [1-%d]" % [G.player.level, all.size()], Px.C("00E5FF"), all)
 
 func chest_choice(evos: Array) -> void:
 	_pause(true)
@@ -952,6 +960,10 @@ func _pick_card(o: Dictionary) -> void:
 		G.meta.save()
 		G.ui.toast("saha: %s — portal o koordinata açılıyor" % BIOME_NAME[int(o.get("id", 0))])
 		G.audio.jingle("boon")
+		return
+	if str(o.get("kind", "")) == "reroll":
+		G.run.draft_reroll = false
+		_open_draft()
 		return
 	if str(o.get("kind", "")) == "evo":
 		G.run.apply_evo({"from": o.get("from", ""), "into": o.get("id", "")})
