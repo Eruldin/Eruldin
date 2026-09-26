@@ -34,6 +34,7 @@ var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var pending_ambush := false # YOL OLAYI pusu: arenaya kuşatılmış girilir
 var pending_dmg := 0.0     # YOL OLAYI harabe: girişte alınan enkaz hasarı
 var force_waylay := ""     # probe/debug: yol olayını zorla
+var _first_visit := false   # bu koşu düğüme ilk iniş mi (lore kartı için)
 var stats := {"kills": 0, "rooms": 0}
 var node_id := "b0"       # wmap node this run entered through
 var node_name := ""       # banner'da node adı (fallback: biome adı)
@@ -128,7 +129,8 @@ func start_run() -> void:
 		G.meta.data["visited"] = vis
 	# node-bazlı ziyaret: haritada ✓ işaretlerini besler
 	var vn: Array = G.meta.data.get("visited_nodes", [])
-	if not vn.has(node_id):
+	_first_visit = not vn.has(node_id)
+	if _first_visit:
 		vn.append(node_id)
 		G.meta.data["visited_nodes"] = vn
 	G.meta.save()
@@ -169,6 +171,13 @@ func _enter_arena() -> void:
 		G.player.hp = maxf(1.0, G.player.hp - pending_dmg)
 		pending_dmg = 0.0
 		G.ui.toast("enkaz altında kaldın")
+	# ilk ziyaret: bölge kartı (BG2 "yeni alan" hissi) — lore varsa oynat
+	if _first_visit:
+		_first_visit = false
+		var nd2 := Wmap.node(node_id)
+		var lore := str(nd2.get("lore", nd2.get("desc", "")))
+		if lore != "":
+			G.ui.cinematic("cine_%d_0" % biome, node_name, lore, 3.2)
 	# kilitli silahlar koşulu ilk kez tutunca duyurulur
 	var seen: Array = G.meta.data.get("unlocked_w", [])
 	var changed := false
