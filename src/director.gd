@@ -51,9 +51,10 @@ func _tick_spawn(d: float) -> void:
 	if _spawn_t > 0.0:
 		return
 	var m := t / 60.0
-	_spawn_t = lerpf(1.6, 0.34, clampf(t / 540.0, 0.0, 1.0))
-	var cap := mini(210, 60 + int(m * 13.0))
-	var batch := mini(6, 2 + int(t / 140.0))
+	var hyp: bool = G.run.hyper
+	_spawn_t = lerpf(1.6, 0.34, clampf(t / 540.0, 0.0, 1.0)) * (0.72 if hyp else 1.0)
+	var cap := mini(210, int((60 + m * 13.0) * (1.4 if hyp else 1.0)))
+	var batch := mini(6, 2 + int(t / 140.0)) + (1 if hyp else 0)
 	while batch > 0 and G.enemies.size() < cap:
 		_spawn(_comp(m), false)
 		batch -= 1
@@ -63,7 +64,7 @@ func _tick_events(d: float) -> void:
 	# elites — every ~50s after 1:35; they drop chests
 	_elite_t -= d
 	if _elite_t <= 0.0:
-		_elite_t = G.rf(44.0, 58.0)
+		_elite_t = G.rf(44.0, 58.0) * (0.8 if G.run.hyper else 1.0)
 		var kind: int = G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.HUSK] if m < 4.0 else ([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER] if m < 6.5 else [Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA, Enemy.EKind.SPITTER]))
 		var e := _spawn(kind, true)
 		if e != null:
@@ -71,7 +72,7 @@ func _tick_events(d: float) -> void:
 	# surge events — a visible ring/flood every ~75s
 	_surge_t -= d
 	if _surge_t <= 0.0:
-		_surge_t = G.rf(62.0, 82.0)
+		_surge_t = G.rf(62.0, 82.0) * (0.8 if G.run.hyper else 1.0)
 		_surge(m)
 	# miniboss
 	if not _mini and t >= MINI_T:
@@ -120,10 +121,10 @@ func _comp(m: float) -> int:
 
 func _hp_scale() -> float:
 	var m := t / 60.0
-	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30)
+	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30) * (1.15 if G.run.hyper else 1.0)
 
 func _dmg_scale() -> float:
-	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15)
+	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15) * (1.2 if G.run.hyper else 1.0)
 
 func _spawn(kind: int, elite: bool) -> Enemy:
 	if not is_instance_valid(G.room):
@@ -131,7 +132,10 @@ func _spawn(kind: int, elite: bool) -> Enemy:
 	var p := _ring_pos()
 	if p == Vector2.INF:
 		return null
-	return Enemy.spawn(kind, p, elite, _hp_scale(), _dmg_scale(), G.room)
+	var e := Enemy.spawn(kind, p, elite, _hp_scale(), _dmg_scale(), G.room)
+	if e != null and G.run.hyper:
+		e.speed *= 1.08
+	return e
 
 func _ring_pos() -> Vector2:
 	for i in 30:
