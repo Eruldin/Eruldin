@@ -226,6 +226,14 @@ func _write_last_run(win: bool) -> void:
 		"level": G.player.level if is_instance_valid(G.player) else 1,
 		"win": win,
 	}
+	# tür-bazlı kesimler meta'ya birikir — Zirkon'un kayıtlarında listelenir
+	var kk: Dictionary = stats.get("kind_kills", {})
+	if not kk.is_empty():
+		var mk: Dictionary = G.meta.data.get("kind_kills", {})
+		for kn in kk:
+			mk[kn] = int(mk.get(kn, 0)) + int(kk[kn])
+		G.meta.data["kind_kills"] = mk
+		G.meta.save()
 	G.meta.data["best_evos"] = maxi(int(G.meta.data.get("best_evos", 0)), int(stats.get("evos", 0)))
 	if win and curse >= 2:
 		G.meta.data["curse_wins"] = int(G.meta.data.get("curse_wins", 0)) + 1

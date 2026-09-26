@@ -978,6 +978,14 @@ func records_panel() -> void:
 		var l := _lbl("%s  %s" % ["◆" if done else "◇", "%s — %s" % [BIOME_NAME[i], Run.BOSS_NAMES[i]]],
 			Vector2.ZERO, 13, Color(0.95, 0.85, 0.4) if done else Color(0.5, 0.5, 0.6))
 		v.add_child(l)
+	var tk: Dictionary = d.get("kind_kills", {})
+	if not tk.is_empty():
+		var kk := tk.keys()
+		kk.sort_custom(func(a, b): return int(tk[a]) > int(tk[b]))
+		var kt := _lbl("— TÜR KESİMLERİ —", Vector2.ZERO, 12, Px.C("c9a227"))
+		v.add_child(kt)
+		var l := _lbl(" · ".join(kk.slice(0, 6).map(func(k2): return "%s %d" % [str(k2), int(tk[k2])])), Vector2.ZERO, 11, Color(0.7, 0.7, 0.8))
+		v.add_child(l)
 	var cols := HBoxContainer.new()
 	cols.alignment = BoxContainer.ALIGNMENT_CENTER
 	cols.add_theme_constant_override("separation", 34)

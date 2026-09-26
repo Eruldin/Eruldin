@@ -29,6 +29,7 @@ var _elite_t := 95.0
 var _surge_t := 85.0
 var _mono_fired := false   # resonance cluster side objective — once per run
 var _tome_t := 275.0       # bilgelik tomu — ~4:35'te ilki, sonra ~4dk'da bir
+var _rain_t := 130.0       # göktaşı yağmuru — oyuncu çevresine telegraph'lı alan vuruşları
 var _mini := false
 var _final := false
 var _won := false
@@ -96,6 +97,11 @@ func _tick_events(d: float) -> void:
 		_tome_t = G.rf(230.0, 285.0)
 		var tp := Vector2(G.rf(G.room.BOUNDS.position.x + 140, G.room.BOUNDS.end.x - 140), G.rf(G.room.BOUNDS.position.y + 120, G.room.BOUNDS.end.y - 120))
 		G.room.spawn_tome(tp)
+	# göktaşı yağmuru: işaretli alanlara iki tarafı da vuran vuruşlar yağar
+	_rain_t -= d
+	if _rain_t <= 0.0 and is_instance_valid(G.player) and not G.player.dead:
+		_rain_t = G.rf(85.0, 110.0) * (0.75 if G.run.hyper else 1.0)
+		_rain()
 	# endless reaper — a scaling HASATÇI hunter every ~100s
 	if G.run.endless:
 		_harvest_t -= d
@@ -262,3 +268,27 @@ func _on_boss_dead(b) -> void:
 		G.run.drop_fragments(b.pos, 90)
 		G.ui.toast("%s düştü — sandıklar yere saçıldı" % b.actor_name)
 		G.audio.jingle("boss")
+
+# göktaşı yağmuru olayı: oyuncu çevresine telegraph'lı vuruşlar — iki tarafı da vurur
+func _rain() -> void:
+	G.ui.toast("GÖKTAŞI YAĞMURU — işaretli alanlardan kaç!")
+	G.audio.play("alarm", 0.9, 0.55)
+	for i in 7:
+		var p := G.player.pos + Vector2(G.rf(-430.0, 430.0), G.rf(-310.0, 310.0))
+		if is_instance_valid(G.room):
+			p = G.room.clamp_pos(p, 60.0)
+		_rain_strike(p)
+
+func _rain_strike(p: Vector2) -> void:
+	var r := 95.0
+	G.fx.tele_circle(p, r, 0.9, Color(1.0, 0.4, 0.15, 0.5))
+	var pp := p
+	get_tree().create_timer(0.9, false).timeout.connect(func():
+		if is_instance_valid(G.player) and not G.player.dead and G.player.pos.distance_to(pp) < r:
+			G.player.take_hit({"dmg": 24.0 + G.run.depth * 2.0, "type": G.DamageType.EXPLOSION, "from": pp, "knock": 8.0, "source": null})
+		for e in G.enemies.duplicate():
+			if e is Enemy and not e.dead and e.pos.distance_to(pp) < r:
+				e.take_hit({"dmg": 70.0 + G.run.depth * 8.0, "type": G.DamageType.EXPLOSION, "from": pp, "knock": 10.0, "source": G.player})
+		G.fx.burst(pp, Color(1.0, 0.5, 0.2), 18, 240.0, 6.0, 0.4)
+		G.fx.light_flash(pp, Color(1.0, 0.45, 0.15), 1.6, 2.6, 0.16)
+		G.audio.play("explode", 1.1, 0.3))
