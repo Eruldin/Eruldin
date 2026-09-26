@@ -70,12 +70,30 @@ func _process(_d: float) -> void:
 							print("[probe] sell %s -> +%d (choralim %d->%d)" % [iid0, got, c0, int(G.meta.data.get("choralim", 0))])
 						G.ui._advance_overlay()     # close -> camp
 					8:
-						G.ui.worldmap_panel()       # david dünya haritası
+						var st2: Array = G.meta.data.get("stash", [])
+						for sid in ["i_palto", "i_halka1"]:
+							if not st2.has(sid):
+								st2.append(sid)
+						G.meta.data["stash"] = st2
+						G.ui.barter_panel()         # saphire takas paneli
 					9:
-						_shoot()                    # node-graph map visible
+						_shoot()                    # barter panel açıkken çek
 					10:
-						G.ui._wmap_pick("b0", Label.new(), {"id": "b0"})
+						var st3: Array = G.meta.data.get("stash", [])
+						if st3.size() >= 2:
+							var n0 := st3.size()
+							var a0 := str(st3[0])
+							var b0 := str(st3[1])
+							var got2 := Items.barter(a0, b0)
+							print("[probe] barter %s+%s -> %s (stash %d->%d)" % [a0, b0, got2, n0, (G.meta.data.get("stash", []) as Array).size()])
+						G.ui._advance_overlay()
 					11:
+						G.ui.worldmap_panel()       # david dünya haritası
+					12:
+						_shoot()                    # node-graph map visible
+					13:
+						G.ui._wmap_pick("b0", Label.new(), {"id": "b0"})
+					14:
 						_shoot()                    # map with selection refreshed
 						G.ui._advance_overlay()
 					_:

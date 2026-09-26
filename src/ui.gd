@@ -900,7 +900,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1337,11 +1337,114 @@ func inventory_panel() -> void:
 			inventory_panel())
 		cell.mouse_filter = Control.MOUSE_FILTER_STOP
 		grid.add_child(cell)
+	var tb := Button.new()
+	tb.text = "HURDA TAKASI →   2 eşya ver, 1 yeni al (nadirlik korunur/yükselir)"
+	tb.add_theme_font_override("font", ui_font())
+	tb.custom_minimum_size = Vector2(320, 28)
+	var tc := CenterContainer.new()
+	tc.add_child(tb)
+	v.add_child(tc)
+	tb.pressed.connect(func():
+		_close_overlay()
+		barter_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 
-# Vezir: the camp's living ledger — lifetime stats + boss dossiers.
+# 2 zula eşyası ↔ 1 yeni eşya; sonuç nadirliği ≥ düşük olanı
+func barter_panel() -> void:
+	_pause(true)
+	var v := _show_panel("barter", "HURDA TAKASI — Saphire'in kefeni", Px.C("ff9e4d"))
+	var stash: Array = G.meta.data.get("stash", [])
+	var hint := _lbl("2 eşya seç — karşılığında yeni bir eşya gelir (nadirlik ≥ düşük olanı)", Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(hint)
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	v.add_child(grid)
+	var sel: Array = []
+	var trade := Button.new()
+	trade.disabled = true
+	trade.modulate = Color(0.5, 0.5, 0.55)
+	trade.text = "2 EŞYA SEÇ"
+	trade.add_theme_font_override("font", ui_font())
+	trade.custom_minimum_size = Vector2(200, 30)
+	if stash.size() < 2:
+		var l := _lbl("takas için zulada en az 2 eşya gerekir — sahadan eşya getir", Vector2.ZERO, 12, Color(0.5, 0.5, 0.6))
+		grid.add_child(l)
+	for iid in stash:
+		var d: Dictionary = Items.DEFS.get(str(iid), {})
+		if d.is_empty():
+			continue
+		var cell := PanelContainer.new()
+		var rc := Px.C(Items.RARITY_COL[int(d.r)])
+		cell.add_theme_stylebox_override("panel", _style_panel(Color(0.05, 0.04, 0.08, 0.95), rc, 2, 3))
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 2)
+		cell.add_child(cv)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		cv.add_child(row)
+		var ic := TextureRect.new()
+		ic.texture = Px.S2(str(d.icon))
+		ic.custom_minimum_size = Vector2(24, 24)
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.modulate = rc
+		row.add_child(ic)
+		var nm := _lbl(str(d.name), Vector2.ZERO, 10, Color(0.9, 0.9, 0.94))
+		row.add_child(nm)
+		var md := _lbl(Items.stat_text(str(iid)), Vector2.ZERO, 9, Color(0.65, 0.75, 0.85))
+		cv.add_child(md)
+		var tag := _lbl("", Vector2.ZERO, 9, Px.C("ffd700"))
+		cv.add_child(tag)
+		cell.mouse_filter = Control.MOUSE_FILTER_STOP
+		var id0 := str(iid)
+		cell.gui_input.connect(func(ev: InputEvent):
+			if not (ev is InputEventMouseButton and ev.pressed):
+				return
+			if sel.has(id0):
+				sel.erase(id0)
+				tag.text = ""
+				cell.add_theme_stylebox_override("panel", _style_panel(Color(0.05, 0.04, 0.08, 0.95), rc, 2, 3))
+			elif sel.size() < 2:
+				sel.append(id0)
+				tag.text = "✓ seçildi"
+				cell.add_theme_stylebox_override("panel", _style_panel(Color(0.08, 0.06, 0.02, 0.95), Px.C("ffd700"), 2, 3))
+			var ready := sel.size() == 2
+			trade.disabled = not ready
+			trade.modulate = Color(1, 1, 1) if ready else Color(0.5, 0.5, 0.55)
+			trade.text = "TAKAS ET" if ready else "2 EŞYA SEÇ  (%d/2)" % sel.size())
+		grid.add_child(cell)
+	trade.pressed.connect(func():
+		var got := Items.barter(str(sel[0]), str(sel[1]))
+		if got == "full":
+			toast("koleksiyon tam — takas edecek eşya kalmadı")
+			return
+		if got != "":
+			var nd: Dictionary = Items.DEFS.get(got, {})
+			G.audio.jingle("victory")
+			toast("takas: %s geldi (%s)" % [str(nd.get("name", got)), Items.RARITY_NAME[int(nd.get("r", 0))]])
+			_close_overlay()
+			inventory_panel())
+	var row2 := HBoxContainer.new()
+	row2.alignment = BoxContainer.ALIGNMENT_CENTER
+	row2.add_theme_constant_override("separation", 12)
+	row2.add_child(trade)
+	var back := Button.new()
+	back.text = "← TEÇHİZAT"
+	back.add_theme_font_override("font", ui_font())
+	back.custom_minimum_size = Vector2(140, 30)
+	row2.add_child(back)
+	v.add_child(row2)
+	back.pressed.connect(func():
+		_close_overlay()
+		inventory_panel())
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
 func records_panel() -> void:
 	_pause(true)
 	var v := _show_panel("records", "KAMP KAYITLARI — Vezir Zirkon", Px.C("c9a227"))
