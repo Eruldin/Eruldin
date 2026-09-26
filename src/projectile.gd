@@ -15,6 +15,8 @@ var homing := false          # player shots home toward enemies
 var homing_player := false   # enemy shots home toward player
 var reflected := false
 var piercing := false
+var aoe := 0.0              # >0: lobbed shot, explodes in an area on impact/expiry
+var life0 := 0.0            # lobbed shots: initial life, drives the fake arc
 var col := Color.WHITE
 var dmg_type: int = G.DamageType.PROJECTILE
 var source: Actor = null
@@ -43,7 +45,10 @@ func _process(_d: float) -> void:
 	var d := get_process_delta_time()
 	life -= d
 	if life <= 0:
-		_die()
+		if aoe > 0.0:
+			_impact()
+		else:
+			_die()
 		return
 	if homing and team == G.Team.PLAYER:
 		var best: Enemy = null
@@ -67,6 +72,11 @@ func _process(_d: float) -> void:
 	if _trail_t <= 0:
 		_trail_t = 0.03
 		G.fx.burst(global_position, Color(col.r, col.g, col.b, 0.5), 1, 15.0, radius * 0.5, 0.2)
+	if aoe > 0.0:
+		if life0 <= 0.0:
+			life0 = maxf(life, 0.01)
+		var pr := clampf(1.0 - life / life0, 0.0, 1.0)
+		sr.scale = Vector2.ONE * radius * 2.0 / 16.0 * (1.0 + 1.15 * sin(pr * PI))
 
 	if is_instance_valid(G.room) and not G.room.inside(global_position, -8.0):
 		_impact()
@@ -104,11 +114,20 @@ func _process(_d: float) -> void:
 				G.fx.burst(global_position, col, 10, 130.0, 4.0, 0.3)
 				return
 			p.take_hit({"dmg": dmg, "type": dmg_type, "from": global_position - vel.normalized() * 4.0, "knock": knock, "stagger": stag, "source": source})
+			aoe = 0.0
 			_impact()
 			return
 
 func _impact() -> void:
-	G.fx.burst(global_position, col, 10, 130.0, 4.0, 0.3)
+	if aoe > 0.0 and team == G.Team.ENEMY:
+		var p := G.player
+		if p != null and not p.dead and global_position.distance_to(p.pos) < aoe + p.hit_radius:
+			p.take_hit({"dmg": dmg, "type": dmg_type, "from": global_position, "knock": knock + 4.0, "stagger": stag, "source": source})
+		G.fx.burst(global_position, col, 22, 200.0, 6.0, 0.45)
+		G.fx.shake(0.12, 0.15)
+		G.audio.play("explode", 1.0, 0.5)
+	else:
+		G.fx.burst(global_position, col, 10, 130.0, 4.0, 0.3)
 	_die()
 
 func _die() -> void:
