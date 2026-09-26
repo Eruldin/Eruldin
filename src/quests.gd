@@ -50,6 +50,8 @@ const DEFS := [
 	{"id": "q_glaive","giver": "ehnar",   "name": "AĞIR TAHMİS",         "desc": "Sırp diskleri depoda paslanıyor. Tek koşuda 400 kesim yaparsan birini sana kalibrarım.", "obj": {"type": "kills", "n": 400}, "rew": {"cho": 150, "wep": "glaive"}, "prereq": "q_nobet2"},
 	{"id": "q_deneme","giver": "ehnar",   "name": "DENEME KANITI",       "desc": "Sahalardaki eski deneme totemleri hâlâ sayıyor. İkisini tamamla — ikisinin de elitleri düşsün.", "obj": {"type": "totem", "n": 2}, "rew": {"cho": 170, "item": "i_koro"}, "prereq": "q_elit"},
 	{"id": "q_son",   "giver": "zirkon",  "name": "ARŞİVİN SONU",        "desc": "Defterin son sayfası boş kalmasın. On görev teslim et — arşivin mührü senin olsun.", "obj": {"type": "quests", "n": 10}, "rew": {"cho": 400, "wep": "meteor"}, "prereq": "q_final"},
+	{"id": "q_siparis","giver": "saphire","name": "MÜŞTERİ SİPARİŞİ",    "desc": "Bir müşteri Boşluk Halkası istiyor — bulursan stoğa değil, doğrudan bana getir. Teslimde parça senden çıkar.", "obj": {"type": "item", "id": "i_bosluk", "n": 1}, "rew": {"cho": 320, "item": "i_ruzgar"}, "prereq": "q_lanet"},
+	{"id": "q_kayit", "giver": "zirkon",  "name": "VERİ AVCISI",          "desc": "Sahalarda hâlâ kütük parçaları saçılı. Beş veri kütüğü topla — arşiv senden borçlu kalacak.", "obj": {"type": "kayit", "n": 5}, "rew": {"cho": 180, "item": "i_merdiven"}, "prereq": "q_final"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -59,7 +61,34 @@ static func _q() -> Dictionary:
 	return G.meta.data["quests"]
 
 static func state(id: String) -> String:
-	return str(_q().get(id, {}).get("st", ""))
+	var st := str(_q().get(id, {}).get("st", ""))
+	# meta-seviye objektifler (eşya teslimi, kütük toplama) tembel kontrol edilir —
+	# koşu dışında da ilerleyebildikleri için state() okurken tamamlanmayı denetler
+	if st == "act":
+		var q := def(id)
+		var t := str(q.obj.get("type", ""))
+		var cur := -1
+		if t == "item":
+			cur = _item_count(str(q.obj.get("id", "")))
+		elif t == "kayit":
+			cur = (G.meta.data.get("lore", []) as Array).size()
+		if cur >= 0:
+			_q()[id]["prog"] = maxi(prog(id), cur)
+		if cur >= int(q.obj.get("n", 1)):
+			_q()[id]["st"] = "done"
+			st = "done"
+			G.meta.save()
+	return st
+
+static func _item_count(iid: String) -> int:
+	var n := 0
+	for v in (G.meta.data.get("stash", []) as Array):
+		if str(v) == iid:
+			n += 1
+	for s in (G.meta.data.get("equip", {}) as Dictionary).values():
+		if str(s) == iid:
+			n += 1
+	return n
 
 static func prog(id: String) -> int:
 	return int(_q().get(id, {}).get("prog", 0))
@@ -113,7 +142,7 @@ static func has_business(nid: String) -> bool:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit"]:
 		done.append_array(tick(type))
 	for q in DEFS:
 		if state(q.id) != "act" or str(q.obj.get("type", "")) != "boss":
@@ -176,6 +205,8 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"score":   cur = int(G.run.stats.get("score", 0))
 			"frag":    cur = int(G.run.fragments)
 			"quests":  cur = _claimed_count()
+			"item":    cur = _item_count(str(o.get("id", "")))
+			"kayit":   cur = (G.meta.data.get("lore", []) as Array).size()
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
 		if cur >= need:
@@ -204,6 +235,20 @@ static func claim(id: String) -> Dictionary:
 		if not un.has(str(rew.node)):
 			un.append(str(rew.node))
 		G.meta.data["unlocked"] = un
+	# eşya teslimi görevi: müşteriye giden parça stoğu/equipten düşer
+	if str(q.obj.get("type", "")) == "item":
+		var iid := str(q.obj.get("id", ""))
+		var st2: Array = G.meta.data.get("stash", [])
+		if st2.has(iid):
+			st2.erase(iid)
+		else:
+			var eq: Dictionary = G.meta.data.get("equip", {})
+			for sl in eq:
+				if str(eq[sl]) == iid:
+					eq.erase(sl)
+					break
+			G.meta.data["equip"] = eq
+		G.meta.data["stash"] = st2
 	if str(rew.get("wep", "")) != "":
 		var wu: Array = G.meta.data.get("wep_unlocked", [])
 		if not wu.has(str(rew.wep)):
@@ -241,6 +286,8 @@ static func obj_text(q: Dictionary) -> String:
 		"frag":   return "%d parçacık topla" % need
 		"totem":  return "%d deneme totemi tamamla" % need
 		"quests": return "%d görev teslim et" % need
+		"item":   return "%s getir" % str(Items.DEFS.get(str(o.get("id", "")), {}).get("name", str(o.get("id", ""))))
+		"kayit":  return "%d veri kütüğü bul" % need
 	return "?"
 
 static func _claimed_count() -> int:
