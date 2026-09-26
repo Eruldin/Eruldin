@@ -760,6 +760,11 @@ func _collect(pk: Node) -> void:
 		"chest":
 			G.run.open_chest()
 		"loot":
+			var ld: Dictionary = Items.DEFS.get(str(pk.get_meta("item", "")), {})
+			var lcol := Px.C(Items.RARITY_COL[int(ld.get("r", 0))]) if not ld.is_empty() else Px.C("c9a227")
+			G.fx.burst(pk.position, lcol, 18, 170.0, 4.5, 0.45)
+			G.fx.light_flash(pk.position, lcol, 1.8, 2.6, 0.3)
+			G.audio.play("boon", 1.2, 0.55)
 			Items.drop_to_run(str(pk.get_meta("item", "")))
 			Quests.tick("loot")
 		_:
@@ -851,6 +856,15 @@ func spawn_loot(iid: String, p: Vector2) -> void:
 	pk.set_meta("val", 0)
 	pickups_node.add_child(pk)
 	G.fx.mk_light(pk, Vector2(0, -8), col, 0.8, 1.8)
+	# loot beam: nadirliğe boyalı ışık sütunu — uzaktan okunur (BG2 ground-item glow)
+	var beam := Polygon2D.new()
+	beam.polygon = PackedVector2Array([Vector2(-5, -110), Vector2(5, -110), Vector2(2, -10), Vector2(-2, -10)])
+	beam.color = Color(col.r, col.g, col.b, 0.3)
+	pk.add_child(beam)
+	var btw := pk.create_tween().set_loops()
+	btw.set_trans(Tween.TRANS_SINE)
+	btw.tween_property(beam, "color:a", 0.6, 0.9)
+	btw.tween_property(beam, "color:a", 0.22, 0.9)
 	G.fx.float_text(p + Vector2(0, -36), "%s!" % str(d.name), col, 0.95)
 
 # HoT ability tome: üstüne basınca bedava lütuf taslağı açan saha kalıntısı

@@ -38,6 +38,7 @@ var data := {
 	"arena_node": "b0",    # world-map node the next run targets (wmap.gd)
 	"unlocked": [],        # quest/node unlocks — wmap "node" gating
 	"visited": [],         # distinct biomes seen this save
+	"visited_nodes": [],   # distinct wmap nodes run at — haritada ✓ işareti
 	"quests": {},          # qid -> {st:"act"|"done"|"claimed", prog:int}
 	"stash": [],           # collected items awaiting equipment
 	"equip": {},           # slot -> item id (7 slots, items.gd)
@@ -114,7 +115,17 @@ func achievements() -> Array:
 		{"name": "SKOR AVCISI", "desc": "tek koşuda 4000+ skor", "done": int(data.get("best_score", 0)) >= 4000},
 		{"name": "MARATONCU", "desc": "tek koşuda 14+ dakika dayan", "done": int(data.get("best_depth", 0)) >= 840},
 		{"name": "KOZ KOLEKSİYONCUSU", "desc": "7 koz kartının hepsini kullan", "done": (data.get("arcanas_seen", []) as Array).size() >= Boons.ARCANAS.size()},
+		{"name": "HARİTA USTASI", "desc": "kamp hariç tüm node'lara koşu yap", "done": (data.get("visited_nodes", []) as Array).size() >= int(Wmap.NODES.size()) - 1},
+		{"name": "KOLEKSİYONER", "desc": "zula + ekipmanda 10+ eşya", "done": (data.get("stash", []) as Array).size() + (data.get("equip", {}) as Dictionary).size() >= 10},
+		{"name": "GÖREV ERİ", "desc": "8 görevi teslim et", "done": _claimed_count() >= 8},
 	]
+
+func _claimed_count() -> int:
+	var n := 0
+	for qid in (data.get("quests", {}) as Dictionary):
+		if str(data["quests"][qid].get("st", "")) == "claimed":
+			n += 1
+	return n
 
 # feats completed since last check — announced once via toast
 func new_feats() -> Array:

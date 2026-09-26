@@ -466,6 +466,8 @@ func die(h: Dictionary) -> void:
 			G.run.drop_fragments(pos, G.ri(8, 14))
 			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
 			Quests.tick("elites")
+			G.fx.flash(Px.C("ffd75f"), 0.13)
+			G.fx.shake(0.16, 0.25)
 			# eşya düşüşü — node "loot" modu şansı büyütür
 			var loot_mod := float(G.run.node_mods.get("loot", 1.0)) if is_instance_valid(G.run) else 1.0
 			if G.chance(0.14 * loot_mod):
