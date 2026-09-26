@@ -9,12 +9,26 @@ static var NAMES := {
 	"ahusk": "GÖÇEBE AHUSK", "elyb": "ELY-B"
 }
 
+# BG2 ortam replikleri — oyuncu yakınken NPC ara sıra mırıldanır
+static var BARKS := {
+	"rhasa":   ["kayıt tutuluyor.", "kovan sessiz değil.", "seni izliyorlar, ely."],
+	"neva":    ["şarkı hâlâ sürüyor...", "geri döneceksin — hep dönersin.", "rezonans bugün temiz."],
+	"saphire": ["tezgâh açık, al geç.", "hurda mı? getir.", "bu kristal saf değil."],
+	"vane":    ["deney planı hazır.", "şasi senkronu iyi durumda.", "ölçüm bekliyorum."],
+	"david":   ["harita güncel.", "kuzey sınırı temiz — şimdilik.", "efendiler bekliyor."],
+	"zirkon":  ["kayıtlar senin lehine.", "arşiv büyüyor.", "savaş efendileri not edildi."],
+	"ehnar":   ["sözleşme masada.", "sınır hâlâ sıcak.", "kılıç paslanmamalı."],
+	"ahusk":   ["kovan kokusu...", "sis bugün kalın.", "geçit hâlâ açık."],
+	"elyb":    ["uyku modu: %60.", "şasi sinyali stabil.", "hazırım."],
+}
+
 var nid := ""
 var body: Sprite2D
 var prompt: Label
 var mark: Label       # "!" — görev işi var (yeni teklif / teslim / ilerleme)
 var _e_held := false
 var _bob := 0.0
+var _bark_t := 0.0      # ortam repliği sayacı
 
 static func make(id: String, p: Vector2, parent: Node) -> NPC:
 	var n := NPC.new()
@@ -71,6 +85,7 @@ func _ready() -> void:
 	_anchor = position
 	_wtarget = _anchor
 	_wt = G.rf(2.0, 7.0)
+	_bark_t = G.rf(8.0, 24.0)
 
 func _process(d: float) -> void:
 	z_index = int(position.y)
@@ -90,6 +105,14 @@ func _process(d: float) -> void:
 		if is_instance_valid(prompt):
 			prompt.visible = false
 		return
+	# yakın NPC mırıldanır — kamp canlı hissetsin
+	_bark_t -= d
+	if _bark_t <= 0.0:
+		_bark_t = G.rf(16.0, 30.0)
+		if position.distance_to(G.player.pos) < 190.0 and G.fx != null:
+			var bk: Array = BARKS.get(nid, [])
+			if not bk.is_empty():
+				G.fx.float_text(position + Vector2(0, -body.texture.get_height() - 20), G.pick(bk), Color(0.75, 0.75, 0.85), 0.85)
 	var near := position.distance_to(G.player.pos) < 58.0
 	prompt.visible = near
 	if near and is_instance_valid(body):
