@@ -46,6 +46,11 @@ const LINES := {
 		"Bir lütuf taşıyorum sana — küçük bir rezonans. Parçacık ver, savaşa hazır in.",
 		"Sahada ölürsem diye verdim kendimi. Sizinkiler geri döner — bizdekiler dönmez.",
 	],
+	"elyb": [
+		"Ben B-serisiyim — ağır çerçeve, ağır silah. Kılıç değil, dizi taşırım.",
+		"Şasimi takarsan Ely-B olursun: daha az can, daha çok vuruş, biraz daha yavaş.",
+		"Alfa-04 sahada ölürse ben inerim. Protokol tek bedene bağlanmaz.",
+	],
 }
 
 const DEATH_LINES := [
@@ -71,6 +76,7 @@ const NPC_COL := {
 	"zirkon": "c9a227",  # vezir — altın
 	"ehnar": "ff9e4d",   # eski şövalye — kızıl-kum
 	"ahusk": "6aa8a0",   # göçebe — soluk çelik
+	"elyb": "9db4c8",    # B-serisi şasi — çelik mavisi
 }
 
 static var _font: Font
@@ -689,6 +695,8 @@ func dialogue(nid: String) -> void:
 		hint.text = "[E / tık] aktif sözleşme"
 	elif nid == "ahusk":
 		hint.text = "[E / tık] destek takası"
+	elif nid == "elyb":
+		hint.text = "[E / tık] şasi seçimi"
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
@@ -735,6 +743,9 @@ func _advance_overlay() -> void:
 			elif nid == "ahusk":
 				_close_overlay()
 				blessing_panel()
+			elif nid == "elyb":
+				_close_overlay()
+				hero_panel()
 			else:
 				_close_overlay()
 		"death":
@@ -743,7 +754,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1244,6 +1255,69 @@ func _pick_stance(key: String) -> void:
 		G.player._apply_stance()
 	toast("Doktrin: %s" % STANCES[key].name)
 	_close_overlay()
+
+# Ely-B's dormant chassis — chassis select is this game's hero-class pick
+const HEROES := {
+	"ely": {"name": "ELY — ALFA-04", "por": "por_ely", "col": "00E5FF",
+		"desc": "Standart şasi. Başlangıç: Enerji Kılıcı. Dengeli gövde — kovanın ilk düşüşünden kalan."},
+	"elyb": {"name": "ELY-B", "por": "por_elyb", "col": "9db4c8",
+		"desc": "Ağır B-serisi. Başlangıç: Plazma Dizisi. −20 can · +%12 hasar · −%8 hız."},
+}
+
+func hero_panel() -> void:
+	_pause(true)
+	var v := _show_panel("hero", "ELY-B — ŞASİ SEÇİMİ", Px.C("9db4c8"))
+	var cur_id := str(G.meta.data.get("hero", "ely"))
+	if not HEROES.has(cur_id):
+		cur_id = "ely"
+	var cur := _lbl("Mevcut şasi: %s" % (HEROES[cur_id] as Dictionary).name, Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
+	cur.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(cur)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(row)
+	for key in HEROES:
+		var s: Dictionary = HEROES[key]
+		var active: bool = key == cur_id
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", _style_panel(Color(0.07, 0.06, 0.09, 0.95), Px.C(s.col), 3 if active else 2, 4))
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 6)
+		cv.custom_minimum_size = Vector2(220, 190)
+		card.add_child(cv)
+		var ic := TextureRect.new()
+		ic.texture = Px.S2(s.por)
+		ic.custom_minimum_size = Vector2(64, 64)
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var icc := CenterContainer.new()
+		icc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icc.add_child(ic)
+		cv.add_child(icc)
+		var nm := _lbl(("%s\n✓ AKTİF" % s.name) if active else s.name, Vector2.ZERO, 13, Px.C(s.col))
+		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cv.add_child(nm)
+		var ds := _lbl(s.desc, Vector2.ZERO, 11, Color(0.78, 0.78, 0.85))
+		ds.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cv.add_child(ds)
+		row.add_child(card)
+		card.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed and not active:
+				_pick_hero(key))
+	var h := _lbl("[E / tık dışarısı] kapat", Vector2.ZERO, 10, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
+func _pick_hero(key: String) -> void:
+	G.meta.data["hero"] = key
+	G.meta.save()
+	G.audio.play("boon", 1.1, 0.6)
+	toast("Şasi: %s" % HEROES[key].name)
+	_close_overlay()
+	hero_panel()
 
 # ---------------------------------------------------------------- pause / settings
 

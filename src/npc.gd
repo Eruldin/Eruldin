@@ -6,7 +6,7 @@ extends Node2D
 static var NAMES := {
 	"rhasa": "GENEL RHASA", "neva": "NEVA", "saphire": "SAPHIRE", "vane": "DR. VANE",
 	"david": "İZ SÜRÜCÜ DAVID", "zirkon": "VEZİR ZİRKON", "ehnar": "ESKİ ŞÖVALYE EHNAR",
-	"ahusk": "GÖÇEBE AHUSK"
+	"ahusk": "GÖÇEBE AHUSK", "elyb": "ELY-B"
 }
 
 var nid := ""

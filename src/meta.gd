@@ -32,6 +32,7 @@ var data := {
 	"upg": {"hp":0,"dmg":0,"dash":0,"revive":0,"frag":0,"shield":0,"spd":0,"mag":0,"luck":0},
 	"seen_lines": [],
 	"stance": "",          # chosen doctrine from Rhasa
+	"hero": "ely",         # chosen chassis — "ely" or heavy "elyb"
 	"arena_biome": 0,      # arena sector picked via David (İz Sürücü)
 	"hyper": false,        # AŞILAMA: sürü hızlı/kalabalık akar, ödeme ×1.5
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır
