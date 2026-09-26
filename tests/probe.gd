@@ -22,6 +22,9 @@ var _loot_ck := false
 var _merch_done := false
 var _merch_ck := false
 var _merch_close := false
+var _stray_done := false
+var _stray_ck := false
+var _stray_sub := -1
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -229,6 +232,27 @@ func _process(_d: float) -> void:
 			if _merch_ck and t >= 146.0:
 				_merch_ck = false
 				print("[probe] WARN merchant panel didn't open")
+			# kayıp şasi kapsaması: dibinde doğur -> panel -> ONAR seçimi
+			if not _stray_done and t >= 146.5:
+				_stray_done = true
+				G.room.spawn_stray(G.player.pos + Vector2(8, 0))
+				_stray_ck = true
+				print("[probe] stray spawned")
+			if _stray_ck and is_instance_valid(G.ui) and is_instance_valid(G.ui._overlay) and str(G.ui._overlay.get_meta("kind", "")) == "stray":
+				_stray_ck = false
+				_stray_sub = 0
+			if _stray_sub == 0:
+				_stray_sub = 1
+				_shoot()                       # şasi paneli
+			elif _stray_sub == 1:
+				_stray_sub = -1
+				for b in G.ui._overlay.find_children("*", "Button", true, false):
+					(b as Button).emit_signal("pressed")
+					break
+				print("[probe] stray onar -> stray_active=%s loot=%d" % [G.room.stray_active, (G.run.stats.get("loot", []) as Array).size()])
+			if _stray_ck and t >= 149.0:
+				_stray_ck = false
+				print("[probe] WARN stray panel didn't open")
 			if t >= _shot_at:
 				_shot_at = t + 15.0
 				_shoot()

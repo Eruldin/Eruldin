@@ -54,6 +54,10 @@ var merchant: Dictionary = {}  # gezgin tüccar: {node,tag} — tek alışveriş
 var merchant_pos := Vector2.ZERO
 var merchant_active := false
 var _merch_armed := true
+var stray: Dictionary = {}      # kayip sasi: {node,tag} — koşu içi karşılaşma (onar ya da parçala)
+var stray_pos := Vector2.ZERO
+var stray_active := false
+var _stray_armed := true
 var _merge_t := 80.0            # kristal konsolidasyonu sayacı
 var decals: Node2D
 var pending_reward: int = Reward.FRAGMENTS
@@ -543,6 +547,7 @@ func _process(d: float) -> void:
 	_tick_pickups(d)
 	_tick_monolith(d)
 	_tick_merchant(d)
+	_tick_stray(d)
 	_tick_doors()
 	_tick_motes(d)
 	_sort_children()
@@ -650,6 +655,59 @@ func despawn_merchant() -> void:
 	if is_instance_valid(merchant.get("tag")):
 		merchant.tag.queue_free()
 	merchant = {}
+
+# Kayıp Şasi: koşu ortasında beliren devre dışı gövde. Onarmak ◈60 harcar ve
+# minnetle bir eşya bırakır; parçalamak ◈140 verir ama azap yazar.
+func spawn_stray(p: Vector2) -> void:
+	if stray_active:
+		return
+	stray_active = true
+	stray_pos = p
+	_stray_armed = true
+	var node := Sprite2D.new()
+	node.texture = Px.S2("npc2_elyb")
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	node.offset = Vector2(0, -node.texture.get_height() * 0.5)
+	node.modulate = Color(0.75, 0.85, 0.95)
+	Px.fit(node, 68.0)
+	node.position = p
+	node.z_index = int(p.y)
+	add_child(node)
+	var tag := Label.new()
+	tag.text = "KAYIP ŞASİ"
+	tag.add_theme_font_size_override("font_size", 11)
+	tag.add_theme_font_override("font", Ui.ui_font())
+	tag.add_theme_color_override("font_color", Px.C("8fd4ff"))
+	tag.add_theme_color_override("font_outline_color", Color.BLACK)
+	tag.add_theme_constant_override("outline_size", 3)
+	tag.position = p + Vector2(-42, -84)
+	tag.z_index = 500
+	add_child(tag)
+	G.fx.mk_light(node, Vector2(0, -14), Px.C("8fd4ff"), 0.6, 1.6)
+	stray = {"node": node, "tag": tag}
+	G.audio.play("door", 0.7, 0.5)
+	G.ui.toast("KAYIP ŞASİ sahada — yanına git")
+
+func despawn_stray() -> void:
+	stray_active = false
+	stray_pos = Vector2.ZERO
+	if is_instance_valid(stray.get("node")):
+		stray.node.queue_free()
+	if is_instance_valid(stray.get("tag")):
+		stray.tag.queue_free()
+	stray = {}
+
+func _tick_stray(_d: float) -> void:
+	if not stray_active or G.player == null or G.player.dead:
+		return
+	var dist := G.player.pos.distance_to(stray_pos)
+	if dist > 160.0:
+		_stray_armed = true
+	if not _stray_armed or G.ui.overlay_open():
+		return
+	if dist < 50.0:
+		_stray_armed = false
+		G.ui.stray_panel()
 
 func _tick_merchant(_d: float) -> void:
 	if not merchant_active or G.player == null or G.player.dead:
@@ -993,6 +1051,13 @@ func on_boss_dead(_b) -> void:
 	G.ui.boss_bar(false, null)
 	G.run.on_boss_dead()
 	unlock_doors()
+	# efendilerin ganimeti: garantili eşya + parçacık yağmuru
+	if is_instance_valid(_b):
+		var bp: Vector2 = _b.pos
+		var iid := Items.roll(G.run.luck + 0.15)
+		if iid != "":
+			spawn_loot(iid, bp + Vector2(0, -10))
+		G.run.drop_fragments(bp, G.ri(20, 32))
 	G.audio.jingle("boss")
 
 func _clear() -> void:

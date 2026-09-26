@@ -480,6 +480,8 @@ func _edge_targets() -> Array:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
 		if G.room.merchant_active:
 			out.append({"p": G.room.merchant_pos, "icon": "ico_loot", "col": "ffd700", "s": 24.0})
+		if G.room.stray_active:
+			out.append({"p": G.room.stray_pos, "icon": "ico_boon", "col": "8fd4ff", "s": 22.0})
 	return out
 
 func _tick_edge() -> void:
@@ -948,7 +950,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1971,6 +1973,65 @@ func merchant_panel() -> void:
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 
+# ---------------------------------------------------------------- stray chassis
+
+func stray_panel() -> void:
+	_pause(true)
+	var v := _show_panel("stray", "KAYIP ŞASİ — enkazda unutulmuş gövde", Px.C("8fd4ff"))
+	var por := TextureRect.new()
+	por.texture = Px.S2("por_elyb")
+	por.custom_minimum_size = Vector2(64, 64)
+	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pc := CenterContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(por)
+	v.add_child(pc)
+	var l := _lbl("\"...transistör parçası lazım. Sistemler kapanıyor.\nMinnetimi transistörle öderim — ya da beni hurda yap.\"", Vector2.ZERO, 12, Color(0.8, 0.88, 0.95))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l)
+	var fr := _lbl("parçacık: ◈ %d" % G.run.fragments, Vector2.ZERO, 12, Px.C("42d4f4"))
+	fr.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(fr)
+	var onar := Button.new()
+	onar.text = "ONAR — ◈60 transistör, karşılığı eşya"
+	onar.add_theme_font_override("font", ui_font())
+	onar.custom_minimum_size = Vector2(380, 30)
+	onar.disabled = G.run.fragments < 60
+	if onar.disabled:
+		onar.modulate = Color(0.5, 0.5, 0.55)
+	var oc1 := CenterContainer.new()
+	oc1.add_child(onar)
+	v.add_child(oc1)
+	onar.pressed.connect(func():
+		if G.run.fragments < 60:
+			return
+		G.run.fragments -= 60
+		Items.drop_to_run(Items.roll(G.run.luck + 0.15))
+		G.audio.jingle("victory")
+		toast("şasi gözlerini açtı — emanet eşyayı bıraktı, yola çıktı")
+		G.room.despawn_stray()
+		_close_overlay())
+	var par := Button.new()
+	par.text = "PARÇALA — ◈140 parçacık, azap +1"
+	par.add_theme_font_override("font", ui_font())
+	par.custom_minimum_size = Vector2(380, 30)
+	var oc2 := CenterContainer.new()
+	oc2.add_child(par)
+	v.add_child(oc2)
+	par.pressed.connect(func():
+		G.run.fragments += 140
+		G.run.curse += 1
+		G.fx.shake(0.15, 0.2)
+		G.audio.play("die", 0.8, 0.7)
+		toast("şasiyi hurdaya çevirdin — kovan bunu gördü")
+		G.room.despawn_stray()
+		_close_overlay())
+	var h := _lbl("[E / tık] kapat — şasi bekler", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
 # ---------------------------------------------------------------- boon draft
 
 func boon_choice() -> void:
@@ -2213,7 +2274,25 @@ func victory_screen(stats: Dictionary) -> void:
 	crc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	crc.add_child(cr)
 	v.add_child(crc)
-	var t1 := _lbl("Dört mühür kırıldı. Kovan sustu.\nChoralim'in şarkısı artık senin.", Vector2.ZERO, 14, Color(0.7, 0.95, 1))
+	var sub := "Dört mühür kırıldı. Kovan sustu.\nChoralim'in şarkısı artık senin."
+	var epilog := {
+		"b0": "Endusterra'nın çoraklığı bir süre daha sessiz kalacak.",
+		"b1": "Simithar damarları artık kovansız söylüyor.",
+		"b2": "Enkazın altında imparatorluk sonunda rahatladı.",
+		"b3": "Kule düştü — protokolün kalbi durdu.",
+		"yol": "Puslu Geçit artık konakçılara değil, yolculara ait.",
+		"tarla": "Yanık tarlalar küllerin altından nefes alıyor.",
+		"pazar": "Hurda pazarın taşları kovanın artıklarından arındı.",
+		"kuyu": "Derin Kuyu'nun kalbi sustu — ışık aşağı indi.",
+		"yuvalar": "Kuluçka ocakları söndü; duvarların nabzı kesildi.",
+		"vatika": "Sessiz Vatika arındı — karanlık bile şarkıya katıldı.",
+		"mabed": "Kırık mabedin yankısı huzurla doldu.",
+		"mezarlik": "Düşmüşler sonunda mezarlarında dinleniyor.",
+	}
+	var epi := str(epilog.get(str(stats.get("node_id", "")), ""))
+	if epi != "":
+		sub += "\n\n%s\n%s" % [str(stats.get("node_name", "")), epi]
+	var t1 := _lbl(sub, Vector2.ZERO, 14, Color(0.7, 0.95, 1))
 	t1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t1)
 	var vt := int(stats.get("time", 0))
