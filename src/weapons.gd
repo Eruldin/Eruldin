@@ -271,7 +271,7 @@ static func draft_opts(p: Player, luck: float) -> Array:
 			pool.append(_opt("psv", pid, 1, d.name, d.icon, d.col, str(d.desc) + "  (yeni pasif)", 6.0, "YENİ"))
 	for b in Boons.roll(G.run.boon_ids, luck):
 		if not ban.has(str(b.id)):
-			pool.append(_opt("boon", b.id, 0, b.name, "icn_" + str(b.patron).to_lower(), b.color.to_html(false), str(b.desc), 2.2, b.patron))
+			pool.append(_opt("boon", b.id, 0, b.name, "icn_" + str(b.patron).to_lower(), b.color.to_html(false), str(b.desc), 2.2, b.patron + " " + "★".repeat(int(b.rarity) + 1)))
 	var out: Array = []
 	for i in 3:
 		if pool.is_empty():
