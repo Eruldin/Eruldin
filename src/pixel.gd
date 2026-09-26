@@ -620,7 +620,7 @@ static func fit(body: Sprite2D, px: float) -> void:
 
 static func _art_tex(path: String) -> Texture2D:
 	var rp := "res://" + path
-	if OS.has_feature("editor"):
+	if OS.has_feature("editor") and FileAccess.file_exists(rp):
 		# dev: prefer raw bytes — the imported .ctex may be stale right
 		# after art_src/build_art.py regenerates PNGs
 		var img := Image.load_from_file(rp)

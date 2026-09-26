@@ -612,6 +612,51 @@ func toast(msg: String) -> void:
 	root.add_child(l)
 	_toasts.append(l)
 
+# mid-fight boss story beat — portrait + line card at top, non-modal, auto-fades
+var _taunt: Control = null
+
+func boss_taunt(por_key: String, name_s: String, line: String) -> void:
+	if is_instance_valid(_taunt):
+		_taunt.queue_free()
+	var p := PanelContainer.new()
+	_taunt = p
+	p.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	p.offset_top = 84.0
+	p.offset_left = 330.0
+	p.offset_right = -330.0
+	p.modulate.a = 0.0
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_theme_stylebox_override("panel", _style_panel(Color(0.06, 0.01, 0.02, 0.92), Px.C("ff5252"), 1, 3))
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 12)
+	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(h)
+	var pr := TextureRect.new()
+	pr.texture = Px.S2("por_" + por_key)
+	pr.custom_minimum_size = Vector2(46, 46)
+	pr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	pr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	h.add_child(pr)
+	var v := VBoxContainer.new()
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	h.add_child(v)
+	v.add_child(_lbl(name_s, Vector2.ZERO, 11, Px.C("ff8a80")))
+	var ll := _lbl(line, Vector2.ZERO, 13, Color(0.96, 0.92, 0.92))
+	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ll.custom_minimum_size = Vector2(540, 0)
+	v.add_child(ll)
+	root.add_child(p)
+	var tw := create_tween()
+	tw.tween_property(p, "modulate:a", 1.0, 0.22)
+	tw.tween_interval(2.7)
+	tw.tween_property(p, "modulate:a", 0.0, 0.55)
+	tw.tween_callback(func():
+		if is_instance_valid(p):
+			p.queue_free()
+		if _taunt == p:
+			_taunt = null)
+
 func _toast_keys() -> void:
 	for i in range(_toasts.size() - 1, -1, -1):
 		var l: Label = _toasts[i]

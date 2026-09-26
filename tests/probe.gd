@@ -102,6 +102,10 @@ func _process(_d: float) -> void:
 						_shoot()                    # records visible (kapanış sonraki adımda)
 					17:
 						G.ui._advance_overlay()
+					18:
+						G.ui.boss_taunt("rex", "REX — AVCI FORMU", "Şarkı sustuğunda... beni hatırla, Alfa-04.")
+					19:
+						_shoot()                    # faz-2 hikaye kartı görünürken
 					_:
 						G.player.pos = G.room.doors[0].pos + Vector2(0, 6)
 						_step = 2
