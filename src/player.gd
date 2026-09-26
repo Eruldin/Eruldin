@@ -61,6 +61,7 @@ var xp_mult := 1.0
 var cd_mult := 1.0
 var area_mult := 1.0
 var proj_spd := 1.0
+var bonus_proj := 0            # ÇOĞALTAN pasifi: mermi/gülle silahlarına ek adet
 var _pulse_t := 0.0
 
 # doctrine (Rhasa stance): cleave = wide arcs / duelist = fast single-target
@@ -531,7 +532,7 @@ func reset_for_run() -> void:
 	level = 1
 	xp = 0.0
 	xp_next = xp_for(1)
-	magnet_r = 95.0; xp_mult = 1.0; cd_mult = 1.0; area_mult = 1.0; proj_spd = 1.0
+	magnet_r = 95.0; xp_mult = 1.0; cd_mult = 1.0; area_mult = 1.0; proj_spd = 1.0; bonus_proj = 0
 	_attack_slow = 1.0; _pulse_t = 0.0
 	_apply_stance()
 	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer"]:
