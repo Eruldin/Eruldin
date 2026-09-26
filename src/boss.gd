@@ -47,6 +47,15 @@ const PHASE_BARKS := {
 	BKind.KIRIN: "KIRIN: ameliyat ikinci evreye geçiyor.",
 	BKind.CONST: "CONSTANTIN: kalkan dengesiz.",
 }
+# faz-2'de portreli hikaye kartı — boss'un yıkımı içeriden görünür
+const P2_LINES := {
+	BKind.REX: "Şarkı sustuğunda... beni hatırla, Alfa-04.",
+	BKind.HOST: "Kovan içimde açılıyor — ya kaç ya katıl.",
+	BKind.NAHUM: "Bu eller benim değil. Protokolü kır — beni affet.",
+	BKind.TUMAN: "Protokol §7: efendi düşerse köle yanar. İkimize de izin yok.",
+	BKind.KIRIN: "Masaya dön, Alfa. Sadece senin parçalarını alacağım.",
+	BKind.CONST: "Aeterna'yı izledin mi? Krallıklar işte böyle düşer.",
+}
 
 static func spawn_boss(p_kind: int, p_pos: Vector2, parent: Node, hp_scale := 1.0) -> Boss:
 	var b := Boss.new()
@@ -208,6 +217,7 @@ func _on_phase2() -> void:
 		_anim = ""
 		_set_anim("p2", 4.0)
 	G.ui.toast(PHASE_BARKS.get(bkind, "FAZ II"))
+	G.ui.boss_taunt(SPR.get(bkind, "rex"), NAMES.get(bkind, "?"), P2_LINES.get(bkind, "..."))
 
 # ---------- REX ----------
 func _rex_attack() -> void:
