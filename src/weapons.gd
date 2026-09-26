@@ -156,6 +156,21 @@ const DEFS := {
 		"b": {"dmg": 38.0, "cd": 1.15, "n": 3.0, "spd": 640.0, "range": 360.0},
 		"hidden": true,
 	},
+	"meteor": {
+		"name": "GÖKTANIŞ", "icon": "icn_skull", "col": "ff7043",
+		"desc": "Düşmanların üstüne işaretli göktaşı yağdırır",
+		"b": {"dmg": 34.0, "cd": 2.6, "n": 2.0, "r": 70.0, "tel": 0.75},
+		"inc": {"dmg": 8.0, "n": 0.25, "r": 3.0, "cd": -0.05},
+		"feats": {8: {"n": 1.0}},
+		"evo": "dup", "into": "meteor_x",
+		"req": {"bosses": 2},
+	},
+	"meteor_x": {
+		"name": "KUYRUKLU SAĞANAK", "icon": "icn_skull", "col": "ffab91",
+		"desc": "Tüm sahaya göktaşı seli",
+		"b": {"dmg": 68.0, "cd": 1.9, "n": 7.0, "r": 95.0, "tel": 0.65},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -169,6 +184,7 @@ const PDEFS := {
 	"regen":   {"name": "REJENERASYON",       "icon": "ico_heal",       "col": "39ff14", "desc": "+0.7 can/sn"},
 	"warp":    {"name": "ROTA AKSAMI",        "icon": "icn_crown",      "col": "ffd166", "desc": "+%9 mermi hızı"},
 	"edge":    {"name": "KESKİN KİLİT",       "icon": "icn_upg_frag",   "col": "ff9de2", "desc": "+%6 kritik şansı"},
+	"dup":     {"name": "ÇOĞALTAN",            "icon": "icn_crown",      "col": "b388ff", "desc": "+1 mermi/gülle adedi"},
 }
 
 static func def(wid: String) -> Dictionary:
@@ -221,6 +237,7 @@ static func apply_passive(pid: String, p: Player) -> void:
 		"regen":
 			p.set_meta("regen", float(p.get_meta("regen", 0.0)) + 0.7)
 		"warp": p.proj_spd *= 1.09
+		"dup":  p.bonus_proj += 1
 
 # which evolutions the player can cash in right now
 static func evo_ready(p: Player) -> Array:
@@ -413,6 +430,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"ray", "ray_x": _ray(st, p)
 		"seeker", "seeker_x": _seeker(st, p)
 		"glaive", "glaive_x": _glaive(st, p, w)
+		"meteor", "meteor_x": _meteor(st, p, w)
 
 static func _nearest(p: Vector2, max_r: float) -> Enemy:
 	var best: Enemy = null
@@ -445,7 +463,7 @@ static func _blade(st: Dictionary, p: Player, wid: String) -> void:
 				p2.auto_swing(a2, reach, arc_deg, dmg, heavy, wid))
 
 static func _plasma(st: Dictionary, p: Player) -> void:
-	var n := maxi(1, roundi(float(st.n)))
+	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)
 	var targets: Array = []
 	var sorted := G.enemies.duplicate()
 	sorted.sort_custom(func(a, b): return is_instance_valid(a) and is_instance_valid(b) and p.pos.distance_squared_to(a.pos) < p.pos.distance_squared_to(b.pos))
@@ -566,7 +584,7 @@ static func _spit(st: Dictionary, p: Player, w: Dictionary) -> void:
 	G.audio.play("shoot", 0.7, 0.45)
 
 static func _dagger(st: Dictionary, p: Player) -> void:
-	var n := maxi(1, roundi(float(st.n)))
+	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)
 	var tgt := _nearest(p.pos, 500.0)
 	var base_dir := (tgt.pos - p.pos).normalized() if tgt != null else (p.move_dir if p.move_dir.length_squared() > 0.01 else p.aim_dir)
 	var fan := float(st.get("fan", 0.18))
@@ -619,7 +637,7 @@ static func _ray(st: Dictionary, p: Player) -> void:
 
 # rosette of homing missiles — each curves into the swarm on its own
 static func _seeker(st: Dictionary, p: Player) -> void:
-	var n := maxi(1, roundi(float(st.n)))
+	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)
 	var pierce: bool = st.get("pierce", 0.0) > 0.0
 	for i in n:
 		var dir := Vector2.from_angle(TAU * i / n + G.rf(-0.2, 0.2))
@@ -638,7 +656,7 @@ static func _seeker(st: Dictionary, p: Player) -> void:
 
 # out-and-back piercing discs — they cut on both legs of the trip
 static func _glaive(st: Dictionary, p: Player, w: Dictionary) -> void:
-	var n := maxi(1, roundi(float(st.n)))
+	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)
 	var base := p.move_dir if p.move_dir.length_squared() > 0.01 else p.aim_dir
 	var spread := TAU if n > 2 else 0.35
 	for i in n:
@@ -656,9 +674,57 @@ static func _glaive(st: Dictionary, p: Player, w: Dictionary) -> void:
 		pr.knock = 4.0
 	G.audio.play("shoot", 0.7, 0.6)
 
+# telegraphed meteor strikes on random enemies — the ring marks the blast
+# zone tel seconds ahead, so the swarm can still be herded into it
+static func _meteor(st: Dictionary, p: Player, w: Dictionary) -> void:
+	var n := maxi(1, roundi(float(st.n)))
+	var r := float(st.r) * p.area_mult
+	var tel := float(st.get("tel", 0.75))
+	var dmg := float(st.dmg) * p.dmg_mult
+	var pool := G.enemies.duplicate()
+	for i in n:
+		var at := Vector2.ZERO
+		if pool.is_empty():
+			at = p.pos + Vector2(G.rf(-260, 260), G.rf(-200, 200))
+		else:
+			var e: Enemy = pool[G.ri(0, pool.size() - 1)]
+			pool.erase(e)
+			if not is_instance_valid(e) or e.dead:
+				continue
+			at = e.pos
+		_strike_tele(at, r, dmg, tel, p, str(w.id))
+
+static func _strike_tele(at: Vector2, r: float, dmg: float, tel: float, p: Player, wid: String) -> void:
+	var ring := Sprite2D.new()
+	ring.texture = Px.S("ring")
+	ring.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	ring.modulate = Color(1.0, 0.45, 0.2, 0.5)
+	ring.scale = Vector2.ONE * (r * 2.0 / 96.0)
+	ring.position = at
+	ring.z_index = -1990
+	G.game.world.add_child(ring)
+	var tw := ring.create_tween()
+	tw.tween_property(ring, "modulate:a", 0.9, tel * 0.8)
+	p.get_tree().create_timer(tel, false).timeout.connect(func():
+		if is_instance_valid(ring):
+			ring.queue_free()
+		if not is_instance_valid(p) or p.dead or G.state != G.State.ROOM:
+			return
+		for e in G.enemies.duplicate():
+			if not is_instance_valid(e) or e.dead:
+				continue
+			if at.distance_to(e.pos) < r + e.hit_radius:
+				var crit := G.chance(p.crit_ch)
+				var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.EXPLOSION, "from": at, "knock": 9.0, "stagger": 0.4, "source": p, "crit": crit, "wpn": wid}
+				e.take_hit(h)
+				p.on_dealt_damage(e, h)
+		G.fx.burst(at, Color(1, 0.5, 0.2), 16, 240.0, 6.0, 0.5)
+		G.fx.shake(0.08, 0.1))
+	G.audio.play("shoot", 0.5, 0.4)
+
 static func _tick_orbit(w: Dictionary, p: Player, d: float) -> void:
 	var st := stats(str(w.id), int(w.lvl))
-	var want := maxi(1, roundi(float(st.n)))
+	var want := maxi(1, roundi(float(st.n)) + p.bonus_proj)
 	# (re)build orb sprites when the count changes
 	var orbs: Array = w.get("orbs", [])
 	while orbs.size() < want:
