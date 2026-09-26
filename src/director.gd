@@ -30,6 +30,7 @@ var _surge_t := 85.0
 var _mono_fired := false   # resonance cluster side objective — once per run
 var _tome_t := 275.0       # bilgelik tomu — ~4:35'te ilki, sonra ~4dk'da bir
 var _rain_t := 130.0       # göktaşı yağmuru — oyuncu çevresine telegraph'lı alan vuruşları
+var _min_ann := 0          # son duyurulan dakika kilometre taşı
 var _mini := false
 var _final := false
 var _won := false
@@ -66,6 +67,10 @@ func _tick_spawn(d: float) -> void:
 
 func _tick_events(d: float) -> void:
 	var m := t / 60.0
+	# dakika kilometre taşı duyurusu
+	if int(m) > _min_ann:
+		_min_ann = int(m)
+		G.ui.toast("%d. dakika — sürü kalınlaşıyor" % _min_ann)
 	# elites — every ~50s after 1:35; they drop chests
 	_elite_t -= d
 	if _elite_t <= 0.0:
