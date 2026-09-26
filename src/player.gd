@@ -45,6 +45,7 @@ var _plasma_charge := -1.0   # <0 = not charging
 var _attack_slow := 1.0
 var revived := false
 var revives_extra := 0   # lütuf kaynaklı ek dirilmeler
+var boost_t := 0.0       # yükleme kalıntısı: >0 iken saldırılar %35 hızlı
 var _swing_hit_done := false
 var charge_rate := 1.0       # plasma charge speed (Rex overcharge boon)
 var _charge_full := false
@@ -129,6 +130,8 @@ func _process(_d: float) -> void:
 	_auto_aim()
 	if G.state == G.State.ROOM:
 		Weapons.tick(self, d)
+	if boost_t > 0.0:
+		boost_t -= d
 	if _combo_lock > 0:
 		_combo_lock -= d
 		if _combo_lock <= 0:
@@ -512,7 +515,7 @@ func reset_for_run() -> void:
 	lifesteal = 0.0; heal_on_kill = 0.0; dash_regen_mult = 1.0
 	b_gravity_well = false; b_homing = false; b_poison = false
 	b_emp = false; b_parry_shock = false; b_stealth_dash = false
-	stealth_t = 0.0; revived = false; revives_extra = 0
+	stealth_t = 0.0; revived = false; revives_extra = 0; boost_t = 0.0
 	charge_rate = 1.0; _charge_full = false
 	# survivors reset: starter blade, empty passives, level 1
 	for w in weapons:

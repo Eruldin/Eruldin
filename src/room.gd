@@ -623,6 +623,14 @@ func _collect(pk: Node) -> void:
 						e.body.modulate = Px.C("8fd4ff")
 			G.audio.play("dash", 0.7, 0.6)
 			G.ui.toast("durdurucu alan — kovan donuyor")
+		"boost":
+			G.player.boost_t = 10.0
+			G.audio.play("dash", 1.2, 0.5)
+			G.ui.toast("yükleme kalıntısı — saldırılar %35 hızlanıyor")
+		"guard":
+			G.player.invuln = maxf(G.player.invuln, 3.0)
+			G.audio.play("parry", 1.0, 0.6)
+			G.ui.toast("koruyucu zarf — 3sn dokunulmaz")
 		"chest":
 			G.run.open_chest()
 		_:
@@ -676,6 +684,12 @@ func spawn_special(kind: String, p: Vector2) -> void:
 		"freeze":
 			pk.texture = Px.S("ring")
 			col = "8fd4ff"
+		"boost":
+			pk.texture = Px.S("icn_dash")
+			col = "ffb74d"
+		"guard":
+			pk.texture = Px.S("icn_upg_shield")
+			col = "00E5FF"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	pk.scale = Vector2.ONE * 0.8
 	pk.modulate = Px.C(col)
