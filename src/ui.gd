@@ -51,6 +51,16 @@ const DEATH_LINES := [
 	"RHASA: Viator'da ölüm bir istatistik. Sen iyi bir istatistik ol.",
 ]
 
+# faction tint per speaker (master-prompt art bible color-coding)
+const NPC_COL := {
+	"rhasa": "ff5a4d",    # İmparatorluk — mat-siyah + kızıl vizör
+	"vane": "8fd4ff",    # çelik
+	"neva": "c26bff",    # choralim
+	"saphire": "ff9e4d", # viator kızıl-kum
+	"david": "00E5FF",   # iz sürücü
+	"zirkon": "c9a227",  # vezir — altın
+}
+
 static var _font: Font
 
 static func ui_font() -> Font:
@@ -97,6 +107,7 @@ var _kills_lbl: Label
 var _wpn_row: HBoxContainer
 var _psv_row: HBoxContainer
 var _gear_sig := ""
+var _pulse := 0.0
 
 func _ready() -> void:
 	layer = 100
@@ -201,7 +212,7 @@ func _build_hud() -> void:
 	_xp_back.size = Vector2(1280, 7)
 	_hud.add_child(_xp_back)
 	_xp_bar = ColorRect.new()
-	_xp_bar.color = Px.C("00E5FF")
+	_xp_bar.color = Px.C("6a3fd1")
 	_xp_bar.position = Vector2(0, 0)
 	_xp_bar.size = Vector2(0, 7)
 	_hud.add_child(_xp_bar)
@@ -327,6 +338,7 @@ func _build_overlays() -> void:
 	root.add_child(_flash)
 
 func _process(d: float) -> void:
+	_pulse += d
 	_tick_hud()
 	_tick_banner(d)
 	_tick_boss_bar()
@@ -358,6 +370,8 @@ func _tick_hud() -> void:
 		_dash_row.get_child(i).modulate = Px.C("00E5FF") if i < p.dash_charges else Color(0.15, 0.2, 0.28)
 	_frag_lbl.text = "◆ %d  (+%d)" % [G.meta.data.choralim, int(G.run.fragments * G.meta.frag_mult())]
 	_xp_bar.size.x = 1280.0 * clampf(p.xp / maxf(p.xp_next, 1.0), 0.0, 1.0)
+	# choralim pulse (#6a3fd1 -> #2c9be8) per the art bible
+	_xp_bar.color = Px.C("6a3fd1").lerp(Px.C("2c9be8"), 0.5 + 0.5 * sin(_pulse * 2.4))
 	_lvl_lbl.text = "SEV %d" % p.level
 	var tt := int(G.run.time)
 	_time_lbl.text = "%02d:%02d" % [tt / 60, tt % 60]
@@ -405,7 +419,12 @@ func _sync_gear_rows(p: Player) -> void:
 		var d: Dictionary = Weapons.pdef(str(ps.id))
 		_psv_row.add_child(_gear_icon(str(d.get("icon", "ico_frag")), str(d.get("col", "c26bff")), int(ps.lvl), 20))
 
+# faction-colored slot frame around each gear icon (VS-style loadout slots)
 func _gear_icon(icon: String, col: String, lvl: int, size: int) -> Control:
+	var sc := Px.C(col)
+	var slot := PanelContainer.new()
+	slot.add_theme_stylebox_override("panel", _style_panel(Color(0.02, 0.02, 0.05, 0.9), sc.lerp(Color.WHITE, 0.12), 1, 2))
+	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var tr := TextureRect.new()
 	tr.texture = Px.S2(icon)
 	if tr.texture == null:
@@ -413,12 +432,13 @@ func _gear_icon(icon: String, col: String, lvl: int, size: int) -> Control:
 	tr.custom_minimum_size = Vector2(size, size)
 	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	tr.modulate = Px.C(col)
+	tr.modulate = sc
 	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(tr)
 	var l := _lbl(str(lvl), Vector2(size - 12, size - 13), 10, Color.WHITE)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tr.add_child(l)
-	return tr
+	return slot
 
 func _boon_spec(bid: String) -> Dictionary:
 	for b in Boons.all():
@@ -594,7 +614,8 @@ func dialogue(nid: String) -> void:
 	_overlay.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	_overlay.offset_top = -168.0
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_overlay.add_theme_stylebox_override("panel", _style_panel(Color(0.04, 0.02, 0.08, 0.94), Px.C("7B1FA2"), 2, 3))
+	var ncol := Px.C(NPC_COL.get(nid, "00E5FF"))
+	_overlay.add_theme_stylebox_override("panel", _style_panel(Color(0.04, 0.02, 0.08, 0.94), ncol, 2, 3))
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 20)
 	margin.add_theme_constant_override("margin_right", 24)
@@ -606,18 +627,22 @@ func dialogue(nid: String) -> void:
 	h.add_theme_constant_override("separation", 16)
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(h)
-	# speaker portrait
+	# speaker portrait in a faction-colored frame
+	var por_f := PanelContainer.new()
+	por_f.add_theme_stylebox_override("panel", _style_panel(Color(0.02, 0.01, 0.05, 0.95), ncol, 2, 2))
+	por_f.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var por := TextureRect.new()
 	por.texture = Px.S2("por_" + nid)
 	por.custom_minimum_size = Vector2(64, 64)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	h.add_child(por)
+	por_f.add_child(por)
+	h.add_child(por_f)
 	var v := VBoxContainer.new()
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	h.add_child(v)
-	var name_l := _lbl(NPC.NAMES.get(nid, nid), Vector2.ZERO, 15, Px.C("00E5FF"))
+	var name_l := _lbl(NPC.NAMES.get(nid, nid), Vector2.ZERO, 15, ncol)
 	v.add_child(name_l)
 	var body_l := _lbl("", Vector2.ZERO, 14, Color(0.9, 0.9, 0.95))
 	body_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
