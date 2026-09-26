@@ -8,8 +8,8 @@ extends Node
 
 const ROOMS_PER_BIOME := 3  # combat rooms before the boss room
 const FINAL_BOSS := 3
-const BOSS_IDS := ["rex", "host", "twins", "final"]
-const BOSS_NAMES := ["REX / ALPHA-05", "PROTERIAN HOST", "NAHUM & TUMAN", "KIRIN & CONSTANTIN"]
+const BOSS_IDS := ["rex", "host", "twins", "final", "final"]
+const BOSS_NAMES := ["REX / ALPHA-05", "PROTERIAN HOST", "NAHUM & TUMAN", "KIRIN & CONSTANTIN", "KIRIN & CONSTANTIN"]
 
 var game: Node2D
 var biome := 0
@@ -100,7 +100,7 @@ func start_run() -> void:
 	node_name = str(nd.get("name", ""))
 	node_mods = nd.get("mods", {})
 	frag_node = float(node_mods.get("frag", 1.0))
-	biome = clampi(int(nd.get("biome", 0)), 0, 3)
+	biome = clampi(int(nd.get("biome", 0)), 0, Room.BIOME_NAME.size() - 1)
 	hyper = bool(G.meta.data.get("hyper", false))
 	dark = bool(G.meta.data.get("dark", false))
 	reward_mult = (1.5 if hyper else 1.0) * (1.25 if dark else 1.0)
@@ -273,19 +273,21 @@ func next_room(reward: int) -> void:
 		if lore != "":
 			G.ui.cinematic("cine_%d_0" % biome, node_name, lore, 3.0)
 		else:
-			G.ui.cinematic("cine_%d_0" % biome, Room.BIOME_NAME[biome], _biome_sub(biome), 2.8)
+			G.ui.cinematic("cine_%d_0" % biome, Room.BIOME_NAME[clampi(biome, 0, Room.BIOME_NAME.size() - 1)], _biome_sub(biome), 2.8)
 
 func _biome_sub(b: int) -> String:
 	return ["Proterian çoraklığı — Alfa-05'in izi burada.",
 			"Simithar damarları — kovanın derinliklere uzandığı yer.",
 			"Sol Primus enkazı — imparatorluğun çürüyen tahtı.",
-			"Aeterna Kulesi — protokolün kalbi."][b]
+			"Aeterna Kulesi — protokolün kalbi.",
+			"Çürük Bataklık — imparatorluğun unuttuğu çamur, burada hiçbir şey temiz çürümez."][mini(b, 4)]
 
 func _boss_intro_sub(b: int) -> String:
 	return ["Alfa-05 · Düşmüş Kardeş — transistörü hâlâ şarkı söylüyor.",
 			"Proterian Yeni Nesil Konakçı — kovan eti hatırlıyor.",
 			"Nahum & Tuman — ikiz protokol, çift ölüm.",
-			"Kirin & Constantin — masanın son iki sandalyesi."][b]
+			"Kirin & Constantin — masanın son iki sandalyesi.",
+			"Kirin & Constantin — masanın son iki sandalyesi."][mini(b, 4)]
 
 func _elite_room() -> bool:
 	return depth == 1 and G.chance(0.35)

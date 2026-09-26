@@ -25,6 +25,7 @@ const NODES := [
 	{"id": "vatika", "name": "SESSİZ VATİKA",      "icon": "icn_crown",   "pos": Vector2(600, 620), "col": "9be8ff", "kind": "arena", "biome": 3, "unlock": "node", "desc": "Protokolün sessiz sığınağı — alacakaranlık, bol choralim.", "lore": "Neva'nın bahsettiği sığınak. Işık burada ölür ama choralim şarkısı çift yankılanır.", "mods": {"hp": 1.3, "frag": 2.0, "dusk": true, "loot": 1.4}},
 	{"id": "mabed",  "name": "KIRILMIŞ MABED",     "icon": "icn_crown",   "pos": Vector2(420, 560), "col": "ffd75f", "kind": "arena", "biome": 0, "unlock": "node", "desc": "Yıkık tapınak — ganimet çift kat, elitler nöbette.", "lore": "Viator'ın eski dua yeri. Sunak kırık ama kutsamalar hâlâ taşın içinde — kovan da bunu biliyor.", "mods": {"loot": 2.2, "elite_t": 0.6, "spawn": 0.8, "frag": 1.2}},
 	{"id": "mezarlik","name": "DÜŞMÜŞLER MEZARI",  "icon": "icn_skull",   "pos": Vector2(950, 150), "col": "90a4ae", "kind": "arena", "biome": 3, "unlock": "node", "desc": "Efendilerin eski çöplüğü — elit kaynağı, sert kovan.", "lore": "Protokolün reddettiği gövdeler buraya atıldı. Şimdi hepsi kalkmış, mezarlarında nöbet tutuyor.", "mods": {"hp": 1.25, "elite_t": 0.5, "dmg": 1.15, "frag": 1.35}},
+	{"id": "batak",  "name": "ÇÜRÜK BATAKLIK",    "icon": "ico_boon",    "pos": Vector2(1120, 430), "col": "66bb6a", "kind": "arena", "biome": 4, "unlock": "node", "desc": "İmparatorluğun unuttuğu bataklık — çeken balçık, mantarlı karanlık, bol ganimet.", "lore": "Protokol buraya hiç bakmadı; bataklık da kimseyi geri vermedi. Suların altında efendilerin artıkları, üstünde küsen sürüler.", "mods": {"hp": 1.05, "spawn": 1.15, "frag": 1.3, "loot": 1.6, "dusk": true}},
 ]
 
 # harita üstünde çizilen seyahat hatları (BG2 bağlantıları)
@@ -34,6 +35,7 @@ const EDGES := [
 	["tarla", "b3"], ["b2", "b3"], ["b3", "kuyu"], ["b2", "kuyu"],
 	["pazar", "yuvalar"], ["b1", "yuvalar"], ["b3", "vatika"], ["kuyu", "vatika"],
 	["tarla", "mabed"], ["mabed", "vatika"], ["yuvalar", "mezarlik"], ["b1", "mezarlik"],
+	["b2", "batak"], ["batak", "kuyu"],
 ]
 
 static func node(id: String) -> Dictionary:

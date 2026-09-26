@@ -140,6 +140,7 @@ func _synth(n: String) -> PackedByteArray:
 		"mus_1": return _drone2([41.0, 61.7, 82.4], 12.0, 0.23, [164.0, 196.0, 247.0, 330.0], true)
 		"mus_2": return _drone2([46.0, 69.3, 92.5], 12.0, 0.21, [185.0, 220.0, 277.0, 370.0], true)
 		"mus_3": return _drone2([36.7, 55.0, 73.4], 14.0, 0.24, [147.0, 175.0, 220.0, 294.0], true)
+		"mus_4": return _drone2([44.0, 65.4, 87.3], 13.0, 0.22, [174.0, 196.0, 262.0, 349.0], true)
 		"mus_boss": return _drone2([36.7, 55.0, 73.4, 110.0], 10.0, 0.3, [147.0, 156.0, 220.0], true)
 	return PackedByteArray()
 

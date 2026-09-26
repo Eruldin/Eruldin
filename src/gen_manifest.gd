@@ -30,7 +30,10 @@ const SPRITES := {
 	# boyanmis zemin resimleri (BG2 tarzi tam-sahne zemin)
 	"gr_0": "art/gen/g_gr_0.png", "gr_1": "art/gen/g_gr_1.png",
 	"gr_2": "art/gen/g_gr_2.png", "gr_3": "art/gen/g_gr_3.png",
+	"gr_4": "art/gen/g_gr_4.png",
 	"gr_hub": "art/gen/g_gr_hub.png",
+	# Çürük Bataklık (biome 4): sinematik kart olarak da zemin resmi kullanılır
+	"cine_4_0": "art/gen/g_gr_4.png",
 	# biome prop'lari: prop_<biome>_<i> (0..5), hub icin prop_hub_<i>
 	"prop_0_0": "art/gen/g_prop_0__0.png", "prop_0_1": "art/gen/g_prop_0__1.png",
 	"prop_0_2": "art/gen/g_prop_0__2.png", "prop_0_3": "art/gen/g_prop_0__3.png",
