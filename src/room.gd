@@ -643,6 +643,8 @@ func _tick_pickups(d: float) -> void:
 		magnet = G.player.magnet_r
 	for pk in pickups_node.get_children():
 		var dist: float = pk.position.distance_to(G.player.pos)
+		if str(pk.get_meta("kind", "")) == "tome" and G.ui.overlay_open():
+			continue   # tom draft açıkken tetiklenmesin — yerinde bekler
 		if int(pk.get_meta("vac", 0)) == 1 or dist < magnet:
 			pk.position = pk.position.move_toward(G.player.pos, (340.0 + (magnet - dist) * 4.0) * d)
 		if dist < 16:
@@ -677,6 +679,9 @@ func _collect(pk: Node) -> void:
 		"heal":
 			G.player.heal(24.0)
 			G.audio.play("heal", 1.0, 0.5)
+		"tome":
+			G.fx.burst(pk.position, Px.C("c9a227"), 16, 160.0, 5.0, 0.5)
+			G.ui.boon_choice()
 		"vacuum":
 			for g2 in pickups_node.get_children():
 				if str(g2.get_meta("kind", "")) == "xp":
@@ -778,6 +783,21 @@ func spawn_special(kind: String, p: Vector2) -> void:
 	pk.set_meta("val", 0)
 	pickups_node.add_child(pk)
 	G.fx.mk_light(pk, Vector2.ZERO, Px.C(col), 0.6, 1.4)
+
+# HoT ability tome: üstüne basınca bedava lütuf taslağı açan saha kalıntısı
+func spawn_tome(p: Vector2) -> void:
+	var pk := Sprite2D.new()
+	pk.texture = Px.S2("ico_boon")
+	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pk.scale = Vector2.ONE * 1.7
+	pk.modulate = Px.C("c9a227")
+	pk.position = clamp_pos(p, 40.0)
+	pk.z_index = int(pk.position.y)
+	pk.set_meta("kind", "tome")
+	pickups_node.add_child(pk)
+	G.fx.mk_light(pk, Vector2(0, -8), Px.C("c9a227"), 0.7, 2.0)
+	G.ui.toast("BİLGELİK TOMU belirdi — üstüne bas, lütuf seç")
+	G.audio.jingle("boon")
 
 func spawn_heal(p: Vector2) -> void:
 	var pk := Sprite2D.new()

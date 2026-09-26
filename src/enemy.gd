@@ -103,7 +103,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller"][randi() % 5]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir"][randi() % 6]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -119,6 +119,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 			"caller":
 				_sum_t = 5.0
 				actor_name = "ÇAĞIRICI " + actor_name
+			"vampir":
+				actor_name = "VAMPİR " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -142,7 +144,7 @@ func _make_body() -> void:
 	Px.fit(body, 118.0 if elite else (108.0 if kind == EKind.KONAKCI else 86.0))
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		_hp_bg = ColorRect.new()
 		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
@@ -311,6 +313,8 @@ func _strike(d: float) -> void:
 			pos = G.room.clamp_pos(pos, radius)
 		if G.player != null and not G.player.dead and pos.distance_to(G.player.pos) < radius + G.player.hit_radius + 8.0:
 			G.player.take_hit({"dmg": touch_dmg, "type": G.DamageType.MELEE, "from": pos, "knock": 5.0, "source": self})
+			if affix == "vampir":
+				hp = minf(hp + touch_dmg * 0.6, max_hp)
 			_state_t = 0
 	if _state_t <= 0:
 		_st = St.RECOVER

@@ -13,6 +13,9 @@ var _roster_done := false
 var _edge_done := false
 var _mono_done := false
 var _mono_check := false
+var _tome_done := false
+var _tome_ck := false
+var _tome_boons := 0
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -84,6 +87,15 @@ func _process(_d: float) -> void:
 			if _mono_done and not _mono_check and not G.room.mono_active:
 				_mono_check = true
 				print("[probe] monolith resolved ok")
+			if not _tome_done and t >= 112.0 and G.player != null:
+				_tome_done = true
+				_tome_boons = G.run.boon_ids.size()
+				G.room.spawn_tome(G.player.pos + Vector2(10, 0))
+				_tome_ck = true
+				print("[probe] tome spawned")
+			if _tome_ck and t >= 118.0:
+				_tome_ck = false
+				print("[probe] tome consumed ok" if G.run.boon_ids.size() > _tome_boons else "[probe] WARN tome not consumed")
 			if t >= _shot_at:
 				_shot_at = t + 15.0
 				_shoot()

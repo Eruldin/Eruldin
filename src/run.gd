@@ -120,6 +120,8 @@ var streak_t := 0.0
 func on_kill(_elite: bool) -> void:
 	streak += 1
 	streak_t = 2.5
+	if streak > int(stats.get("best_streak", 0)):
+		stats["best_streak"] = streak
 	var bonus := 0
 	match streak:
 		15: bonus = 10
