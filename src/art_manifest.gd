@@ -102,6 +102,9 @@ const SPRITES := {
 	"npc2_zirkon": "art/c_zirkon_idle_0.png",
 	"npcb_zirkon": "art/c_zirkon_idle_1.png",
 	"por_zirkon": "art/por_c_zirkon.png",
+	"npc2_ehnar": "art/c_ehnar_idle_0.png",
+	"npcb_ehnar": "art/c_ehnar_idle_1.png",
+	"por_ehnar": "art/por_c_ehnar.png",
 }
 
 const FRAMES := {
