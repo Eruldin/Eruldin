@@ -322,5 +322,6 @@ func _rain_strike(p: Vector2, cfg: Dictionary) -> void:
 			if e is Enemy and not e.dead and e.pos.distance_to(pp) < r:
 				e.take_hit({"dmg": 70.0 + G.run.depth * 8.0, "type": pt, "from": pp, "knock": 10.0, "source": G.player})
 		G.fx.burst(pp, col, 18, 240.0, 6.0, 0.4)
+		G.fx.boom(pp, col, r)
 		G.fx.light_flash(pp, col, 1.6, 2.6, 0.16)
 		G.audio.play("explode", 1.1, 0.3))

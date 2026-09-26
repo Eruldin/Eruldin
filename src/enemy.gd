@@ -13,7 +13,7 @@ enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 # base set automatically in _make_body
 const KIND_SET := {
 	EKind.VARL: "c_varl", EKind.CEREB: "c_cereb",
-	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa", EKind.CARRIER: "c_konakci",
+	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa", EKind.CARRIER: "c_carrier",
 }
 
 var kind: int = EKind.HUSK
@@ -495,6 +495,7 @@ func die(h: Dictionary) -> void:
 			if is_instance_valid(G.player) and not G.player.dead and G.player.pos.distance_to(blast_pos) < 118.0:
 				G.player.take_hit({"dmg": bd, "type": G.DamageType.EXPLOSION, "from": blast_pos, "knock": 14.0, "source": null})
 			G.fx.burst(blast_pos, Color(1.0, 0.45, 0.15), 26, 240.0, 6.0, 0.5)
+			G.fx.boom(blast_pos, Color(1.0, 0.5, 0.2), 110.0)
 			G.fx.light_flash(blast_pos, Color(1, 0.6, 0.2), 2.2, 3.0, 0.25)
 			G.audio.play("explode", 0.9, 0.7)
 			G.fx.shake(0.18, 0.2))

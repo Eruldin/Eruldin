@@ -182,6 +182,24 @@ func mk_light(parent: Node, pos: Vector2, col: Color, energy: float, tex_scale: 
 	parent.add_child(l)
 	return l
 
+# generated pixel-art explosion sprite — a real boom frame on top of the
+# particle burst (colors are baked into the art, so modulate stays white)
+func boom(pos: Vector2, col: Color, radius := 70.0) -> void:
+	var s := _mk("fx_boom", 64)
+	if s.texture == null:
+		burst(pos, col, 14, 300.0, 4.5, 0.4)
+		return
+	s.global_position = pos
+	s.rotation = G.rf(0, TAU)
+	var sc := radius * 2.0 / float(maxi(s.texture.get_height(), 1))
+	s.scale = Vector2.ONE * sc * 0.7
+	s.modulate = Color(1, 1, 1, 0.95)
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	var tw := create_tween()
+	tw.tween_property(s, "scale", Vector2.ONE * sc * 1.25, 0.3)
+	tw.parallel().tween_property(s, "modulate:a", 0.0, 0.3)
+	tw.tween_callback(s.queue_free)
+
 func light_flash(pos: Vector2, col: Color, energy := 1.6, tex_scale := 2.5, dur := 0.22) -> void:
 	var l := mk_light(self, pos, col, energy, tex_scale)
 	l.z_index = 70
