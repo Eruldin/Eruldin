@@ -948,7 +948,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1396,6 +1396,16 @@ func inventory_panel() -> void:
 	tb.pressed.connect(func():
 		_close_overlay()
 		barter_panel())
+	var sb := Button.new()
+	sb.text = "PAZAR TEZGÂHI →   choralim ile eşya al (stok koşu başına yenilenir)"
+	sb.add_theme_font_override("font", ui_font())
+	sb.custom_minimum_size = Vector2(320, 28)
+	var sc := CenterContainer.new()
+	sc.add_child(sb)
+	v.add_child(sc)
+	sb.pressed.connect(func():
+		_close_overlay()
+		shop_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
@@ -1494,6 +1504,85 @@ func barter_panel() -> void:
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
+
+# Saphire'in pazar tezgâhı — koşu başına yenilenen stok, choralim karşılığı eşya
+func shop_panel() -> void:
+	_pause(true)
+	var v := _show_panel("shop", "PAZAR TEZGÂHI — Saphire'in malları", Px.C("ff9e4d"))
+	var money := _lbl("Saf Choralim: ◆ %d" % int(G.meta.data.get("choralim", 0)), Vector2.ZERO, 13, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
+	var hint := _lbl("stok her koşu dönüşünde yenilenir — sahipsiz eşyalar gelir", Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(hint)
+	var stock := Items.shop_stock()
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	v.add_child(grid)
+	if stock.is_empty():
+		var l := _lbl("stok boş — yeni koşudan sonra tezgâh yenilenir", Vector2.ZERO, 12, Color(0.5, 0.5, 0.6))
+		grid.add_child(l)
+	for iid in stock:
+		var d: Dictionary = Items.DEFS.get(str(iid), {})
+		if d.is_empty():
+			continue
+		var cell := PanelContainer.new()
+		var rc := Px.C(Items.RARITY_COL[int(d.r)])
+		cell.add_theme_stylebox_override("panel", _style_panel(Color(0.05, 0.04, 0.08, 0.95), rc, 2, 3))
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 2)
+		cell.add_child(cv)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		cv.add_child(row)
+		var ic := TextureRect.new()
+		ic.texture = Px.S2(str(d.icon))
+		ic.custom_minimum_size = Vector2(24, 24)
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.modulate = rc
+		row.add_child(ic)
+		var nm := _lbl(str(d.name), Vector2.ZERO, 10, Color(0.9, 0.9, 0.94))
+		row.add_child(nm)
+		var rt := _lbl(Items.RARITY_NAME[int(d.r)], Vector2.ZERO, 8, rc)
+		cv.add_child(rt)
+		var md := _lbl(Items.stat_text(str(iid)), Vector2.ZERO, 9, Color(0.65, 0.75, 0.85))
+		cv.add_child(md)
+		var price := Items.buy_price(str(iid))
+		var bb := Button.new()
+		bb.text = "SATIN AL ◆%d" % price
+		bb.add_theme_font_override("font", ui_font())
+		bb.custom_minimum_size = Vector2(120, 22)
+		bb.disabled = int(G.meta.data.get("choralim", 0)) < price
+		if bb.disabled:
+			bb.modulate = Color(0.5, 0.5, 0.55)
+		cv.add_child(bb)
+		var id0 := str(iid)
+		var dname := str(d.name)
+		bb.pressed.connect(func():
+			var paid := Items.buy(id0)
+			if paid > 0:
+				G.audio.jingle("boon")
+				toast("%s alındı: ◆-%d" % [dname, paid])
+				_close_overlay()
+				shop_panel())
+		grid.add_child(cell)
+	var back2 := Button.new()
+	back2.text = "← TEÇHİZAT"
+	back2.add_theme_font_override("font", ui_font())
+	back2.custom_minimum_size = Vector2(160, 26)
+	var bc := CenterContainer.new()
+	bc.add_child(back2)
+	v.add_child(bc)
+	back2.pressed.connect(func():
+		_close_overlay()
+		inventory_panel())
+	var h2 := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h2)
+
 func records_panel() -> void:
 	_pause(true)
 	var v := _show_panel("records", "KAMP KAYITLARI — Vezir Zirkon", Px.C("c9a227"))

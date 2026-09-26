@@ -166,6 +166,44 @@ static func sell(id: String) -> int:
 	G.meta.save()
 	return p
 
+# kamp tezgâhı: koşu sayısına bağlı yenilenen 3'lü stok — choralim'in harcama yeri
+const SHOP_N := 3
+
+static func shop_stock() -> Array:
+	var gen := int(G.meta.data.get("runs", 0))
+	var stock: Array = G.meta.data.get("shop_stock", [])
+	if int(G.meta.data.get("shop_gen", -1)) != gen:
+		var pool: Array = []
+		for id in DEFS:
+			if not _in_stash(id):
+				pool.append(id)
+		pool.shuffle()
+		stock = pool.slice(0, mini(SHOP_N, pool.size()))
+		G.meta.data["shop_stock"] = stock
+		G.meta.data["shop_gen"] = gen
+		G.meta.save()
+	return stock
+
+static func buy_price(id: String) -> int:
+	return sell_price(id) * 3
+
+# 0 = stokta yok · -1 = choralim yetmez · >0 = alındı (ödenen fiyat)
+static func buy(id: String) -> int:
+	var st: Array = shop_stock()
+	if not st.has(id):
+		return 0
+	var p := buy_price(id)
+	if int(G.meta.data.get("choralim", 0)) < p:
+		return -1
+	G.meta.data["choralim"] -= p
+	st.erase(id)
+	G.meta.data["shop_stock"] = st
+	var bag: Array = G.meta.data.get("stash", [])
+	bag.append(id)
+	G.meta.data["stash"] = bag
+	G.meta.save()
+	return p
+
 # hurda takası: 2 zula eşyası → 1 yeni eşya; nadirlik ≥ ikisinin düşük olanı.
 # koleksiyon doluysa "full" döner ve eşyalar yanmaz.
 static func barter(a: String, b: String) -> String:
