@@ -15,6 +15,7 @@ var game: Node2D
 var biome := 0
 var depth := 0
 var hyper := false          # AŞILAMA modu — David'in saha panelinden açılır
+var curse := 0             # KARANLIK SÖZLEŞME yığını — düşmanları sertleştirir
 var reward_mult := 1.0     # choralim payout multiplier (hyper ×1.5)
 var fragments := 0        # impure choralim gathered this run → purified on death
 var boon_ids: Array = []
@@ -31,8 +32,9 @@ var stats := {"kills": 0, "rooms": 0}
 func _init(g: Node2D) -> void:
 	game = g
 
-func hp_scale() -> float: return 1.0 + biome * 0.35 + depth * 0.12
-func dmg_scale() -> float: return 1.0 + biome * 0.18 + depth * 0.06
+# hp_scale/dmg_scale: biome + derinlik + KARANLIK SÖZLEŞME yığını (curse)
+func hp_scale() -> float: return (1.0 + biome * 0.35 + depth * 0.12) * (1.0 + curse * 0.12)
+func dmg_scale() -> float: return (1.0 + biome * 0.18 + depth * 0.06) * (1.0 + curse * 0.12)
 
 func hub() -> void:
 	biome = 0
@@ -60,6 +62,7 @@ func start_run() -> void:
 	time = 0.0
 	pending_drafts = 0
 	banished.clear()
+	curse = 0
 	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
 	G.meta.save()
