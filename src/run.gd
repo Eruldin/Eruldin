@@ -16,7 +16,8 @@ var biome := 0
 var depth := 0
 var hyper := false          # AŞILAMA modu — David'in saha panelinden açılır
 var curse := 0             # KARANLIK SÖZLEŞME yığını — düşmanları sertleştirir
-var reward_mult := 1.0     # choralim payout multiplier (hyper ×1.5)
+var dark := false          # KARANLIK mutator — şifa düşmez, ödeme ×1.25
+var reward_mult := 1.0     # choralim payout multiplier (hyper ×1.5, dark ×1.25)
 var fragments := 0        # impure choralim gathered this run → purified on death
 var boon_ids: Array = []
 var luck := 0.0           # raised by elites; sways epic boon rolls
@@ -52,7 +53,8 @@ func hub() -> void:
 func start_run() -> void:
 	biome = clampi(int(G.meta.data.get("arena_biome", 0)), 0, 3)
 	hyper = bool(G.meta.data.get("hyper", false))
-	reward_mult = 1.5 if hyper else 1.0
+	dark = bool(G.meta.data.get("dark", false))
+	reward_mult = (1.5 if hyper else 1.0) * (1.25 if dark else 1.0)
 	depth = -1
 	fragments = 0
 	boon_ids.clear()
