@@ -24,6 +24,8 @@ var affix := ""            # elite modifier: armored / volatile / swift / sparke
 var _spk_t := 0.0
 var _sum_t := 0.0   # çağırıcı elit: döl saçma sayacı
 var _mend_t := 0.0  # şifalı elit: alan onarımı sayacı
+var _lead_pulse := 0.0  # sürücü elit: hız aurası sayacı
+var lead_t := 0.0       # bu düşmanın üstündeki kalan sürücü buffı
 var _sum_n := 0     # bu elitin saldığı döl sayısı
 var speed := 100.0
 var touch_dmg := 10.0
@@ -113,7 +115,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split"][randi() % 8]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu"][randi() % 9]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -136,6 +138,9 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "ŞİFALI " + actor_name
 			"split":
 				actor_name = "BÖLÜCÜ " + actor_name
+			"surucu":
+				_lead_pulse = 0.8
+				actor_name = "SÜRÜCÜ " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -164,7 +169,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("ffb74d"), 0.4, 1.4)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		_hp_bg = ColorRect.new()
 		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
@@ -245,6 +250,20 @@ func _process(_d: float) -> void:
 					mn += 1
 			if mn > 0:
 				G.fx.burst(pos + Vector2(0, -14), Px.C("69f0ae"), 10, 140.0, 4.0, 0.4)
+	# sürücü elit: yakın sürüye hız aurası yayar — öncelik hedef olur
+	if lead_t > 0.0:
+		lead_t -= d
+	if affix == "surucu":
+		_lead_pulse -= d
+		if _lead_pulse <= 0.0:
+			_lead_pulse = 0.6
+			var ln := 0
+			for e in G.enemies:
+				if e != self and is_instance_valid(e) and not e.dead and pos.distance_to(e.pos) < 220.0:
+					e.lead_t = 0.75
+					ln += 1
+			if ln >= 3:
+				G.fx.tele_ring(pos, 220.0, 0.45, Color(0.75, 0.8, 0.2, 0.35))
 	if _cd_t > 0:
 		_cd_t -= d
 	_tick_anim(d)
@@ -276,8 +295,9 @@ func _seek(d: float) -> void:
 			dir = -dir
 		elif dist < keep_max:
 			dir = dir.rotated(PI / 2 * sin(Time.get_ticks_msec() * 0.0008))
-	if speed > 0:
-		pos += dir.normalized() * speed * d
+	var spd := speed * (1.28 if lead_t > 0.0 else 1.0)
+	if spd > 0:
+		pos += dir.normalized() * spd * d
 		if is_instance_valid(G.room):
 			pos = G.room.clamp_pos(pos, radius)
 	_face_p()
@@ -300,7 +320,7 @@ func _seek(d: float) -> void:
 						_begin_windup()
 					else:
 						# attack director full — orbit the player instead of crowding
-						pos += dir.rotated(PI / 2 * _orbit) * speed * 0.55 * d
+						pos += dir.rotated(PI / 2 * _orbit) * spd * 0.55 * d
 						pos = G.room.clamp_pos(pos, radius) if is_instance_valid(G.room) else pos
 
 func _begin_windup() -> void:

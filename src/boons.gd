@@ -78,6 +78,7 @@ const ARCANAS := {
 	"kum":     {"name": "KUM SAATİ",     "desc": "+%18 deneyim kazancı", "col": "f0e68c"},
 	"aci":     {"name": "ACI ODAKI",     "desc": "+%20 kritik şansı — ama -%10 deneyim", "col": "ff8a65"},
 	"hurda":   {"name": "HURDA KALBİ",   "desc": "+%35 şans — sahada eşya bereketi", "col": "8d6e63"},
+	"yanki":   {"name": "ÇİFT YANKI",    "desc": "+1 ek atılım şarjı — ama -%8 hız", "col": "4dd0e1"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -106,6 +107,10 @@ static func apply_arcana(id: String, p: Player) -> void:
 			p.xp_mult *= 0.90
 		"hurda":
 			G.run.luck += 0.35
+		"yanki":
+			p.dash_max += 1
+			p.dash_charges += 1
+			p.speed *= 0.92
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0
