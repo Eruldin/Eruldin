@@ -39,6 +39,8 @@ const DEFS := [
 	{"id": "q_nobet",  "giver": "ehnar",   "name": "SON NÖBET",        "desc": "Mezardaki nöbetçiler sayıyor. Tek koşuda 10 elit kes — mezarın kapağı kalkar.", "obj": {"type": "elites", "n": 10}, "rew": {"cho": 110, "node": "mezarlik"}, "prereq": "q_elit"},
 	{"id": "q_batak",  "giver": "david",   "name": "BATAKLIK ROTASI",   "desc": "Konakçı Yaratıkların izi doğuda bir bataklığa çıkıyor. 8 tanesini kes — rotayı çizerim.", "obj": {"type": "kind", "k": "Konakçı Yaratık", "n": 8}, "rew": {"cho": 90, "node": "batak"}, "prereq": "q_gez"},
 	{"id": "q_sis",    "giver": "ahusk",   "name": "SİS PERDESİ",        "desc": "Kistlerin şarkısı batıda bir geçidi işaretliyor. 12 Cerebellum Kisti kes — geçidi bulayım.", "obj": {"type": "kind", "k": "Cerebellum Kisti", "n": 12}, "rew": {"cho": 100, "node": "sisgecidi"}, "prereq": "q_dua"},
+	{"id": "q_sinir",  "giver": "david",   "name": "HARİTA SINIRI",      "desc": "Haritanın tamamı yankılanmalı. Beş farklı sahada koşu yap.", "obj": {"type": "biomes", "n": 5}, "rew": {"cho": 150}, "prereq": "q_batak"},
+	{"id": "q_nobet2", "giver": "ehnar",   "name": "NÖBETÇİNİN KİLİDİ",  "desc": "Elitler defterde iz bırakır. Tek koşuda 15 elit kes — rekoru kır.", "obj": {"type": "elites", "n": 15}, "rew": {"cho": 140, "item": "i_gocek"}, "prereq": "q_nobet"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}

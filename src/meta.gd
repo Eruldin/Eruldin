@@ -119,10 +119,11 @@ func achievements() -> Array:
 		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0, "rew": 150},
 		{"name": "SKOR AVCISI", "desc": "tek koşuda 4000+ skor", "done": int(data.get("best_score", 0)) >= 4000, "rew": 150},
 		{"name": "MARATONCU", "desc": "tek koşuda 14+ dakika dayan", "done": int(data.get("best_depth", 0)) >= 840, "rew": 200},
-		{"name": "KOZ KOLEKSİYONCUSU", "desc": "7 koz kartının hepsini kullan", "done": (data.get("arcanas_seen", []) as Array).size() >= Boons.ARCANAS.size(), "rew": 150},
+		{"name": "KOZ KOLEKSİYONCUSU", "desc": "tüm koz kartlarını kullan", "done": (data.get("arcanas_seen", []) as Array).size() >= Boons.ARCANAS.size(), "rew": 150},
 		{"name": "HARİTA USTASI", "desc": "kamp hariç tüm node'lara koşu yap", "done": (data.get("visited_nodes", []) as Array).size() >= int(Wmap.NODES.size()) - 1, "rew": 200},
 		{"name": "KOLEKSİYONER", "desc": "zula + ekipmanda 10+ eşya", "done": (data.get("stash", []) as Array).size() + (data.get("equip", {}) as Dictionary).size() >= 10, "rew": 100},
 		{"name": "GÖREV ERİ", "desc": "8 görevi teslim et", "done": _claimed_count() >= 8, "rew": 150},
+		{"name": "ARŞİVCİ", "desc": "8 veri kütüğünü topla", "done": (data.get("lore", []) as Array).size() >= Quests.LORE.size(), "rew": 200},
 	]
 
 func _claimed_count() -> int:
