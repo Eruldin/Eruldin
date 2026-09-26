@@ -26,6 +26,9 @@ static func make(id: String, p: Vector2, parent: Node) -> NPC:
 var _fr: Array = []
 var _fr_i := 0
 var _fr_t := 0.0
+var _anchor := Vector2.ZERO   # kamp konumu — gezinme bunun etrafında
+var _wtarget := Vector2.ZERO
+var _wt := 0.0
 
 func _ready() -> void:
 	var sh := Sprite2D.new()
@@ -65,6 +68,9 @@ func _ready() -> void:
 	mark.z_index = 500
 	add_child(mark)
 	_bob = G.rf(0, TAU)
+	_anchor = position
+	_wtarget = _anchor
+	_wt = G.rf(2.0, 7.0)
 
 func _process(d: float) -> void:
 	z_index = int(position.y)
@@ -88,6 +94,15 @@ func _process(d: float) -> void:
 	prompt.visible = near
 	if near and is_instance_valid(body):
 		body.flip_h = G.player.pos.x < position.x
+	# kamp içi gezinme: NPC'ler dayanak etrafında usulca dolaşır (BG2 boşta-yürüme)
+	elif is_instance_valid(body):
+		_wt -= d
+		if _wt <= 0.0:
+			_wt = G.rf(4.0, 9.0)
+			_wtarget = _anchor + Vector2(G.rf(-1.0, 1.0) * 34.0, G.rf(-1.0, 1.0) * 18.0)
+		if position.distance_to(_wtarget) > 2.0:
+			position = position.move_toward(_wtarget, 12.0 * d)
+			body.flip_h = _wtarget.x < position.x
 	var e := Input.is_key_pressed(KEY_E)
 	if near and e and not _e_held:
 		G.ui.dialogue(nid)
