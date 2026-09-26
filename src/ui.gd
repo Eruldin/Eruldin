@@ -114,6 +114,7 @@ var _banner_lbl: Label
 var _banner_t := 0.0
 var _toasts: Array = []
 var _flash: ColorRect
+var _lowhp: ColorRect        # low-health heartbeat vignette
 var _overlay: Control = null     # current modal overlay (dialogue/boon/death/etc)
 var _crt: TextureRect
 var _vign: TextureRect
@@ -355,6 +356,11 @@ func _build_overlays() -> void:
 	_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_flash)
+	_lowhp = ColorRect.new()
+	_lowhp.color = Color(0.5, 0.0, 0.04, 0)
+	_lowhp.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_lowhp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_lowhp)
 
 func _process(d: float) -> void:
 	_pulse += d
@@ -371,6 +377,9 @@ func _tick_hud() -> void:
 	_hp_bar.size.x = 256 * clampf(p.hp / p.max_hp, 0.0, 1.0)
 	_hp_hi.size.x = _hp_bar.size.x
 	_hp_txt.text = "%d / %d" % [maxi(0, ceili(p.hp)), ceili(p.max_hp)]
+	var hfrac := clampf(p.hp / maxf(p.max_hp, 1.0), 0.0, 1.0)
+	if is_instance_valid(_lowhp):
+		_lowhp.color.a = (0.34 - hfrac) * 0.55 * (0.55 + 0.45 * sin(_pulse * 5.6)) if hfrac < 0.34 and not p.dead else 0.0
 	# plasma charge strip
 	var charging: bool = p._plasma_charge >= 0.0
 	_ch_back.visible = charging
@@ -1479,6 +1488,7 @@ func pause_panel() -> void:
 				G.audio.music.volume_db = linear_to_db(clampf(0.4 * float(st.mus), 0.001, 1.0))
 			G.audio.play("ui", 1.2, 0.5))
 	if G.state == G.State.ROOM:
+		_build_recap(v)
 		var qb := Button.new()
 		qb.text = "KAMPA DÖN (koşuyu bırak)"
 		qb.custom_minimum_size = Vector2(260, 28)
