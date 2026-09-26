@@ -1101,7 +1101,7 @@ func upgrade_panel() -> void:
 		row.add_theme_constant_override("separation", 10)
 		grid.add_child(row)
 		var ic := TextureRect.new()
-		ic.texture = Px.S2("icn_upg_" + Meta._key(key))
+		ic.texture = Px.S2(str(spec.get("icon", "icn_upg_" + Meta._key(key))))
 		ic.custom_minimum_size = Vector2(26, 26)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

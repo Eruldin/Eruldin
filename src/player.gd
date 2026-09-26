@@ -96,6 +96,8 @@ func init() -> void:
 	dmg_mult += G.meta.upg(Meta.U.DMG) * 0.08
 	dash_max += G.meta.upg(Meta.U.DASH)
 	dash_charges = dash_max
+	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)
+	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
 	knock_resist = 2.0
 	super.init()
 	_apply_stance()
@@ -515,6 +517,8 @@ func reset_for_run() -> void:
 	dmg_mult += G.meta.upg(Meta.U.DMG) * 0.08
 	dash_max = 1 + G.meta.upg(Meta.U.DASH)
 	dash_charges = dash_max
+	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)
+	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
 	_combo = 0; _combo_t = 0.0; _combo_lock = 0.0; _plasma_charge = -1.0
 
 func die(h: Dictionary) -> void:

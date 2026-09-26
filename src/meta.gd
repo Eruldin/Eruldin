@@ -4,7 +4,7 @@ extends RefCounted
 # Persistent meta-progression: Pure Choralim currency, permanent upgrades,
 # death/run stats, boss flags, seen dialogue lines. JSON save at user://.
 
-enum U { HP, DMG, DASH, REVIVE, FRAG, SHIELD }
+enum U { HP, DMG, DASH, REVIVE, FRAG, SHIELD, SPD, MAG, LUCK }
 
 const UPG := {
 	U.HP:     {"name": "Sinirsel Dayanıklılık", "desc": "+20 azami can", "max": 5, "base": 40},
@@ -13,6 +13,9 @@ const UPG := {
 	U.REVIVE: {"name": "Neva'nın Bağı", "desc": "Koşuda bir kez %40 canla diril", "max": 1, "base": 200},
 	U.FRAG:   {"name": "Choralim Sifonu", "desc": "+%15 parçacık kazancı", "max": 3, "base": 50},
 	U.SHIELD: {"name": "Zırh Kaplama", "desc": "+1 zırh (düz hasar azaltma)", "max": 3, "base": 60},
+	U.SPD:    {"name": "Servo Ayaklar", "desc": "+%6 hareket hızı", "max": 4, "base": 55, "icon": "icn_upg_dash"},
+	U.MAG:    {"name": "Toplayıcı Bobin", "desc": "+45 toplama yarıçapı", "max": 3, "base": 60, "icon": "icn_upg_frag"},
+	U.LUCK:   {"name": "Talih Devresi", "desc": "+0.15 şans — daha iyi taslaklar", "max": 3, "base": 75, "icon": "icn_upg_revive"},
 }
 
 const SAVE_PATH := "user://dusus_save.json"
@@ -26,7 +29,7 @@ var data := {
 	"victories": 0,
 	"best_depth": 0,
 	"bosses": [],          # defeated boss ids: "rex","host","twins","final"
-	"upg": {"hp":0,"dmg":0,"dash":0,"revive":0,"frag":0,"shield":0},
+	"upg": {"hp":0,"dmg":0,"dash":0,"revive":0,"frag":0,"shield":0,"spd":0,"mag":0,"luck":0},
 	"seen_lines": [],
 	"stance": "",          # chosen doctrine from Rhasa
 	"arena_biome": 0,      # arena sector picked via David (İz Sürücü)
@@ -38,7 +41,7 @@ var data := {
 }
 
 static func _key(u: int) -> String:
-	return ["hp","dmg","dash","revive","frag","shield"][u]
+	return ["hp","dmg","dash","revive","frag","shield","spd","mag","luck"][u]
 
 func upg(u: int) -> int:
 	return int(data["upg"].get(_key(u), 0))
