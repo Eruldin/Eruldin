@@ -24,6 +24,7 @@ var _merch_ck := false
 var _merch_close := false
 var _stray_done := false
 var _stray_ck := false
+var _ceset_done := false
 var _stray_sub := -1
 var _pre_story_cho := 0
 
@@ -237,6 +238,12 @@ func _process(_d: float) -> void:
 				# lanetli sandık: dibinde doğur -> ambush + ödül
 				G.room.spawn_special("cursed", G.player.pos + Vector2(6, 0))
 				print("[probe] cursed chest spawned")
+			# ceset koşusu kapsaması: dibinde doğur -> otomatik toplanır
+			if _loot_ck and not _ceset_done and t >= 148.0:
+				_ceset_done = true
+				var ck := G.room.spawn_special("ceset", G.player.pos)
+				ck.set_meta("val", 90)
+				print("[probe] ceset spawned")
 			# gezgin tüccar kapsaması: frag ver, dibinde doğur -> panel açılmalı
 			if not _merch_done and t >= 142.0:
 				_merch_done = true
