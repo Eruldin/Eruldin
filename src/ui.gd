@@ -1324,6 +1324,12 @@ func inventory_panel() -> void:
 	var sl2 := _lbl("ekipman toplamı:  %s" % ("   ·   ".join(stats_txt) if not stats_txt.is_empty() else "—"), Vector2.ZERO, 11, Color(0.7, 0.8, 0.9))
 	sl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sl2)
+	# set bonusları: tamamlananlar parlar, eksikler soluk ilerleme gösterir
+	for s in Items.set_state():
+		var scol := Px.C("ffd75f") if s.active else Color(0.45, 0.45, 0.55)
+		var stl := _lbl("%s  %d/%d%s" % [str(s.name), int(s.have), int(s.need), " — AKTİF" if s.active else ""], Vector2.ZERO, 10, scol)
+		stl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(stl)
 	var sep := _lbl("— ZULA  (seç: kuşan / tekrar seç: geri koy) —", Vector2.ZERO, 12, Px.C("ff9e4d"))
 	sep.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sep)
