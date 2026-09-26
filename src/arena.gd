@@ -18,6 +18,12 @@ func build_arena(biome_idx: int) -> void:
 	_scatter_decals_big()
 	_scatter_props_big()
 	_place_hazards_arena()
+	# a few field items scattered like VS floor pickups
+	for i in 5:
+		var p := Vector2(rng.randf_range(BOUNDS.position.x + 140, BOUNDS.end.x - 140), rng.randf_range(BOUNDS.position.y + 140, BOUNDS.end.y - 140))
+		if p.distance_to(Vector2.ZERO) < 280.0:
+			continue
+		spawn_special(["vacuum", "bomb", "freeze"][i % 3], p)
 	G.audio.play_music("mus_%d" % biome)
 	G.ui.banner(BIOME_NAME[biome], "kovan akıyor — hayatta kal")
 

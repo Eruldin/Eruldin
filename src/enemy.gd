@@ -370,6 +370,8 @@ func die(h: Dictionary) -> void:
 		if elite:
 			G.room.spawn_chest(pos)
 			G.run.drop_fragments(pos, G.ri(8, 14))
+			if G.chance(0.12):
+				G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze"]), pos)
 		elif G.chance(0.12):
 			G.run.drop_fragments(pos, G.ri(1, 3))
 	# volatile elite: telegraphed blast after death

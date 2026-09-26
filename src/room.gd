@@ -583,7 +583,7 @@ func _tick_pickups(d: float) -> void:
 		magnet = G.player.magnet_r
 	for pk in pickups_node.get_children():
 		var dist: float = pk.position.distance_to(G.player.pos)
-		if dist < magnet:
+		if int(pk.get_meta("vac", 0)) == 1 or dist < magnet:
 			pk.position = pk.position.move_toward(G.player.pos, (340.0 + (magnet - dist) * 4.0) * d)
 		if dist < 16:
 			_collect(pk)
@@ -596,6 +596,31 @@ func _collect(pk: Node) -> void:
 		"heal":
 			G.player.heal(24.0)
 			G.audio.play("heal", 1.0, 0.5)
+		"vacuum":
+			for g2 in pickups_node.get_children():
+				if str(g2.get_meta("kind", "")) == "xp":
+					g2.set_meta("vac", 1)
+			G.audio.play("boon", 1.1, 0.5)
+			G.ui.toast("rezonans dalgası — kristaller çekiliyor")
+		"bomb":
+			var boom_n := 0
+			for e in G.enemies.duplicate():
+				if e is Enemy and not e.dead:
+					e.take_hit({"dmg": 55.0, "type": G.DamageType.EXPLOSION, "from": pk.position, "knock": 15.0, "stagger": 0.7, "source": G.player})
+					boom_n += 1
+			G.fx.burst(pk.position, Color(1, 0.55, 0.15), 30, 300.0, 7.0, 0.6)
+			G.fx.light_flash(pk.position, Color(1, 0.7, 0.25), 2.6, 3.6, 0.3)
+			G.fx.shake(0.22, 0.3)
+			G.audio.play("explode", 0.8, 0.8)
+			G.ui.toast("şok dalgası — %d kovan üyesi" % boom_n)
+		"freeze":
+			for e in G.enemies.duplicate():
+				if e is Enemy and not e.dead:
+					e.take_hit({"dmg": 1.0, "type": G.DamageType.SHOCK, "from": pk.position, "stagger": 4.5, "source": G.player})
+					if is_instance_valid(e.body):
+						e.body.modulate = Px.C("8fd4ff")
+			G.audio.play("dash", 0.7, 0.6)
+			G.ui.toast("durdurucu alan — kovan donuyor")
 		"chest":
 			G.run.open_chest()
 		_:
@@ -633,6 +658,31 @@ func spawn_chest(p: Vector2) -> void:
 	pickups_node.add_child(pk)
 	G.fx.mk_light(pk, Vector2(0, -14), Px.C("ffb74d"), 0.7, 1.6)
 	G.fx.float_text(p + Vector2(0, -34), "SANDIK!", Px.C("ffb74d"), 1.1)
+
+# rare field items (VS floor pickups): vacuum draws every gem in, bomb hits
+# the whole swarm, freeze staggers it for a few seconds
+func spawn_special(kind: String, p: Vector2) -> void:
+	var pk := Sprite2D.new()
+	var col := "ffffff"
+	match kind:
+		"vacuum":
+			pk.texture = Px.S("crystal")
+			col = "00E5FF"
+		"bomb":
+			pk.texture = Px.S("spark")
+			col = "ff5533"
+		"freeze":
+			pk.texture = Px.S("ring")
+			col = "8fd4ff"
+	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pk.scale = Vector2.ONE * 0.8
+	pk.modulate = Px.C(col)
+	pk.position = p
+	pk.z_index = int(p.y)
+	pk.set_meta("kind", kind)
+	pk.set_meta("val", 0)
+	pickups_node.add_child(pk)
+	G.fx.mk_light(pk, Vector2.ZERO, Px.C(col), 0.6, 1.4)
 
 func spawn_heal(p: Vector2) -> void:
 	var pk := Sprite2D.new()
