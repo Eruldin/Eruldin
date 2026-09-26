@@ -28,6 +28,7 @@ var _spawn_t := 0.0
 var _elite_t := 95.0
 var _surge_t := 85.0
 var _mono_fired := false   # resonance cluster side objective — once per run
+var _tome_t := 275.0       # bilgelik tomu — ~4:35'te ilki, sonra ~4dk'da bir
 var _mini := false
 var _final := false
 var _won := false
@@ -89,6 +90,12 @@ func _tick_events(d: float) -> void:
 		if pp == Vector2.ZERO:
 			pp = G.room.clamp_pos(G.player.pos + Vector2(400, 0), 40.0)
 		G.room.spawn_monolith(pp)
+	# HoT ability tome: saha kalıntısı — üstüne basan bedava lütuf taslağı açar
+	_tome_t -= d
+	if _tome_t <= 0.0 and is_instance_valid(G.room):
+		_tome_t = G.rf(230.0, 285.0)
+		var tp := Vector2(G.rf(G.room.BOUNDS.position.x + 140, G.room.BOUNDS.end.x - 140), G.rf(G.room.BOUNDS.position.y + 120, G.room.BOUNDS.end.y - 120))
+		G.room.spawn_tome(tp)
 	# endless reaper — a scaling HASATÇI hunter every ~100s
 	if G.run.endless:
 		_harvest_t -= d

@@ -451,6 +451,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "ico_boon", "col": "ffb74d", "s": 22.0})
 			elif k == "vacuum" or k == "bomb" or k == "freeze" or k == "boost" or k == "guard":
 				out.append({"p": pk.position, "icon": "ico_frag", "col": "00E5FF", "s": 18.0})
+			elif k == "tome":
+				out.append({"p": pk.position, "icon": "ico_boon", "col": "c9a227", "s": 24.0})
 		if G.room.mono_active:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
 	return out
@@ -1242,7 +1244,7 @@ func death_screen(killer: String, gained: int) -> void:
 	gl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(gl)
 	var tt := int(G.run.time)
-	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
+	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0)), int(G.run.stats.get("best_streak", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
 	dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dl)
 	_build_recap(v)
@@ -1268,7 +1270,7 @@ func victory_screen(stats: Dictionary) -> void:
 	t1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t1)
 	var vt := int(stats.get("time", 0))
-	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim\nChoralim saflaştırıldı: ◆ +%d\nToplam zafer: %d" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), int(stats.get("gained", 0)), G.meta.data.victories], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
+	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d\nChoralim saflaştırıldı: ◆ +%d\nToplam zafer: %d" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), int(stats.get("best_streak", 0)), int(stats.get("gained", 0)), G.meta.data.victories], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
 	t2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t2)
 	_build_recap(v)
