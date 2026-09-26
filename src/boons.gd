@@ -76,6 +76,8 @@ const ARCANAS := {
 	"hasat":   {"name": "HASAT ŞENLİĞİ", "desc": "Her kesimde %2 ihtimalle +1 parçacık", "col": "39ff14"},
 	"temkin":  {"name": "TEMKİN ZIRHI",  "desc": "+3 zırh — ama -%8 hasar", "col": "8ea0b5"},
 	"kum":     {"name": "KUM SAATİ",     "desc": "+%18 deneyim kazancı", "col": "f0e68c"},
+	"aci":     {"name": "ACI ODAKI",     "desc": "+%20 kritik şansı — ama -%10 deneyim", "col": "ff8a65"},
+	"hurda":   {"name": "HURDA KALBİ",   "desc": "+%35 şans — sahada eşya bereketi", "col": "8d6e63"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -99,6 +101,11 @@ static func apply_arcana(id: String, p: Player) -> void:
 			p.dmg_mult *= 0.92
 		"kum":
 			p.xp_mult *= 1.18
+		"aci":
+			p.crit_ch += 0.20
+			p.xp_mult *= 0.90
+		"hurda":
+			G.run.luck += 0.35
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0
