@@ -141,6 +141,21 @@ const DEFS := {
 		"b": {"dmg": 34.0, "cd": 1.2, "n": 7.0, "spd": 480.0, "pierce": 1.0},
 		"hidden": true,
 	},
+	"glaive": {
+		"name": "SIRP DİSKİ", "icon": "icn_dash", "col": "7fe0c3",
+		"desc": "Gidip dönen delici disk — iki yönde de keser",
+		"b": {"dmg": 15.0, "cd": 1.7, "n": 1.0, "spd": 520.0, "range": 300.0},
+		"inc": {"dmg": 4.2, "cd": -0.05, "n": 0.25, "range": 8.0},
+		"feats": {5: {"n": 1.0}, 8: {"n": 1.0}},
+		"evo": "edge", "into": "glaive_x",
+		"req": {"kills": 1500},
+	},
+	"glaive_x": {
+		"name": "ÇİFT GİRDAP", "icon": "icn_dash", "col": "a9ffe8",
+		"desc": "Üç dönen disk — gidiş ve dönüşte keser",
+		"b": {"dmg": 38.0, "cd": 1.15, "n": 3.0, "spd": 640.0, "range": 360.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -153,6 +168,7 @@ const PDEFS := {
 	"vigor":   {"name": "BİYOLAT",            "icon": "icn_upg_hp",     "col": "ff6688", "desc": "+15 azami can"},
 	"regen":   {"name": "REJENERASYON",       "icon": "ico_heal",       "col": "39ff14", "desc": "+0.7 can/sn"},
 	"warp":    {"name": "ROTA AKSAMI",        "icon": "icn_crown",      "col": "ffd166", "desc": "+%9 mermi hızı"},
+	"edge":    {"name": "KESKİN KİLİT",       "icon": "icn_upg_frag",   "col": "ff9de2", "desc": "+%6 kritik şansı"},
 }
 
 static func def(wid: String) -> Dictionary:
@@ -201,6 +217,7 @@ static func apply_passive(pid: String, p: Player) -> void:
 		"vigor":
 			p.max_hp += 15.0
 			p.hp = minf(p.hp + 15.0, p.max_hp)
+		"edge":   p.crit_ch += 0.06
 		"regen":
 			p.set_meta("regen", float(p.get_meta("regen", 0.0)) + 0.7)
 		"warp": p.proj_spd *= 1.09
@@ -383,6 +400,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"dagger", "dagger_x": _dagger(st, p)
 		"ray", "ray_x": _ray(st, p)
 		"seeker", "seeker_x": _seeker(st, p)
+		"glaive", "glaive_x": _glaive(st, p, w)
 
 static func _nearest(p: Vector2, max_r: float) -> Enemy:
 	var best: Enemy = null
@@ -602,6 +620,25 @@ static func _seeker(st: Dictionary, p: Player) -> void:
 		pr.life = 3.2
 	G.audio.play("shoot", 0.85, 0.6)
 	G.fx.burst(p.pos + Vector2(0, -12), Px.C("ffd166"), 8, 140.0, 3.0, 0.25)
+
+# out-and-back piercing discs — they cut on both legs of the trip
+static func _glaive(st: Dictionary, p: Player, w: Dictionary) -> void:
+	var n := maxi(1, roundi(float(st.n)))
+	var base := p.move_dir if p.move_dir.length_squared() > 0.01 else p.aim_dir
+	var spread := TAU if n > 2 else 0.35
+	for i in n:
+		var dir := base.rotated(-spread * 0.5 + spread * float(i) / maxf(1.0, n - 1.0)) if n > 1 else base
+		var pr := Projectile.new()
+		G.game.world.add_child(pr)
+		var reach := float(st.get("range", 300.0)) * p.area_mult
+		pr.setup(G.Team.PLAYER, p.pos + dir * 20.0, dir * float(st.spd) * p.proj_spd,
+			float(st.dmg) * p.dmg_mult, 9.5 * p.area_mult, Px.C(str(DEFS.get(str(w.id), {}).get("col", "7fe0c3"))), "ring")
+		pr.piercing = true
+		pr.boomerang = true
+		pr.life = 2.0 * reach / (float(st.spd) * p.proj_spd)
+		pr.life0 = pr.life
+		pr.knock = 4.0
+	G.audio.play("shoot", 0.7, 0.6)
 
 static func _tick_orbit(w: Dictionary, p: Player, d: float) -> void:
 	var st := stats(str(w.id), int(w.lvl))
