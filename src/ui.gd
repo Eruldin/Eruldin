@@ -403,7 +403,7 @@ func _tick_hud() -> void:
 	_xp_bar.color = Px.C("6a3fd1").lerp(Px.C("2c9be8"), 0.5 + 0.5 * sin(_pulse * 2.4))
 	_lvl_lbl.text = "SEV %d" % p.level
 	var tt := int(G.run.time)
-	_time_lbl.text = "%02d:%02d" % [tt / 60, tt % 60]
+	_time_lbl.text = ("%02d:%02d" % [tt / 60, tt % 60]) + ("   AZAP ×%d" % int(G.run.curse) if int(G.run.curse) > 0 else "")
 	_time_lbl.add_theme_color_override("font_color", Px.C("c26bff") if G.run.endless else (Px.C("ff5533") if G.run.hyper else Color(0.9, 0.95, 1)))
 	_kills_lbl.text = "%d kesim" % int(G.run.stats.get("kills", 0))
 	if G.run.streak >= 10:

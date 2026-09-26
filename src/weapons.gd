@@ -306,6 +306,9 @@ static func draft_opts(p: Player, luck: float) -> Array:
 	for b in Boons.roll(G.run.boon_ids, luck):
 		if not ban.has(str(b.id)):
 			pool.append(_opt("boon", b.id, 0, b.name, "icn_" + str(b.patron).to_lower(), b.color.to_html(false), str(b.desc), 2.2, b.patron + " " + "★".repeat(int(b.rarity) + 1)))
+	# azap kartı — güç bedeliyle (HoT cursed scroll); nadiren çıkar, 4'te tavan
+	if G.run != null and int(G.run.curse) < 4 and int(p.level) >= 5 and not ban.has("curse"):
+		pool.append(_opt("curse", "curse", 0, "KARANLIK SÖZLEŞME", "icn_skull", "ff2222", "+%25 hasar — karşılığında kovan +%12 sert ve dayanıklı olur (bu koşuda birikir)", 0.9, "AZAP"))
 	var out: Array = []
 	for i in 3:
 		if pool.is_empty():
@@ -377,6 +380,10 @@ static func apply_opt(opt: Dictionary, p: Player) -> void:
 			for b in Boons.all():
 				if b.id == opt.id:
 					G.run.take_boon(b)
+		"curse":
+			G.run.curse += 1
+			p.dmg_mult *= 1.25
+			G.ui.toast("AZAP: kovan güçlendi — sözleşme %d" % int(G.run.curse))
 		"gift":
 			match str(opt.id):
 				"frag": G.run.fragments += 120
