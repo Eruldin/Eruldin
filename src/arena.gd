@@ -15,7 +15,7 @@ func build_arena(biome_idx: int) -> void:
 	G.game.set_dark(DARK[biome])
 	# dünya-haritası düğümü modları: alacakaranlık düğümler daha koyu atmosfer
 	if G.run != null and bool(G.run.node_mods.get("dusk", false)):
-		G.game.set_dark(minf(DARK[biome] + 0.18, 0.72))
+		G.game.set_dark(DARK[biome] * Color(0.78, 0.78, 0.78))
 	_field_floor()
 	_edge_walls()
 	_scatter_decals_big()

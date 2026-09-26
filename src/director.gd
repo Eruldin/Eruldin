@@ -171,7 +171,8 @@ func _tick_events(d: float) -> void:
 	# miniboss
 	if not _mini and t >= MINI_T:
 		_mini = true
-		_boss(MINI_KIND[biome], 1.0 + m * 0.10 + biome * 0.35, "%s geliyor" % Boss.NAMES[MINI_KIND[biome]])
+		var mk := int(MINI_KIND[clampi(biome, 0, MINI_KIND.size() - 1)])
+		_boss(mk, 1.0 + m * 0.10 + biome * 0.35, "%s geliyor" % Boss.NAMES[mk])
 	# final boss — kill it to clear the stage
 	if not _final and t >= FINAL_T:
 		_final = true
@@ -221,6 +222,7 @@ func _comp(m: float) -> int:
 			1: pool.append_array([Enemy.EKind.SPITTER, Enemy.EKind.DRONE])
 			2: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.HUSK])
 			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA])
+			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB])   # bataklık: şişkin konakçılar + kistler
 	return G.pick(pool)
 
 func _hp_scale() -> float:

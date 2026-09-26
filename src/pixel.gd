@@ -1198,6 +1198,7 @@ static func _wall2(key: String) -> Texture2D:
 		"1": top = C("3c3c50"); front = C("262633"); acc = C("00E676")
 		"2": top = C("4a4440"); front = C("2e2926"); acc = C("ff7722")
 		"3": top = C("322c4a"); front = C("1c1830"); acc = C("c9a227")
+		"4": top = C("2e4432"); front = C("16251c"); acc = C("66bb6a")
 		_: top = C("5f452a"); front = C("3a2818"); acc = C("a8842f")
 	var t := _img(64, 56)
 	for y in 56:

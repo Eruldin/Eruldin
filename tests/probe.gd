@@ -99,7 +99,11 @@ func _process(_d: float) -> void:
 					12:
 						_shoot()                    # node-graph map visible
 					13:
-						G.ui._wmap_pick("b0", Label.new(), {"id": "b0"})
+						var un: Array = G.meta.data.get("unlocked", [])
+						if not un.has("batak"):
+							un.append("batak")
+							G.meta.data["unlocked"] = un
+						G.ui._wmap_pick("batak", Label.new(), {"id": "batak"})
 					14:
 						_shoot()                    # map with selection refreshed
 						G.ui._advance_overlay()
@@ -158,7 +162,7 @@ func _process(_d: float) -> void:
 			if G.state == G.State.ROOM:
 				G.run.dbg_god()
 				_step = 3
-				print("[probe] arena live")
+				print("[probe] arena live node=%s biome=%d" % [G.run.node_id, G.room.biome])
 		3:
 			if G.ui.overlay_open():
 				var k := str(G.ui._overlay.get_meta("kind", ""))

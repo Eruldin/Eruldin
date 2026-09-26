@@ -12,13 +12,15 @@ var W := 1180.0
 var H := 660.0
 var BOUNDS := Rect2(-540, -290, 1080, 580)
 
-const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE"]
+const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK"]
 # biome'a ozgu uretilmis prop setleri (prop_<key>_<i>) — BG2 tarzi scatter
 const PROP_SPR := {
 	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5"],
 	"1": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
 	"2": ["prop_2_0", "prop_2_1", "prop_2_2", "prop_2_3", "prop_2_4", "prop_2_5"],
 	"3": ["prop_3_0", "prop_3_1", "prop_3_2", "prop_3_3", "prop_3_4", "prop_3_5"],
+	# Çürük Bataklik: Simithar'in mantar/kristal setini ödünç alır — fungal örtü
+	"4": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
 	"hub": ["prop_hub_0", "prop_hub_1", "prop_hub_2", "prop_hub_3", "prop_hub_4", "prop_hub_5"],
 }
 # isik veren prop'lar (kristal, mantar, fener, turbin, obelisk, ateslik)
@@ -33,6 +35,7 @@ const MOTE_COL := {
 	"1": Color(0.4, 0.9, 1.0, 0.4),
 	"2": Color(1.0, 0.55, 0.25, 0.45),
 	"3": Color(0.7, 0.5, 1.0, 0.35),
+	"4": Color(0.45, 0.9, 0.5, 0.4),
 	"hub": Color(1.0, 0.75, 0.45, 0.35),
 }
 var motes: Array = []   # [{s, vel}] atmosfer parcaciklari
@@ -87,6 +90,7 @@ const DARK := [
 	Color(0.64, 0.68, 0.76),   # Simithar — cold cavern
 	Color(0.60, 0.53, 0.46),   # Sol Primus — rusted gloom
 	Color(0.55, 0.51, 0.66),   # Aeterna — imperial night
+	Color(0.44, 0.52, 0.42),   # Çürük Bataklık — murky fungal gloom
 ]
 const HUB_DARK := Color(0.62, 0.56, 0.47)
 
@@ -143,7 +147,7 @@ func build(biome_idx: int, rt: int, promise: int, depth: int, seed_val: int) -> 
 	pending_reward = promise
 	is_hub = false
 	rng.seed = seed_val
-	G.game.set_dark(DARK[biome])
+	G.game.set_dark(DARK[clampi(biome, 0, DARK.size() - 1)])
 	_backdrop()
 	_build_floor_named(str(biome))
 	_build_walls_named(str(biome))
@@ -154,7 +158,7 @@ func build(biome_idx: int, rt: int, promise: int, depth: int, seed_val: int) -> 
 	_place_hazards(depth)
 	_make_doors()
 	G.audio.play_music("mus_boss" if rt == Type.BOSS else "mus_%d" % biome)
-	G.ui.banner(BIOME_NAME[biome], _room_subtitle(depth))
+	G.ui.banner(BIOME_NAME[clampi(biome, 0, BIOME_NAME.size() - 1)], _room_subtitle(depth))
 	if rt == Type.BOSS:
 		_start_boss_fight()
 	else:
@@ -214,6 +218,7 @@ func _atmos() -> void:
 		add_child(s)
 		var base := Vector2(rng.randf_range(-6, 10), rng.randf_range(-14, -4))
 		if _biome_key() == "2": base = Vector2(rng.randf_range(-4, 4), rng.randf_range(-26, -12))
+		if _biome_key() == "4": base = Vector2(rng.randf_range(-8, 8), rng.randf_range(-18, -6))
 		motes.append({"s": s, "vel": base, "ph": rng.randf() * TAU})
 
 func _build_floor_named(key: String) -> void:
@@ -230,7 +235,7 @@ func _build_floor_named(key: String) -> void:
 func _build_walls_named(key: String) -> void:
 	var tex := Px.S2("w2_" + key)
 	var x := -W * 0.5 - 64
-	var lamp_col: Color = [Px.C("ffb74d"), Px.C("00E676"), Px.C("ff7722"), Px.C("c9a227")][clampi(biome, 0, 3)]
+	var lamp_col: Color = [Px.C("ffb74d"), Px.C("00E676"), Px.C("ff7722"), Px.C("c9a227"), Px.C("66bb6a")][clampi(biome, 0, 4)]
 	var xi := 0
 	while x <= W * 0.5 + 64:
 		for off in [Vector2(0, 0), Vector2(0, -64)]:
@@ -325,6 +330,8 @@ func _place_hazards(depth: int) -> void:
 				add_hazard(p, 46.0, 16.0, -1.0, Color(1, 0.4, 0.1, 0.3))    # lava pool
 			2:
 				add_slowzone(p, 52.0, -1.0)                                # radiation field
+			4:
+				add_slowzone(p, 60.0, -1.0)                                # batak çamuru — çeken balçık
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))   # void pool
 

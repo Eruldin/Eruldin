@@ -4,7 +4,7 @@ extends CanvasLayer
 # All UI is built in code: HUD, boss bar, banners, toasts, dialogue panel,
 # boon draft, upgrade shop (Dr. Vane), death/victory screens, title, CRT tint.
 
-const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE"]
+const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK"]
 
 const LINES := {
 	"rhasa": [
@@ -446,7 +446,7 @@ func _tick_hud() -> void:
 		s.mouse_entered.connect(func(): _show_tip(s, spec))
 		s.mouse_exited.connect(func(): _tip.visible = false)
 	if G.state == G.State.ROOM and is_instance_valid(G.room):
-		_room_lbl.text = BIOME_NAME[clampi(G.run.biome, 0, 3)]
+		_room_lbl.text = str(G.run.node_name) if str(G.run.node_name) != "" else BIOME_NAME[clampi(G.run.biome, 0, BIOME_NAME.size() - 1)]
 	elif G.state == G.State.HUB:
 		_room_lbl.text = "VIATOR KAMPI"
 	else:
@@ -2288,6 +2288,7 @@ func victory_screen(stats: Dictionary) -> void:
 		"vatika": "Sessiz Vatika arındı — karanlık bile şarkıya katıldı.",
 		"mabed": "Kırık mabedin yankısı huzurla doldu.",
 		"mezarlik": "Düşmüşler sonunda mezarlarında dinleniyor.",
+		"batak": "Bataklık çamuru ilk kez birini geri verdi.",
 	}
 	var epi := str(epilog.get(str(stats.get("node_id", "")), ""))
 	if epi != "":

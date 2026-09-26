@@ -37,6 +37,7 @@ const DEFS := [
 	{"id": "q_vatika", "giver": "neva",    "name": "SESSİZ VATİKA",    "desc": "Aeterna dibinde bir sığınak var. Uzun Türkü'nü bitirene yolu açarım.", "obj": {"type": "boss", "k": "twins"}, "rew": {"node": "vatika"}, "prereq": "q_surv2"},
 	{"id": "q_dua",    "giver": "ahusk",   "name": "SESSİZ DUA",       "desc": "Mabed hâlâ dinliyor. Bir koşuda 300 sn boyunca tek parça kal — tapınağın yolu açılır.", "obj": {"type": "time", "n": 300}, "rew": {"cho": 90, "node": "mabed"}},
 	{"id": "q_nobet",  "giver": "ehnar",   "name": "SON NÖBET",        "desc": "Mezardaki nöbetçiler sayıyor. Tek koşuda 10 elit kes — mezarın kapağı kalkar.", "obj": {"type": "elites", "n": 10}, "rew": {"cho": 110, "node": "mezarlik"}, "prereq": "q_elit"},
+	{"id": "q_batak",  "giver": "david",   "name": "BATAKLIK ROTASI",   "desc": "Konakçı Yaratıkların izi doğuda bir bataklığa çıkıyor. 8 tanesini kes — rotayı çizerim.", "obj": {"type": "kind", "k": "Konakçı Yaratık", "n": 8}, "rew": {"cho": 90, "node": "batak"}, "prereq": "q_gez"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
