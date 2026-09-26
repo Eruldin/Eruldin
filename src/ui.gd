@@ -892,6 +892,7 @@ func _advance_overlay() -> void:
 				inventory_panel()
 			elif nid == "neva":
 				_close_overlay()
+				song_panel()
 			else:
 				_close_overlay()
 		"death":
@@ -900,7 +901,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -996,6 +997,7 @@ func _service_panel_for(nid: String) -> void:
 		"zirkon":  records_panel()
 		"ehnar":   contract_panel()
 		"ahusk":   blessing_panel()
+		"neva":    song_panel()
 		"saphire": inventory_panel()
 		"elyb":    hero_panel()
 		_:         pass
@@ -1518,6 +1520,27 @@ func records_panel() -> void:
 		l.custom_minimum_size = Vector2(240, 0)
 		right.add_child(l)
 	cols.add_child(right)
+	# ÖYKÜ codex'i — ziyaret edilmiş node'ların lore kayıtları
+	var lore_col := VBoxContainer.new()
+	lore_col.add_theme_constant_override("separation", 5)
+	lore_col.add_child(_lbl("— ÖYKÜ —", Vector2.ZERO, 12, Px.C("c9a227")))
+	var vn: Array = G.meta.data.get("visited_nodes", [])
+	var any_lore := false
+	for n in Wmap.NODES:
+		if str(n.id) == "kamp" or str(n.get("lore", "")) == "":
+			continue
+		var seen: bool = vn.has(str(n.id))
+		var lt: String = str(n.lore)
+		if lt.length() > 110:
+			lt = lt.substr(0, 107) + "..."
+		var ll := _lbl("%s\n%s" % [str(n.name), lt if seen else "— keşfedilmedi —"], Vector2.ZERO, 9,
+			Color(0.85, 0.8, 0.6) if seen else Color(0.4, 0.4, 0.5))
+		ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ll.custom_minimum_size = Vector2(190, 0)
+		lore_col.add_child(ll)
+		any_lore = true
+	if any_lore:
+		cols.add_child(lore_col)
 	v.add_child(cols)
 	# görev defteri — kabul edilen / biten / teslim edilenler
 	var qsep := _lbl("— GÖREV DEFTERİ —", Vector2.ZERO, 12, Px.C("c9a227"))
@@ -1605,6 +1628,47 @@ func blessing_panel() -> void:
 			G.audio.play("boon", 1.1, 0.6)
 			_close_overlay()
 			blessing_panel())
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
+# Neva'nın şarkısı: tek koşuluk +%15 XP — choralim karşılığı
+func song_panel() -> void:
+	_pause(true)
+	var v := _show_panel("song", "NEVA — choralim şarkısı", Px.C("c26bff"))
+	var por := TextureRect.new()
+	por.texture = Px.S2("por_neva")
+	por.custom_minimum_size = Vector2(72, 72)
+	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pc := CenterContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(por)
+	v.add_child(pc)
+	var has := bool(G.meta.data.get("neva_song", false))
+	var l := _lbl("şarkı sonraki koşuyu sarar — +%15 XP kazanımı", Vector2.ZERO, 13, Color(0.85, 0.8, 0.95))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l)
+	var money := _lbl("Saf Choralim: ◆ %d" % G.meta.data.choralim, Vector2.ZERO, 12, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
+	var btn := Button.new()
+	btn.text = "✓ HAZIR — sahaya in" if has else "◆ 60 — DİNLE"
+	btn.disabled = has or G.meta.data.choralim < 60
+	btn.custom_minimum_size = Vector2(200, 30)
+	btn.add_theme_font_override("font", ui_font())
+	var bc := CenterContainer.new()
+	bc.add_child(btn)
+	v.add_child(bc)
+	btn.pressed.connect(func():
+		if not has and G.meta.data.choralim >= 60:
+			G.meta.data["choralim"] -= 60
+			G.meta.data["neva_song"] = true
+			G.meta.save()
+			G.audio.play("boon", 1.1, 0.6)
+			_close_overlay()
+			song_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)

@@ -96,6 +96,12 @@ func _process(_d: float) -> void:
 					14:
 						_shoot()                    # map with selection refreshed
 						G.ui._advance_overlay()
+					15:
+						G.ui.records_panel()        # zirkon kayıtları + ÖYKÜ sütunu
+					16:
+						_shoot()                    # records visible (kapanış sonraki adımda)
+					17:
+						G.ui._advance_overlay()
 					_:
 						G.player.pos = G.room.doors[0].pos + Vector2(0, 6)
 						_step = 2
