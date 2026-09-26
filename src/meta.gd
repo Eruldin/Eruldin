@@ -125,6 +125,7 @@ func achievements() -> Array:
 		{"name": "NÜVE AVCISI", "desc": "10 altın nüve topla", "done": int(data.get("eggs", 0)) >= 10, "rew": 120},
 		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0, "rew": 150},
 		{"name": "SKOR AVCISI", "desc": "tek koşuda 4000+ skor", "done": int(data.get("best_score", 0)) >= 4000, "rew": 150},
+		{"name": "S SINIFI", "desc": "tek koşuda S notası al (5000+ skor)", "done": int(data.get("best_score", 0)) >= 5000, "rew": 250},
 		{"name": "MARATONCU", "desc": "tek koşuda 14+ dakika dayan", "done": int(data.get("best_depth", 0)) >= 840, "rew": 200},
 		{"name": "KOZ KOLEKSİYONCUSU", "desc": "tüm koz kartlarını kullan", "done": (data.get("arcanas_seen", []) as Array).size() >= Boons.ARCANAS.size(), "rew": 150},
 		{"name": "HARİTA USTASI", "desc": "kamp hariç tüm node'lara koşu yap", "done": (data.get("visited_nodes", []) as Array).size() >= int(Wmap.NODES.size()) - 1, "rew": 200},

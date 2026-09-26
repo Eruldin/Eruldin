@@ -697,6 +697,25 @@ func screen_flash(col: Color, a: float) -> void:
 func hurt_flash() -> void:
 	screen_flash(Color(0.6, 0.02, 0.05), 0.22)
 
+# hasar yön göstergesi: saldırganın olduğu tarafa doğru kızıl kama (kamera
+# oyuncuyu merkezler — wedge'i ekran ortasından dünya yönüne oturt)
+func hurt_dir(from_pos: Vector2) -> void:
+	if G.player == null or not is_instance_valid(G.player):
+		return
+	var dir := (from_pos - G.player.pos)
+	if dir.length() < 4.0:
+		return
+	dir = dir.normalized()
+	var tri := Polygon2D.new()
+	tri.polygon = PackedVector2Array([Vector2(0, -10), Vector2(8, 10), Vector2(-8, 10)])
+	tri.color = Color(0.95, 0.12, 0.12, 0.8)
+	tri.position = Vector2(640, 360) + dir * 150.0
+	tri.rotation = dir.angle() + PI * 0.5
+	add_child(tri)
+	var tw := create_tween()
+	tw.tween_property(tri, "modulate:a", 0.0, 0.65)
+	tw.tween_callback(tri.queue_free)
+
 # ---------------------------------------------------------------- cinematics
 
 # Letterboxed still-card: painted panel + title + sub, auto-dismisses or
