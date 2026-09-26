@@ -26,6 +26,17 @@ const NODES := [
 	{"id": "mabed",  "name": "KIRILMIŞ MABED",     "icon": "icn_crown",   "pos": Vector2(420, 560), "col": "ffd75f", "kind": "arena", "biome": 0, "unlock": "node", "desc": "Yıkık tapınak — ganimet çift kat, elitler nöbette.", "lore": "Viator'ın eski dua yeri. Sunak kırık ama kutsamalar hâlâ taşın içinde — kovan da bunu biliyor.", "mods": {"loot": 2.2, "elite_t": 0.6, "spawn": 0.8, "frag": 1.2}},
 	{"id": "mezarlik","name": "DÜŞMÜŞLER MEZARI",  "icon": "icn_skull",   "pos": Vector2(950, 150), "col": "90a4ae", "kind": "arena", "biome": 3, "unlock": "node", "desc": "Efendilerin eski çöplüğü — elit kaynağı, sert kovan.", "lore": "Protokolün reddettiği gövdeler buraya atıldı. Şimdi hepsi kalkmış, mezarlarında nöbet tutuyor.", "mods": {"hp": 1.25, "elite_t": 0.5, "dmg": 1.15, "frag": 1.35}},
 	{"id": "batak",  "name": "ÇÜRÜK BATAKLIK",    "icon": "ico_boon",    "pos": Vector2(1120, 430), "col": "66bb6a", "kind": "arena", "biome": 4, "unlock": "node", "desc": "İmparatorluğun unuttuğu bataklık — çeken balçık, mantarlı karanlık, bol ganimet.", "lore": "Protokol buraya hiç bakmadı; bataklık da kimseyi geri vermedi. Suların altında efendilerin artıkları, üstünde küsen sürüler.", "mods": {"hp": 1.05, "spawn": 1.15, "frag": 1.3, "loot": 1.6, "dusk": true}},
+	# kind "story": savaşsız tek seferlik hikaye durağı — sinematik + ödül, sonra tükenir
+	{"id": "kayalik","name": "YANKI KAYASI",        "icon": "icn_skull",   "pos": Vector2(300, 520), "col": "8fd4ff", "kind": "story", "unlock": "open",    "desc": "Kampın güneyinde koro taşı — bir kez dinlenir.", "rew": {"cho": 60},
+	 "cards": [
+	 	{"tex": "cine_0_1", "title": "YANKI KAYASI", "sub": "Taş, düşen her praetorianın son sinyalini saklar. Parmağını değdir — binlerce yankı aynı anda senin adını söyler."},
+	 	{"tex": "por_neva", "title": "NEVA", "sub": "Bunu hissettin değil mi? Kaya korosuna katıldın — artık düşersen bir kaydın var. Parçacıklarını al, git."},
+	 ]},
+	{"id": "krater", "name": "DÜŞÜK KRATER",       "icon": "icn_mine",    "pos": Vector2(860, 650), "col": "ffb74d", "kind": "story", "unlock": "boss rex","desc": "İlk efendinin düştüğü yerde bir krater — içinde hâlâ ışık yanıyor.", "rew": {"cho": 120, "item": "i_palto"},
+	 "cards": [
+	 	{"tex": "cine_0_2", "title": "DÜŞÜK KRATER", "sub": "Alfa-05 burada düştü. Kraterin dibinde henüz çürümemiş bir zırh parçası duruyor — kovan bile ona dokunmamış."},
+	 	{"tex": "por_rhasa", "title": "RHASA", "sub": "Onun parçasını taşıyorsun artık. Kraterin kenarında bir şey parlıyor — al ve git, koku burada da sürer."},
+	 ]},
 ]
 
 # harita üstünde çizilen seyahat hatları (BG2 bağlantıları)
@@ -36,6 +47,8 @@ const EDGES := [
 	["pazar", "yuvalar"], ["b1", "yuvalar"], ["b3", "vatika"], ["kuyu", "vatika"],
 	["tarla", "mabed"], ["mabed", "vatika"], ["yuvalar", "mezarlik"], ["b1", "mezarlik"],
 	["b2", "batak"], ["batak", "kuyu"],
+	["tarla", "kayalik"], ["kamp", "kayalik"],
+	["mabed", "krater"], ["vatika", "krater"],
 ]
 
 static func node(id: String) -> Dictionary:
@@ -51,6 +64,8 @@ static func _unlocked() -> Array:
 static func can_enter(id: String) -> bool:
 	var n := node(id)
 	if n.is_empty():
+		return false
+	if str(n.get("kind", "")) == "story" and (G.meta.data.get("story_done", []) as Array).has(id):
 		return false
 	match str(n.get("unlock", "open")):
 		"open":
@@ -74,6 +89,8 @@ static func unlock_cine(id: String) -> void:
 
 static func unlock_text(id: String) -> String:
 	var n := node(id)
+	if str(n.get("kind", "")) == "story" and (G.meta.data.get("story_done", []) as Array).has(id):
+		return "tamamlandı"
 	match str(n.get("unlock", "open")):
 		"open": return ""
 		"node": return "görevle açılır"

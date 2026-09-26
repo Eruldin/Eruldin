@@ -907,6 +907,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 		_advance_overlay()
 
 func _advance_overlay() -> void:
+	if not is_instance_valid(_overlay):
+		return
 	var kind: String = _overlay.get_meta("kind", "")
 	match kind:
 		"dialogue":
@@ -1173,8 +1175,12 @@ func _wmap_pick(nid: String, info: Label, sel: Dictionary) -> void:
 		toast("kilitli: %s" % Wmap.unlock_text(nid))
 		G.audio.play("die", 1.4, 0.3)
 		return
-	if str(Wmap.node(nid).get("kind", "")) == "hub":
+	var nkind := str(Wmap.node(nid).get("kind", ""))
+	if nkind == "hub":
 		toast("burası kamp — zaten buradayız")
+		return
+	if nkind == "story":
+		_story_node(nid)
 		return
 	sel["id"] = nid
 	G.meta.data["arena_node"] = nid
@@ -1186,6 +1192,35 @@ func _wmap_pick(nid: String, info: Label, sel: Dictionary) -> void:
 	if gl != null and is_instance_valid(gl):
 		gl.text = "hedef: %s — portal kampta güneyde" % str(Wmap.node(nid).get("name", "?"))
 	worldmap_panel()  # seçili çerçeveyi tazele
+
+# savaşsız hikaye düğümü: sinematik kartlar + ödül, bir kez yaşanır
+func _story_node(nid: String) -> void:
+	var n := Wmap.node(nid)
+	var sd: Array = G.meta.data.get("story_done", [])
+	if sd.has(nid):
+		toast("bu yankı sustu — bir kez dinlenir")
+		return
+	sd.append(nid)
+	G.meta.data["story_done"] = sd
+	var rew: Dictionary = n.get("rew", {})
+	if int(rew.get("cho", 0)) > 0:
+		G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) + int(rew.cho)
+	if str(rew.get("item", "")) != "":
+		var st: Array = G.meta.data.get("stash", [])
+		st.append(str(rew.item))
+		G.meta.data["stash"] = st
+		toast("zula: %s envantere eklendi" % str(rew.item))
+	G.meta.save()
+	# haritayı kapat, kartları oynat
+	if overlay_open():
+		_advance_overlay()
+	var cards: Array = n.get("cards", [])
+	if cards.is_empty():
+		cards = [{"tex": "bg%d" % int(n.get("biome", 0)), "title": str(n.name), "sub": str(n.get("lore", n.get("desc", "")))}]
+	cine_seq(cards)
+	G.audio.jingle("boon")
+	if int(rew.get("cho", 0)) > 0:
+		toast("+%d ◆ choralim" % int(rew.cho))
 
 # ---------------------------------------------------------------- görev panosu
 
