@@ -11,6 +11,9 @@ var n := 1
 var pierce := false
 var idx := 0
 var total := 1
+var anchor := false    # nöbet kulesi modu: süzülmez, kurulduğu yerde durur
+var life := -1.0       # anchor'lı dronlar süreli yaşar
+var spr: Sprite2D
 var _t := 0.5
 var _ang := 0.0
 
@@ -18,16 +21,20 @@ static func spawn(idx2: int) -> Drone:
 	var d := Drone.new()
 	d.idx = idx2
 	G.game.world.add_child(d)
-	var spr := Sprite2D.new()
-	spr.texture = Px.S2("spark")
-	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	spr.modulate = Px.C("00E5FF")
-	spr.scale = Vector2.ONE * 1.3
-	d.add_child(spr)
+	d.spr = Sprite2D.new()
+	d.spr.texture = Px.S2("spark")
+	d.spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	d.spr.modulate = Px.C("00E5FF")
+	d.spr.scale = Vector2.ONE * 1.3
+	d.add_child(d.spr)
 	G.fx.mk_light(d, Vector2.ZERO, Px.C("00E5FF"), 0.5, 1.3)
 	if is_instance_valid(G.player):
 		d.position = G.player.pos
 	return d
+
+func tint(col: Color) -> void:
+	if is_instance_valid(spr):
+		spr.modulate = col
 
 func _process(d: float) -> void:
 	if G.state != G.State.ROOM:
@@ -36,9 +43,16 @@ func _process(d: float) -> void:
 	var p := G.player
 	if p == null or p.dead:
 		return
-	_ang += d * 1.9
-	var want := p.pos + Vector2.from_angle(_ang + TAU * float(idx) / maxf(1.0, float(total))) * 56.0 + Vector2(0, -16)
-	position = position.lerp(want, minf(1.0, d * 5.5))
+	if life > 0.0:
+		life -= d
+		if life <= 0.0:
+			G.fx.burst(position, Px.C("ffb74d"), 8, 120.0, 3.0, 0.3)
+			queue_free()
+			return
+	if not anchor:
+		_ang += d * 1.9
+		var want := p.pos + Vector2.from_angle(_ang + TAU * float(idx) / maxf(1.0, float(total))) * 56.0 + Vector2(0, -16)
+		position = position.lerp(want, minf(1.0, d * 5.5))
 	z_index = int(position.y) - 8
 	_t -= d
 	if _t <= 0.0:

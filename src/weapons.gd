@@ -186,6 +186,21 @@ const DEFS := {
 		"b": {"dmg": 22.0, "cd": 0.72, "n": 2.0, "drones": 3.0, "pierce": 1.0},
 		"hidden": true,
 	},
+	"sentry": {
+		"name": "NÖBET KULESİ", "icon": "icn_upg_shield", "col": "ffb74d",
+		"desc": "Geçici nöbet kulesi kurar — kendi hızında ateş eder",
+		"b": {"dmg": 0.0, "cd": 9.0, "n": 0.0, "drones": 1.0, "shot": 9.0, "rate": 0.42, "dur": 14.0},
+		"inc": {"shot": 2.4, "cd": -0.3, "dur": 0.6},
+		"feats": {5: {"drones": 1.0}, 8: {"rate": -0.08}},
+		"evo": "core", "into": "sentry_x",
+		"req": {"wins": 1},
+	},
+	"sentry_x": {
+		"name": "KORUMA AĞI", "icon": "icn_upg_shield", "col": "ffd54f",
+		"desc": "Üç kule — hızlı delici ateş ağı",
+		"b": {"dmg": 0.0, "cd": 11.0, "n": 0.0, "drones": 3.0, "shot": 16.0, "rate": 0.3, "dur": 20.0, "pierce": 1.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -455,6 +470,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"glaive", "glaive_x": _glaive(st, p, w)
 		"meteor", "meteor_x": _meteor(st, p, w)
 		"drone", "drone_x": _drone(st, p, wid)
+		"sentry", "sentry_x": _sentry(st, p, wid)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
@@ -474,6 +490,23 @@ static func _drone(st: Dictionary, p: Player, wid: String) -> void:
 		dr.pierce = st.get("pierce", 0.0) > 0.0
 		dr.idx = i
 		dr.total = ds.size()
+
+# nöbet kulesi arketipi: kurulduğu yere çakılı, süreli Drone varyantı
+static func _sentry(st: Dictionary, p: Player, wid: String) -> void:
+	var cnt := maxi(1, roundi(float(st.get("drones", 1.0))))
+	for i in cnt:
+		var d := Drone.spawn(0)
+		d.anchor = true
+		d.wid = wid
+		d.dmg = float(st.get("shot", 9.0))
+		d.cd = float(st.get("rate", 0.42))
+		d.n = 1
+		d.life = float(st.get("dur", 14.0))
+		d.pierce = st.get("pierce", 0.0) > 0.0
+		d.position = p.pos + Vector2(G.rf(-46.0, 46.0), G.rf(-34.0, 22.0))
+		d.tint(Px.C("ffd54f"))
+	G.fx.burst(p.pos, Px.C("ffb74d"), 8, 140.0, 4.0, 0.35)
+	G.audio.play("plasma", 0.7, 0.5)
 
 static func _nearest(p: Vector2, max_r: float) -> Enemy:
 	var best: Enemy = null
