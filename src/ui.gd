@@ -777,13 +777,15 @@ func cinematic(tex_key: String, title: String, sub: String, dur := 2.6) -> void:
 			_advance_overlay())
 
 # hikaye kartı zinciri — her kart sinematik letterbox; E/tık sıradakine geçer
-func cine_seq(cards: Array) -> void:
+func cine_seq(cards: Array, then := Callable()) -> void:
 	if overlay_open() or cards.is_empty():
 		return
+	_cine_then = then
 	_cine_cards = cards.duplicate()
 	_cine_play()
 
 var _cine_cards: Array = []
+var _cine_then := Callable()
 
 func _cine_play() -> void:
 	if _cine_cards.is_empty():
@@ -1000,7 +1002,12 @@ func _advance_overlay() -> void:
 					_close_overlay()
 					_cine_play())
 			else:
-				tw.tween_callback(_close_overlay)
+				tw.tween_callback(func():
+					_close_overlay()
+					var cb := _cine_then
+					_cine_then = Callable()
+					if cb.is_valid():
+						cb.call())
 		"title":
 			_close_overlay()
 			G.run.hub()
@@ -2452,21 +2459,9 @@ func death_screen(killer: String, gained: int) -> void:
 func _grade(sc: int) -> String:
 	return "S" if sc >= 5000 else ("A" if sc >= 3500 else ("B" if sc >= 2200 else "C"))
 
-func victory_screen(stats: Dictionary) -> void:
-	_pause(true)
-	var v := _show_panel("victory", "PROTOKOL TAMAMLANDI", Px.C("00E5FF"))
-	var cr := TextureRect.new()
-	cr.texture = Px.S2("icn_crown")
-	cr.custom_minimum_size = Vector2(44, 44)
-	cr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	cr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	cr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var crc := CenterContainer.new()
-	crc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	crc.add_child(cr)
-	v.add_child(crc)
-	var sub := "Dört mühür kırıldı. Kovan sustu.\nChoralim'in şarkısı artık senin."
-	var epilog := {
+# node başına zafer sonrası satır — epilog metni hem sinematikte hem sonuç panelinde
+func epilog(nid: String) -> String:
+	return str({
 		"b0": "Endusterra'nın çoraklığı bir süre daha sessiz kalacak.",
 		"b1": "Simithar damarları artık kovansız söylüyor.",
 		"b2": "Enkazın altında imparatorluk sonunda rahatladı.",
@@ -2482,8 +2477,23 @@ func victory_screen(stats: Dictionary) -> void:
 		"batak": "Bataklık çamuru ilk kez birini geri verdi.",
 		"kulovasi": "Kül söndü — imparatorluğun yangını yüz yıl sonra bitti.",
 		"avlis": "Zincir kırıldı — altı efendi tek koşuda düştü.",
-	}
-	var epi := str(epilog.get(str(stats.get("node_id", "")), ""))
+	}.get(nid, ""))
+
+func victory_screen(stats: Dictionary) -> void:
+	_pause(true)
+	var v := _show_panel("victory", "PROTOKOL TAMAMLANDI", Px.C("00E5FF"))
+	var cr := TextureRect.new()
+	cr.texture = Px.S2("icn_crown")
+	cr.custom_minimum_size = Vector2(44, 44)
+	cr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	cr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	cr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var crc := CenterContainer.new()
+	crc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	crc.add_child(cr)
+	v.add_child(crc)
+	var sub := "Dört mühür kırıldı. Kovan sustu.\nChoralim'in şarkısı artık senin."
+	var epi := epilog(str(stats.get("node_id", "")))
 	if epi != "":
 		sub += "\n\n%s\n%s" % [str(stats.get("node_name", "")), epi]
 	var t1 := _lbl(sub, Vector2.ZERO, 14, Color(0.7, 0.95, 1))
