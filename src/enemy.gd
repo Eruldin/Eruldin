@@ -4,16 +4,16 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER }
 
-const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye"}
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
 # base set automatically in _make_body
 const KIND_SET := {
 	EKind.VARL: "c_varl", EKind.CEREB: "c_cereb",
-	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa",
+	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa", EKind.CARRIER: "c_konakci",
 }
 
 var kind: int = EKind.HUSK
@@ -103,6 +103,11 @@ func _setup_stats(hs: float, ds: float) -> void:
 			max_hp = 88; speed = 128; touch_dmg = 16; radius = 15; hit_radius = 18
 			windup_t = 0.5; recover_t = 0.55; attack_cd = 1.0; touch_r = 42
 			actor_name = "Alfa Şövalye"
+		EKind.CARRIER:
+			max_hp = 130; speed = 66; touch_dmg = 12; radius = 18; hit_radius = 21
+			windup_t = 0.65; recover_t = 0.8; attack_cd = 1.5; touch_r = 44
+			actor_name = "Hamal Taşıyıcı"
+			knock_resist = 80.0
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
@@ -150,6 +155,9 @@ func _make_body() -> void:
 			kn = bk
 	_load_frames(kn, 5.0)
 	Px.fit(body, 118.0 if elite else (108.0 if kind == EKind.KONAKCI else 86.0))
+	if kind == EKind.CARRIER and not elite:
+		base_color = Color(1.0, 0.85, 0.45)
+		G.fx.mk_light(self, Vector2(0, -18), Px.C("ffb74d"), 0.4, 1.4)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
 		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae"}.get(affix, "7B1FA2")
@@ -493,5 +501,9 @@ func die(h: Dictionary) -> void:
 		# HASAT ŞENLİĞİ kozu: kesim başına küçük parçacık damlası
 		if is_instance_valid(G.player) and G.player.has_meta("harvest") and G.chance(0.02):
 			G.run.drop_fragments(pos, 1)
+		# hamal taşıyıcı yükünü düşürür — rastgele saha kalıntısı
+		if kind == EKind.CARRIER:
+			G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard"]), pos)
+			G.fx.float_text(pos + Vector2(0, -40), "YÜK DÜŞTÜ", Px.C("ffb74d"), 0.9)
 		G.room.on_enemy_dead(self)
 	queue_free()
