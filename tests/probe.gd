@@ -234,6 +234,9 @@ func _process(_d: float) -> void:
 				_loot_ck = true
 				var bag := (G.run.stats.get("loot", []) as Array).size()
 				print("[probe] loot bag=%d elite_kills=%d" % [bag, int(G.run.stats.get("elite_kills", 0))])
+				# lanetli sandık: dibinde doğur -> ambush + ödül
+				G.room.spawn_special("cursed", G.player.pos + Vector2(6, 0))
+				print("[probe] cursed chest spawned")
 			# gezgin tüccar kapsaması: frag ver, dibinde doğur -> panel açılmalı
 			if not _merch_done and t >= 142.0:
 				_merch_done = true

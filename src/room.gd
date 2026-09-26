@@ -1006,6 +1006,19 @@ func _collect(pk: Node) -> void:
 						break
 			G.meta.save()
 			G.audio.play("boon", 1.3, 0.6)
+		"cursed":
+			G.ui.toast("LANETLİ SANDIK — pusu!")
+			G.audio.play("alarm", 0.9, 0.6)
+			G.fx.shake(6.0, 0.4)
+			for i in 9:
+				var ang := TAU * float(i) / 9.0 + G.rf(-0.2, 0.2)
+				var sp := clamp_pos(pk.position + Vector2.from_angle(ang) * G.rf(240.0, 320.0), 40.0)
+				var ek: int = G.pick([Enemy.EKind.VARL, Enemy.EKind.HUSK, Enemy.EKind.DRONE, Enemy.EKind.SENTINEL])
+				Enemy.spawn(ek, sp, G.chance(0.25), G.director._hp_scale(), G.director._dmg_scale(), self)
+			spawn_chest(pk.position + Vector2(-30, 10))
+			var ciid := Items.roll(G.run.luck + 0.15)
+			if ciid != "":
+				spawn_loot(ciid, pk.position + Vector2(30, 10))
 		"chest":
 			G.run.open_chest()
 		"loot":
@@ -1080,8 +1093,11 @@ func spawn_special(kind: String, p: Vector2) -> void:
 		"lore":
 			pk.texture = Px.S2("ico_quest") if Px.S2("ico_quest") != null else Px.S("dot")
 			col = "8fd4ff"
+		"cursed":
+			pk.texture = Px.S("crate")
+			col = "ff3355"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	pk.scale = Vector2.ONE * 0.8
+	pk.scale = Vector2.ONE * (0.95 if kind == "cursed" else 0.8)
 	pk.modulate = Px.C(col)
 	pk.position = p
 	pk.z_index = int(p.y)

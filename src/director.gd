@@ -227,10 +227,10 @@ func _comp(m: float) -> int:
 
 func _hp_scale() -> float:
 	var m := t / 60.0
-	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30) * (1.15 if G.run.hyper else 1.0) * float(G.run.node_mods.get("hp", 1.0))
+	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30) * (1.15 if G.run.hyper else 1.0) * float(G.run.node_mods.get("hp", 1.0)) * (1.0 + 0.12 * float(G.meta.data.get("ng", 0)))
 
 func _dmg_scale() -> float:
-	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15) * (1.2 if G.run.hyper else 1.0) * float(G.run.node_mods.get("dmg", 1.0))
+	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15) * (1.2 if G.run.hyper else 1.0) * float(G.run.node_mods.get("dmg", 1.0)) * (1.0 + 0.08 * float(G.meta.data.get("ng", 0)))
 
 func _spawn(kind: int, elite: bool) -> Enemy:
 	if not is_instance_valid(G.room):

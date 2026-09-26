@@ -104,7 +104,7 @@ func start_run() -> void:
 	biome = clampi(int(nd.get("biome", 0)), 0, Room.BIOME_NAME.size() - 1)
 	hyper = bool(G.meta.data.get("hyper", false))
 	dark = bool(G.meta.data.get("dark", false))
-	reward_mult = (1.5 if hyper else 1.0) * (1.25 if dark else 1.0)
+	reward_mult = (1.5 if hyper else 1.0) * (1.25 if dark else 1.0) * (1.0 + 0.08 * float(G.meta.data.get("ng", 0)))
 	depth = -1
 	fragments = 0
 	boon_ids.clear()
@@ -416,6 +416,8 @@ func victory() -> void:
 	stats.gained = gained
 	fragments = 0
 	G.meta.data["victories"] += 1
+	G.meta.data["ng"] = int(G.meta.data.get("ng", 0)) + 1
+	stats["ng"] = int(G.meta.data.get("ng", 0))
 	G.meta.save()
 	for f in G.meta.new_feats():
 		G.ui.toast("BAŞARIM: %s" % f)

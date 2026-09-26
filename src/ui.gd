@@ -480,6 +480,8 @@ func _edge_targets() -> Array:
 			var k := str(pk.get_meta("kind", ""))
 			if k == "chest":
 				out.append({"p": pk.position, "icon": "ico_boon", "col": "ffb74d", "s": 22.0})
+			elif k == "cursed":
+				out.append({"p": pk.position, "icon": "icn_skull", "col": "ff3355", "s": 22.0})
 			elif k == "vacuum" or k == "bomb" or k == "freeze" or k == "boost" or k == "guard":
 				out.append({"p": pk.position, "icon": "ico_frag", "col": "00E5FF", "s": 18.0})
 			elif k == "egg":
@@ -2377,6 +2379,11 @@ func victory_screen(stats: Dictionary) -> void:
 	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d\nChoralim saflaştırıldı: ◆ +%d\nToplam zafer: %d\nSkor: %d%s" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), int(stats.get("best_streak", 0)), int(stats.get("gained", 0)), G.meta.data.victories, int(stats.get("score", 0)), " — YENİ REKOR!" if stats.get("new_record", false) else ""], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
 	t2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t2)
+	var ngl := int(stats.get("ng", 0))
+	if ngl > 0:
+		var t3 := _lbl("PROTOKOL DERİNLİĞİ +%d — kovan sonsuza +%d%% sert, ödemeler +%d%%" % [ngl, ngl * 12, ngl * 8], Vector2.ZERO, 12, Px.C("c26bff"))
+		t3.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(t3)
 	_build_recap(v)
 	var h := _lbl("[E / tık] — kampa dön (yeni döngü)", Vector2.ZERO, 12, Color(0.5, 0.7, 0.9))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
