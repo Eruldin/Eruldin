@@ -109,6 +109,9 @@ func _tick_events(d: float) -> void:
 		var kind: int = G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.HUSK] if m < 4.0 else ([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER] if m < 6.5 else [Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA, Enemy.EKind.SPITTER]))
 		var e := _spawn(kind, true)
 		if e != null:
+			# geç dakika nadirliği: altın ŞAMPİYON — öldürünce garanti eşya
+			if m >= 8.0 and G.chance(0.09):
+				e.promote_champ()
 			G.ui.toast("%s — sandık taşıyor" % e.actor_name)
 	# surge events — a visible ring/flood every ~75s
 	_surge_t -= d
