@@ -1853,8 +1853,16 @@ func records_panel() -> void:
 			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			row.add_child(tr)
 		var cnt := int(tk.get(Enemy.KIND_NAME[k], 0))
+		var kv := VBoxContainer.new()
+		kv.add_theme_constant_override("separation", 0)
 		var kl := _lbl("%s  x%d" % [str(Enemy.KIND_NAME[k]), cnt], Vector2.ZERO, 11, Color(0.8, 0.8, 0.85) if cnt > 0 else Color(0.4, 0.4, 0.5))
-		row.add_child(kl)
+		kv.add_child(kl)
+		if cnt > 0:
+			var lo := _lbl(str(Enemy.KIND_LORE.get(k, "")), Vector2.ZERO, 8, Color(0.45, 0.5, 0.58))
+			lo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			lo.custom_minimum_size = Vector2(150, 0)
+			kv.add_child(lo)
+		row.add_child(kv)
 		mid.add_child(row)
 	cols.add_child(mid)
 	var right := VBoxContainer.new()

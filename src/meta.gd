@@ -52,6 +52,7 @@ var data := {
 	"dark": false,         # KARANLIK: şifa küresi düşmez, ödeme ×1.25
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır
 	"hired": false,        # Ahusk yoldaşı — koşu boyunca muhafız dronu
+	"seen_kinds": [],      # ilk kez görülen düşman türleri (EKind id'leri)
 	"intro_seen": false,   # açılış sinematik kartları bir kez oynatılır
 	"contract": {},        # Ehnar's aktif görevi: {key,need,reward}
 	"feats_seen": [],      # duyurulmuş başarımlar (toast bir kez)
