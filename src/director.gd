@@ -28,6 +28,7 @@ var running := true
 
 var _spawn_t := 0.0
 var _elite_t := 95.0
+var _tut_step := 0
 # EFENDİ AVLISI: node_mods.rush — altı efendi arka arkaya; zafer zincirin sonunda
 var _rush_order := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.NAHUM, Boss.BKind.TUMAN, Boss.BKind.KIRIN, Boss.BKind.CONST]
 var _rush_idx := 0
@@ -94,6 +95,31 @@ func _tick_spawn(d: float) -> void:
 
 func _tick_events(d: float) -> void:
 	var m := t / 60.0
+	# ilk koşu yönlendirmesi — tek seferlik ipucu dizisi (meta "tut" işaretlenir)
+	if not bool(G.meta.data.get("tut", false)):
+		match _tut_step:
+			0:
+				if t >= 2.0:
+					_tut_step = 1
+					G.ui.toast("WASD / ok tuşları — hareket")
+			1:
+				if t >= 9.0:
+					_tut_step = 2
+					G.ui.toast("SPACE — kaçış hamlesi: sürünün arasından geç")
+			2:
+				if t >= 18.0:
+					_tut_step = 3
+					G.ui.toast("kristalleri topla — seviye taslağı açılır")
+			3:
+				if t >= 32.0:
+					_tut_step = 4
+					G.ui.toast("silahların kendi ateş eder — sen sadece hayatta kal")
+			4:
+				if t >= 48.0:
+					_tut_step = 5
+					G.meta.data["tut"] = true
+					G.meta.save()
+					G.ui.toast("hedef: süre dolana dek yaşa — sonra efendi gelir")
 	# YOL OLAYI pusu: arenaya kuşatılmış giriş (ilk yarım saniyede çözülür)
 	if G.run.pending_ambush and t > 0.5:
 		G.run.pending_ambush = false

@@ -54,6 +54,7 @@ var data := {
 	"hired": false,        # Ahusk yoldaşı — koşu boyunca muhafız dronu
 	"seen_kinds": [],      # ilk kez görülen düşman türleri (EKind id'leri)
 	"intro_seen": false,   # açılış sinematik kartları bir kez oynatılır
+	"tut": false,          # ilk koşu ipucu dizisi oynatıldı mı
 	"contract": {},        # Ehnar's aktif görevi: {key,need,reward}
 	"feats_seen": [],      # duyurulmuş başarımlar (toast bir kez)
 	"reapers": 0,          # kesilen HASATÇI sayısı
