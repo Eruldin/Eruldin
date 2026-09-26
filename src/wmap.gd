@@ -32,6 +32,7 @@ const NODES := [
 	 	{"tex": "cine_0_1", "title": "YANKI KAYASI", "sub": "Taş, düşen her praetorianın son sinyalini saklar. Parmağını değdir — binlerce yankı aynı anda senin adını söyler."},
 	 	{"tex": "por_neva", "title": "NEVA", "sub": "Bunu hissettin değil mi? Kaya korosuna katıldın — artık düşersen bir kaydın var. Parçacıklarını al, git."},
 	 ]},
+	{"id": "sisgecidi", "name": "SİS GEÇİDİ",      "icon": "icn_dash",    "pos": Vector2(160, 480), "col": "a5d6a7", "kind": "arena", "biome": 4, "unlock": "node", "desc": "Batıdaki sis perdesi — kasılmak isteyenlerin geçidi: sürü bol, frag ve ganimet bereketli.", "lore": "Bataklığın sisi burada duvar gibi. İçinde kistler şarkı söylüyor; göçebe Ahusk bu yolu gençliğinde kaçarak geçti.", "mods": {"spawn": 1.25, "frag": 1.45, "loot": 1.4, "dusk": true}},
 	{"id": "krater", "name": "DÜŞÜK KRATER",       "icon": "icn_mine",    "pos": Vector2(860, 650), "col": "ffb74d", "kind": "story", "unlock": "boss rex","desc": "İlk efendinin düştüğü yerde bir krater — içinde hâlâ ışık yanıyor.", "rew": {"cho": 120, "item": "i_palto"},
 	 "cards": [
 	 	{"tex": "cine_0_2", "title": "DÜŞÜK KRATER", "sub": "Alfa-05 burada düştü. Kraterin dibinde henüz çürümemiş bir zırh parçası duruyor — kovan bile ona dokunmamış."},
@@ -49,6 +50,7 @@ const EDGES := [
 	["b2", "batak"], ["batak", "kuyu"],
 	["tarla", "kayalik"], ["kamp", "kayalik"],
 	["mabed", "krater"], ["vatika", "krater"],
+	["kayalik", "sisgecidi"], ["kamp", "sisgecidi"],
 ]
 
 static func node(id: String) -> Dictionary:

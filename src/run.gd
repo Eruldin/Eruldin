@@ -137,7 +137,7 @@ func start_run() -> void:
 	var wk := force_waylay
 	force_waylay = ""
 	if wk == "" and randf() < 0.35:
-		wk = G.pick(["pusu", "kervan", "harabe"])
+		wk = G.pick(["pusu", "kervan", "harabe", "gezgin"])
 	if wk != "":
 		G.ui.travel_event(wk, node_name)
 	else:
