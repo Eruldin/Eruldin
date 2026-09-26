@@ -96,6 +96,33 @@ const DEFS := {
 		"b": {"dmg": 30.0, "cd": 2.0, "n": 4.0, "r": 92.0, "dur": 6.0},
 		"hidden": true,
 	},
+	"dagger": {
+		"name": "FİTİL BIÇAĞI", "icon": "icn_stance_duel", "col": "9fd8ff",
+		"desc": "Baktığın yöne bıçak yelpazesi fırlatır",
+		"b": {"dmg": 9.0, "cd": 0.95, "n": 2.0, "spd": 620.0, "fan": 0.18},
+		"inc": {"dmg": 2.4, "n": 0.34, "cd": -0.03},
+		"feats": {6: {"n": 1.0}},
+		"evo": "plating", "into": "dagger_x",
+	},
+	"dagger_x": {
+		"name": "ÇELİK YAĞMURU", "icon": "icn_stance_duel", "col": "cfe8ff",
+		"desc": "Delici bıçak fırtınası",
+		"b": {"dmg": 26.0, "cd": 0.7, "n": 8.0, "spd": 700.0, "fan": 0.55, "pierce": 1.0},
+		"hidden": true,
+	},
+	"ray": {
+		"name": "PROTERİN HÜZMESİ", "icon": "icn_upg_dmg", "col": "ffe3a0",
+		"desc": "En yakın düşmana delici hüzme",
+		"b": {"dmg": 30.0, "cd": 2.1, "len": 620.0, "w": 26.0},
+		"inc": {"dmg": 8.0, "len": 14.0, "w": 1.6, "cd": -0.05},
+		"evo": "regen", "into": "ray_x",
+	},
+	"ray_x": {
+		"name": "GAMA ERİYİĞİ", "icon": "icn_upg_dmg", "col": "fff3c0",
+		"desc": "Geniş yakıcı hüzme",
+		"b": {"dmg": 82.0, "cd": 1.4, "len": 780.0, "w": 46.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -305,6 +332,8 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"bolt", "bolt_x": _bolt(st, p)
 		"nova", "nova_x": _nova(st, p)
 		"spit", "spit_x": _spit(st, p, w)
+		"dagger", "dagger_x": _dagger(st, p)
+		"ray", "ray_x": _ray(st, p)
 
 static func _nearest(p: Vector2, max_r: float) -> Enemy:
 	var best: Enemy = null
@@ -455,6 +484,57 @@ static func _spit(st: Dictionary, p: Player, w: Dictionary) -> void:
 			G.game.world.add_child(node)
 		w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0})
 	G.audio.play("shoot", 0.7, 0.45)
+
+static func _dagger(st: Dictionary, p: Player) -> void:
+	var n := maxi(1, roundi(float(st.n)))
+	var tgt := _nearest(p.pos, 500.0)
+	var base_dir := (tgt.pos - p.pos).normalized() if tgt != null else (p.move_dir if p.move_dir.length_squared() > 0.01 else p.aim_dir)
+	var fan := float(st.get("fan", 0.18))
+	for i in n:
+		var dir := Vector2.from_angle(base_dir.angle() + (i - (n - 1) * 0.5) * fan)
+		var pr := Projectile.new()
+		G.game.world.add_child(pr)
+		pr.setup(G.Team.PLAYER, p.pos + dir * 20.0, dir * float(st.spd) * p.proj_spd,
+			float(st.dmg) * p.dmg_mult, 7.0, Px.C("cfe8ff"), "spark")
+		pr.piercing = st.get("pierce", 0.0) > 0.0
+		pr.knock = 2.0
+		pr.stag = 0.15
+	G.audio.play("shoot", 1.3, 0.6)
+	G.fx.directional(p.pos + Vector2(0, -12), base_dir, Px.C("cfe8ff"), 5, 200.0, 3.0, 0.2)
+
+# piercing corridor beam aimed at the nearest enemy — linear AoE, not radial
+static func _ray(st: Dictionary, p: Player) -> void:
+	var tgt := _nearest(p.pos, 640.0)
+	if tgt == null:
+		return
+	var dir := (tgt.pos - p.pos).normalized()
+	var len := float(st.len) * p.area_mult
+	var wid := float(st.w) * p.area_mult
+	var a := p.pos + dir * 16.0
+	var dmg := float(st.dmg) * p.dmg_mult
+	for e in G.enemies.duplicate():
+		if not is_instance_valid(e) or e.dead:
+			continue
+		var t := clampf((e.pos - a).dot(dir), 0.0, len)
+		if (a + dir * t).distance_to(e.pos) < wid * 0.5 + e.hit_radius:
+			var crit := G.chance(p.crit_ch)
+			var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.SHOCK, "from": a, "knock": 3.0, "stagger": 0.2, "source": p, "crit": crit}
+			e.take_hit(h)
+			p.on_dealt_damage(e, h)
+	var beam := Sprite2D.new()
+	beam.texture = Px.S("bar")
+	beam.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	beam.modulate = Color(1.0, 0.88, 0.55, 0.85)
+	beam.position = a + dir * len * 0.5
+	beam.rotation = dir.angle()
+	beam.scale = Vector2(len / 4.0, wid / 4.0)
+	beam.z_index = 58
+	G.game.world.add_child(beam)
+	var tw := beam.create_tween()
+	tw.tween_property(beam, "modulate:a", 0.0, 0.28)
+	tw.tween_callback(beam.queue_free)
+	G.audio.play("plasma", 0.8, 0.75)
+	G.fx.shake(0.1, 0.06)
 
 static func _tick_orbit(w: Dictionary, p: Player, d: float) -> void:
 	var st := stats(str(w.id), int(w.lvl))
