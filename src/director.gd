@@ -44,6 +44,7 @@ var _mini := false
 var _final := false
 var _won := false
 var _final_alive := 0     # final-boss count still standing (pairs need both down)
+var _merch_fired := false # gezgin tüccar — koşuda bir kez
 var _harvest_t := 30.0    # endless-mode reaper cadence
 var _quest_t := 0.0       # 1sn'lik görev tick'i
 
@@ -111,6 +112,18 @@ func _tick_events(d: float) -> void:
 		if pp == Vector2.ZERO:
 			pp = G.room.clamp_pos(G.player.pos + Vector2(400, 0), 40.0)
 		G.room.spawn_monolith(pp)
+	# gezgin tüccar: tek sefer, ~4:12'de oyuncudan uzak bir noktada belirir
+	if not _merch_fired and m >= 4.2 and is_instance_valid(G.room) and G.player != null and not G.player.dead:
+		_merch_fired = true
+		var mp := Vector2.ZERO
+		for i in 8:
+			var cand := G.player.pos + Vector2(G.rf(-560, 560), G.rf(-380, 380))
+			if G.room.inside(cand, 90.0) and cand.distance_to(G.player.pos) > 300.0:
+				mp = cand
+				break
+		if mp == Vector2.ZERO:
+			mp = G.room.clamp_pos(G.player.pos + Vector2(-380, 0), 40.0)
+		G.room.spawn_merchant(mp)
 	# HoT ability tome: saha kalıntısı — üstüne basan bedava lütuf taslağı açar
 	_tome_t -= d
 	if _tome_t <= 0.0 and is_instance_valid(G.room):

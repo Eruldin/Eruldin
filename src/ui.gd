@@ -478,6 +478,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "ico_loot", "col": "42d4f4", "s": 20.0})
 		if G.room.mono_active:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
+		if G.room.merchant_active:
+			out.append({"p": G.room.merchant_pos, "icon": "ico_loot", "col": "ffd700", "s": 24.0})
 	return out
 
 func _tick_edge() -> void:
@@ -901,7 +903,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1670,6 +1672,84 @@ func song_panel() -> void:
 			_close_overlay()
 			song_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
+# gezgin tüccar — koşu içi dükkân: parçacık harca, tek alışveriş, sonra kovar
+func merchant_panel() -> void:
+	_pause(true)
+	var v := _show_panel("merchant", "GEZGİN TÜCCAR — yolda pazar", Px.C("ffd700"))
+	var por := TextureRect.new()
+	por.texture = Px.S2("por_ahusk")
+	por.custom_minimum_size = Vector2(64, 64)
+	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pc := CenterContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(por)
+	v.add_child(pc)
+	var l := _lbl("\"Kovandan değilim, kervandanım. Tek alışveriş — sonra yola.\"", Vector2.ZERO, 12, Color(0.85, 0.8, 0.6))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l)
+	var fr := _lbl("parçacık: ◈ %d   (tek alışveriş hakkın var)" % G.run.fragments, Vector2.ZERO, 13, Px.C("42d4f4"))
+	fr.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(fr)
+	var offers := [
+		{"name": "ŞİFA", "desc": "+%40 can", "cost": 150, "icon": "icn_upg_hp"},
+		{"name": "LÜTUF", "desc": "rasgele lütuf kartı", "cost": 400, "icon": "ico_boon"},
+		{"name": "EŞYA", "desc": "rasgele eşya — nadirlik şansa bağlı", "cost": 600, "icon": "ico_loot"},
+	]
+	for o in offers:
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 12)
+		v.add_child(row)
+		var ic := TextureRect.new()
+		ic.texture = Px.S2(str(o.icon))
+		ic.custom_minimum_size = Vector2(26, 26)
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.modulate = Px.C("ffd700")
+		row.add_child(ic)
+		var lb := _lbl("%s — %s" % [str(o.name), str(o.desc)], Vector2.ZERO, 13, Color(0.9, 0.9, 0.94))
+		lb.custom_minimum_size = Vector2(300, 0)
+		row.add_child(lb)
+		var cost := int(o.cost)
+		var b := Button.new()
+		b.text = "◈ %d" % cost
+		b.add_theme_font_override("font", ui_font())
+		b.custom_minimum_size = Vector2(90, 26)
+		b.disabled = G.run.fragments < cost
+		if b.disabled:
+			b.modulate = Color(0.5, 0.5, 0.55)
+		row.add_child(b)
+		var o_id := str(o.name)
+		b.pressed.connect(func():
+			if G.run.fragments < cost:
+				return
+			G.run.fragments -= cost
+			match o_id:
+				"ŞİFA":
+					G.player.hp = minf(G.player.max_hp, G.player.hp + G.player.max_hp * 0.4)
+					G.fx.burst(G.player.pos + Vector2(0, -20), Px.C("42d4f4"), 18, 140.0, 5.0, 0.6)
+				"LÜTUF":
+					G.run.take_boon(G.pick(Boons.all()))
+				"EŞYA":
+					Items.drop_to_run(Items.roll(G.run.luck))
+			G.audio.jingle("victory")
+			toast("tüccar: %s alındı — yoluna devam ediyor" % o_id)
+			G.room.despawn_merchant()
+			_close_overlay())
+	var out := Button.new()
+	out.text = "YOLA DEVAM — almadan çık"
+	out.add_theme_font_override("font", ui_font())
+	out.custom_minimum_size = Vector2(240, 28)
+	var oc := CenterContainer.new()
+	oc.add_child(out)
+	v.add_child(oc)
+	out.pressed.connect(_close_overlay)
+	var h := _lbl("[E / tık] kapat — tüccar bekler", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 
