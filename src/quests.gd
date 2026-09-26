@@ -52,6 +52,7 @@ const DEFS := [
 	{"id": "q_son",   "giver": "zirkon",  "name": "ARŞİVİN SONU",        "desc": "Defterin son sayfası boş kalmasın. On görev teslim et — arşivin mührü senin olsun.", "obj": {"type": "quests", "n": 10}, "rew": {"cho": 400, "wep": "meteor"}, "prereq": "q_final"},
 	{"id": "q_siparis","giver": "saphire","name": "MÜŞTERİ SİPARİŞİ",    "desc": "Bir müşteri Boşluk Halkası istiyor — bulursan stoğa değil, doğrudan bana getir. Teslimde parça senden çıkar.", "obj": {"type": "item", "id": "i_bosluk", "n": 1}, "rew": {"cho": 320, "item": "i_ruzgar"}, "prereq": "q_lanet"},
 	{"id": "q_kayit", "giver": "zirkon",  "name": "VERİ AVCISI",          "desc": "Sahalarda hâlâ kütük parçaları saçılı. Beş veri kütüğü topla — arşiv senden borçlu kalacak.", "obj": {"type": "kayit", "n": 5}, "rew": {"cho": 180, "item": "i_merdiven"}, "prereq": "q_final"},
+	{"id": "q_sampiyon","giver": "ehnar", "name": "ALTIN TEHDİT",        "desc": "Geç saatlerde altınla parlayan şampiyonlar geziyor — birini kes, madalyonun benim olsun.", "obj": {"type": "champ", "n": 1}, "rew": {"cho": 220}, "prereq": "q_nobet2"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -142,7 +143,7 @@ static func has_business(nid: String) -> bool:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ"]:
 		done.append_array(tick(type))
 	for q in DEFS:
 		if state(q.id) != "act" or str(q.obj.get("type", "")) != "boss":
@@ -206,6 +207,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"frag":    cur = int(G.run.fragments)
 			"quests":  cur = _claimed_count()
 			"item":    cur = _item_count(str(o.get("id", "")))
+			"champ":   cur = int(G.run.stats.get("champ_kills", 0))
 			"kayit":   cur = (G.meta.data.get("lore", []) as Array).size()
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
@@ -288,6 +290,7 @@ static func obj_text(q: Dictionary) -> String:
 		"quests": return "%d görev teslim et" % need
 		"item":   return "%s getir" % str(Items.DEFS.get(str(o.get("id", "")), {}).get("name", str(o.get("id", ""))))
 		"kayit":  return "%d veri kütüğü bul" % need
+		"champ":  return "%d şampiyon elit kes" % need
 	return "?"
 
 static func _claimed_count() -> int:
