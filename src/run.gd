@@ -51,7 +51,7 @@ func start_run() -> void:
 	depth = -1
 	fragments = 0
 	boon_ids.clear()
-	luck = 0.0
+	luck = G.meta.upg(Meta.U.LUCK) * 0.15
 	alive = true
 	time = 0.0
 	pending_drafts = 0
