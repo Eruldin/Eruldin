@@ -29,7 +29,16 @@ var _elite_t := 95.0
 var _surge_t := 85.0
 var _mono_fired := false   # resonance cluster side objective — once per run
 var _tome_t := 275.0       # bilgelik tomu — ~4:35'te ilki, sonra ~4dk'da bir
-var _rain_t := 130.0       # göktaşı yağmuru — oyuncu çevresine telegraph'lı alan vuruşları
+var _rain_t := 130.0       # ortam tehlikesi — oyuncu çevresine telegraph'lı alan vuruşları
+
+# ortam tehlikesi saha başına değişir — hepsi telegraph'lı, iki tarafı da vurur:
+# barrens göktaşı / mine kaya sağanağı / wreckage ark fırtınası / aeterna ışık hüzmesi
+const RAIN_CFG := [
+	{"t": "GÖKTAŞI YAĞMURU — işaretli alanlardan kaç!", "col": "ff6626", "r": 95.0, "n": 7, "pdmg": 24.0, "ptype": "EXPLOSION"},
+	{"t": "KAYA SAĞANAĞI — madenin tavanı çözülüyor!", "col": "b08850", "r": 105.0, "n": 6, "pdmg": 30.0, "ptype": "MELEE"},
+	{"t": "ARK FIRTINASI — enkaz elektrik boşalıyor!", "col": "42d4f4", "r": 70.0, "n": 10, "pdmg": 18.0, "ptype": "SHOCK"},
+	{"t": "IŞIK HÜZMESİ — kubbe odaklanıyor!", "col": "ffe9a8", "r": 62.0, "n": 9, "pdmg": 22.0, "ptype": "PURE"},
+]
 var _min_ann := 0          # son duyurulan dakika kilometre taşı
 var _mini := false
 var _final := false
@@ -289,24 +298,29 @@ func _on_boss_dead(b) -> void:
 
 # göktaşı yağmuru olayı: oyuncu çevresine telegraph'lı vuruşlar — iki tarafı da vurur
 func _rain() -> void:
-	G.ui.toast("GÖKTAŞI YAĞMURU — işaretli alanlardan kaç!")
+	var cfg: Dictionary = RAIN_CFG[clampi(biome, 0, RAIN_CFG.size() - 1)]
+	G.ui.toast(str(cfg.t))
 	G.audio.play("alarm", 0.9, 0.55)
-	for i in 7:
+	for i in int(cfg.n):
 		var p := G.player.pos + Vector2(G.rf(-430.0, 430.0), G.rf(-310.0, 310.0))
 		if is_instance_valid(G.room):
 			p = G.room.clamp_pos(p, 60.0)
-		_rain_strike(p)
+		_rain_strike(p, cfg)
 
-func _rain_strike(p: Vector2) -> void:
-	var r := 95.0
-	G.fx.tele_circle(p, r, 0.9, Color(1.0, 0.4, 0.15, 0.5))
+func _rain_strike(p: Vector2, cfg: Dictionary) -> void:
+	var r: float = cfg.r
+	var col := Px.C(str(cfg.col))
+	var tc := col
+	tc.a = 0.5
+	G.fx.tele_circle(p, r, 0.9, tc)
 	var pp := p
+	var pt: int = G.DamageType[str(cfg.ptype)]
 	get_tree().create_timer(0.9, false).timeout.connect(func():
 		if is_instance_valid(G.player) and not G.player.dead and G.player.pos.distance_to(pp) < r:
-			G.player.take_hit({"dmg": 24.0 + G.run.depth * 2.0, "type": G.DamageType.EXPLOSION, "from": pp, "knock": 8.0, "source": null})
+			G.player.take_hit({"dmg": float(cfg.pdmg) + G.run.depth * 2.0, "type": pt, "from": pp, "knock": 8.0, "source": null})
 		for e in G.enemies.duplicate():
 			if e is Enemy and not e.dead and e.pos.distance_to(pp) < r:
-				e.take_hit({"dmg": 70.0 + G.run.depth * 8.0, "type": G.DamageType.EXPLOSION, "from": pp, "knock": 10.0, "source": G.player})
-		G.fx.burst(pp, Color(1.0, 0.5, 0.2), 18, 240.0, 6.0, 0.4)
-		G.fx.light_flash(pp, Color(1.0, 0.45, 0.15), 1.6, 2.6, 0.16)
+				e.take_hit({"dmg": 70.0 + G.run.depth * 8.0, "type": pt, "from": pp, "knock": 10.0, "source": G.player})
+		G.fx.burst(pp, col, 18, 240.0, 6.0, 0.4)
+		G.fx.light_flash(pp, col, 1.6, 2.6, 0.16)
 		G.audio.play("explode", 1.1, 0.3))

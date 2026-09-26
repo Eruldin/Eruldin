@@ -981,13 +981,6 @@ func records_panel() -> void:
 			Vector2.ZERO, 13, Color(0.95, 0.85, 0.4) if done else Color(0.5, 0.5, 0.6))
 		v.add_child(l)
 	var tk: Dictionary = d.get("kind_kills", {})
-	if not tk.is_empty():
-		var kk := tk.keys()
-		kk.sort_custom(func(a, b): return int(tk[a]) > int(tk[b]))
-		var kt := _lbl("— TÜR KESİMLERİ —", Vector2.ZERO, 12, Px.C("c9a227"))
-		v.add_child(kt)
-		var l := _lbl(" · ".join(kk.slice(0, 6).map(func(k2): return "%s %d" % [str(k2), int(tk[k2])])), Vector2.ZERO, 11, Color(0.7, 0.7, 0.8))
-		v.add_child(l)
 	var cols := HBoxContainer.new()
 	cols.alignment = BoxContainer.ALIGNMENT_CENTER
 	cols.add_theme_constant_override("separation", 34)
@@ -1004,6 +997,27 @@ func records_panel() -> void:
 			Vector2.ZERO, 12, Color(0.9, 0.85, 0.6) if ok else Color(0.45, 0.45, 0.55))
 		left.add_child(l)
 	cols.add_child(left)
+	var mid := VBoxContainer.new()
+	mid.add_theme_constant_override("separation", 4)
+	var sep4 := _lbl("— KOVAN KAYITLARI —", Vector2.ZERO, 12, Px.C("c9a227"))
+	mid.add_child(sep4)
+	for k in Enemy.EKind.values():
+		var kn: String = Enemy.KIND_SET.get(k, Enemy.EKind.keys()[k].to_lower())
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		var fr: Dictionary = Px.F(kn)
+		if fr.has("idle") and not fr["idle"].is_empty():
+			var tr := TextureRect.new()
+			tr.texture = fr["idle"][0]
+			tr.custom_minimum_size = Vector2(28, 28)
+			tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			row.add_child(tr)
+		var cnt := int(tk.get(Enemy.KIND_NAME[k], 0))
+		var kl := _lbl("%s  x%d" % [str(Enemy.KIND_NAME[k]), cnt], Vector2.ZERO, 11, Color(0.8, 0.8, 0.85) if cnt > 0 else Color(0.4, 0.4, 0.5))
+		row.add_child(kl)
+		mid.add_child(row)
+	cols.add_child(mid)
 	var right := VBoxContainer.new()
 	right.add_theme_constant_override("separation", 5)
 	var sep3 := _lbl("— BAŞARIMLAR —", Vector2.ZERO, 12, Px.C("c9a227"))
