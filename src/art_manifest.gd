@@ -95,6 +95,13 @@ const SPRITES := {
 	"proj_0": "art/proj_0.png",
 	"proj_1": "art/proj_1.png",
 	"proj_2": "art/proj_2.png",
+	# hub NPCs built from the concept-art sets (2-frame idle bob)
+	"npc2_david": "art/c_david_idle_0.png",
+	"npcb_david": "art/c_david_idle_1.png",
+	"por_david": "art/por_c_david.png",
+	"npc2_zirkon": "art/c_zirkon_idle_0.png",
+	"npcb_zirkon": "art/c_zirkon_idle_1.png",
+	"por_zirkon": "art/por_c_zirkon.png",
 }
 
 const FRAMES := {

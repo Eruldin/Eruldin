@@ -4,7 +4,8 @@ extends Node2D
 # Hub NPC — shows a prompt when Ely is near; E opens their dialogue.
 
 static var NAMES := {
-	"rhasa": "GENEL RHASA", "neva": "NEVA", "saphire": "SAPHIRE", "vane": "DR. VANE"
+	"rhasa": "GENEL RHASA", "neva": "NEVA", "saphire": "SAPHIRE", "vane": "DR. VANE",
+	"david": "İZ SÜRÜCÜ DAVID", "zirkon": "VEZİR ZİRKON"
 }
 
 var nid := ""

@@ -41,7 +41,7 @@ func hub() -> void:
 	G.ui.hub_ui(true)
 
 func start_run() -> void:
-	biome = 0
+	biome = clampi(int(G.meta.data.get("arena_biome", 0)), 0, 3)
 	depth = -1
 	fragments = 0
 	boon_ids.clear()

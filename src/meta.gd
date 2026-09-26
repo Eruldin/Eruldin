@@ -29,6 +29,7 @@ var data := {
 	"upg": {"hp":0,"dmg":0,"dash":0,"revive":0,"frag":0,"shield":0},
 	"seen_lines": [],
 	"stance": "",          # chosen doctrine from Rhasa
+	"arena_biome": 0,      # arena sector picked via David (İz Sürücü)
 	"last_death": {"killer":"", "biome":0, "depth":0, "boss":false},
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
 }

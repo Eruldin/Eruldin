@@ -26,6 +26,16 @@ const LINES := {
 	"vane": [
 		"Sentetik nörolojin hâlâ sağlam. Parçacıklarla yükseltme ister misin?",
 	],
+	"david": [
+		"Dört sahada iz sürdüm, Ely. Hepsinde kovanın kokusu farklı — ama ölüm aynı.",
+		"Barrens'ta toprak konuşur. Mine'da damarlar şarkı söyler. Wreckage'ta imparatorluk çürür. Spire'da... protokol bekler.",
+		"İzi seç, ben açarım. Sahaya inmeden önce bana uğra.",
+	],
+	"zirkon": [
+		"Her düşüşü yazıyorum, Alfa-04. Kovan silmeyi sever — ben sevmem.",
+		"Kayıtlarım kampla yaşıyor. Ne kadar koştuğunu, kimi düşürdüğünü — hepsi burada.",
+		"İsimler unutulunca ölüm iki kez kazanır. Seni unutturmayacağım.",
+	],
 }
 
 const DEATH_LINES := [
@@ -633,6 +643,10 @@ func dialogue(nid: String) -> void:
 		hint.text = "[E / tık] yükseltme paneli"
 	elif nid == "rhasa":
 		hint.text = "[E / tık] doktrin seçimi"
+	elif nid == "david":
+		hint.text = "[E / tık] saha seçimi"
+	elif nid == "zirkon":
+		hint.text = "[E / tık] kamp kayıtları"
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
@@ -667,6 +681,12 @@ func _advance_overlay() -> void:
 			elif nid == "rhasa":
 				_close_overlay()
 				stance_panel()
+			elif nid == "david":
+				_close_overlay()
+				biome_panel()
+			elif nid == "zirkon":
+				_close_overlay()
+				records_panel()
 			else:
 				_close_overlay()
 		"death":
@@ -675,7 +695,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause":
+		"upgrade", "stance", "pause", "records", "biomesel":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -725,6 +745,57 @@ func _show_panel(kind: String, title: String, title_col: Color) -> VBoxContainer
 	v.add_child(t)
 	root.add_child(_overlay)
 	return v
+
+# ---------------------------------------------------------------- david / zirkon
+
+# İz Sürücü: pick which sector the portal opens to. Higher biome = painted
+# backdrops/props/hazards of that sector, its own boss, harder scaling.
+func biome_panel() -> void:
+	_pause(true)
+	var cur := int(G.meta.data.get("arena_biome", 0))
+	var boss_por := ["por_rex", "por_host", "por_nahum", "por_kirin"]
+	var opts: Array = []
+	for i in 4:
+		var tag := "◈ SEÇİLİ" if i == cur else "SAHA %d" % (i + 1)
+		opts.append({"kind": "biome", "id": i, "name": "%s\n%s" % [BIOME_NAME[i], tag],
+			"icon": boss_por[i], "col": ["00E5FF", "00E676", "ffb74d", "c26bff"][i],
+			"desc": "%s\nzorluk %s" % [_biome_desc(i), "★".repeat(i + 1)], "top": "", "w": 1.0})
+	_show_cards("biomesel", "SAHA SEÇİMİ — David'in izleri  [1-4]", Px.C("00E5FF"), opts)
+
+func _biome_desc(b: int) -> String:
+	return ["Proterian çoraklığı — Alfa-05'in izi.",
+			"Simithar damarları — kovanın kökleri.",
+			"İmparatorluk enkazı — çürüyen taht.",
+			"Protokolün kalbi — son masa."][b]
+
+# Vezir: the camp's living ledger — lifetime stats + boss dossiers.
+func records_panel() -> void:
+	_pause(true)
+	var v := _show_panel("records", "KAMP KAYITLARI — Vezir Zirkon", Px.C("c9a227"))
+	var d := G.meta.data
+	var rows := [
+		"koşu: %d   zafer: %d   düşüş: %d" % [int(d.get("runs", 0)), int(d.get("victories", 0)), int(d.get("deaths", 0))],
+		"toplam kesim: %d   ·   en derin: %d" % [int(d.get("kills", 0)), int(d.get("best_depth", 0))],
+		"choralim rezervi: ◆ %d" % int(d.get("choralim", 0)),
+	]
+	for r in rows:
+		var l := _lbl(r, Vector2.ZERO, 14, Color(0.85, 0.85, 0.92))
+		v.add_child(l)
+	var sep := _lbl("— DÜŞMÜŞ EFENDELER —", Vector2.ZERO, 12, Px.C("c9a227"))
+	v.add_child(sep)
+	var dn: Array = G.meta.data.get("bosses", [])
+	for i in 4:
+		var bid: String = Run.BOSS_IDS[i]
+		var done: bool = dn.has(bid)
+		var l := _lbl("%s  %s" % ["◆" if done else "◇", "%s — %s" % [BIOME_NAME[i], Run.BOSS_NAMES[i]]],
+			Vector2.ZERO, 13, Color(0.95, 0.85, 0.4) if done else Color(0.5, 0.5, 0.6))
+		v.add_child(l)
+	var ld: Dictionary = d.get("last_death", {})
+	if not ld.is_empty() and str(ld.get("killer", "")) != "":
+		var l := _lbl("son düşüş: %s @ %s" % [str(ld.get("killer")), BIOME_NAME[int(ld.get("biome", 0))]], Vector2.ZERO, 11, Color(0.6, 0.55, 0.6))
+		v.add_child(l)
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	v.add_child(h)
 
 # ---------------------------------------------------------------- boon draft
 
@@ -813,9 +884,15 @@ func _pick_card(o: Dictionary) -> void:
 	if not is_instance_valid(_overlay):
 		return
 	var kind := str(_overlay.get_meta("kind", ""))
-	if kind != "draft" and kind != "chest" and kind != "boon":
+	if kind != "draft" and kind != "chest" and kind != "boon" and kind != "biomesel":
 		return
 	_close_overlay()
+	if kind == "biomesel":
+		G.meta.data["arena_biome"] = int(o.get("id", 0))
+		G.meta.save()
+		G.ui.toast("saha: %s — portal o koordinata açılıyor" % BIOME_NAME[int(o.get("id", 0))])
+		G.audio.jingle("boon")
+		return
 	if str(o.get("kind", "")) == "evo":
 		G.run.apply_evo({"from": o.get("from", ""), "into": o.get("id", "")})
 		return
@@ -828,7 +905,7 @@ func _pick_card(o: Dictionary) -> void:
 func _unhandled_key_input(ev: InputEvent) -> void:
 	if not (ev is InputEventKey and ev.pressed and not ev.echo):
 		return
-	if overlay_open() and str(_overlay.get_meta("kind", "")) in ["boon", "draft", "chest"]:
+	if overlay_open() and str(_overlay.get_meta("kind", "")) in ["boon", "draft", "chest", "biomesel"]:
 		var opts: Array = _overlay.get_meta("opts", [])
 		var idx := int(ev.keycode) - int(KEY_1)
 		if idx >= 0 and idx < opts.size():
