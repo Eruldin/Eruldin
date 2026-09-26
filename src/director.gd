@@ -31,6 +31,7 @@ var _mini := false
 var _final := false
 var _won := false
 var _final_alive := 0     # final-boss count still standing (pairs need both down)
+var _harvest_t := 30.0    # endless-mode reaper cadence
 
 func _process(d: float) -> void:
 	if not running or G.state != G.State.ROOM or G.player == null or G.player.dead:
@@ -75,6 +76,22 @@ func _tick_events(d: float) -> void:
 	if _surge_t <= 0.0:
 		_surge_t = G.rf(62.0, 82.0) * (0.8 if G.run.hyper else 1.0)
 		_surge(m)
+	# endless reaper — a scaling HASATÇI hunter every ~100s
+	if G.run.endless:
+		_harvest_t -= d
+		if _harvest_t <= 0.0:
+			_harvest_t = 100.0
+			var e := _spawn(Enemy.EKind.ALFA, true)
+			if e != null:
+				var n := 1.0 + maxf(0.0, (t - WIN_T) / 60.0) * 0.8
+				e.max_hp *= 6.0 * n
+				e.hp = e.max_hp
+				e.touch_dmg *= 1.6 * n
+				e.actor_name = "HASATÇI"
+				e.affix = "volatile"
+				G.fx.mk_light(e, Vector2(0, -18), Px.C("ff2222"), 0.8, 2.4)
+				G.ui.toast("HASATÇI peşine düştü — kaç ya da öldür")
+				G.audio.jingle("boss")
 	# miniboss
 	if not _mini and t >= MINI_T:
 		_mini = true
