@@ -455,6 +455,7 @@ func add_xp(v: float) -> void:
 		xp_next = xp_for(level)
 		G.run.pending_drafts += 1
 		G.fx.burst(pos + Vector2(0, -22), Px.C("00E5FF"), 14, 140.0, 4.0, 0.5)
+		G.fx.light_flash(pos + Vector2(0, -22), Px.C("7fd4ff"), 1.5, 2.6, 0.28)
 		G.audio.play("boon", 1.4, 0.5)
 
 func _pulse() -> void:
