@@ -230,6 +230,9 @@ func _comp(m: float) -> int:
 		pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.CEREB])
 	if m >= 8.5:
 		pool.append_array([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.DRONE, Enemy.EKind.KONAKCI])
+	# kalkan muhafızı: geç dalga zırhlı öncü — cepheyi tutar
+	if m >= 6.0:
+		pool.append(Enemy.EKind.MUHFIZ)
 	# hamal taşıyıcı: nadir yük düşürücü — 4:30'dan sonra havuza sızar
 	if m >= 4.5:
 		pool.append(Enemy.EKind.CARRIER)
@@ -241,7 +244,7 @@ func _comp(m: float) -> int:
 			2: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.HUSK])
 			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA])
 			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB])   # bataklık: şişkin konakçılar + kistler
-			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL]) # kül ovası: ateşi seven sert öncüler
+			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ]) # kül ovası: ateşi seven sert öncüler
 	return G.pick(pool)
 
 func _hp_scale() -> float:

@@ -4,11 +4,11 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ }
 
 # tür-bazlı ölüm patlaması rengi — kesimden kimin öldüğü görsel okunur
-const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700"}
-const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı"}
+const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff"}
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
@@ -16,6 +16,7 @@ enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 const KIND_SET := {
 	EKind.VARL: "c_varl", EKind.CEREB: "c_cereb",
 	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa", EKind.CARRIER: "c_carrier",
+	EKind.MUHFIZ: "c_alfa",
 }
 
 var kind: int = EKind.HUSK
@@ -113,6 +114,11 @@ func _setup_stats(hs: float, ds: float) -> void:
 			windup_t = 0.65; recover_t = 0.8; attack_cd = 1.5; touch_r = 44
 			actor_name = "Hamal Taşıyıcı"
 			knock_resist = 80.0
+		EKind.MUHFIZ:
+			max_hp = 110; speed = 52; touch_dmg = 17; radius = 17; hit_radius = 20
+			windup_t = 0.65; recover_t = 0.85; attack_cd = 1.5; touch_r = 46
+			actor_name = "Kalkan Muhafızı"
+			knock_resist = 85.0
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
@@ -171,6 +177,9 @@ func _make_body() -> void:
 	if kind == EKind.CARRIER and not elite:
 		base_color = Color(1.0, 0.85, 0.45)
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("ffb74d"), 0.4, 1.4)
+	if kind == EKind.MUHFIZ and not elite:
+		base_color = Color(0.72, 0.88, 1.0)
+		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
 		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043"}.get(affix, "7B1FA2")
@@ -455,7 +464,17 @@ func _cancel_attack() -> void:
 		if is_instance_valid(body):
 			body.modulate = base_color
 
+# Kalkan Muhafızı: cepheden gelen darbe kalkana çarpar — arkadan vur
 func take_hit(h: Dictionary) -> void:
+	if kind == EKind.MUHFIZ and is_instance_valid(G.player) and h.has("from"):
+		var fw := (G.player.pos - pos).normalized()
+		var aw := (Vector2(h.get("from")) - pos).normalized()
+		if fw.dot(aw) > 0.35:
+			h["dmg"] = float(h.get("dmg", 0.0)) * 0.25
+			if not h.has("_shield_fx"):
+				h["_shield_fx"] = true
+				G.fx.burst(pos + aw * 20.0 + Vector2(0, -10), Px.C("80d8ff"), 6, 90.0, 3.0, 0.25)
+				G.audio.play("dash", 2.2, 0.25)
 	super.take_hit(h)
 	if _st == St.RISE:
 		_rise_t = minf(_rise_t, 0.15)
@@ -494,7 +513,7 @@ func die(h: Dictionary) -> void:
 		G.fx.burst(pos, Px.C("8dc63f"), 14, 150.0, 4.0, 0.4)
 	if is_instance_valid(G.room):
 		# XP gem every kill; elites also drop a chest; rare heal orb
-		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0][kind] + (10.0 if elite else 0.0)
+		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0, 7.0][kind] + (10.0 if elite else 0.0)
 		G.room.spawn_gem(pos, xp_val)
 		if elite:
 			G.room.spawn_chest(pos)
