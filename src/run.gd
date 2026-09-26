@@ -103,6 +103,28 @@ func _process(_d: float) -> void:
 	if pending_drafts > 0 and G.state == G.State.ROOM and is_instance_valid(G.ui) and not G.ui.overlay_open():
 		pending_drafts -= 1
 		G.ui.levelup_draft()
+	if streak_t > 0.0:
+		streak_t -= get_process_delta_time()
+		if streak_t <= 0.0:
+			streak = 0
+
+# kill streak: chained kills within 2.5s pay milestone fragment bonuses
+var streak := 0
+var streak_t := 0.0
+
+func on_kill(_elite: bool) -> void:
+	streak += 1
+	streak_t = 2.5
+	var bonus := 0
+	match streak:
+		15: bonus = 10
+		30: bonus = 25
+		60: bonus = 60
+		120: bonus = 150
+	if bonus > 0:
+		fragments += bonus
+		G.ui.toast("KATLİAM x%d  —  +%d parçacık" % [streak, bonus])
+		G.audio.jingle("boon")
 
 func open_chest() -> void:
 	var evos := Weapons.evo_ready(G.player)

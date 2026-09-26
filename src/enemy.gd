@@ -385,6 +385,7 @@ func die(h: Dictionary) -> void:
 	G.meta.data.kills += 1
 	if is_instance_valid(G.run):
 		G.run.stats.kills = int(G.run.stats.get("kills", 0)) + 1
+		G.run.on_kill(elite)
 	G.audio.play("die", G.rf(0.9, 1.2), 0.6)
 	G.fx.light_flash(pos + Vector2(0, -12), Color(1, 0.5, 0.3), 1.4, 2.4, 0.2)
 	G.fx.burst(pos + Vector2(0, -10), Color(0.5, 0.05, 0.05), 30 if elite else 16, 190.0, 5.0, 0.6, 6.0)
