@@ -44,6 +44,7 @@ var _combo_queued := false
 var _plasma_charge := -1.0   # <0 = not charging
 var _attack_slow := 1.0
 var revived := false
+var revives_extra := 0   # lütuf kaynaklı ek dirilmeler
 var _swing_hit_done := false
 var charge_rate := 1.0       # plasma charge speed (Rex overcharge boon)
 var _charge_full := false
@@ -476,8 +477,12 @@ func take_hit(h: Dictionary) -> void:
 	G.ui.hurt_flash()
 	invuln = maxf(invuln, 0.55)
 	if hp <= 0:
-		if G.meta.upg(Meta.U.REVIVE) > 0 and not revived:
-			revived = true
+		var rev_meta := G.meta.upg(Meta.U.REVIVE) > 0 and not revived
+		if rev_meta or revives_extra > 0:
+			if rev_meta:
+				revived = true
+			else:
+				revives_extra -= 1
 			hp = max_hp * 0.4
 			invuln = 2.0
 			G.fx.burst(pos + Vector2(0, -12), Px.C("7B1FA2"), 40, 280.0, 6.0, 0.8)
@@ -503,7 +508,7 @@ func reset_for_run() -> void:
 	lifesteal = 0.0; heal_on_kill = 0.0; dash_regen_mult = 1.0
 	b_gravity_well = false; b_homing = false; b_poison = false
 	b_emp = false; b_parry_shock = false; b_stealth_dash = false
-	stealth_t = 0.0; revived = false
+	stealth_t = 0.0; revived = false; revives_extra = 0
 	charge_rate = 1.0; _charge_full = false
 	# survivors reset: starter blade, empty passives, level 1
 	for w in weapons:

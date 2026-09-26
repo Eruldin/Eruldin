@@ -17,6 +17,7 @@ static func all() -> Array:
 		{"id":"homing","patron":"Neva","name":"Kıvrılan Mermiler","desc":"Plazma mermileri hedefe döner","rarity":1,"color":Px.C("7B1FA2")},
 		{"id":"mind","patron":"Neva","name":"Zihin Kırılması","desc":"+%15 kritik ihtimali","rarity":0,"color":Px.C("7B1FA2")},
 		{"id":"aegis","patron":"Neva","name":"Telekinetik Zırh","desc":"Dash sonrası +0.15sn dokunulmazlık","rarity":2,"color":Px.C("7B1FA2")},
+		{"id":"revive","patron":"Neva","name":"İkinci Nefes","desc":"Ölümden bir kez %40 canla dönersin","rarity":2,"color":Px.C("7B1FA2")},
 		# --- Saphire Kabile Taktikleri ---
 		{"id":"venom","patron":"Saphire","name":"Zehir Sürme","desc":"Vuruşlar zehir bırakır (hasarın %25'i/sn)","rarity":0,"color":Px.C("00E676")},
 		{"id":"predator","patron":"Saphire","name":"Avcı Odağı","desc":"+%10 kritik, kritik ×2.4","rarity":1,"color":Px.C("00E676")},
@@ -90,3 +91,4 @@ static func apply(id: String, p: Player) -> void:
 		"bloodlust": p.dmg_mult *= 1.40; p.dmg_taken_mult *= 1.15
 		"frenzy": p.atk_speed *= 1.18; p.max_hp = maxf(20.0, p.max_hp - 15); p.hp = minf(p.hp, p.max_hp)
 		"carapace": p.lifesteal += 0.08; p.max_hp = maxf(20.0, p.max_hp * 0.9); p.hp = minf(p.hp, p.max_hp)
+		"revive": p.revives_extra += 1
