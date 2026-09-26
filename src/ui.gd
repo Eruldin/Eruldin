@@ -381,6 +381,7 @@ func _tick_hud() -> void:
 	_lvl_lbl.text = "SEV %d" % p.level
 	var tt := int(G.run.time)
 	_time_lbl.text = "%02d:%02d" % [tt / 60, tt % 60]
+	_time_lbl.add_theme_color_override("font_color", Px.C("ff5533") if G.run.hyper else Color(0.9, 0.95, 1))
 	_kills_lbl.text = "%d kesim" % int(G.run.stats.get("kills", 0))
 	_sync_gear_rows(p)
 	while _boon_row.get_child_count() < G.run.boon_ids.size():
@@ -796,7 +797,11 @@ func biome_panel() -> void:
 		opts.append({"kind": "biome", "id": i, "name": "%s\n%s" % [BIOME_NAME[i], tag],
 			"icon": boss_por[i], "col": ["00E5FF", "00E676", "ffb74d", "c26bff"][i],
 			"desc": "%s\nzorluk %s" % [_biome_desc(i), "★".repeat(i + 1)], "top": "", "w": 1.0})
-	_show_cards("biomesel", "SAHA SEÇİMİ — David'in izleri  [1-4]", Px.C("00E5FF"), opts)
+	var hyp := bool(G.meta.data.get("hyper", false))
+	opts.append({"kind": "biome", "id": -1, "name": "AŞILAMA\n%s" % ("◈ AÇIK" if hyp else "MOD"),
+		"icon": "icn_kovan", "col": "ff5533",
+		"desc": "kovan hızlı ve kalabalık akar\nparçacık ödemesi ×1.5", "top": "", "w": 1.0})
+	_show_cards("biomesel", "SAHA SEÇİMİ — David'in izleri  [1-5]", Px.C("00E5FF"), opts)
 
 func _biome_desc(b: int) -> String:
 	return ["Proterian çoraklığı — Alfa-05'in izi.",
@@ -956,9 +961,16 @@ func _pick_card(o: Dictionary) -> void:
 		return
 	_close_overlay()
 	if kind == "biomesel":
-		G.meta.data["arena_biome"] = int(o.get("id", 0))
-		G.meta.save()
-		G.ui.toast("saha: %s — portal o koordinata açılıyor" % BIOME_NAME[int(o.get("id", 0))])
+		var bid := int(o.get("id", 0))
+		if bid == -1:
+			var hyp := not bool(G.meta.data.get("hyper", false))
+			G.meta.data["hyper"] = hyp
+			G.meta.save()
+			G.ui.toast("aşılama %s — kovan %s" % ["AÇILDI" if hyp else "kapatıldı", "hızlı ve kalabalık akacak" if hyp else "normal akacak"])
+		else:
+			G.meta.data["arena_biome"] = bid
+			G.meta.save()
+			G.ui.toast("saha: %s — portal o koordinata açılıyor" % BIOME_NAME[bid])
 		G.audio.jingle("boon")
 		return
 	if str(o.get("kind", "")) == "reroll":

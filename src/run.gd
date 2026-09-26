@@ -13,7 +13,9 @@ const BOSS_NAMES := ["REX / ALPHA-05", "PROTERIAN HOST", "NAHUM & TUMAN", "KIRIN
 
 var game: Node2D
 var biome := 0
-var depth := 0            # room index within the biome (0..ROOMS_PER_BIOME)
+var depth := 0
+var hyper := false          # AŞILAMA modu — David'in saha panelinden açılır
+var reward_mult := 1.0     # choralim payout multiplier (hyper ×1.5)
 var fragments := 0        # impure choralim gathered this run → purified on death
 var boon_ids: Array = []
 var luck := 0.0           # raised by elites; sways epic boon rolls
@@ -44,6 +46,8 @@ func hub() -> void:
 
 func start_run() -> void:
 	biome = clampi(int(G.meta.data.get("arena_biome", 0)), 0, 3)
+	hyper = bool(G.meta.data.get("hyper", false))
+	reward_mult = 1.5 if hyper else 1.0
 	depth = -1
 	fragments = 0
 	boon_ids.clear()
@@ -63,6 +67,8 @@ func start_run() -> void:
 	_place_player(a)
 	G.player.reset_for_run()
 	G.ui.hub_ui(false)
+	if hyper:
+		G.ui.toast("AŞILAMA AKTİF — kovan hızlı akıyor, ödeme ×1.5")
 	var dr := Director.new()
 	dr.biome = biome
 	add_child(dr)
@@ -204,7 +210,7 @@ func victory() -> void:
 	stats.time = time
 	stats.level = G.player.level if is_instance_valid(G.player) else 1
 	_write_last_run(true)
-	var gained := int(fragments * G.meta.frag_mult())
+	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
 	G.meta.add_choralim(gained)
 	stats.gained = gained
 	fragments = 0
@@ -228,7 +234,7 @@ func on_player_death(h: Dictionary) -> void:
 	G.ui.boss_bar(false, null)
 	_write_last_run(false)
 	G.meta.record_death(killer, biome, int(time), was_boss)
-	var gained := int(fragments * G.meta.frag_mult())
+	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
 	G.meta.add_choralim(gained)
 	fragments = 0
 	G.ui.death_screen(killer, gained)
@@ -237,7 +243,7 @@ func abandon_to_hub() -> void:
 	if not alive:
 		return
 	alive = false
-	var gained := int(fragments * G.meta.frag_mult())
+	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
 	if gained > 0:
 		G.meta.add_choralim(gained)
 	fragments = 0
