@@ -239,6 +239,7 @@ func _write_last_run(win: bool) -> void:
 		G.meta.data["kind_kills"] = mk
 		G.meta.save()
 	G.meta.data["best_evos"] = maxi(int(G.meta.data.get("best_evos", 0)), int(stats.get("evos", 0)))
+	G.meta.data["best_streak_all"] = maxi(int(G.meta.data.get("best_streak_all", 0)), int(stats.get("best_streak", 0)))
 	# koşu skoru: kesim + seviye + süre + evrim + azap çarpanı — rekor meta'da tutulur
 	var score := int(stats.get("kills", 0)) * 10 + int(stats.get("level", 1)) * 120 + int(time) * 3 + int(stats.get("evos", 0)) * 500 + curse * 250
 	stats["score"] = score
