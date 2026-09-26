@@ -58,6 +58,11 @@ var data := {
 	"curse_wins": 0,       # 2+ sözleşmeyle kazanılan zafer
 	"eggs": 0,             # toplanan altın nüve (kalıcı +%0.5 hasar/adet)
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
+	"kind_kills": {},      # tür-bazlı toplam kesimler (Zirkon kayıtları)
+	"best_streak_all": 0,  # tüm zamanların en uzun serisi
+	"best_score": 0,       # en yüksek koşu skoru
+	"arcanas_seen": [],    # kullanılan koz kartları (KOLEKSİYONCUSU besler)
+	"_last_contract_key": "",  # Ehnar sözleşme tekrar engeli
 	"last_death": {"killer":"", "biome":0, "depth":0, "boss":false},
 	"shop_stock": [],      # Saphire'in tezgâh stoku — koşu başına yenilenir
 	"shop_gen": -1,        # stok üretimindeki koşu sayacı

@@ -124,6 +124,8 @@ func _synth(n: String) -> PackedByteArray:
 		"plasma": return _sweep(0.22, 220.0, 90.0, false)
 		"plasmaCharge": return _sweep(0.5, 120.0, 700.0, false)
 		"shoot": return _sweep(0.12, 900.0, 200.0, false)
+		"zap": return _hit(0.08, 2400.0, 0.65)
+		"beam": return _sweep(0.3, 1800.0, 500.0, false)
 		"die": return _hit(0.3, 180.0, 0.9)
 		"hurt": return _hit(0.14, 500.0, 0.6)
 		"door": return _chime([330.0, 495.0], 0.35)
