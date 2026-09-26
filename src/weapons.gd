@@ -323,6 +323,8 @@ static func _opt(kind: String, id: String, lvl: int, name: String, icon: String,
 
 # VS achievement gating: gated weapons only draft once the meta goal is met
 static func unlocked(wid: String) -> bool:
+	if G.meta != null and Array(G.meta.data.get("wep_unlocked", [])).has(wid):
+		return true
 	var req: Dictionary = DEFS.get(wid, {}).get("req", {})
 	if req.is_empty():
 		return true

@@ -44,6 +44,7 @@ const DEFS := [
 	{"id": "q_lanet", "giver": "saphire", "name": "LANETLİ MALLAR",    "desc": "Kızıl sandıklar pusu taşıyor ama içi dolu. 3 lanetli sandık aç — pusuya değer.", "obj": {"type": "cursed", "n": 3}, "rew": {"cho": 130, "item": "i_bosluk"}, "prereq": "q_loot"},
 	{"id": "q_kul",   "giver": "david",   "name": "KÜL ROTASI",         "desc": "Kuyu'nun doğusunda kül hâlâ yanıyor — Alfa Şövalyeleri orada toplanıyor. 10 tanesini kes, rotayı çıkarayım.", "obj": {"type": "kind", "k": "Alfa Şövalye", "n": 10}, "rew": {"cho": 150, "node": "kulovasi"}, "prereq": "q_sinir"},
 	{"id": "q_iz",    "giver": "neva",    "name": "YANKININ İZİ",       "desc": "Düştüğün yerde parçacıkların kalır. Öldüğün sahaya geri dön, eski cesedinden yükünü geri al — iki kez.", "obj": {"type": "ceset", "n": 2}, "rew": {"cho": 140, "item": "i_koro"}, "prereq": "q_surv"},
+	{"id": "q_aura",  "giver": "vane",    "name": "AURA FİŞEĞİ",         "desc": "Rezonans protokolü denemeye hazır. Tek koşuda 12 elit kes — fişeği sana bağlarım.", "obj": {"type": "elites", "n": 12}, "rew": {"cho": 160, "wep": "aura"}, "prereq": "q_nobet"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -195,6 +196,11 @@ static func claim(id: String) -> Dictionary:
 		if not un.has(str(rew.node)):
 			un.append(str(rew.node))
 		G.meta.data["unlocked"] = un
+	if str(rew.get("wep", "")) != "":
+		var wu: Array = G.meta.data.get("wep_unlocked", [])
+		if not wu.has(str(rew.wep)):
+			wu.append(str(rew.wep))
+		G.meta.data["wep_unlocked"] = wu
 	G.meta.save()
 	return rew
 
@@ -206,6 +212,8 @@ static func rew_text(rew: Dictionary) -> String:
 		parts.append("eşya: %s" % str(Items.DEFS.get(str(rew.item), {}).get("name", rew.item)))
 	if str(rew.get("node", "")) != "":
 		parts.append("yeni bölge açıldı")
+	if str(rew.get("wep", "")) != "":
+		parts.append("silah: %s" % str(Weapons.DEFS.get(str(rew.wep), {}).get("name", rew.wep)))
 	return " + ".join(parts)
 
 static func obj_text(q: Dictionary) -> String:
