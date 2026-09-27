@@ -521,6 +521,10 @@ func _contract_tick() -> void:
 		G.ui.toast("EHNAR: sözleşme tuttu — +%d◆" % r)
 		G.audio.jingle("boon")
 		G.meta.data["contracts_done"] = int(G.meta.data.get("contracts_done", 0)) + 1
+		var t0 := Quests.rep_tier()
+		G.meta.data["rep"] = int(G.meta.data.get("rep", 0)) + 1
+		if Quests.rep_tier() > t0:
+			G.ui.toast("kamp itibarın yükseldi: %s" % Quests.rep_name())
 		c = {}
 	if c.is_empty():
 		var nxt: Dictionary = CONTRACTS[randi() % CONTRACTS.size()]
@@ -552,7 +556,7 @@ func victory() -> void:
 		wn.append(node_id)
 		G.meta.data["won_nodes"] = wn
 	var tribute := wn.size() * 12
-	var gained := int(fragments * G.meta.frag_mult() * reward_mult) + tribute
+	var gained := int(fragments * G.meta.frag_mult() * reward_mult * Quests.rep_mult()) + tribute
 	G.meta.add_choralim(gained)
 	stats.gained = gained
 	fragments = 0
@@ -616,7 +620,7 @@ func on_player_death(h: Dictionary) -> void:
 	# endless'te zafer çoktan bankada — sözleşmeler/özet zaferi korur
 	_write_last_run(endless)
 	G.meta.record_death(killer, biome, int(time), was_boss)
-	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
+	var gained := int(fragments * G.meta.frag_mult() * reward_mult * Quests.rep_mult())
 	G.meta.add_choralim(gained)
 	fragments = 0
 	for f in G.meta.new_feats():
@@ -635,7 +639,7 @@ func abandon_to_hub() -> void:
 	if not alive:
 		return
 	alive = false
-	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
+	var gained := int(fragments * G.meta.frag_mult() * reward_mult * Quests.rep_mult())
 	if gained > 0:
 		G.meta.add_choralim(gained)
 	fragments = 0

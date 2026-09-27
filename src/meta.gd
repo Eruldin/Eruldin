@@ -87,6 +87,7 @@ var data := {
 	"geodes": 0,           # kırılan damar jeotu sayısı (çukur gizli olayı)
 	"baskin_wins": 0,      # koro baskını altında kazanılan zaferler
 	"contracts_done": 0,  # Ehnar'da tutan sözleşme sayısı
+	"rep": 0,            # kamp itibarı — görev/sözleşme başına +1; kademe ödeme çarpanı verir
 	"title": "",           # takılı unvan (TITLES id) — koşu sonu ekranlarında görünür
 	"kind_kills": {},      # tür-bazlı toplam kesimler (Zirkon kayıtları)
 	"best_streak_all": 0,  # tüm zamanların en uzun serisi
@@ -210,6 +211,7 @@ func achievements() -> Array:
 		{"name": "JEOT USTASI", "desc": "5 damar jeotu kır", "done": int(data.get("geodes", 0)) >= 5, "rew": 180},
 		{"name": "BASKIN AVCISI", "desc": "koro baskını altında 3 zafer kazan", "done": int(data.get("baskin_wins", 0)) >= 3, "rew": 220},
 		{"name": "SÖZLEŞME USTASI", "desc": "Ehnar'da 8 sözleşme tuttur", "done": int(data.get("contracts_done", 0)) >= 8, "rew": 200},
+		{"name": "KAMPIN SESİ", "desc": "kamp itibarın KAHRAMAN kademesine ulaşsın (40 puan)", "done": int(data.get("rep", 0)) >= 40, "rew": 250},
 		{"name": "MASA KIRANI", "desc": "Tegan'da 6 bahis tuttur", "done": int(data.get("bets_won", 0)) >= 6, "rew": 180},
 		{"name": "BEŞ GÖVDE", "desc": "beş farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 5, "rew": 400},
 		{"name": "ALTI GÖVDE", "desc": "altı farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 6, "rew": 500},
@@ -227,6 +229,7 @@ const TITLES := [
 	{"id": "kolek",   "name": "KOLEKSİYONER",   "src": "KOLEKSİYONER"},
 	{"id": "baskin",  "name": "BASKIN KIRICI",  "src": "BASKIN AVCISI"},
 	{"id": "sozlesme","name": "SÖZLEŞME KILICI", "src": "SÖZLEŞME USTASI"},
+	{"id": "itibar",  "name": "KAMPIN SESİ",    "src": "KAMPIN SESİ"},
 	{"id": "kiran",   "name": "PROTOKOLÜ KIRAN", "src": "PROTOKOLÜ KIRAN"},
 	{"id": "dare",    "name": "DARE KIRAN",      "src": "DARE KIRAN"},
 	{"id": "cukur",   "name": "DAMAR YÜRÜYEN",    "src": "ÇUKURUN DİBİ"},
