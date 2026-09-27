@@ -71,6 +71,8 @@ const DEFS := [
 	{"id": "q_dev",   "giver": "ahusk",   "name": "BATAKLIĞIN EFENDİSİ","desc": "Bataklığın dibinde bir dev oturuyor — gençliğimde ondan kaçtım, şimdi sen indir. Kalbi sana tılsım olur.", "obj": {"type": "boss", "k": "dev"}, "rew": {"cho": 240, "item": "i_devkalp"}, "prereq": "q_batak"},
 	{"id": "q_sarnic","giver": "ahusk",   "name": "SUYUN ALTINDA",      "desc": "Sarnıçların hâlâ dolu olduğunu bilirim — bataklıkta bir tanesi gördüm. Tek koşuda 1600 parçacık getir, girişin yerini çizeyim.", "obj": {"type": "frag", "n": 1600}, "rew": {"cho": 260, "node": "sarnic"}, "prereq": "q_batak"},
 	{"id": "q_balcik","giver": "ahusk",   "name": "ÇAMURUN İÇİNDEKİ",   "desc": "Balçıktan yürüyenler kervan yolunu kesiyor — bırakırsan yarası kapanıyor. On tanesini çökert, kalbini sana tılsım yapayım.", "obj": {"type": "kind", "k": "Balçık Adam", "n": 10}, "rew": {"cho": 200, "item": "i_balcikkalp"}, "prereq": "q_sarnic"},
+	{"id": "q_dokuz", "giver": "zirkon",  "name": "DOKUZ DEFTER",      "desc": "Defterde dokuz efendi sayfası var — hepsi düşerse protokolün savaş kısmı biter. Dokuzuncu kapanışta praetorian gövde zırhını veririm.", "obj": {"type": "bosses", "n": 9}, "rew": {"cho": 300, "item": "i_praetorian"}, "prereq": "q_final"},
+	{"id": "q_soy",  "giver": "zirkon",  "name": "TÜM SOY",            "desc": "Kaydın eksik — kovanın her soyundan birini görmeden defter kapanmaz. On dört türü de gözle; kemer takasını yapayım.", "obj": {"type": "kinds", "n": 14}, "rew": {"cho": 260, "item": "i_soykemer"}, "prereq": "q_dokuz"},
 	{"id": "q_kor",   "giver": "ehnar",   "name": "KÜLLERİN EFENDİSİ",  "desc": "Kül Ovası'nda son efendi oturuyor — imparatorluğunun tahtı hâlâ yanıyor. Kor Yücelten'i düşür; tacını sana miğfer yaparım.", "obj": {"type": "boss", "k": "kor"}, "rew": {"cho": 240, "item": "i_kortac"}, "prereq": "q_kul"},
 	{"id": "q_karne", "giver": "mina",    "name": "İKSİR KARNESİ",        "desc": "Şifa içecek şişe değil, disiplin ister. Altı iksir iç — karneni ocak defterine işlerim.", "obj": {"type": "iksir", "n": 6}, "rew": {"cho": 140, "item": "i_kemer_par"}, "prereq": "q_sofra"},
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
@@ -97,6 +99,10 @@ static func state(id: String) -> String:
 			cur = (G.meta.data.get("lore", []) as Array).size()
 		elif t == "nodes":
 			cur = (G.meta.data.get("won_nodes", []) as Array).size()
+		elif t == "bosses":
+			cur = (G.meta.data.get("bosses", []) as Array).size()
+		elif t == "kinds":
+			cur = (G.meta.data.get("seen_kinds", []) as Array).size()
 		if cur >= 0:
 			_q()[id]["prog"] = maxi(prog(id), cur)
 		if cur >= int(q.obj.get("n", 1)):
