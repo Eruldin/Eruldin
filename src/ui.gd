@@ -1218,7 +1218,13 @@ func worldmap_panel() -> void:
 			if ev is InputEventMouseButton and ev.pressed:
 				_wmap_pick(nid, info, sel))
 		btn.mouse_entered.connect(func():
-			info.text = "%s — %s%s" % [str(n.name), str(n.desc), "" if can else "   [%s]" % Wmap.unlock_text(nid)])
+			var line := "%s — %s%s" % [str(n.name), str(n.desc), "" if can else "   [%s]" % Wmap.unlock_text(nid)]
+			var recd: Dictionary = (G.meta.data.get("node_rec", {}) as Dictionary).get(nid, {})
+			if not recd.is_empty():
+				line += "   [rekor %d · zafer %d · yenilgi %d]" % [int(recd.get("s", 0)), int(recd.get("w", 0)), int(recd.get("d", 0))]
+			if (G.meta.data.get("won_nodes", []) as Array).has(nid):
+				line += "   ◆ FETHEDİLDİ"
+			info.text = line)
 	# mutator şeridi
 	var mut := HBoxContainer.new()
 	mut.alignment = BoxContainer.ALIGNMENT_CENTER
