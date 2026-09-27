@@ -110,6 +110,7 @@ var _hp_txt: Label
 var _ch_back: ColorRect
 var _ch_bar: ColorRect
 var _dash_row: HBoxContainer
+var _skill_lbl: Label
 var _frag_lbl: Label
 var _boon_row: HBoxContainer
 var _room_lbl: Label
@@ -236,6 +237,10 @@ func _build_hud() -> void:
 	_dash_row.position = Vector2(21, 678)
 	_dash_row.add_theme_constant_override("separation", 5)
 	_hud.add_child(_dash_row)
+
+	# Q aktif yetenek pimi — hazır olunca yanar
+	_skill_lbl = _lbl("Q", Vector2(90, 676), 14, Px.C("ffd75f"))
+	_hud.add_child(_skill_lbl)
 
 	_frag_lbl = _lbl("◆ 0", Vector2(1140, 648), 16, Px.C("c26bff"))
 	_hud.add_child(_frag_lbl)
@@ -429,6 +434,10 @@ func _tick_hud() -> void:
 		_dash_row.add_child(c)
 	for i in _dash_row.get_child_count():
 		_dash_row.get_child(i).modulate = Px.C("00E5FF") if i < p.dash_charges else Color(0.15, 0.2, 0.28)
+	if is_instance_valid(_skill_lbl):
+		var scol: Color = {"elyb": Px.C("9db4c8"), "via": Px.C("00E5FF")}.get(str(G.meta.data.get("hero", "ely")), Px.C("c26bff"))
+		_skill_lbl.add_theme_color_override("font_color", scol if p.skill_cd <= 0 else Color(0.3, 0.3, 0.35))
+		_skill_lbl.text = "Q" if p.skill_cd <= 0 else str(int(ceil(p.skill_cd)))
 	_frag_lbl.text = "◆ %d  (+%d)" % [G.meta.data.choralim, int(G.run.fragments * G.meta.frag_mult())]
 	_xp_bar.size.x = 1280.0 * clampf(p.xp / maxf(p.xp_next, 1.0), 0.0, 1.0)
 	# choralim pulse (#6a3fd1 -> #2c9be8) per the art bible
