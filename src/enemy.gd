@@ -1047,6 +1047,7 @@ func die(h: Dictionary) -> void:
 					G.room.spawn_loot(iid3, pos + Vector2(-20, 14))
 				G.run.drop_fragments(pos + Vector2(20, 10), 12)
 				G.ui.toast("devriye başı düştü — zula açıldı")
+				Quests.tick("devriye")
 			if actor_name.contains("HASATÇI"):
 				G.meta.data["reapers"] = int(G.meta.data.get("reapers", 0)) + 1
 				G.meta.save()
