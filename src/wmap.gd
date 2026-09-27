@@ -118,6 +118,7 @@ const NODES := [
 		{"label": "KULEYİ MÜHÜRLE — sondaj kapansın", "sub": "Matkabı kilitlersin; damar huzursuzluğu diner. Kamp bunu duyar — Lena haritasına kuleyi 'güvenli' diye işler.", "rew": {"cho": 90, "rep": 2, "omen": {"heal": 1.15}, "cine": [{"tex": "cine_7_0", "title": "SONDAJ MÜHÜRLENDİ", "sub": "Kilidi çevirdin; kule içindeki uğultu sustu. Çukurun nabzı bir gece için yumuşadı."}]}},
 	]},
 	{"id": "seren", "name": "SEREN TEPESİ",     "icon": "icn_dash",    "pos": Vector2(1450, 165), "col": "c8f0ff", "kind": "arena", "biome": 8, "unlock": "node", "desc": "Buzulun doğu omzunda aurora'nın yere değdiği tepe — tayflar burada yoğunlaşır, elit nöbetçiler ışığın altında döner.", "lore": "Lena'nın haritasında burası 'seren' diye işaretli — denizci diliyle 'göğün direği'. Auroranın düştüğü yerde tayflar katılaşır: gece boyunca tepenin üstünde dönen bir ışık kervanı var; katılan çıkamaz diyorlar.", "mods": {"hp": 1.35, "dmg": 1.2, "spawn": 0.95, "frag": 1.8, "loot": 1.55, "elite_t": 0.6, "dusk": true}},
+	{"id": "islik", "name": "IŞIK İŞLİĞİ",      "icon": "icn_mine",   "pos": Vector2(1335, 470), "col": "80ffd4", "kind": "arena", "biome": 7, "unlock": "node", "desc": "Çukurun doğu duvarında kristali saflaştıran eski işlik — damardan yürüyen zırhlılar fırınların başında nöbet tutuyor.", "lore": "İmparatorluğun saflaştırma hattı: ham damar burada parlatılır, kusurlusu çukura geri dökülürdü. Fırınlar söndü ama kristal hâlâ işleniyor — artık işleyen kovan: KRİSTALLİ elitler bacaların arasında dönüyor, ve damar onlara elbise biçiyor.", "mods": {"hp": 1.3, "dmg": 1.2, "spawn": 1.05, "frag": 1.9, "loot": 1.45, "elite_t": 0.7, "dusk": true}},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -174,6 +175,7 @@ const EDGES := [
 	["kaos", "sondaj"], ["damar", "sondaj"], ["damarkasa", "sondaj"],
 	["koranit", "korgecidi"], ["kulovasi", "korgecidi"], ["korkasa", "korgecidi"], ["kuyu", "korgecidi"],
 	["beyazufuk", "seren"], ["kervan", "seren"],
+	["damar", "islik"], ["sondaj", "islik"], ["damarkasa", "islik"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için
