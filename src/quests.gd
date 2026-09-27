@@ -378,6 +378,13 @@ static func rep_tier() -> int:
 static func rep_name() -> String:
 	return REP_NAMES[rep_tier()]
 
+# kamp itibarı fiyat indirimi: katman başına %4 (EFSANE'de %16)
+static func rep_discount() -> float:
+	return 1.0 - 0.04 * rep_tier()
+
+static func rep_price(x: int) -> int:
+	return maxi(1, int(round(float(x) * rep_discount())))
+
 static func rep_mult() -> float:
 	return 1.0 + 0.05 * rep_tier()
 
