@@ -26,6 +26,9 @@ const BUILDS := {
 	"kuyu":   {"name": "Kuyu",           "cost": 500, "icon": "icn_upg_hp",     "req": "yuva", "desc": "Temiz su — her koşunun başında iki şifa küresi sahaya düşer"},
 	"sur":    {"name": "Sur Duvarı",     "cost": 600, "icon": "icn_upg_shield", "req": "kule", "desc": "Kamp surları — her sahada ekstra bir sandık bekler"},
 	"ahir":   {"name": "Ağıl",           "cost": 550, "icon": "icn_kovan",      "req": "kuyu", "desc": "Yakaladığın sürüngenler kampına döner — her biri koşu başına +3 parçacık (en çok 12)"},
+	"kehne":  {"name": "Kehanet Ocağı",   "cost": 750, "icon": "icn_crown",      "req": "kule",   "desc": "Koz kartlarını okuyan ocak — kader taslağı artık 4 kart sunar"},
+	"talim":  {"name": "Talim Sahası",    "cost": 800, "icon": "icn_upg_dmg",    "req": "atolye", "desc": "Ehnar'ın idman meydanı — koşuya 2. seviyeden başlarsın (ilk taslak bedava)"},
+	"umbar":  {"name": "Erzak Ambarı",    "cost": 700, "icon": "icn_upg_frag",   "req": "yuva",   "desc": "Mina'nın kileri — iksir ve şarap karnen birer adet büyür"},
 }
 
 const SAVE_PATH := "user://dusus_save.json"
