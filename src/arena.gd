@@ -197,6 +197,18 @@ func _place_hazards_arena() -> void:
 				t5.sr.modulate.a = 0.12
 				G.fx.mk_light(self, p, Px.C("ff7722"), 0.4, 1.5)
 				hazards.append({"pos": p, "r": 52.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(2, 6), "tele": t5, "erupt": 0.0, "col": "ff7722"})
+			6:
+				if i < 3:
+					# üç sabit hortum patlaması
+					var t6 := G.fx.tele_circle(p, 56.0, 9999.0, Color(1.0, 0.68, 0.3, 0.25))
+					t6.sr.modulate.a = 0.12
+					G.fx.mk_light(self, p, Px.C("ffaa55"), 0.4, 1.5)
+					hazards.append({"pos": p, "r": 56.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(2, 6), "tele": t6, "erupt": 0.0, "col": "ffaa55"})
+				else:
+					# Kızıl Çöl: sürüklenen kum hortumu — sahayı dolaşır, içindekini döndürerek iter
+					var tt := G.fx.tele_circle(p, 62.0, 9999.0, Color(1.0, 0.7, 0.35, 0.22))
+					tt.sr.modulate.a = 0.16
+					hazards.append({"pos": p, "r": 62.0, "dps": 8.0, "kind": "surgun", "t": -1.0, "tele": tt, "vel": Vector2.from_angle(rng.randf() * TAU) * 40.0, "sway": rng.randf() * TAU})
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))
 

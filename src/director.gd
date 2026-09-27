@@ -453,6 +453,13 @@ func _rain() -> void:
 		if is_instance_valid(G.room):
 			p = G.room.clamp_pos(p, 60.0)
 		_rain_strike(p, cfg)
+	# Kızıl Çöl: fırtına üç gezici hortum sürükler — ~24sn sahada kalırlar
+	if biome == 6 and is_instance_valid(G.room):
+		for j in 3:
+			var p2 := G.room.clamp_pos(G.player.pos + Vector2.from_angle(G.rf(0.0, TAU)) * G.rf(240.0, 340.0), 60.0)
+			var tt := G.fx.tele_circle(p2, 62.0, 9999.0, Color(1.0, 0.7, 0.35, 0.22))
+			tt.sr.modulate.a = 0.16
+			G.room.hazards.append({"pos": p2, "r": 62.0, "dps": 8.0, "kind": "surgun", "t": 24.0, "tele": tt, "vel": Vector2.from_angle(G.rf(0.0, TAU)) * 46.0, "sway": G.rf(0.0, TAU)})
 
 func _rain_strike(p: Vector2, cfg: Dictionary) -> void:
 	var r: float = cfg.r
