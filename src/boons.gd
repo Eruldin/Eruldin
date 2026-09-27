@@ -101,6 +101,7 @@ const ARCANAS := {
 	"celikk":  {"name": "ÇELİK KARIN",      "desc": "+30 azami can — ama -%10 hareket hızı", "col": "80d8ff"},
 	"guzergah":{"name": "KAÇAK GÜZERGÂHI",  "desc": "Kaçak elitler çok daha sık çıkar — ama sürü %8 sıklaşır", "col": "ffd54f"},
 	"yagma":   {"name": "KESKİN YAĞMA",     "desc": "Kritik vuruşlar %8 ihtimalle parçacık döker — ama -%10 deneyim", "col": "ffd75f"},
+	"narakad": {"name": "NARA KADERİ",      "desc": "Fanatik elitler çok daha sık çıkar — ama -6 azami can", "col": "ff5252"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -196,6 +197,10 @@ static func apply_arcana(id: String, p: Player) -> void:
 		"guzergah":
 			G.run.kacak_plus = true
 			G.run.node_mods["spawn"] = float(G.run.node_mods.get("spawn", 1.0)) * 1.08
+		"narakad":
+			G.run.fanatik_plus = true
+			p.max_hp -= 6.0
+			p.hp = minf(p.hp, p.max_hp)
 		"yagma":
 			p.set_meta("crit_frag", true)
 			p.xp_mult *= 0.90

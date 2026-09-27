@@ -39,6 +39,7 @@ var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var twin_chest := false    # İKİZ SANDIK kozu: her sandık çift doğar
 var waylay_chance := 0.35  # OLAY YERİ kozu: yol olayı olasılığı (1.0 = her seyahat)
 var baskin_plus := false   # NABIZ KURŞUNU kozu: baskın düğümü bereketi artar
+var fanatik_plus := false  # NARA KADERİ kozu: fanatik elitler sıklaşır
 var kacak_plus := false    # KAÇAK GÜZERGÂHI kozu: kaçak elitler çok daha sık
 var pending_ambush := false  # YOL OLAYI pusu: arenaya kuşatılmış girilir
 var _skip_waylay := false   # TEKRAR DENE: aynı node'a dönerken yol olayı atlanır
@@ -238,6 +239,7 @@ func start_run() -> void:
 	twin_chest = false
 	waylay_chance = 0.35
 	baskin_plus = false
+	fanatik_plus = false
 	curse = 0
 	pending_ambush = false
 	pending_dmg = 0.0
