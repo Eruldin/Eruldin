@@ -2103,6 +2103,9 @@ const WAYLAY := {
 	"tutsak": {"name": "ZİNCİRLİ YOLCU", "col": "ffab91",
 		"sub": "Bir gezgin kaya dibine zincirlenmiş — konakçı devriyeleri onu yem olarak bırakmış, etrafta nöbetçi sinyalleri dönüyor. Zinciri kırarsan sürü üstüne çöker; sessizce geçersen kimse fark etmez.",
 		"opts": ["KURTAR — kuşatılmış giriş, ama zulasındaki eşyayı sana bırakır", "GEÇ — nöbetçileri uyandırma"]},
+	"konservi": {"name": "KORO KONSERVİ", "col": "e8d060",
+		"sub": "Yol kenarında yarı gömülü bir Koro aktarıcısı hâlâ baskın nabzını yayınlıyor — içindeki diyapazon hâlâ ayarlı. Sızdırılmış frekansı bozarsan işaret başka düğüme kayar; kulak verirsen ritim zihnine yazılır.",
+		"opts": ["FREKANSI BOZ — baskın işareti başka düğüme kayar", "RİTMİ DİNLE — +%15 şansla sahaya in"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -2193,6 +2196,21 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				toast("zincir kırıldı — yolcu zulasını verdi, sürü harekete geçti")
 			else:
 				toast("yolcu arkanda kaldı — yolun sessiz")
+		"konservi":
+			if idx == 0:
+				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar
+				var cands: Array = []
+				for _n in Wmap.NODES:
+					if str(_n.get("kind", "")) == "arena" and Wmap.can_enter(str(_n.id)):
+						cands.append(str(_n.id))
+				cands.erase(str(G.meta.data.get("hot_node", "")))
+				if not cands.is_empty():
+					G.meta.data["hot_node"] = str(G.pick(cands))
+					G.meta.save()
+				toast("frekans bozuldu — baskın işareti kaydı")
+			else:
+				G.run.luck += 0.15
+				toast("nabzın ritmi zihinde — şans arttı")
 	G.audio.jingle("boon")
 	_close_overlay()
 	G.run._enter_arena()
