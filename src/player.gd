@@ -658,7 +658,7 @@ func take_hit(h: Dictionary) -> void:
 	if dead or invuln > 0:
 		return
 	var src = h.get("source")
-	if parry_active() and src is Actor and h.get("type") != G.DamageType.HAZARD:
+	if parry_active() and is_instance_valid(src) and src is Actor and h.get("type") != G.DamageType.HAZARD:
 		# successful parry
 		G.audio.play("parryOk")
 		G.fx.burst(pos + Vector2(0, -12), Px.C("00E5FF"), 18, 190.0, 4.5, 0.35)
@@ -682,14 +682,14 @@ func take_hit(h: Dictionary) -> void:
 	hp -= dmg
 	G.run.stats["_nodmg"] = 0.0   # hasarsiz seri kirildi
 	# BOZUCU elit: vuruşu aletleri karıştırır — Q bekleme süresi uzar, dash kilitlenir
-	if src is Actor and str(src.get("affix")) == "bozucu":
+	if is_instance_valid(src) and src is Actor and str(src.get("affix")) == "bozucu":
 		skill_cd = minf(skill_max, skill_cd + skill_max * 0.35)
 		_dash_cd = maxf(_dash_cd, 1.4)
 		G.fx.float_text(pos + Vector2(0, -48), "BOZULDU!", Px.C("ce93d8"), 0.95)
 		G.fx.burst(pos + Vector2(0, -14), Px.C("ce93d8"), 12, 140.0, 3.5, 0.3)
 		G.audio.play("hurt", 0.7)
 	# AYAZLI elit: vuruşu dondurur — kısa süreli hareket yavaşlaması
-	if src is Actor and str(src.get("affix")) == "soguk":
+	if is_instance_valid(src) and src is Actor and str(src.get("affix")) == "soguk":
 		chill_t = maxf(chill_t, 1.6)
 		G.fx.float_text(pos + Vector2(0, -62), "DONAKALDIN!", Px.C("bfe8ff"), 0.9)
 		G.fx.burst(pos + Vector2(0, -10), Px.C("bfe8ff"), 10, 120.0, 3.0, 0.3)
