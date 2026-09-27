@@ -81,6 +81,7 @@ const DEFS := [
 	{"id": "q_dg",    "giver": "vane",    "name": "GÖVDENİN ŞARKISI",     "desc": "Kalp kalıntılarından bir kasa dövdüm — G-1'i sahada sınamadan kampı salmam. O gövdeyle bir zafer getir; nabız çekirdeğini kemerine takarım.", "obj": {"type": "hero_won", "id": "dg", "n": 1}, "rew": {"cho": 280, "item": "i_nabizcek"}, "prereq": "q_kalp"},
 	{"id": "q_kaos",  "giver": "zirkon",  "name": "KAOS SIZINTISI",        "desc": "Çukurun güney ucunda damar kararsız — kayıtlarım orada tutarlı tek veri bırakmıyor. On dört Damar Golemi'ni çökert; sızıntının kaynağını haritaya işlerim.", "obj": {"type": "kind", "k": "Damar Golemi", "n": 14}, "rew": {"cho": 380, "node": "kaos", "rep": 2}, "prereq": "q_kalp"},
 	{"id": "q_kaos2", "giver": "zirkon",  "name": "KAOS ÇÖZÜMÜ",           "desc": "Sızıntı düğümünü açtın — şimdi onu sindir. Damarın üç sızıntısını da zaferle kapat; kararsız çekirdeği sana kemer yaparım.", "obj": {"type": "kaos", "n": 3}, "rew": {"cho": 450, "item": "i_kaos", "rep": 3}, "prereq": "q_kaos"},
+	{"id": "q_ritim", "giver": "ehnar",   "name": "KESKİN RİTM",           "desc": "Şövalyelik ritim işidir — her vuruşun keskin noktayı bulması. Tek koşuda iki yüz elli kritik vuruş yap; ritim bileziğini kuşanırsın.", "obj": {"type": "crits", "n": 250}, "rew": {"cho": 300, "item": "i_ritim", "rep": 2}, "prereq": "q_nobet2"},
 	{"id": "q_jeot",  "giver": "lena",    "name": "ÇATLAK SESLERİ",       "desc": "Çukurda ara sıra jeotlar çatlıyor — içleri saf damar dolu. İkisini kır, çatlaklardan çıkan gözü kolye yapayım.", "obj": {"type": "geo", "n": 2}, "rew": {"cho": 220, "item": "i_jeotgoz"}, "prereq": "q_cukur"},
 	{"id": "q_konvoy","giver": "lena",    "name": "GANİMET YOLU",         "desc": "Koro'nun nakliye konvoyları sahalarda boydan boya geçiyor — hamalları çıkışa varmadan düşür, yükü kampa insin. Altı konvoy hamalı kes; konvoy pusulamı boynuna takarım.", "obj": {"type": "konvoy", "n": 6}, "rew": {"cho": 320, "item": "i_konvoy", "rep": 2}, "prereq": "q_lena"},
 	{"id": "q_fisilti","giver": "lena",   "name": "FISILTI AVCISI",       "desc": "Çukurun duvarları fısıldıyor — kopan kristal parçaları sürü halinde saldırıyor. On sekizini dağıt; en berrak parçayı küpe yaparım.", "obj": {"type": "kind", "k": "Damar Fısıltısı", "n": 18}, "rew": {"cho": 240, "item": "i_fisilti"}, "prereq": "q_jeot"},
@@ -322,7 +323,7 @@ static func daily_check() -> void:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer", "koz"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer", "koz", "crits"]:
 		done.append_array(tick(type))
 	daily_check()
 	for q in DEFS:
@@ -393,6 +394,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"kayit":   cur = (G.meta.data.get("lore", []) as Array).size()
 			"koz":     cur = (G.meta.data.get("arcanas_seen", []) as Array).size()
 			"nodmg":   cur = int(G.run.stats.get("best_nodmg", 0))
+			"crits":   cur = int(G.run.stats.get("crits", 0))
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
 		if cur >= need:
@@ -535,6 +537,7 @@ static func obj_text(q: Dictionary) -> String:
 		"devriye": return "%d devriye başı kes" % need
 		"konvoy":  return "%d konvoy hamalı kes (çıkışa varmadan)" % need
 		"kaos":    return "%d kez kaos damarını zaferle sindir" % need
+		"crits":   return "tek koşuda %d kritik vuruş yap" % need
 	return "?"
 
 static func _claimed_count() -> int:
