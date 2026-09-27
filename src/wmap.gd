@@ -96,6 +96,16 @@ const EDGES := [
 	["cukur", "buzul"], ["damar", "buzul"], ["buzul", "kervan"],
 ]
 
+# harita komşuları — sefer zinciri ve rota önerisi için
+static func neighbors(id: String) -> Array:
+	var out: Array = []
+	for e in EDGES:
+		if e[0] == id:
+			out.append(str(e[1]))
+		elif e[1] == id:
+			out.append(str(e[0]))
+	return out
+
 static func node(id: String) -> Dictionary:
 	for n in NODES:
 		if n.id == id:

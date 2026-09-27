@@ -37,7 +37,8 @@ func has_arcana(a: String) -> bool:
 var elite_fever := false   # SARI HAT: elitler %20 sık doğar
 var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var pending_ambush := false  # YOL OLAYI pusu: arenaya kuşatılmış girilir
-var _skip_waylay := false    # TEKRAR DENE: aynı node'a dönerken yol olayı atlanır
+var _skip_waylay := false   # TEKRAR DENE: aynı node'a dönerken yol olayı atlanır
+var _keep_sefer := false    # sefer zinciri: respawn_to_hub sefer sayacını silmez
 var pending_dmg := 0.0     # YOL OLAYI harabe: girişte alınan enkaz hasarı
 var pending_heal := 0.0    # YOL OLAYI sığınak: girişte dinlenme canı
 var force_waylay := ""     # probe/debug: yol olayını zorla
@@ -153,6 +154,16 @@ func start_run() -> void:
 		G.meta.save()
 		stats["omen"] = 1
 		G.ui.toast("KERVANIN LANETİ — sürü bu koşuda daha sert, parçacık bereketli")
+	# sefer zinciri: zafer sonrası kampa dönmeden zincirlenen koşular — ayak başına katlanan zorluk + ödül
+	var sefer := int(G.meta.data.get("sefer", 0))
+	if sefer > 0:
+		var sm := {"hp": pow(1.2, sefer), "dmg": pow(1.1, sefer), "spawn": pow(1.1, sefer), "frag": pow(1.45, sefer), "elite_t": pow(0.85, sefer)}
+		for mk in sm:
+			node_mods[mk] = float(node_mods.get(mk, 1.0)) * float(sm[mk])
+		frag_node = float(node_mods.get("frag", 1.0))
+		reward_mult *= 1.0 + 0.3 * sefer
+		stats["sefer"] = sefer
+		G.ui.toast("SEFER %d — zincir uzuyor: sürü katlandı, ganimet bereketi büyüdü" % sefer)
 	if bool(node_mods.get("noheal", false)):
 		G.ui.toast("YEMİN DARESİ — şifa küresi düşmez, tek yaşamla sınan")
 	alive = true
@@ -607,9 +618,22 @@ func victory() -> void:
 		G.ui.victory_screen(stats)
 
 # zaferden sonra devam — kovan sonsuz ölçeklenmeye döner, sonraki ölüm normal öder
+func sefer_next(nid: String) -> void:
+	# zaferden zincirleme koşu: sayacı büyüt, hedef düğümü seç, kampı atla
+	G.meta.data["sefer"] = int(G.meta.data.get("sefer", 0)) + 1
+	G.meta.data["arena_node"] = nid
+	G.meta.data["arena_biome"] = int(Wmap.node(nid).get("biome", 0))
+	G.meta.save()
+	_keep_sefer = true
+	_skip_waylay = true
+	respawn_to_hub()
+	start_run()
+
 func continue_endless() -> void:
 	if endless:
 		return
+	G.meta.data["sefer"] = 0
+	G.meta.save()
 	endless = true
 	alive = true
 	G.state = G.State.ROOM
@@ -632,6 +656,10 @@ func on_player_death(h: Dictionary) -> void:
 	G.ui.boss_bar(false, null)
 	# endless'te zafer çoktan bankada — sözleşmeler/özet zaferi korur
 	_write_last_run(endless)
+	# ölüm sefer zincirini kırar
+	if int(G.meta.data.get("sefer", 0)) > 0:
+		stats["sefer"] = int(G.meta.data.get("sefer", 0))
+	G.meta.data["sefer"] = 0
 	G.meta.record_death(killer, biome, int(time), was_boss)
 	var gained := int(fragments * G.meta.frag_mult() * reward_mult * Quests.rep_mult())
 	G.meta.add_choralim(gained)
@@ -665,6 +693,12 @@ func retry_node() -> void:
 	start_run()
 
 func respawn_to_hub() -> void:
+	# sefer zinciri sadece 'sonraki düğüm' akışında yaşar; kampa dönüş zinciri kırar
+	if _keep_sefer:
+		_keep_sefer = false
+	elif int(G.meta.data.get("sefer", 0)) > 0:
+		G.meta.data["sefer"] = 0
+		G.meta.save()
 	# purge the dead player shell, rebuild at camp
 	if is_instance_valid(G.player):
 		G.player.queue_free()

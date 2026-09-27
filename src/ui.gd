@@ -3150,6 +3150,37 @@ func victory_screen(stats: Dictionary) -> void:
 	btn.pressed.connect(func():
 		_close_overlay()
 		G.run.continue_endless())
+	# SEFER: zaferi kampa taşımadan komşu bir düğüme zincirleme koş — ayak başına zorluk ve ödül katlanır
+	var nxt := _sefer_target(str(stats.get("node_id", "")))
+	if nxt != "":
+		var legs := int(G.meta.data.get("sefer", 0)) + 1
+		var sbtn := Button.new()
+		sbtn.text = "⛓ SEFER %d — %s (sürü katlanır, ödül ×%.1f)" % [legs, str(Wmap.node(nxt).get("name", "?")), 1.0 + 0.3 * legs]
+		sbtn.custom_minimum_size = Vector2(340, 32)
+		sbtn.add_theme_font_override("font", ui_font())
+		var sc := CenterContainer.new()
+		sc.add_child(sbtn)
+		v.add_child(sc)
+		sbtn.pressed.connect(func():
+			_close_overlay()
+			G.run.sefer_next(nxt))
+
+# sefer zincirinin bir sonraki durağı: fethedilmemiş komşu arena öncelikli
+func _sefer_target(from_id: String) -> String:
+	if from_id == "":
+		return ""
+	var won: Array = G.meta.data.get("won_nodes", [])
+	var fresh: Array = []
+	var any: Array = []
+	for nb in Wmap.neighbors(from_id):
+		var nn := Wmap.node(nb)
+		if str(nn.get("kind", "")) != "arena" or not Wmap.can_enter(nb):
+			continue
+		any.append(nb)
+		if not won.has(nb):
+			fresh.append(nb)
+	var pool := fresh if not fresh.is_empty() else any
+	return str(G.pick(pool)) if not pool.is_empty() else ""
 
 func death_reaction() -> void:
 	var ld: Dictionary = G.meta.data.last_death
