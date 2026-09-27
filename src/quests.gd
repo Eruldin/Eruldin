@@ -96,6 +96,7 @@ const DEFS := [
 	{"id": "q_degirmen", "giver": "lena",  "name": "DEĞİRMEN SESLERİ",   "desc": "Kum fırtınalarının arasında eski yel değirmenleri hâlâ dönüyor — tek koşuda 350 kesim yap, güzergâhını haritaya işlerim.", "obj": {"type": "kills", "n": 350}, "rew": {"cho": 150, "node": "degirmen"}, "prereq": "q_kum"},
 	{"id": "q_kervan", "giver": "tegan",   "name": "SİMSARIN KAYBI",     "desc": "Değirmenlerin ötesinde kumun altında bir han gömülü — kervanımın yarısı orada kaldı, mahzeni hâlâ dolu. Altı kum akrebi iğnesi getir, hanın kilidinin zamanını sana çözerim.", "obj": {"type": "kind", "k": "Kum Akrebi", "n": 6}, "rew": {"cho": 260, "node": "kervansaray", "rep": 2}, "prereq": "q_degirmen"},
 	{"id": "q_depot", "giver": "vane",    "name": "MÜHÜRLÜ DEPO",       "desc": "Simithar'ın planlarında bir 'maden kasası' var — mühür mekanik, kapı zamana bağlı; tek ihtiyacımız kasaya giden yolu temiz tutacak kadar parçacık saygınlığı. Tek koşuda 1100 parçacık biriktir, depo rotasını senin için açarım.", "obj": {"type": "frag", "n": 1100}, "rew": {"cho": 240, "node": "madenkasa", "rep": 2}, "prereq": "q_loot"},
+	{"id": "q_yollar","giver": "vane",    "name": "ESKİ YOLLAR",        "desc": "Dünya haritası yalnız düğümler değil — aradaki yollar da iş yapar. Pusudan kuyuya, sekiz yol olayı geçir; güzergâh defterini senin için güncelleyeyim.", "obj": {"type": "waylay", "n": 8}, "rew": {"cho": 280, "rep": 2}, "prereq": "q_depot"},
 	{"id": "q_yagma", "giver": "tegan",   "name": "ÇİFT KASA",            "desc": "İki mühürlü kasa da açıldıysa kervan borcum kapanır — han ve depo, ikisini de yağmala, payımı alırım.", "obj": {"type": "hazine", "n": 2}, "rew": {"cho": 320, "rep": 3}, "prereq": "q_kervan"},
 	{"id": "q_korkasa","giver": "tegan",  "name": "KOR KASASI",           "desc": "Kül Ovası'nın altında üçüncü bir kasa var — mührü ısıyla besleniyor, bekçisi ateşin kendisi. Kor Yücelten'i düşür; kasa yolu soğuyunca senin için yanar.", "obj": {"type": "boss", "k": "kor"}, "rew": {"cho": 300, "node": "korkasa", "rep": 2}, "prereq": "q_yagma"},
 	{"id": "q_yagmaci","giver": "tegan",  "name": "YAĞMACININ YEMİNİ",    "desc": "Üç kasa da açıldı, dördüncü yağma benim terazimi taşırır — dört kez mahzen boşalt; han, depo ve kor kasası fark etmez. Kantar taşım senin olsun.", "obj": {"type": "hazine", "n": 4}, "rew": {"cho": 380, "item": "i_kantas", "rep": 3}, "prereq": "q_korkasa"},
@@ -538,6 +539,7 @@ static func obj_text(q: Dictionary) -> String:
 		"geo":    return "%d damar jeotu kır" % need
 		"hazine": return "%d hazine düğümü yağmala" % need
 		"verim": return "verim noktasında %d zafer kazan" % need
+		"waylay": return "%d yol olayı geçir" % need
 		"cameo":  return "%d yoldaş karşılaşması geçir" % need
 		"firtina": return "%d kesimi kum fırtınasında yap" % need
 		"zehir":  return "%d kesimi gaz havuzunda yap" % need

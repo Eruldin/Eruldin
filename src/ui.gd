@@ -2175,6 +2175,9 @@ const WAYLAY := {
 	"kuyu": {"name": "SES KUYUSU", "col": "4dd0e1",
 		"sub": "Yolun ortasında taş çemberli bir kuyu — içinden koro korosu gibi bir yankı yükseliyor. Eski madenciler kuyunun karanlıkla değil sesle ölçüldüğünü söyler; bir parçacık atarsan yankı cevap verir, kulak verirsen bedava ama kimi zaman koroyu da çağırır.",
 		"opts": ["◆35 AT — yankı cömert döner: ganimet ×1.35 · parçacık ×1.2", "KULAK VER — ücretsiz; yankı bazen sürüyü çağırır"]},
+	"ilahi": {"name": "KORO İLAHİSİ", "col": "7c4dff",
+		"sub": "Yolun ortasında bir koro habercisi ilahi okuyor — sesi düşman değil, davet. Eski devirlerde bu ilahi avcıları sahaya elitlerin üstüne salarmış; ödersen senin koşuna da okur, okursan sürü çeker ama av bereketli olur.",
+		"opts": ["İLAHİ SATIN AL — ◆30: elitler sıklaşır, parçacık ×1.25", "GEÇ — şarkı arkanda söndü"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -2218,6 +2221,9 @@ func travel_event(wkind: String, dest: String) -> void:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		if wkind == "multeci" and i == 0 and int(G.meta.data.get("choralim", 0)) < 30:
+			ob.disabled = true
+			ob.modulate = Color(0.45, 0.45, 0.5)
+		if wkind == "ilahi" and i == 0 and int(G.meta.data.get("choralim", 0)) < 30:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		if wkind == "kuyu" and i == 0 and int(G.meta.data.get("choralim", 0)) < 35:
@@ -2377,6 +2383,16 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 					G.run.node_mods["spawn"] = float(G.run.node_mods.get("spawn", 1.0)) * 1.15
 					toast("yankı koroyu çağırdı — sürü sıkılaşacak")
 			Quests.tick("kuyu")
+		"ilahi":
+			if idx == 0:
+				G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - 30
+				G.meta.save()
+				G.run.node_mods["elite_t"] = float(G.run.node_mods.get("elite_t", 1.0)) * 0.8
+				G.run.node_mods["frag"] = float(G.run.node_mods.get("frag", 1.0)) * 1.25
+				G.run.frag_node = float(G.run.node_mods.get("frag", 1.0))
+				toast("ilahi koşunda söyleniyor — elitler sık, parçacık bereketli")
+			else:
+				toast("ilahi arkanda kaldı — yol sessiz")
 		"konservi":
 			if idx == 0:
 				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar
