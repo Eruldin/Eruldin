@@ -23,6 +23,8 @@ const BUILDS := {
 	"yuva":   {"name": "Ehil Yuva",      "cost": 300, "icon": "icn_upg_hp",     "desc": "Mina'nın ocağı büyür — iksir stoğu 3→4, kor şarabı 2→3"},
 	"atolye": {"name": "Atölye",         "cost": 400, "icon": "icn_upg_shield", "desc": "Saphire'in tezgâhı kurulur — işleme bedeli %25 iner"},
 	"kule":   {"name": "Nöbet Kulesi",   "cost": 450, "icon": "icn_upg_dash",   "desc": "Kamp gözcüsü — her koşuya koruyucu zarf + iksirle çıkarsın"},
+	"kuyu":   {"name": "Kuyu",           "cost": 500, "icon": "icn_upg_hp",     "req": "yuva", "desc": "Temiz su — her koşunun başında iki şifa küresi sahaya düşer"},
+	"sur":    {"name": "Sur Duvarı",     "cost": 600, "icon": "icn_upg_shield", "req": "kule", "desc": "Kamp surları — her sahada ekstra bir sandık bekler"},
 }
 
 const SAVE_PATH := "user://dusus_save.json"
@@ -204,6 +206,7 @@ func achievements() -> Array:
 		{"name": "SÖZLEŞME USTASI", "desc": "Ehnar'da 8 sözleşme tuttur", "done": int(data.get("contracts_done", 0)) >= 8, "rew": 200},
 		{"name": "MASA KIRANI", "desc": "Tegan'da 6 bahis tuttur", "done": int(data.get("bets_won", 0)) >= 6, "rew": 180},
 		{"name": "BEŞ GÖVDE", "desc": "beş farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 5, "rew": 400},
+		{"name": "MİMAR", "desc": "kampın beş binasını da kur", "done": (data.get("camp_builds", {}) as Dictionary).size() >= 5, "rew": 350},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
@@ -224,6 +227,7 @@ const TITLES := [
 	{"id": "kor",     "name": "KOR KIRAN",        "src": "KÜLLERİN EFENDİSİ"},
 	{"id": "kumar",   "name": "KUMARBAZ",         "src": "MASA KIRANI"},
 	{"id": "govde",   "name": "ÇOK GÖVDELİ",      "src": "BEŞ GÖVDE"},
+	{"id": "mimar",   "name": "KAMP MİMARI",      "src": "MİMAR"},
 ]
 
 func title_open(tid: String) -> bool:

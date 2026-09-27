@@ -3005,6 +3005,8 @@ func upgrade_panel() -> void:
 	for bid in Meta.BUILDS:
 		var spec: Dictionary = Meta.BUILDS[bid]
 		var built := G.meta.has_build(bid)
+		var req := str(spec.get("req", ""))
+		var req_ok := req == "" or G.meta.has_build(req)
 		var row2 := HBoxContainer.new()
 		row2.add_theme_constant_override("separation", 10)
 		v.add_child(row2)
@@ -3016,7 +3018,7 @@ func upgrade_panel() -> void:
 		ic2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ic2.modulate = Color(1, 1, 1) if built else Color(0.75, 0.65, 0.4)
 		row2.add_child(ic2)
-		var nl := _lbl(str(spec.name) + ("  KURULU" if built else ""), Vector2.ZERO, 13, Color(0.55, 0.9, 0.6) if built else Color(0.9, 0.9, 0.95))
+		var nl := _lbl(str(spec.name) + ("  KURULU" if built else ("" if req_ok else "  (%s gerekir)" % str((Meta.BUILDS.get(req, {}) as Dictionary).get("name", req)))), Vector2.ZERO, 13, Color(0.55, 0.9, 0.6) if built else (Color(0.5, 0.5, 0.55) if not req_ok else Color(0.9, 0.9, 0.95)))
 		nl.custom_minimum_size = Vector2(280, 0)
 		row2.add_child(nl)
 		var ds2 := _lbl(str(spec.desc), Vector2.ZERO, 11, Color(0.6, 0.6, 0.7))
@@ -3025,7 +3027,7 @@ func upgrade_panel() -> void:
 		row2.add_child(ds2)
 		var bb := Button.new()
 		bb.text = "✓" if built else "◆ %d" % int(spec.cost)
-		bb.disabled = built or G.meta.data.choralim < int(spec.cost)
+		bb.disabled = built or not req_ok or G.meta.data.choralim < int(spec.cost)
 		bb.custom_minimum_size = Vector2(90, 26)
 		bb.add_theme_font_override("font", ui_font())
 		row2.add_child(bb)
