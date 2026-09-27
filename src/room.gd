@@ -905,7 +905,7 @@ func _tick_veins(d: float) -> void:
 				G.run.drop_fragments(p, G.ri(16, 26))
 				Quests.tick("vein")
 				if G.chance(0.3):
-					spawn_special(G.pick(["heal", "boost", "guard"]), p + Vector2(0, -14))
+					spawn_special(G.pick(["heal", "boost", "guard", "iksir"]), p + Vector2(0, -14))
 
 func _tick_caches() -> void:
 	if caches.is_empty() or G.player == null or G.player.dead:
@@ -1140,6 +1140,14 @@ func _collect(pk: Node) -> void:
 			G.player.invuln = maxf(G.player.invuln, 3.0)
 			G.audio.play("parry", 1.0, 0.6)
 			G.ui.toast("koruyucu zarf — 3sn dokunulmaz")
+		"iksir":
+			if G.player.iksir_n >= 3:
+				G.run.drop_fragments(pk.position, 5)
+				G.ui.toast("iksir karnen dolu — parçacığa döndü")
+			else:
+				G.player.iksir_n += 1
+				G.ui.toast("CHORALİM İKSİRİ +1 — R ile içilir")
+			G.audio.play("pickup", 1.5, 0.45)
 		"egg":
 			G.meta.data["eggs"] = int(G.meta.data.get("eggs", 0)) + 1
 			G.meta.save()
@@ -1309,6 +1317,9 @@ func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 		"guard":
 			pk.texture = Px.S("icn_upg_shield")
 			col = "00E5FF"
+		"iksir":
+			pk.texture = Px.S2("icn_upg_hp") if Px.S2("icn_upg_hp") != null else Px.S("dot")
+			col = "8affc9"
 		"egg":
 			pk.texture = Px.S("icn_crown")
 			col = "ffd700"
