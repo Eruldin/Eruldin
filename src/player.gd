@@ -680,6 +680,13 @@ func take_hit(h: Dictionary) -> void:
 	var dmg := maxf(1.0, (h.get("dmg", 1.0) - armor) * dmg_taken_mult)
 	hp -= dmg
 	G.run.stats["_nodmg"] = 0.0   # hasarsiz seri kirildi
+	# BOZUCU elit: vuruşu aletleri karıştırır — Q bekleme süresi uzar, dash kilitlenir
+	if src is Actor and str(src.get("affix")) == "bozucu":
+		skill_cd = minf(skill_max, skill_cd + skill_max * 0.35)
+		_dash_cd = maxf(_dash_cd, 1.4)
+		G.fx.float_text(pos + Vector2(0, -48), "BOZULDU!", Px.C("ce93d8"), 0.95)
+		G.fx.burst(pos + Vector2(0, -14), Px.C("ce93d8"), 12, 140.0, 3.5, 0.3)
+		G.audio.play("hurt", 0.7)
 	set_flash()
 	_anim = ""
 	_set_anim("hurt", 6.0)

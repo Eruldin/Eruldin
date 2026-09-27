@@ -257,7 +257,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak", "fanatik"][randi() % 22]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak", "fanatik", "bozucu"][randi() % 23]
 		# KAÇAK GÜZERGÂHI kozu: elitlerin yarısı kaçak çıkar
 		if is_instance_valid(G.run) and G.run.kacak_plus and G.chance(0.5):
 			affix = "kacak"
@@ -323,6 +323,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "FANATİK " + actor_name
 			"kacak":
 				actor_name = "KAÇAK " + actor_name
+			"bozucu":
+				actor_name = "BOZUCU " + actor_name
 		# affix kaydı — LANET KIRANI başarımını besler
 		var seen: Array = G.meta.data.get("affix_seen", [])
 		if not seen.has(affix):
@@ -389,7 +391,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7", "ambarli": "c8e6c9", "kacak": "ffd54f", "fanatik": "ff5252"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7", "ambarli": "c8e6c9", "kacak": "ffd54f", "fanatik": "ff5252", "bozucu": "ce93d8"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
