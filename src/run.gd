@@ -442,18 +442,29 @@ func victory() -> void:
 	G.meta.data["victories"] += 1
 	G.meta.data["ng"] = int(G.meta.data.get("ng", 0)) + 1
 	stats["ng"] = int(G.meta.data.get("ng", 0))
+	var first_end := node_id == "b3" and not bool(G.meta.data.get("ended", false))
+	if node_id == "b3":
+		G.meta.data["ended"] = true
 	G.meta.save()
 	for f in G.meta.new_feats():
 		G.ui.toast("BAŞARIM: %s" % f)
 	G.audio.jingle("boss")
-	# zafer sinematiği: biome kartı + Neva repliği, sonra sonuç paneli
+	# zafer sinematiği: biome kartı + Neva repliği, sonra sonuç paneli.
+	# b3 ilk zaferinde GERÇEK SON — 3 kartlık ending zinciri.
 	var ci := clampi(biome, 0, 5)
-	var tex := "cine_%d_%d" % [ci, randi() % 4] if ci <= 3 else "cine_%d_0" % ci
-	var epi := G.ui.epilog(node_id)
-	G.ui.cine_seq([
-		{"tex": tex, "title": "PROTOKOL KIRILDI", "sub": (node_name + "\n" + epi) if epi != "" else node_name},
-		{"tex": "por_neva", "title": "NEVA", "sub": "Şarkı sustu, Alfa-04. Bu sefer geriye tam döndün."},
-	], func(): G.ui.victory_screen(stats))
+	if first_end:
+		G.ui.cine_seq([
+			{"tex": "cine_3_0", "title": "AETERNA SUSTU", "sub": "Kirin ve Constantin düştü. Spire'ın tepesinde ışık ilk kez kapandı."},
+			{"tex": "cine_3_2", "title": "PROTOKOL KIRILDI", "sub": "Kovanın şarkısı senin adınla bitiyor, Alfa-04."},
+			{"tex": "por_neva", "title": "NEVA", "sub": "Döndün. Bu sefer geride şarkı bırakmadın — yerine sessizlik, ve bir kamp ateşi."},
+		], func(): G.ui.victory_screen(stats))
+	else:
+		var tex := "cine_%d_%d" % [ci, randi() % 4] if ci <= 3 else "cine_%d_0" % ci
+		var epi := G.ui.epilog(node_id)
+		G.ui.cine_seq([
+			{"tex": tex, "title": "PROTOKOL KIRILDI", "sub": (node_name + "\n" + epi) if epi != "" else node_name},
+			{"tex": "por_neva", "title": "NEVA", "sub": "Şarkı sustu, Alfa-04. Bu sefer geriye tam döndün."},
+		], func(): G.ui.victory_screen(stats))
 	if not G.ui.overlay_open():
 		G.ui.victory_screen(stats)
 

@@ -55,6 +55,7 @@ var data := {
 	"seen_kinds": [],      # ilk kez görülen düşman türleri (EKind id'leri)
 	"intro_seen": false,   # açılış sinematik kartları bir kez oynatılır
 	"tut": false,          # ilk koşu ipucu dizisi oynatıldı mı
+	"ended": false,        # b3 zaferi — gerçek son gösterildi
 	"contract": {},        # Ehnar's aktif görevi: {key,need,reward}
 	"feats_seen": [],      # duyurulmuş başarımlar (toast bir kez)
 	"reapers": 0,          # kesilen HASATÇI sayısı
@@ -142,6 +143,7 @@ func achievements() -> Array:
 		{"name": "ARŞİVCİ", "desc": "8 veri kütüğünü topla", "done": (data.get("lore", []) as Array).size() >= Quests.LORE.size(), "rew": 200},
 		{"name": "DERİN SEÇİLMİŞ", "desc": "3. derinliğe ulaş (3 zafer)", "done": int(data.get("ng", 0)) >= 3, "rew": 300},
 		{"name": "ALTIN KIRICI", "desc": "toplam 10 şampiyon elit kes", "done": int(data.get("champs", 0)) >= 10, "rew": 400},
+		{"name": "PROTOKOLÜ KIRAN", "desc": "Aeterna Spire'ı düşür — gerçek sonu gör", "done": bool(data.get("ended", false)), "rew": 500},
 	]
 
 func _claimed_count() -> int:
