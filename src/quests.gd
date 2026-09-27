@@ -73,6 +73,9 @@ const DEFS := [
 	{"id": "q_balcik","giver": "ahusk",   "name": "ÇAMURUN İÇİNDEKİ",   "desc": "Balçıktan yürüyenler kervan yolunu kesiyor — bırakırsan yarası kapanıyor. On tanesini çökert, kalbini sana tılsım yapayım.", "obj": {"type": "kind", "k": "Balçık Adam", "n": 10}, "rew": {"cho": 200, "item": "i_balcikkalp"}, "prereq": "q_sarnic"},
 	{"id": "q_dokuz", "giver": "zirkon",  "name": "DOKUZ DEFTER",      "desc": "Defterde dokuz efendi sayfası var — hepsi düşerse protokolün savaş kısmı biter. Dokuzuncu kapanışta praetorian gövde zırhını veririm.", "obj": {"type": "bosses", "n": 9}, "rew": {"cho": 300, "item": "i_praetorian"}, "prereq": "q_final"},
 	{"id": "q_soy",  "giver": "zirkon",  "name": "TÜM SOY",            "desc": "Kaydın eksik — kovanın her soyundan birini görmeden defter kapanmaz. On dört türü de gözle; kemer takasını yapayım.", "obj": {"type": "kinds", "n": 14}, "rew": {"cho": 260, "item": "i_soykemer"}, "prereq": "q_dokuz"},
+	{"id": "q_avlu",  "giver": "ehnar",   "name": "AVLU SINAVI",        "desc": "Efendi Avlusu'nda altı efendi arka arkaya nöbet tutar — zincirin tamamını tek koşuda kes, penceyi takas ederim.", "obj": {"type": "won_node", "id": "avlis", "n": 1}, "rew": {"cho": 280, "item": "i_efendipence"}, "prereq": "q_kor"},
+	{"id": "q_kayit", "giver": "neva",    "name": "SEKİZ KÜTÜK",        "desc": "Saha eski defterini dağıttı — sekiz kütük var, hepsi sende toplanırsa sessiz çizmeyi söylerim.", "obj": {"type": "kayit", "n": 8}, "rew": {"cho": 200, "item": "i_kozcizme"}, "prereq": "q_vatika"},
+	{"id": "q_nuve",  "giver": "ahusk",   "name": "DAMARIN ÇEYİZİ",    "desc": "Damar kıran iyi beslenir — on damar kır, nüve halkasını takarım.", "obj": {"type": "vein", "n": 10}, "rew": {"cho": 220, "item": "i_nuve"}, "prereq": "q_balcik"},
 	{"id": "q_kor",   "giver": "ehnar",   "name": "KÜLLERİN EFENDİSİ",  "desc": "Kül Ovası'nda son efendi oturuyor — imparatorluğunun tahtı hâlâ yanıyor. Kor Yücelten'i düşür; tacını sana miğfer yaparım.", "obj": {"type": "boss", "k": "kor"}, "rew": {"cho": 240, "item": "i_kortac"}, "prereq": "q_kul"},
 	{"id": "q_karne", "giver": "mina",    "name": "İKSİR KARNESİ",        "desc": "Şifa içecek şişe değil, disiplin ister. Altı iksir iç — karneni ocak defterine işlerim.", "obj": {"type": "iksir", "n": 6}, "rew": {"cho": 140, "item": "i_kemer_par"}, "prereq": "q_sofra"},
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
@@ -103,6 +106,8 @@ static func state(id: String) -> String:
 			cur = (G.meta.data.get("bosses", []) as Array).size()
 		elif t == "kinds":
 			cur = (G.meta.data.get("seen_kinds", []) as Array).size()
+		elif t == "won_node":
+			cur = 1 if (G.meta.data.get("won_nodes", []) as Array).has(str(q.obj.get("id", ""))) else 0
 		if cur >= 0:
 			_q()[id]["prog"] = maxi(prog(id), cur)
 		if cur >= int(q.obj.get("n", 1)):
@@ -326,6 +331,7 @@ static func obj_text(q: Dictionary) -> String:
 		"item":   return "%s getir" % str(Items.DEFS.get(str(o.get("id", "")), {}).get("name", str(o.get("id", ""))))
 		"kayit":  return "%d veri kütüğü bul" % need
 		"champ":  return "%d şampiyon elit kes" % need
+		"won_node": return "%s fethi" % str(Wmap.node(str(o.get("id", ""))).get("name", str(o.get("id", ""))))
 	return "?"
 
 static func _claimed_count() -> int:
