@@ -188,6 +188,20 @@ func build_hub() -> void:
 		for pp in [Vector2(-120, 300), Vector2(120, 310), Vector2(0, 340)]:
 			_prop(pp, 16, "prop_hub_5")
 		_fire(Vector2(-160, H * 0.5 - 90))
+	# kamp inşaatı görünür olur: yuva → mutfak çadırı, atölye → tezgâh, kule → gözcü direği
+	if is_instance_valid(G.meta):
+		if G.meta.has_build("yuva"):
+			_prop(Vector2(-380, 240), 15, "prop_hub_1")
+			_prop(Vector2(-420, 200), 12, "prop_hub_1")
+			_fire(Vector2(-340, 260))
+		if G.meta.has_build("atolye"):
+			_prop(Vector2(-40, 180), 16, "prop_hub_4")
+			_prop(Vector2(-140, 170), 12, "prop_hub_5")
+			G.fx.mk_light(self, Vector2(-40, 180), Px.C("8fd4ff"), 0.5, 1.8)
+		if G.meta.has_build("kule"):
+			_prop(Vector2(-500, -240), 30, "prop_hub_2")
+			_prop(Vector2(-480, -200), 12, "prop_hub_3")
+			G.fx.mk_light(self, Vector2(-500, -260), Px.C("ffd75f"), 0.6, 2.2)
 	if tier > int(G.meta.data.get("camp_tier", 0)):
 		G.meta.data["camp_tier"] = tier
 		G.meta.save()

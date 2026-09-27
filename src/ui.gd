@@ -1814,20 +1814,21 @@ func shop_panel() -> void:
 	v.add_child(irow)
 	var ib := Button.new()
 	var iprice := 40
-	ib.text = "CHORALİM İKSİRİ ◆%d  (R — elde %d/3)" % [iprice, G.player.iksir_n if is_instance_valid(G.player) else 0]
+	var icap := 4 if G.meta.has_build("yuva") else 3
+	ib.text = "CHORALİM İKSİRİ ◆%d  (R — elde %d/%d)" % [iprice, G.player.iksir_n if is_instance_valid(G.player) else 0, icap]
 	ib.add_theme_font_override("font", ui_font())
 	ib.custom_minimum_size = Vector2(300, 24)
-	ib.disabled = int(G.meta.data.get("choralim", 0)) < iprice or (is_instance_valid(G.player) and G.player.iksir_n >= 3)
+	ib.disabled = int(G.meta.data.get("choralim", 0)) < iprice or (is_instance_valid(G.player) and G.player.iksir_n >= icap)
 	if ib.disabled:
 		ib.modulate = Color(0.5, 0.5, 0.55)
 	irow.add_child(ib)
 	ib.pressed.connect(func():
-		if int(G.meta.data.get("choralim", 0)) >= iprice and is_instance_valid(G.player) and G.player.iksir_n < 3:
+		if int(G.meta.data.get("choralim", 0)) >= iprice and is_instance_valid(G.player) and G.player.iksir_n < icap:
 			G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - iprice
 			G.meta.save()
 			G.player.iksir_n += 1
 			G.audio.jingle("boon")
-			toast("iksir alındı — R ile içilir (elde %d/3)" % G.player.iksir_n)
+			toast("iksir alındı — R ile içilir (elde %d/%d)" % [G.player.iksir_n, icap])
 			_close_overlay()
 			shop_panel())
 	# kor şarabı: 25sn güç/hız — T ile içilir, koşular arasında kalır
@@ -1836,20 +1837,21 @@ func shop_panel() -> void:
 	v.add_child(srow)
 	var sb := Button.new()
 	var sprice := 55
-	sb.text = "KOR ŞARABI ◆%d  (T — 25sn güç, elde %d/2)" % [sprice, G.player.sarap_n if is_instance_valid(G.player) else 0]
+	var scap := 3 if G.meta.has_build("yuva") else 2
+	sb.text = "KOR ŞARABI ◆%d  (T — 25sn güç, elde %d/%d)" % [sprice, G.player.sarap_n if is_instance_valid(G.player) else 0, scap]
 	sb.add_theme_font_override("font", ui_font())
 	sb.custom_minimum_size = Vector2(300, 24)
-	sb.disabled = int(G.meta.data.get("choralim", 0)) < sprice or (is_instance_valid(G.player) and G.player.sarap_n >= 2)
+	sb.disabled = int(G.meta.data.get("choralim", 0)) < sprice or (is_instance_valid(G.player) and G.player.sarap_n >= scap)
 	if sb.disabled:
 		sb.modulate = Color(0.5, 0.5, 0.55)
 	srow.add_child(sb)
 	sb.pressed.connect(func():
-		if int(G.meta.data.get("choralim", 0)) >= sprice and is_instance_valid(G.player) and G.player.sarap_n < 2:
+		if int(G.meta.data.get("choralim", 0)) >= sprice and is_instance_valid(G.player) and G.player.sarap_n < scap:
 			G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - sprice
 			G.meta.save()
 			G.player.sarap_n += 1
 			G.audio.jingle("boon")
-			toast("kor şarabı alındı — T ile içilir (elde %d/2)" % G.player.sarap_n)
+			toast("kor şarabı alındı — T ile içilir (elde %d/%d)" % [G.player.sarap_n, scap])
 			_close_overlay()
 			shop_panel())
 	var back2 := Button.new()
@@ -2994,6 +2996,43 @@ func upgrade_panel() -> void:
 		btn.pressed.connect(func():
 			if G.meta.buy(key):
 				G.audio.play("boon", 1.3, 0.6)
+				_close_overlay()
+				upgrade_panel())
+	# KAMP İNŞASI — tek seferlik binalar, kalıcı etki + kampta görünür prop
+	var bh := _lbl("— KAMP İNŞASI —", Vector2.ZERO, 12, Px.C("8fd4ff"))
+	bh.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(bh)
+	for bid in Meta.BUILDS:
+		var spec: Dictionary = Meta.BUILDS[bid]
+		var built := G.meta.has_build(bid)
+		var row2 := HBoxContainer.new()
+		row2.add_theme_constant_override("separation", 10)
+		v.add_child(row2)
+		var ic2 := TextureRect.new()
+		ic2.texture = Px.S2(str(spec.get("icon", "icn_upg_shield")))
+		ic2.custom_minimum_size = Vector2(26, 26)
+		ic2.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic2.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic2.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ic2.modulate = Color(1, 1, 1) if built else Color(0.75, 0.65, 0.4)
+		row2.add_child(ic2)
+		var nl := _lbl(str(spec.name) + ("  KURULU" if built else ""), Vector2.ZERO, 13, Color(0.55, 0.9, 0.6) if built else Color(0.9, 0.9, 0.95))
+		nl.custom_minimum_size = Vector2(280, 0)
+		row2.add_child(nl)
+		var ds2 := _lbl(str(spec.desc), Vector2.ZERO, 11, Color(0.6, 0.6, 0.7))
+		ds2.custom_minimum_size = Vector2(160, 0)
+		ds2.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row2.add_child(ds2)
+		var bb := Button.new()
+		bb.text = "✓" if built else "◆ %d" % int(spec.cost)
+		bb.disabled = built or G.meta.data.choralim < int(spec.cost)
+		bb.custom_minimum_size = Vector2(90, 26)
+		bb.add_theme_font_override("font", ui_font())
+		row2.add_child(bb)
+		bb.pressed.connect(func():
+			if G.meta.buy_build(bid):
+				G.audio.play("boon", 1.3, 0.6)
+				toast("%s kuruldu" % spec.name)
 				_close_overlay()
 				upgrade_panel())
 	var h := _lbl("[E / tık dışarısı] kapat", Vector2.ZERO, 10, Color(0.4, 0.4, 0.5))

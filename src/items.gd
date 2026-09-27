@@ -230,7 +230,7 @@ static func forge_price(id: String) -> int:
 	var d: Dictionary = DEFS.get(id, {})
 	if d.is_empty() or item_lvl(id) >= 3:
 		return 0
-	return int([70, 130, 240, 420][int(d.r)] * (item_lvl(id) + 1))
+	return int([70, 130, 240, 420][int(d.r)] * (item_lvl(id) + 1) * (0.75 if G.meta.has_build("atolye") else 1.0))
 
 static func forge(id: String) -> int:
 	var p := forge_price(id)
