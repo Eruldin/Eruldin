@@ -54,6 +54,7 @@ const DEFS := [
 	{"id": "q_siparis","giver": "saphire","name": "MÜŞTERİ SİPARİŞİ",    "desc": "Bir müşteri Boşluk Halkası istiyor — bulursan stoğa değil, doğrudan bana getir. Teslimde parça senden çıkar.", "obj": {"type": "item", "id": "i_bosluk", "n": 1}, "rew": {"cho": 320, "item": "i_ruzgar"}, "prereq": "q_lanet"},
 	{"id": "q_kayit", "giver": "zirkon",  "name": "VERİ AVCISI",          "desc": "Sahalarda hâlâ kütük parçaları saçılı. Beş veri kütüğü topla — arşiv senden borçlu kalacak.", "obj": {"type": "kayit", "n": 5}, "rew": {"cho": 180, "item": "i_merdiven"}, "prereq": "q_final"},
 	{"id": "q_sampiyon","giver": "ehnar", "name": "ALTIN TEHDİT",        "desc": "Geç saatlerde altınla parlayan şampiyonlar geziyor — birini kes, madalyonun benim olsun.", "obj": {"type": "champ", "n": 1}, "rew": {"cho": 220}, "prereq": "q_nobet2"},
+	{"id": "q_anil",  "giver": "david",   "name": "SON İZLER",            "desc": "Müfretemin son izi Kül Ovası'nda bitti. Altı sahayı da gör — haritanın tamamı yankılansın, eski defter kapansın.", "obj": {"type": "biomes", "n": 6}, "rew": {"cho": 300, "cine": [{"tex": "por_david", "title": "DAVID", "sub": "Hepsini gördün. Müfretemin izi artık haritada değil — hatırada."}, {"tex": "cine_5_0", "title": "SON İZ", "sub": "Kül Ovası'nın kenarında yarım bir izcilik nişanı: S-7. Geri getiren tek parçacık oydu."}]}, "prereq": "q_kul"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -270,6 +271,8 @@ static func rew_text(rew: Dictionary) -> String:
 		parts.append("yeni bölge açıldı")
 	if str(rew.get("wep", "")) != "":
 		parts.append("silah: %s" % str(Weapons.DEFS.get(str(rew.wep), {}).get("name", rew.wep)))
+	if rew.get("cine") is Array and not (rew["cine"] as Array).is_empty():
+		parts.append("anı kaydı")
 	return " + ".join(parts)
 
 static func obj_text(q: Dictionary) -> String:
