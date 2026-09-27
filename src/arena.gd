@@ -237,6 +237,16 @@ func _place_hazards_arena() -> void:
 				t7.sr.modulate.a = 0.12
 				G.fx.mk_light(self, p, Px.C("4dd0e1"), 0.4, 1.5)
 				hazards.append({"pos": p, "r": 58.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(4, 9), "tele": t7, "erupt": 0.0, "col": "4dd0e1"})
+			8:
+				if i % 3 == 0:
+					# kalıcı buzul zemini — kaygan, hasar vermez
+					add_slowzone(p, 58.0, -1.0)
+				else:
+					# Donmuş Çatlak: buz-beyaz telegraph'lı don patlaması
+					var t8 := G.fx.tele_circle(p, 54.0, 9999.0, Color(0.6, 0.86, 1.0, 0.25))
+					t8.sr.modulate.a = 0.12
+					G.fx.mk_light(self, p, Px.C("9fd8ff"), 0.4, 1.5)
+					hazards.append({"pos": p, "r": 54.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(3, 7), "tele": t8, "erupt": 0.0, "col": "9fd8ff"})
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))
 

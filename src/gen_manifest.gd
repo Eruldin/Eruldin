@@ -48,10 +48,12 @@ const SPRITES := {
 	"gr_5": "art/gen/g_gr_5.png",
 	"gr_6": "art/gen/g_gr_6.png",
 	"gr_7": "art/gen/g_gr_7.png",
+	"gr_8": "art/gen/g_gr_8.png",
 	"gr_hub": "art/gen/g_gr_hub.png",
 	# Kızıl Çöl (biome 6): sinematik kart olarak da zemin resmi kullanılır
 	"cine_6_0": "art/gen/g_gr_6.png",
 	"cine_7_0": "art/gen/g_gr_7.png",
+	"cine_8_0": "art/gen/g_gr_8.png",
 	# Çürük Bataklık (biome 4): sinematik kart olarak da zemin resmi kullanılır
 	"cine_4_0": "art/gen/g_gr_4.png",
 	# Kül Ovası (biome 5): sinematik kart olarak da zemin resmi kullanılır
@@ -78,6 +80,10 @@ const SPRITES := {
 	"prop_6_0": "art/gen/g_prop_6__0.png", "prop_6_1": "art/gen/g_prop_6__1.png",
 	"prop_6_2": "art/gen/g_prop_6__2.png", "prop_6_3": "art/gen/g_prop_6__3.png",
 	"prop_6_4": "art/gen/g_prop_6__4.png", "prop_6_5": "art/gen/g_prop_6__5.png",
+	# Donmuş Çatlak: buz sarkıtı / donmuş monolit / aurora kristali / kar yığını / kaburga / rün totemi
+	"prop_8_0": "art/gen/g_prop_8__0.png", "prop_8_1": "art/gen/g_prop_8__1.png",
+	"prop_8_2": "art/gen/g_prop_8__2.png", "prop_8_3": "art/gen/g_prop_8__3.png",
+	"prop_8_4": "art/gen/g_prop_8__4.png", "prop_8_5": "art/gen/g_prop_8__5.png",
 	# efekt kareleri (renkleri pikselde — modulate beyaz kullan)
 	"fx_boom": "art/gen/g_fx_0.png", "fx_zap": "art/gen/g_fx_1.png",
 	"fx_slash": "art/gen/g_fx_2.png", "fx_heal": "art/gen/g_fx_3.png",

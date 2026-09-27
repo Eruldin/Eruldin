@@ -12,7 +12,7 @@ var W := 1180.0
 var H := 660.0
 var BOUNDS := Rect2(-540, -290, 1080, 580)
 
-const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK", "KÜL OVASI", "KIZIL ÇÖL", "KRİSTAL ÇUKUR"]
+const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK", "KÜL OVASI", "KIZIL ÇÖL", "KRİSTAL ÇUKUR", "DONMUŞ ÇATLAK"]
 # biome'a ozgu uretilmis prop setleri (prop_<key>_<i>) — BG2 tarzi scatter
 const PROP_SPR := {
 	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5"],
@@ -27,6 +27,8 @@ const PROP_SPR := {
 	"6": ["prop_6_0", "prop_6_1", "prop_6_2", "prop_6_3", "prop_6_4", "prop_6_5"],
 	# Kristal Çukur: Simithar'in kristal/mantar seti çukura da uyar
 	"7": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
+	# Donmuş Çatlak: kendi buz seti — sarkıt/monolit/aurora kristali/kar yığını/kaburga/totem
+	"8": ["prop_8_0", "prop_8_1", "prop_8_2", "prop_8_3", "prop_8_4", "prop_8_5"],
 	"hub": ["prop_hub_0", "prop_hub_1", "prop_hub_2", "prop_hub_3", "prop_hub_4", "prop_hub_5"],
 }
 # isik veren prop'lar (kristal, mantar, fener, turbin, obelisk, ateslik)
@@ -36,6 +38,7 @@ const PROP_LIGHT := {
 	"prop_3_3": Color(0.6, 0.4, 1.0), "prop_3_4": Color(1.0, 0.65, 0.25),
 	"prop_5_0": Color(1.0, 0.45, 0.12), "prop_5_2": Color(1.0, 0.55, 0.15), "prop_5_4": Color(1.0, 0.5, 0.1),
 	"prop_6_0": Color(0.4, 0.95, 0.9), "prop_6_3": Color(0.4, 0.9, 1.0),
+	"prop_8_0": Color(0.45, 0.85, 1.0), "prop_8_2": Color(0.4, 0.95, 0.9), "prop_8_5": Color(0.5, 0.7, 1.0),
 }
 # atmosfer motes: renk + yon egilimi (biome basina)
 const MOTE_COL := {
@@ -47,6 +50,7 @@ const MOTE_COL := {
 	"5": Color(1.0, 0.5, 0.2, 0.4),
 	"6": Color(1.0, 0.72, 0.4, 0.4),
 	"7": Color(0.35, 0.9, 1.0, 0.4),
+	"8": Color(0.78, 0.9, 1.0, 0.42),
 	"hub": Color(1.0, 0.75, 0.45, 0.35),
 }
 var motes: Array = []   # [{s, vel}] atmosfer parcaciklari
@@ -329,6 +333,7 @@ func _atmos() -> void:
 		var base := Vector2(rng.randf_range(-6, 10), rng.randf_range(-14, -4))
 		if _biome_key() == "2": base = Vector2(rng.randf_range(-4, 4), rng.randf_range(-26, -12))
 		if _biome_key() == "4": base = Vector2(rng.randf_range(-8, 8), rng.randf_range(-18, -6))
+		if _biome_key() == "8": base = Vector2(rng.randf_range(-7, 7), rng.randf_range(16, 32))
 		motes.append({"s": s, "vel": base, "ph": rng.randf() * TAU})
 
 func _build_floor_named(key: String) -> void:
@@ -345,7 +350,7 @@ func _build_floor_named(key: String) -> void:
 func _build_walls_named(key: String) -> void:
 	var tex := Px.S2("w2_" + key)
 	var x := -W * 0.5 - 64
-	var lamp_col: Color = [Px.C("ffb74d"), Px.C("00E676"), Px.C("ff7722"), Px.C("c9a227"), Px.C("66bb6a"), Px.C("ff5522"), Px.C("ffaa55"), Px.C("4dd0e1")][clampi(biome, 0, 7)]
+	var lamp_col: Color = [Px.C("ffb74d"), Px.C("00E676"), Px.C("ff7722"), Px.C("c9a227"), Px.C("66bb6a"), Px.C("ff5522"), Px.C("ffaa55"), Px.C("4dd0e1"), Px.C("9fd8ff")][clampi(biome, 0, 8)]
 	var xi := 0
 	while x <= W * 0.5 + 64:
 		for off in [Vector2(0, 0), Vector2(0, -64)]:
@@ -463,6 +468,16 @@ func _place_hazards(depth: int) -> void:
 					var tt := G.fx.tele_circle(p, 62, 9999.0, Color(1.0, 0.7, 0.35, 0.22))
 					tt.sr.modulate.a = 0.16
 					hazards.append({"pos": p, "r": 62.0, "dps": 8.0, "kind": "surgun", "t": -1.0, "tele": tt, "vel": Vector2.from_angle(rng.randf() * TAU) * 36.0, "sway": rng.randf() * TAU})
+			8:
+				if i % 3 == 0:
+					# kalıcı buzul zemini — üstünde kayarsın, hasar vermez
+					add_slowzone(p, 58.0, -1.0)
+				else:
+					# buzul çatlağı — buz-beyaz telegraph'lı don patlaması
+					var t8 := G.fx.tele_circle(p, 54, 9999.0, Color(0.6, 0.86, 1.0, 0.25))
+					t8.sr.modulate.a = 0.12
+					G.fx.mk_light(self, p, Px.C("9fd8ff"), 0.4, 1.5)
+					hazards.append({"pos": p, "r": 54.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(3, 7), "tele": t8, "erupt": 0.0, "col": "9fd8ff"})
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))   # void pool
 		i += 1
