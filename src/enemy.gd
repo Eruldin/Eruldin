@@ -945,6 +945,8 @@ func die(h: Dictionary) -> void:
 				if str(hz.get("kind", "")) == "toxic" and pos.distance_to(hz.pos) < float(hz.get("r", 0.0)):
 					Quests.tick("zehir")
 					break
+		if bool(h.get("ark", false)):
+			Quests.tick("ark")   # Sol Primus zincir yildirimiyla dusen kesim
 		# gizli bataklık olayı: 30 sivri kesilirse bulutun kalbi kızar
 		if kind == EKind.SIVRI and int(kk.get(kn, 0)) == 30 and not bool(G.run.stats.get("dol_anasi", false)) and G.run.biome == 4 and is_instance_valid(G.room):
 			G.run.stats["dol_anasi"] = true
