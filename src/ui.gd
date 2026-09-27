@@ -1778,15 +1778,24 @@ func inventory_panel() -> void:
 	sep.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sep)
 	var stash: Array = G.meta.data.get("stash", [])
+	var stash_sorted: Array = stash.duplicate()
+	# nadirlik önce; eşitte isim sırası — en iyi parçalar üstte
+	stash_sorted.sort_custom(func(a: String, b: String) -> bool:
+		var da: Dictionary = Items.DEFS.get(a, {})
+		var db: Dictionary = Items.DEFS.get(b, {})
+		if int(da.get("r", 0)) != int(db.get("r", 0)):
+			return int(da.get("r", 0)) > int(db.get("r", 0))
+		return str(da.get("name", a)) < str(db.get("name", b)))
 	var grid := GridContainer.new()
 	grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
 	v.add_child(grid)
-	if stash.is_empty():
+	if stash_sorted.is_empty():
 		var l := _lbl("zula boş — elitler ve boss'lar eşya düşürür", Vector2.ZERO, 12, Color(0.5, 0.5, 0.6))
 		grid.add_child(l)
-	for iid in stash:
+	var stat_names := {"hp": "can", "armor": "zırh", "dmg": "hasar", "spd": "hız", "crit": "kritik", "critmult": "kritik×", "ls": "can emme", "mag": "mıknatıs", "xp": "XP", "dash_regen": "dash yenileme", "revive": "dirilme", "skill": "Q bekleme", "frag": "parçacık", "siphon": "yük", "over": "aşırı"}
+	for iid in stash_sorted:
 		var d: Dictionary = Items.DEFS.get(str(iid), {})
 		if d.is_empty():
 			continue
@@ -1810,6 +1819,30 @@ func inventory_panel() -> void:
 		row.add_child(nm)
 		var md := _lbl(Items.stat_text(str(iid)), Vector2.ZERO, 9, Color(0.65, 0.75, 0.85))
 		cv.add_child(md)
+		# kuşanılanla stat farkı — ARPG karşılaştırma satırı (yüzükler hedef slota göre, işleme ölçeği dahil)
+		var eslot := str(d.get("slot", ""))
+		if eslot == "yuzuk":
+			eslot = "yuzuk1" if str(eq.get("yuzuk1", "")) == "" else "yuzuk2"
+		var cur_id := str(eq.get(eslot, ""))
+		var cur: Dictionary = Items.DEFS.get(cur_id, {})
+		var ls_n := Items._lscale(str(iid))
+		var ls_c := Items._lscale(cur_id)
+		var deltas := []
+		var mods: Dictionary = d.get("mods", {})
+		var curmods: Dictionary = cur.get("mods", {})
+		for k in mods:
+			var dd := float(mods.get(k, 0)) * ls_n - float(curmods.get(k, 0)) * ls_c
+			if absf(dd) > 0.001:
+				deltas.append("%s %s" % [("%+d" % int(round(dd))) if absf(dd) >= 1.5 else ("%+d%%" % int(round(dd * 100.0))), str(stat_names.get(k, k))])
+		for k in curmods:
+			if not mods.has(k):
+				var dc := -float(curmods[k]) * ls_c
+				deltas.append("%s %s" % [("%+d" % int(round(dc))) if absf(dc) >= 1.5 else ("%+d%%" % int(round(dc * 100.0))), str(stat_names.get(k, k))])
+		if not deltas.is_empty():
+			var dcol := Color(0.45, 0.8, 0.5) if str(d.get("slot", "")) != "" and cur.is_empty() else Color(0.6, 0.7, 0.85)
+			var dl := _lbl("◈ %s" % " · ".join(deltas), Vector2.ZERO, 8, dcol)
+			dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			cv.add_child(dl)
 		var brow := HBoxContainer.new()
 		brow.add_theme_constant_override("separation", 4)
 		cv.add_child(brow)
