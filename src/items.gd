@@ -75,6 +75,11 @@ const DEFS := {
 	"i_barut":    {"name": "Barut Başlığı",    "slot": "bas",     "r": 1, "icon": "icn_mine",      "mods": {"dmg": 0.04, "hp": 12}},
 	"i_vurgu":    {"name": "Vurgu Halkası",    "slot": "yuzuk",   "r": 1, "icon": "icn_dagger",     "mods": {"skill": -0.09, "dmg": 0.03}},
 	"i_anasi_igne": {"name": "Kraliçe İğnesi", "slot": "yuzuk",   "r": 3, "icon": "icn_dagger",     "mods": {"crit": 0.10, "ls": 0.02}},
+	# EFSANEVİ (r4) — düşmez, sadece altın şampiyonlardan/orta efendilerden kopar
+	"i_koroses": {"name": "Koro'nun Sesi",    "slot": "kemer",   "r": 4, "icon": "icn_zap",        "mods": {"dmg": 0.12, "skill": -0.12}},
+	"i_praetoryuz":{"name": "Praetor Yüzüğü",  "slot": "yuzuk2",  "r": 4, "icon": "icn_dagger",     "mods": {"crit": 0.08, "critmult": 0.40}},
+	"i_hanimzil": {"name": "Hanım'ın Zili",   "slot": "kolye",   "r": 4, "icon": "icn_crown",      "mods": {"xp": 0.15, "ls": 0.03, "hp": 20}},
+	"i_vahdettir":{"name": "Vahdet Tırnağı",  "slot": "eldiven", "r": 4, "icon": "icn_sword",      "mods": {"dmg": 0.15, "spd": -0.03}},
 	"i_devkalp": {"name": "Batak Kalbi",     "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 40, "armor": 0.8}},
 	"i_kortac":  {"name": "Kor Tacı",        "slot": "bas",     "r": 3, "icon": "icn_crown",      "mods": {"dmg": 0.08, "skill": -0.10}},
 	"i_balcikkalp": {"name": "Balçık Kalbi", "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 30, "ls": 0.02}},
@@ -98,8 +103,8 @@ const DEFS := {
 	"i_nurfener": {"name": "Ufuk Feneri",     "slot": "kolye",   "r": 3, "icon": "icn_crown",      "mods": {"skill": -0.12, "xp": 0.12, "ls": 0.02, "frag": 0.1}},
 }
 
-const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700", "ff4fd8"]
-const RARITY_NAME := ["ORTAK", "NADİR", "EFSANE", "DESTANSI"]
+const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700", "ff4fd8", "f5f5f5"]
+const RARITY_NAME := ["ORTAK", "NADİR", "EFSANE", "DESTANSI", "EFSANEVİ"]
 
 # drop table weights per rarity; nadir/efsane need luck to matter
 static func roll(luck: float) -> String:
@@ -131,6 +136,14 @@ static func _in_stash(id: String) -> bool:
 	return st.has(id) or eq.values().has(id)
 
 # drop during a run → into the run's loot bag
+# efsanevi havuzu: sahip olunmayan r4 parçaları (şampiyon düşüşüne ayrık)
+static func legendary_ids() -> Array:
+	var pool: Array = []
+	for id in DEFS:
+		if int(DEFS[id].r) == 4 and not _in_stash(id):
+			pool.append(id)
+	return pool
+
 static func drop_to_run(id: String) -> void:
 	if id == "" or not DEFS.has(id):
 		return
