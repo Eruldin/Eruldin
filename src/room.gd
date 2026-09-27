@@ -202,6 +202,12 @@ func build_hub() -> void:
 			_prop(Vector2(-500, -240), 30, "prop_hub_2")
 			_prop(Vector2(-480, -200), 12, "prop_hub_3")
 			G.fx.mk_light(self, Vector2(-500, -260), Px.C("ffd75f"), 0.6, 2.2)
+		if G.meta.has_build("kuyu"):
+			_prop(Vector2(40, 60), 14, "prop_hub_4")
+			_prop(Vector2(20, 90), 10, "prop_hub_5")
+		if G.meta.has_build("sur"):
+			for sp in [Vector2(-560, 300), Vector2(-280, 360), Vector2(0, 380), Vector2(280, 360), Vector2(560, 300)]:
+				_prop(sp, 16, "prop_hub_0")
 	if tier > int(G.meta.data.get("camp_tier", 0)):
 		G.meta.data["camp_tier"] = tier
 		G.meta.save()

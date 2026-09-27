@@ -283,6 +283,23 @@ const DEFS := {
 		"b": {"dmg": 9.0, "cd": 2.8, "r": 130.0, "dur": 4.6},
 		"hidden": true,
 	},
+	# kırbaç arketipi (VS): uzun-ince ön kesik, sağ/sol dönüşümlü — geniş
+	# değil derin keser; kalabalığın kenarını biçmek için
+	"kirbac": {
+		"name": "KOVAN KIRBACI", "icon": "icn_stance_cleave", "col": "d8b45a",
+		"desc": "Öne uzun ince kesik — her vuruş sağ/sol tarafa kayar",
+		"b": {"dmg": 18.0, "cd": 1.35, "reach": 200.0, "arc": 52.0},
+		"inc": {"dmg": 4.4, "reach": 6.0, "cd": -0.04},
+		"feats": {5: {"arc": 16.0}, 8: {"dmg": 9.0}},
+		"evo": "dup", "into": "kirbac_x",
+		"req": {"kills": 1800},
+	},
+	"kirbac_x": {
+		"name": "İKİZ KAMÇI", "icon": "icn_stance_duel", "col": "ffd75f",
+		"desc": "İki tarafa aynı anda — ölüm kervanı",
+		"b": {"dmg": 36.0, "cd": 1.0, "reach": 265.0, "arc": 58.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -591,6 +608,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"volt", "volt_x": _volt(st, p)
 		"trail", "trail_x": _trail(st, p, w)
 		"sis", "sis_x": _sis(st, p, w)
+		"kirbac", "kirbac_x": _whip(st, p, w, wid)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
@@ -657,6 +675,20 @@ static func _blade(st: Dictionary, p: Player, wid: String) -> void:
 				var t2 := _nearest(p2.pos, 420.0)
 				var a2 := (t2.pos - p2.pos).angle() if t2 != null else ang + PI
 				p2.auto_swing(a2, reach, arc_deg, dmg, heavy, wid))
+
+# kırbaç: blade'in uzun-ince türevi — vuruş her turda sağ/sol kayar;
+# evo (İKİZ KAMÇI) iki tarafı aynı anda çalar
+static func _whip(st: Dictionary, p: Player, w: Dictionary, wid: String) -> void:
+	var flip := bool(w.get("flip", false))
+	w["flip"] = not flip
+	var tgt := _nearest(p.pos, 480.0)
+	var ang := (tgt.pos - p.pos).angle() if tgt != null else (p.move_dir.angle() if p.move_dir.length_squared() > 0.01 else p.aim_dir.angle())
+	var offs: Array = [deg_to_rad(26.0), deg_to_rad(-26.0)] if wid == "kirbac_x" else [deg_to_rad(26.0) * (1.0 if flip else -1.0)]
+	var dmg := float(st.dmg) * p.dmg_mult * p.st_dmg * (p.melee_dmg / 14.0)
+	var reach := float(st.reach) * p.area_mult
+	var arc_deg := float(st.arc) * p.area_mult
+	for o in offs:
+		p.auto_swing(ang + float(o), reach, arc_deg, dmg, false, wid)
 
 static func _plasma(st: Dictionary, p: Player) -> void:
 	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)

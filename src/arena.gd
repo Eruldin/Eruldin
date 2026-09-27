@@ -73,6 +73,13 @@ func build_arena(biome_idx: int) -> void:
 		spawn_special("guard", Vector2(110, 70))
 		spawn_special("iksir", Vector2(-100, 80))
 		G.ui.toast("nöbet kulesi devrede — zarf ve iksir yanında")
+	if is_instance_valid(G.meta) and G.meta.has_build("sur"):
+		var sp := Vector2(rng.randf_range(BOUNDS.position.x + 160, BOUNDS.end.x - 160), rng.randf_range(BOUNDS.position.y + 160, BOUNDS.end.y - 160))
+		if sp.distance_to(Vector2.ZERO) > 300.0:
+			spawn_chest(sp)
+	if is_instance_valid(G.meta) and G.meta.has_build("kuyu"):
+		spawn_heal(Vector2(150, -60))
+		spawn_heal(Vector2(-150, -50))
 	G.audio.play_music("mus_%d" % biome)
 	var nn := str(G.run.node_name) if G.run != null else ""
 	G.ui.banner(nn if nn != "" else BIOME_NAME[biome], "kovan akıyor — hayatta kal")
