@@ -109,6 +109,7 @@ var data := {
 	"mina_meal": false,    # Mina'nın yemeği — sonraki koşuda şifa küresi şansı ×2
 	"rescued_lena": false, # sahada kafesten kurtarılan Kartograf Lena — kampa katılır
 	"lena_route": false,   # Lena'nın keşif güzergâhı — sonraki koşuda saha zengin
+	"affix_seen": [],      # görülen elit affix'leri — LANET KIRANI başarımını besler
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0, "full": false},
 }
 
@@ -199,6 +200,7 @@ func achievements() -> Array:
 		{"name": "KATALOGLUCU", "desc": "tüm düşman türlerini kayıt defterine işlet", "done": (data.get("seen_kinds", []) as Array).size() >= Enemy.EKind.size(), "rew": 120},
 		{"name": "ON HİKÂYE", "desc": "on efendinin hepsiyle yüz yüze gel", "done": (data.get("boss_seen", []) as Array).size() >= 10, "rew": 160},
 		{"name": "ON BİR HİKÂYE", "desc": "on bir efendinin hepsiyle yüz yüze gel", "done": (data.get("boss_seen", []) as Array).size() >= 11, "rew": 220},
+		{"name": "LANET KIRANI", "desc": "yirmi elit lanetini de sahada gör", "done": (data.get("affix_seen", []) as Array).size() >= 20, "rew": 300},
 		{"name": "EVRİM MİMARI", "desc": "tek koşuda 3 evrim tamamla", "done": int(data.get("best_evos", 0)) >= 3, "rew": 120},
 		{"name": "NÜVE AVCISI", "desc": "10 altın nüve topla", "done": int(data.get("eggs", 0)) >= 10, "rew": 120},
 		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0, "rew": 150},
@@ -252,6 +254,7 @@ const TITLES := [
 	{"id": "damarguc","name": "DAMARGÜÇ",         "src": "ALTI GÖVDE"},
 	{"id": "mimar",   "name": "KAMP MİMARI",      "src": "MİMAR"},
 	{"id": "sefer",   "name": "ZİNCİR TAŞIYAN",   "src": "SEFERKÂR"},
+	{"id": "lanet",   "name": "LANET KIRANI",     "src": "LANET KIRANI"},
 ]
 
 func title_open(tid: String) -> bool:

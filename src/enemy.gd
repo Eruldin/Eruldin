@@ -304,6 +304,12 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "CAZİBELİ " + actor_name
 			"ambarli":
 				actor_name = "AMBARLI " + actor_name
+		# affix kaydı — LANET KIRANI başarımını besler
+		var seen: Array = G.meta.data.get("affix_seen", [])
+		if not seen.has(affix):
+			seen.append(affix)
+			G.meta.data["affix_seen"] = seen
+			G.meta.save()
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -591,7 +597,7 @@ func _seek(d: float) -> void:
 			dir = -dir
 		elif dist < keep_max:
 			dir = dir.rotated(PI / 2 * sin(Time.get_ticks_msec() * 0.0008))
-	var spd := speed * (1.28 if lead_t > 0.0 else 1.0) * (2.3 if _burrowed else 1.0) * (2.2 if _dive_t > 0.0 else 1.0) * (0.5 if chill_t > 0.0 else 1.0)
+	var spd := speed * (1.28 if lead_t > 0.0 else 1.0) * (2.3 if _burrowed else 1.0) * (2.2 if _dive_t > 0.0 else 1.0) * (0.5 if chill_t > 0.0 else 1.0) * (0.72 if (is_instance_valid(G.player) and G.player.has_meta("wall") and pos.distance_to(G.player.pos) < 150.0) else 1.0)
 	var mdir := dir
 	if kind == EKind.KOCBASI:
 		if _charge_t > 0.0:
