@@ -29,6 +29,7 @@ const SPRITES := {
 	"por_dev": "art/por_dev.png",
 	"por_kor": "art/por_kor.png",
 	"por_damar": "art/por_damar.png",
+	"por_buz": "art/por_buz.png",
 	"por_h9": "art/por_h9.png",
 	"prop_mahkum2": "art/prop_mahkum2.png",
 	# sahne vistalari (uretilmis): backdrop katmanlari + arena ufku
@@ -168,7 +169,7 @@ const FRAMES := {
 	"husk": {}, "sentinel": {}, "spitter": {}, "turret": {}, "drone": {},
 	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {}, "c_herald": {}, "c_akrep": {}, "c_balcik": {}, "c_gozetmen": {}, "c_copcu": {}, "c_dinamitci": {}, "c_kuzgun": {}, "c_sivri": {}, "c_koc": {}, "c_gol": {}, "c_fisilti": {}, "c_pence": {},
 	"rex": {}, "host": {}, "nahum": {}, "tuman": {}, "kirin": {}, "const": {},
-	"anasi": {}, "dev": {}, "kor": {}, "damar": {},
+	"anasi": {}, "dev": {}, "kor": {}, "damar": {}, "buz": {},
 }
 
 static func frames() -> Dictionary:
@@ -178,7 +179,7 @@ static func frames() -> Dictionary:
 	for k in ["c_varl", "c_cereb", "c_konakci", "c_alfa", "c_herald", "c_akrep", "c_balcik", "c_gozetmen", "c_copcu", "c_dinamitci", "c_kuzgun", "c_sivri", "c_koc", "c_gol", "c_fisilti", "c_pence"]:
 		d[k] = _en("g_" + k.trim_prefix("c_"))
 	d["c_carrier"] = _en("g_carrier")
-	for k in ["rex", "host", "nahum", "tuman", "kirin", "const", "anasi", "dev", "kor", "damar"]:
+	for k in ["rex", "host", "nahum", "tuman", "kirin", "const", "anasi", "dev", "kor", "damar", "buz"]:
 		d[k] = _bs("g_" + k)
 	d["c_h9"] = _hero("g_h9")
 	d["c_k7"] = _hero("g_k7")

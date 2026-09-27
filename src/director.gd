@@ -12,7 +12,7 @@ const WIN_T := 780.0      # 13:00 failsafe — swarm collapses
 
 # per-sector bosses: miniboss is the previous sector's efendi (biome 0 keeps
 # the Host); the final is that sector's own boss — twins/Aeterna spawn as pairs
-const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM, Boss.BKind.TUMAN, Boss.BKind.TUMAN, Boss.BKind.KIRIN, Boss.BKind.KOR]
+const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM, Boss.BKind.TUMAN, Boss.BKind.TUMAN, Boss.BKind.KIRIN, Boss.BKind.KOR, Boss.BKind.DAMAR]
 const FINAL_KIND := [
 	[Boss.BKind.REX],
 	[Boss.BKind.HOST],
@@ -22,6 +22,7 @@ const FINAL_KIND := [
 	[Boss.BKind.KOR],
 	[Boss.BKind.ANASI],
 	[Boss.BKind.DAMAR],
+	[Boss.BKind.BUZ],
 ]
 
 var t := 0.0
@@ -51,6 +52,7 @@ const RAIN_CFG := [
 	{"t": "KOR YAĞMURU — gökyüzü kül kusuyor!", "col": "ff7722", "r": 90.0, "n": 8, "pdmg": 26.0, "ptype": "EXPLOSION"},
 	{"t": "KUM FIRTINASI — sürüklenen kumlar kabarır!", "col": "ffaa55", "r": 105.0, "n": 6, "pdmg": 18.0, "ptype": "SHOCK"},
 	{"t": "KRİSTAL YAĞMURU — çukurun tavanı düşüyor!", "col": "4dd0e1", "r": 75.0, "n": 9, "pdmg": 22.0, "ptype": "PURE"},
+	{"t": "TIPİ — donmuş hava çöküyor!", "col": "9fd8ff", "r": 85.0, "n": 8, "pdmg": 22.0, "ptype": "PURE"},
 ]
 var _min_ann := 0          # son duyurulan dakika kilometre taşı
 var _mini := false
@@ -442,6 +444,7 @@ func _on_boss_dead(b) -> void:
 			Boss.BKind.DEV: bid = "dev"
 			Boss.BKind.KOR: bid = "kor"
 			Boss.BKind.DAMAR: bid = "damar"
+			Boss.BKind.BUZ: bid = "buz"
 		G.meta.boss_down(bid)
 		Quests.tick("boss", bid)
 	if is_instance_valid(G.room):
