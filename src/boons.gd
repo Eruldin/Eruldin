@@ -89,6 +89,8 @@ const ARCANAS := {
 	"sofra":   {"name": "SOFRA DÜZENİ",   "desc": "İksir ve şarap %50 daha uzun/güçlü etki eder", "col": "ef5350"},
 	"pence":   {"name": "PENÇE ROTASI",   "desc": "+%15 saldırı hızı — ama -%10 hasar", "col": "ff7043"},
 	"yemin":   {"name": "DİRENÇ YEMİNİ",  "desc": "+1 dirilme hakkı — ama -%15 parçacık verimi", "col": "90a4ae"},
+	"kirici":  {"name": "KIRICI ÖFKESİ",   "desc": "+%30 kritik hasarı — ama -%5 kritik şansı", "col": "ff5252"},
+	"borclu":  {"name": "BORÇLU KADER",    "desc": "+300 koşu parçacığı — ama ödeme ×0.85", "col": "c9a227"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -148,6 +150,12 @@ static func apply_arcana(id: String, p: Player) -> void:
 		"yemin":
 			p.revives_extra += 1
 			p.frag_mult *= 0.85
+		"kirici":
+			p.crit_mult += 0.30
+			p.crit_ch -= 0.05
+		"borclu":
+			G.run.fragments += 300
+			G.run.reward_mult *= 0.85
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0

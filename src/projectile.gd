@@ -107,6 +107,9 @@ func _process(_d: float) -> void:
 				e.take_hit(h)
 				G.player.on_dealt_damage(e, h)
 				G.audio.play("hit", 1.3, 0.5)
+				if crit:
+					G.audio.play("crit", G.rf(1.0, 1.15), 0.35)
+					G.fx.burst(e.pos + Vector2(0, -10), Px.C("ffd75f"), 5, 170.0, 3.0, 0.22)
 				if not piercing:
 					_impact()
 					return
