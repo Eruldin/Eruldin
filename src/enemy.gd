@@ -257,10 +257,13 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak"][randi() % 21]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak", "fanatik"][randi() % 22]
 		# KAÇAK GÜZERGÂHI kozu: elitlerin yarısı kaçak çıkar
 		if is_instance_valid(G.run) and G.run.kacak_plus and G.chance(0.5):
 			affix = "kacak"
+		# NARA KADERİ kozu: fanatiklerin de kendi yoğunluğu var
+		elif is_instance_valid(G.run) and G.run.fanatik_plus and G.chance(0.4):
+			affix = "fanatik"
 		match affix:
 			"armored":
 				armor += 5.0
@@ -316,6 +319,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "CAZİBELİ " + actor_name
 			"ambarli":
 				actor_name = "AMBARLI " + actor_name
+			"fanatik":
+				actor_name = "FANATİK " + actor_name
 			"kacak":
 				actor_name = "KAÇAK " + actor_name
 		# affix kaydı — LANET KIRANI başarımını besler
@@ -384,7 +389,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7", "ambarli": "c8e6c9", "kacak": "ffd54f"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7", "ambarli": "c8e6c9", "kacak": "ffd54f", "fanatik": "ff5252"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -1153,6 +1158,14 @@ func die(h: Dictionary) -> void:
 		G.fx.float_text(pos + Vector2(0, -52), "KAÇAK YAKALANDI", Px.C("ffd54f"), 0.95)
 		G.run.stats["kacak_kills"] = int(G.run.stats.get("kacak_kills", 0)) + 1
 		Quests.tick("kacak")
+	# fanatik elit: ölüm narası — yakın sürü çılgına döner (kısa güçlü hız buffı)
+	if elite and affix == "fanatik":
+		for e4 in G.enemies:
+			if is_instance_valid(e4) and not e4.dead and e4 != self and e4.pos.distance_to(pos) < 300.0:
+				e4.lead_t = maxf(e4.lead_t, 6.0)
+		G.fx.float_text(pos + Vector2(0, -52), "FANATİK NARASI", Px.C("ff5252"), 0.95)
+		G.fx.tele_ring(pos, 300.0, 0.5, Color(1, 0.32, 0.2, 0.45))
+		G.fx.burst(pos, Px.C("ff5252"), 16, 200.0, 5.0, 0.45)
 	# kristalli elit: ölünce çevreye parçacık yağmuru saçar — damar yemi
 	if elite and affix == "kristal" and is_instance_valid(G.run):
 		G.run.drop_fragments(pos, G.ri(8, 14))
