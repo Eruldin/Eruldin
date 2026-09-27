@@ -478,6 +478,18 @@ func _place_hazards(depth: int) -> void:
 					t8.sr.modulate.a = 0.12
 					G.fx.mk_light(self, p, Px.C("9fd8ff"), 0.4, 1.5)
 					hazards.append({"pos": p, "r": 54.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(3, 7), "tele": t8, "erupt": 0.0, "col": "9fd8ff"})
+			3:
+				# Aeterna: çan alanı — halkanın içindeki sürü nabızla hızlanır; düşmanı içinden geçirme
+				var t3 := G.fx.tele_circle(p, 74, 9999.0, Color(0.76, 0.63, 0.16, 0.2))
+				t3.sr.modulate.a = 0.10
+				G.fx.mk_light(self, p, Px.C("c9a227"), 0.35, 1.4)
+				hazards.append({"pos": p, "r": 74.0, "dps": 0.0, "kind": "coro", "t": rng.randf_range(1.5, 3.5), "tele": t3})
+			7:
+				# Kristal Çukur: damar fışkını — telegraph'lı püskürme kristal saçar ama içinde duranı da vurur
+				var t7 := G.fx.tele_circle(p, 56, 9999.0, Color(0.3, 0.82, 0.88, 0.25))
+				t7.sr.modulate.a = 0.12
+				G.fx.mk_light(self, p, Px.C("4dd0e1"), 0.4, 1.5)
+				hazards.append({"pos": p, "r": 56.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(2, 6), "tele": t7, "erupt": 0.0, "col": "4dd0e1", "gusher": true})
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))   # void pool
 		i += 1
@@ -1172,9 +1184,26 @@ func _tick_hazards(d: float) -> void:
 					if is_instance_valid(h.tele.sr):
 						h.tele.sr.modulate.a = 0.12
 					G.fx.burst(h.pos, Px.C(str(h.get("col", "00E676"))), 14, 130.0, 4.0, 0.4)
+					if bool(h.get("gusher", false)):
+						for g in 5:
+							spawn_gem(h.pos + Vector2(rng.randf_range(-60, 60), rng.randf_range(-60, 60)), float(rng.randi_range(2, 5)))
 					G.audio.play("explode", 1.6, 0.3)
 				elif is_instance_valid(h.tele.sr):
 					h.tele.sr.modulate.a = 0.5  # warning flare
+		elif h.kind == "coro":
+			# Aeterna çan alanı: nabız attığında içindeki düşmanlar kısa süre hızlanır
+			h.t -= d
+			if h.t <= 0.0:
+				h.t = rng.randf_range(3.0, 4.5)
+				if is_instance_valid(h.tele.sr):
+					h.tele.sr.modulate.a = 0.4
+				for e in G.enemies:
+					if is_instance_valid(e) and e.pos.distance_to(h.pos) < h.r:
+						e.lead_t = maxf(e.lead_t, 1.4)
+				G.fx.burst(h.pos, Px.C("c9a227"), 10, 90.0, 3.0, 0.35)
+				G.audio.play("boon", 1.2, 0.2)
+			elif is_instance_valid(h.get("tele", {}).get("sr")) and h.tele.sr.modulate.a > 0.12:
+				h.tele.sr.modulate.a = maxf(0.12, h.tele.sr.modulate.a - d * 0.4)
 		elif h.kind == "surgun":
 			# gezici kum hortumu: alanı süpürür, içindekini döndürerek iter
 			# t>0 ise fırtına hortumu — süresi dolunca tele'i temizleyip düşer
