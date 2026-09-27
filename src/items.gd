@@ -74,6 +74,7 @@ const DEFS := {
 	"i_kacakkordon": {"name": "Kese Kordonu", "slot": "kemer",   "r": 2, "icon": "ico_frag",       "mods": {"frag": 0.10, "spd": 0.05}},
 	"i_yanki":   {"name": "Yankı Taşı",      "slot": "yuzuk2",  "r": 2, "icon": "ico_frag",       "mods": {"mag": 50.0, "frag": 0.08}},
 	"i_manset":  {"name": "Muhafız Manşeti", "slot": "eldiven", "r": 3, "icon": "icn_upg_shield", "mods": {"armor": 0.7, "dmg": 0.06, "hp": 10}},
+	"i_nara":    {"name": "Nara Boynuzu",    "slot": "bas",     "r": 3, "icon": "icn_skull",      "mods": {"dmg": 0.08, "ls": 0.02}},
 	"i_arkhalka": {"name": "Ark Bileziği",    "slot": "yuzuk1",  "r": 2, "icon": "icn_zap",        "mods": {"skill": -0.06, "dmg": 0.04}},
 	"i_bora":     {"name": "Bora Zili",       "slot": "kemer",   "r": 2, "icon": "icn_dash",       "mods": {"spd": 0.05, "armor": 0.5}},
 	"i_ayin":     {"name": "Ayin Mumusu",     "slot": "eldiven", "r": 2, "icon": "icn_skull",      "mods": {"dmg": 0.05, "crit": 0.03}},

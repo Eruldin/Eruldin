@@ -49,6 +49,7 @@ const DEFS := [
 	{"id": "q_aura",  "giver": "vane",    "name": "AURA FİŞEĞİ",         "desc": "Rezonans protokolü denemeye hazır. Tek koşuda 12 elit kes — fişeği sana bağlarım.", "obj": {"type": "elites", "n": 12}, "rew": {"cho": 160, "wep": "aura"}, "prereq": "q_nobet"},
 	{"id": "q_skor",  "giver": "rhasa",   "name": "SKOR VERGİSİ",        "desc": "Kovan rekor sever. Tek koşuda 4000 skor yap — oranını yükseltirim.", "obj": {"type": "score", "n": 4000}, "rew": {"cho": 260}, "prereq": "q_kan2"},
 	{"id": "q_vergi", "giver": "rhasa",   "name": "ALTIN VERGİ",         "desc": "Kovan altınla sınanır — sahada gezen şampiyonların madalyonları hazinenin. Üç şampiyon kes, kovan seni tanısın.", "obj": {"type": "champ", "n": 3}, "rew": {"cho": 300, "item": "i_cengel"}, "prereq": "q_skor"},
+	{"id": "q_seri",  "giver": "rhasa",   "name": "SERİ NARASI",         "desc": "Kovan duraksamayı sevmez — kesimler zincir olmalı, nefes bile araya girmemeli. Tek koşuda yüzlük katliam serisi yap; nara boynuzunu takarsın.", "obj": {"type": "seri", "n": 100}, "rew": {"cho": 320, "item": "i_nara", "rep": 2}, "prereq": "q_vergi"},
 	{"id": "q_frag",  "giver": "saphire", "name": "PARÇACIK HASADI",     "desc": "Tezgâh parçacıksız dönmez. Tek koşuda 600 parçacık topla — kesende dursun, teslime gerek yok.", "obj": {"type": "frag", "n": 600}, "rew": {"cho": 140}, "prereq": "q_loot"},
 	{"id": "q_glaive","giver": "ehnar",   "name": "AĞIR TAHMİS",         "desc": "Sırp diskleri depoda paslanıyor. Tek koşuda 400 kesim yaparsan birini sana kalibrarım.", "obj": {"type": "kills", "n": 400}, "rew": {"cho": 150, "wep": "glaive"}, "prereq": "q_nobet2"},
 	{"id": "q_deneme","giver": "ehnar",   "name": "DENEME KANITI",       "desc": "Sahalardaki eski deneme totemleri hâlâ sayıyor. İkisini tamamla — ikisinin de elitleri düşsün.", "obj": {"type": "totem", "n": 2}, "rew": {"cho": 170, "item": "i_koro"}, "prereq": "q_elit"},
@@ -333,7 +334,7 @@ static func daily_check() -> void:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer", "koz", "crits"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer", "koz", "crits", "seri", "parry"]:
 		done.append_array(tick(type))
 	daily_check()
 	for q in DEFS:
@@ -406,6 +407,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"nodmg":   cur = int(G.run.stats.get("best_nodmg", 0))
 			"crits":   cur = int(G.run.stats.get("crits", 0))
 			"parry":   cur = int(G.run.stats.get("parries", 0))
+			"seri":    cur = int(G.run.stats.get("best_streak", 0))
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
 		if cur >= need:
@@ -552,6 +554,7 @@ static func obj_text(q: Dictionary) -> String:
 		"kacak":   return "%d kaçak elit yakala" % need
 		"kuyu":    return "%d kez ses kuyusuyla uğraş" % need
 		"parry":   return "tek koşuda %d kez parry yap" % need
+		"seri":    return "tek koşuda %d'lik kesim serisi yap" % need
 	return "?"
 
 static func _claimed_count() -> int:
