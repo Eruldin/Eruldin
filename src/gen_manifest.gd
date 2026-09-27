@@ -172,7 +172,7 @@ const FRAMES := {
 	"c_k7": {},
 	"c_dg": {},
 	"husk": {}, "sentinel": {}, "spitter": {}, "turret": {}, "drone": {},
-	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {}, "c_herald": {}, "c_akrep": {}, "c_balcik": {}, "c_gozetmen": {}, "c_copcu": {}, "c_dinamitci": {}, "c_kuzgun": {}, "c_sivri": {}, "c_koc": {}, "c_gol": {}, "c_fisilti": {}, "c_pence": {}, "c_tayf": {}, "c_emici": {},
+	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {}, "c_herald": {}, "c_akrep": {}, "c_balcik": {}, "c_gozetmen": {}, "c_copcu": {}, "c_dinamitci": {}, "c_kuzgun": {}, "c_sivri": {}, "c_koc": {}, "c_gol": {}, "c_fisilti": {}, "c_pence": {}, "c_tayf": {}, "c_emici": {}, "c_dol": {},
 	"rex": {}, "host": {}, "nahum": {}, "tuman": {}, "kirin": {}, "const": {},
 	"anasi": {}, "dev": {}, "kor": {}, "damar": {}, "buz": {}, "nur": {},
 }
@@ -181,7 +181,7 @@ static func frames() -> Dictionary:
 	var d := FRAMES.duplicate()
 	for k in ["husk", "sentinel", "spitter", "turret", "drone"]:
 		d[k] = _en("g_" + k)
-	for k in ["c_varl", "c_cereb", "c_konakci", "c_alfa", "c_herald", "c_akrep", "c_balcik", "c_gozetmen", "c_copcu", "c_dinamitci", "c_kuzgun", "c_sivri", "c_koc", "c_gol", "c_fisilti", "c_pence", "c_tayf", "c_emici"]:
+	for k in ["c_varl", "c_cereb", "c_konakci", "c_alfa", "c_herald", "c_akrep", "c_balcik", "c_gozetmen", "c_copcu", "c_dinamitci", "c_kuzgun", "c_sivri", "c_koc", "c_gol", "c_fisilti", "c_pence", "c_tayf", "c_emici", "c_dol"]:
 		d[k] = _en("g_" + k.trim_prefix("c_"))
 	d["c_carrier"] = _en("g_carrier")
 	for k in ["rex", "host", "nahum", "tuman", "kirin", "const", "anasi", "dev", "kor", "damar", "buz", "nur"]:
