@@ -86,6 +86,7 @@ const DEFS := [
 	{"id": "q_govde","giver": "david",   "name": "HER GÖVDE BİR DERS",  "desc": "Ely'nin kasası tek başına kovanı yormaz — her şasi ayrı ders. Üç farklı gövdeyle zafer kazan; hangi şasiyle dönersen dön, seni bekleyen şeyi çizim yapayım.", "obj": {"type": "heros", "n": 3}, "rew": {"cho": 300, "item": "i_ikiz"}, "prereq": "q_gez"},
 	{"id": "q_anit",  "giver": "ehnar",   "name": "ANIT NÖBETİ",         "desc": "Kül tepesinde bir anıt var — kovan oraya saygı duruşuna geliyor. Tek koşuda 500 kesim yaparsan girişi gösteririm.", "obj": {"type": "kills", "n": 500}, "rew": {"cho": 200, "node": "koranit"}, "prereq": "q_kul"},
 	{"id": "q_kor",   "giver": "ehnar",   "name": "KÜLLERİN EFENDİSİ",  "desc": "Kül Ovası'nda son efendi oturuyor — imparatorluğunun tahtı hâlâ yanıyor. Kor Yücelten'i düşür; tacını sana miğfer yaparım.", "obj": {"type": "boss", "k": "kor"}, "rew": {"cho": 240, "item": "i_kortac"}, "prereq": "q_kul"},
+	{"id": "q_duvar", "giver": "ehnar",   "name": "ESKİ MUHAFIZIN YEMİNİ","desc": "Kalkan kasasını duydum — K-7, benim devriyemin duvar serisiydi. O gövdeyle bir zafer getir; yemin plakasını zırhına işlerim.", "obj": {"type": "hero_won", "id": "k7", "n": 1}, "rew": {"cho": 260, "item": "i_duvar"}},
 	{"id": "q_karne", "giver": "mina",    "name": "İKSİR KARNESİ",        "desc": "Şifa içecek şişe değil, disiplin ister. Altı iksir iç — karneni ocak defterine işlerim.", "obj": {"type": "iksir", "n": 6}, "rew": {"cho": 140, "item": "i_kemer_par"}, "prereq": "q_sofra"},
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
 	{"id": "q_ziyafet","giver": "mina",   "name": "KURTULUŞ ZİYAFETİ",    "desc": "Büyük sofra büyük malzeme ister. Otuz küre daha — karşılığında damlayı veririm, seni geri getirir.", "obj": {"type": "sifa", "n": 30}, "rew": {"cho": 320, "item": "i_neva"}, "prereq": "q_sofra"},
@@ -125,6 +126,8 @@ static func state(id: String) -> String:
 			cur = int(G.meta.data.get("bets_won", 0))
 		elif t == "heros":
 			cur = (G.meta.data.get("hero_wins", {}) as Dictionary).size()
+		elif t == "hero_won":
+			cur = int((G.meta.data.get("hero_wins", {}) as Dictionary).get(str(q.obj.get("id", "")), 0))
 		if cur >= 0:
 			_q()[id]["prog"] = maxi(prog(id), cur)
 		if cur >= int(q.obj.get("n", 1)):
