@@ -3544,6 +3544,8 @@ func epilog(nid: String) -> String:
 		"cukur": "Kuyunun kalbi sustu — damarlar yüz yıllığına karardı.",
 		"damar": "Ana yatak söndü — imparatorluğun son zenginliği bitti.",
 		"buzul": "Buzul sustu — çatlağın altındaki sürüler sonunda dinleniyor.",
+		"enkazkasa": "Son sevkiyat yerini buldu — manifest kapandı.",
+		"batikkasa": "Ambar yüzeye çıktı — bataklık son yükünü verdi.",
 	}.get(nid, ""))
 
 func victory_screen(stats: Dictionary) -> void:
