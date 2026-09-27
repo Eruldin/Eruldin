@@ -49,6 +49,8 @@ const DEFS := {
 	"i_cevher":   {"name": "Cevher Yüzüğü",    "slot": "yuzuk",   "r": 0, "icon": "ico_frag",       "mods": {"frag": 0.08, "xp": 0.04}},
 	"i_cengel":   {"name": "Av Çengeli",       "slot": "eldiven", "r": 2, "icon": "icn_sword",      "mods": {"dmg": 0.08, "ls": 0.015}},
 	"i_pusula":   {"name": "Kuzey Pusulası",   "slot": "kolye",   "r": 2, "icon": "icn_dash",       "mods": {"xp": 0.10, "mag": 50.0}},
+	"i_nabiz":    {"name": "Nabız Söndürücü",  "slot": "kolye",   "r": 2, "icon": "icn_zap",        "mods": {"skill": -0.16}},
+	"i_vurgu":    {"name": "Vurgu Halkası",    "slot": "yuzuk",   "r": 1, "icon": "icn_dagger",     "mods": {"skill": -0.09, "dmg": 0.03}},
 }
 
 const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700"]
@@ -149,7 +151,7 @@ const SETS := {
 static func equip_stats() -> Dictionary:
 	var out := {"hp": 0.0, "armor": 0.0, "dmg": 0.0, "spd": 0.0, "crit": 0.0,
 		"critmult": 0.0, "ls": 0.0, "mag": 0.0, "xp": 0.0, "frag": 0.0,
-		"dash_regen": 0.0, "revive": 0}
+		"dash_regen": 0.0, "revive": 0, "skill": 0.0}
 	var eq: Dictionary = G.meta.data.get("equip", {})
 	var worn: Array = eq.values()
 	for slot in eq:
@@ -311,10 +313,11 @@ static func stat_text(id: String) -> String:
 		return ""
 	var names := {"hp": "can", "armor": "zırh", "dmg": "hasar", "spd": "hız",
 		"crit": "kritik", "critmult": "kritik×", "ls": "can emme", "mag": "mıknatıs",
-		"xp": "XP", "frag": "parçacık", "dash_regen": "dash yenileme", "revive": "dirilme"}
+		"xp": "XP", "frag": "parçacık", "dash_regen": "dash yenileme", "revive": "dirilme",
+		"skill": "Q bekleme"}
 	var parts: Array = []
 	for k in d.mods:
 		var f := float(d.mods[k]) * (1.0 if k == "revive" else _lscale(id))
-		var fmt := "+%d" % int(f) if absf(f) >= 1.5 else "+%d%%" % int(f * 100)
+		var fmt := "%+d" % int(f) if absf(f) >= 1.5 else "%+d%%" % int(f * 100)
 		parts.append("%s %s" % [fmt, names.get(k, k)])
 	return "  ".join(parts)
