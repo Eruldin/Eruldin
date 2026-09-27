@@ -72,6 +72,11 @@ func _process(d: float) -> void:
 		return
 	t += d
 	G.run.time = t
+	# hasarsiz seri: oyuncu vurulmadan gecen en uzun sure (stats'a yazilir, take_hit sifirlar)
+	var _nd := float(G.run.stats.get("_nodmg", 0.0)) + d
+	G.run.stats["_nodmg"] = _nd
+	if _nd > float(G.run.stats.get("best_nodmg", 0.0)):
+		G.run.stats["best_nodmg"] = _nd
 	# melee attack tokens scale with minutes so hordes stay readable, not fair
 	G.MELEE_TOKENS_MAX = 2 + mini(10, int(t / 75.0))
 	_tick_spawn(d)
@@ -80,6 +85,7 @@ func _process(d: float) -> void:
 	if _quest_t >= 1.0:
 		_quest_t = 0.0
 		Quests.tick("time")
+		Quests.tick("nodmg")
 	# ikinci kader kartı — 7:00'de (elinde ilk kart varsa)
 	if not _koz2_fired and t >= 420.0 and G.run.arcana != "" and G.run.arcana2 == "" and is_instance_valid(G.ui) and not G.ui.overlay_open():
 		_koz2_fired = true

@@ -3195,7 +3195,7 @@ func death_screen(killer: String, gained: int) -> void:
 		ul.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(ul)
 	var tt := int(G.run.time)
-	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0)), int(G.run.stats.get("best_streak", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
+	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d · hasarsız %dsn" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0)), int(G.run.stats.get("best_streak", 0)), int(G.run.stats.get("best_nodmg", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
 	dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dl)
 	var sc := int(G.run.stats.get("score", 0))

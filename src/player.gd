@@ -671,6 +671,7 @@ func take_hit(h: Dictionary) -> void:
 		return
 	var dmg := maxf(1.0, (h.get("dmg", 1.0) - armor) * dmg_taken_mult)
 	hp -= dmg
+	G.run.stats["_nodmg"] = 0.0   # hasarsiz seri kirildi
 	set_flash()
 	_anim = ""
 	_set_anim("hurt", 6.0)
