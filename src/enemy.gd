@@ -1140,6 +1140,11 @@ func die(h: Dictionary) -> void:
 	if kind == EKind.CARRIER and is_instance_valid(G.room):
 		G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard", "iksir", "sarap"]), pos)
 		G.fx.float_text(pos + Vector2(0, -40), "YÜK DÜŞTÜ", Px.C("ffb74d"), 0.9)
+		# konvoy hamalı kesildi — çıkışa varmadan düşürülen ganimet
+		if has_meta("convoy_dir"):
+			G.run.drop_fragments(pos + Vector2(16, 8), 10)
+			G.run.stats["convoy_kills"] = int(G.run.stats.get("convoy_kills", 0)) + 1
+			Quests.tick("konvoy")
 	if is_instance_valid(G.room):
 		G.room.on_enemy_dead(self)
 	queue_free()
