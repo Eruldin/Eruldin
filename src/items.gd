@@ -56,6 +56,8 @@ const DEFS := {
 	"i_devkalp": {"name": "Batak Kalbi",     "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 40, "armor": 0.8}},
 	"i_kortac":  {"name": "Kor Tacı",        "slot": "bas",     "r": 3, "icon": "icn_crown",      "mods": {"dmg": 0.08, "skill": -0.10}},
 	"i_balcikkalp": {"name": "Balçık Kalbi", "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 30, "ls": 0.02}},
+	"i_praetorian": {"name": "Praetorian Gövdesi", "slot": "govde", "r": 3, "icon": "icn_upg_shield", "mods": {"hp": 60, "armor": 1.2}},
+	"i_soykemer": {"name": "Soy Kemeri",      "slot": "kemer",   "r": 3, "icon": "icn_crown",      "mods": {"dmg": 0.07, "xp": 0.10}},
 	# kemer slotu — 8. ekipman yuvası
 	"i_kemer_kum": {"name": "Kum Kemeri",      "slot": "kemer",   "r": 0, "icon": "icn_dash",       "mods": {"spd": 0.04, "mag": 25.0}},
 	"i_kemer_par": {"name": "Parazit Kemeri",  "slot": "kemer",   "r": 1, "icon": "icn_kovan",      "mods": {"hp": 18, "ls": 0.015}},
