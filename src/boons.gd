@@ -102,6 +102,8 @@ const ARCANAS := {
 	"guzergah":{"name": "KAÇAK GÜZERGÂHI",  "desc": "Kaçak elitler çok daha sık çıkar — ama sürü %8 sıklaşır", "col": "ffd54f"},
 	"yagma":   {"name": "KESKİN YAĞMA",     "desc": "Kritik vuruşlar %8 ihtimalle parçacık döker — ama -%10 deneyim", "col": "ffd75f"},
 	"narakad": {"name": "NARA KADERİ",      "desc": "Fanatik elitler çok daha sık çıkar — ama -6 azami can", "col": "ff5252"},
+	"itibar":  {"name": "KAMP ELBİSESİ",    "desc": "Kamp itibar kademesi başına +%6 hasar", "col": "c9a227"},
+	"geri":    {"name": "GERİ KAZANIM",      "desc": "Her taslak seçimi +8 parçacık döker — ama -%8 deneyim", "col": "39ff14"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -204,6 +206,10 @@ static func apply_arcana(id: String, p: Player) -> void:
 		"yagma":
 			p.set_meta("crit_frag", true)
 			p.xp_mult *= 0.90
+		"itibar":
+			p.dmg_mult *= 1.0 + Quests.rep_tier() * 0.06
+		"geri":
+			p.xp_mult *= 0.92
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0

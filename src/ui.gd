@@ -3370,6 +3370,10 @@ func _pick_card(o: Dictionary) -> void:
 		G.ui.toast("KOZ: %s" % str(o.get("name", "?")))
 		return
 	Weapons.apply_opt(o, G.player)
+	if G.run != null and G.run.has_arcana("geri"):
+		G.run.fragments += 8
+		if is_instance_valid(G.player):
+			G.fx.float_text(G.player.pos + Vector2(0, -40), "+8◈", Px.C("39ff14"), 1.0)
 	if is_instance_valid(G.player):
 		G.fx.burst(G.player.pos + Vector2(0, -24), Px.C(str(o.get("col", "00E5FF"))), 20, 150.0, 4.0, 0.7)
 	G.audio.jingle("boon")
