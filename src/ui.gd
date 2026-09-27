@@ -2262,7 +2262,15 @@ func contract_panel() -> void:
 	var l4 := _lbl("tutan sözleşme: %d" % int(G.meta.data.get("contracts_done", 0)), Vector2.ZERO, 11, Px.C("c9a227"))
 	l4.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(l4)
-	var h := _lbl("[E / tık] kapat — sözleşme kampa döndüğünde değerlendirilir", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	var hd := _lbl("— GÜNLÜK İHALELER —", Vector2.ZERO, 12, Px.C("ffd700"))
+	hd.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(hd)
+	for b in Quests.daily():
+		var done_b := bool(b.get("done", false))
+		var bl := _lbl("%s  —  %s" % [str(b.get("desc", "")), "✓ ÖDENDİ" if done_b else "◆ %d" % int(b.get("cho", 0))], Vector2.ZERO, 11, Color(0.55, 0.85, 0.55) if done_b else Color(0.82, 0.76, 0.6))
+		bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(bl)
+	var h := _lbl("[E / tık] kapat — sözleşme ve ihaleler kampa döndüğünde değerlendirilir", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 

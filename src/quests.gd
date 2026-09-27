@@ -207,13 +207,83 @@ static func active_for(nid: String) -> Array:
 
 # anything to talk about: new offer, live progress, or a claimable reward
 static func has_business(nid: String) -> bool:
+	if nid == "ehnar":
+		for b in daily():
+			if not bool(b.get("done", false)):
+				return true
 	return not (available_for(nid).is_empty() and claimable_for(nid).is_empty() and active_for(nid).is_empty())
+
+# ---------- günlük ihaleler ----------
+# Tarih-seed'li 2 küçük kontrat; koşu bitiminde (tick_all) değerlendirilir.
+# stats okumaları tick() match'i ile aynı tutulur.
+const BOUNTY_DEFS := [
+	{"type": "kills",  "n": 250, "desc": "tek koşuda 250 kesim",        "cho": 80},
+	{"type": "elites", "n": 8,   "desc": "tek koşuda 8 elit kes",        "cho": 90},
+	{"type": "time",   "n": 480, "desc": "tek koşuda 8 dakika dayan",    "cho": 100},
+	{"type": "loot",   "n": 3,   "desc": "tek koşuda 3 ganimet topla",   "cho": 90},
+	{"type": "score",  "n": 3500,"desc": "tek koşuda 3500 skor",        "cho": 110},
+	{"type": "win",    "n": 1,   "desc": "herhangi bir düğümde zafer",   "cho": 120},
+	{"type": "kind",   "k": "Taret",         "n": 6, "desc": "tek koşuda 6 Taret sök",        "cho": 80},
+	{"type": "kind",   "k": "Kor Pençe",     "n": 8, "desc": "tek koşuda 8 Kor Pençe kes",    "cho": 110},
+	{"type": "kind",   "k": "Gözetmen",      "n": 8, "desc": "tek koşuda 8 Gözetmen düşür",   "cho": 100},
+	{"type": "kind",   "k": "Balçık Adam",   "n": 8, "desc": "tek koşuda 8 Balçık Adam erit", "cho": 100},
+	{"type": "vein",   "n": 4,   "desc": "tek koşuda 4 choralim damarı kır", "cho": 90},
+	{"type": "champ",  "n": 1,   "desc": "tek koşuda 1 şampiyon kes",    "cho": 130},
+]
+
+static func daily() -> Array:
+	var today := Time.get_date_string_from_system()
+	var d: Dictionary = G.meta.data.get("daily", {})
+	if str(d.get("date", "")) != today:
+		var pool := BOUNTY_DEFS.duplicate()
+		var list: Array = []
+		for i in 2:
+			var i2 := (hash(today) + i * 7919) % pool.size()
+			var b: Dictionary = pool[i2].duplicate()
+			pool.remove_at(i2)
+			b["done"] = false
+			list.append(b)
+		d = {"date": today, "list": list}
+		G.meta.data["daily"] = d
+		G.meta.save()
+	return d.get("list", [])
+
+static func _bounty_cur(b: Dictionary) -> int:
+	match str(b.get("type", "")):
+		"kills":  return int(G.run.stats.get("kills", 0))
+		"elites": return int(G.run.stats.get("elite_kills", 0))
+		"time":   return int(G.run.time)
+		"loot":   return (G.run.stats.get("loot", []) as Array).size()
+		"score":  return int(G.run.stats.get("score", 0))
+		"win":    return 1 if bool(G.run.stats.get("won", false)) else 0
+		"kind":   return int(G.run.stats.get("kind_kills", {}).get(str(b.get("k", "")), 0))
+		"vein":   return int(G.run.stats.get("veins", 0))
+		"champ":  return int(G.run.stats.get("champ_kills", 0))
+	return 0
+
+# koşu sonunda (tick_all içinden) — tutan ihaleler choralim öder
+static func daily_check() -> void:
+	if G.run == null:
+		return
+	var hit := false
+	for b in daily():
+		if bool(b.get("done", false)):
+			continue
+		if _bounty_cur(b) >= int(b.get("n", 1)):
+			b["done"] = true
+			hit = true
+			G.meta.add_choralim(int(b.get("cho", 0)))
+			if is_instance_valid(G.ui):
+				G.ui.toast("İHALE TUTTU — %s  (◆ +%d)" % [str(b.get("desc", "")), int(b.get("cho", 0))])
+	if hit:
+		G.meta.save()
 
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
 	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes"]:
 		done.append_array(tick(type))
+	daily_check()
 	for q in DEFS:
 		if state(q.id) != "act" or str(q.obj.get("type", "")) != "boss":
 			continue
