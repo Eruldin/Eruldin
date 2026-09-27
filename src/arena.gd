@@ -80,6 +80,11 @@ func build_arena(biome_idx: int) -> void:
 	if is_instance_valid(G.meta) and G.meta.has_build("kuyu"):
 		spawn_heal(Vector2(150, -60))
 		spawn_heal(Vector2(-150, -50))
+	if is_instance_valid(G.meta) and G.meta.has_build("ahir") and G.run != null:
+		var pn := mini(int(G.meta.data.get("pets", 0)), 12)
+		if pn > 0:
+			G.run.drop_fragments(Vector2(60, 40), pn * 3)
+			G.ui.toast("ağıl ödedi — %d sürüngen ×3 parçacık" % pn)
 	G.audio.play_music("mus_%d" % biome)
 	var nn := str(G.run.node_name) if G.run != null else ""
 	G.ui.banner(nn if nn != "" else BIOME_NAME[biome], "kovan akıyor — hayatta kal")
