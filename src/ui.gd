@@ -2160,6 +2160,9 @@ const WAYLAY := {
 	"surungen": {"name": "KAYIP SÜRÜNGEN", "col": "8dc63f",
 		"sub": "Yolun kenarında korkudan büzülmüş bir sürüngen — senden kaçmıyor, kampın kokusunu almış. Ağıl varsa onu yuvasına götürebilirsin; yoksa salıvermek de bir lütuftur.",
 		"opts": ["KUCAKLA — ağıl varsa hayvan olur, yoksa ◈20 bırakır", "SERBEST BIRAK — sahaya tok in (+14 can)"]},
+	"multeci": {"name": "MÜLTECİ KAŞİFESİ", "col": "bcaaa4",
+		"sub": "Kampa dönmeye çalışan bir aile yolu kesiyor — babanın omzunda kırık bir parıltı taşı, çocuğun elinde kroki bir harita. Parçacık istiyorlar; kampı gerçekten bulup bulmayacaklarını kimse bilmiyor.",
+		"opts": ["◆30 VER — aile kampa ulaşır, itibarın artar", "GEÇ — yolunu aç, selametle"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -2197,6 +2200,9 @@ func travel_event(wkind: String, dest: String) -> void:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		if wkind == "gezgin" and i == 0 and int(G.meta.data.get("choralim", 0)) < 120:
+			ob.disabled = true
+			ob.modulate = Color(0.45, 0.45, 0.5)
+		if wkind == "multeci" and i == 0 and int(G.meta.data.get("choralim", 0)) < 30:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		var oc := CenterContainer.new()
@@ -2307,6 +2313,17 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 			else:
 				G.run.pending_heal = 14.0
 				toast("sürüngen serbest — sahaya tok iniyorsun")
+		"multeci":
+			if idx == 0:
+				if int(G.meta.data.get("choralim", 0)) >= 30:
+					G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - 30
+					G.meta.data["rep"] = int(G.meta.data.get("rep", 0)) + 1
+					G.meta.save()
+					toast("aile kampta anlatılacak — itibar +1")
+				else:
+					toast("parçacığın yetmedi — aile mahzun yoluna devam etti")
+			else:
+				toast("selametle — kaşifeler karanlığa karıştı")
 		"konservi":
 			if idx == 0:
 				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar
