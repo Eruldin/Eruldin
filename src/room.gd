@@ -494,12 +494,12 @@ func add_hazard(p: Vector2, r: float, dps: float, dur: float, col: Color) -> voi
 	var l := G.fx.mk_light(self, p, col, 0.5, 1.6)
 	hazards.append({"pos": p, "r": r, "dps": dps, "kind": "pool", "node": s, "t": dur, "light": l})
 
-func add_slowzone(p: Vector2, r: float, dur: float) -> void:
+func add_slowzone(p: Vector2, r: float, dur: float, col := Color(0.4, 0.9, 0.6, 0.22)) -> void:
 	var s := Sprite2D.new()
 	s.texture = Px.S("circle")
 	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	s.scale = Vector2.ONE * (r * 2.0) / 72.0
-	s.modulate = Color(0.4, 0.9, 0.6, 0.22)
+	s.modulate = col
 	s.position = p
 	s.z_index = -1950
 	add_child(s)
