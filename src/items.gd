@@ -80,6 +80,7 @@ const DEFS := {
 	"i_ayin":     {"name": "Ayin Mumusu",     "slot": "eldiven", "r": 2, "icon": "icn_skull",      "mods": {"dmg": 0.05, "crit": 0.03}},
 	"i_vahde":    {"name": "Vahde Miğferi",   "slot": "bas",     "r": 2, "icon": "icn_crown",      "mods": {"dmg": 0.06, "hp": 10}},
 	"i_ocak":     {"name": "Ocak Çivisi",     "slot": "bas",     "r": 2, "icon": "icn_mine",       "mods": {"dmg": 0.05, "armor": 0.8}},
+	"i_ocakmohur":{"name": "Ocak Mührü",      "slot": "kolye",   "r": 2, "icon": "ico_frag",       "mods": {"hp": 10, "frag": 0.05}},
 	"i_zar":      {"name": "Tegan'ın Zarı",    "slot": "kolye",   "r": 2, "icon": "ico_frag",       "mods": {"frag": 0.08, "crit": 0.04}},
 	"i_barut":    {"name": "Barut Başlığı",    "slot": "bas",     "r": 1, "icon": "icn_mine",      "mods": {"dmg": 0.04, "hp": 12}},
 	"i_vurgu":    {"name": "Vurgu Halkası",    "slot": "yuzuk",   "r": 1, "icon": "icn_dagger",     "mods": {"skill": -0.09, "dmg": 0.03}},
