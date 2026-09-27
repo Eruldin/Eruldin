@@ -79,6 +79,7 @@ var _muhur_sp: Sprite2D = null
 var _sum_n := 0     # bu elitin saldığı döl sayısı
 var _balcik_cd := 0.0  # balçık adam: hasar sonrası rejenerasyon beklemesi
 var _stolen := 0.0     # çöpçü kurt: yuttuğu kristal değeri
+var _cil_t := 0.0      # çılgın elit: öfke kıvılcımı sayacı
 var _dol_t := 2.5      # döl yuması: yavru kusma sayacı
 var _dol_kids: Array = []  # döl yuması: canlı yavrular (adet sınırı için)
 var _scav_t := 0.0     # çöpçü kurt: kristal tarama sayacı
@@ -274,7 +275,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak", "fanatik", "bozucu", "soguk", "yanki", "hayalet"][randi() % 26]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak", "fanatik", "bozucu", "soguk", "yanki", "hayalet", "cilgin"][randi() % 27]
 		# KAÇAK GÜZERGÂHI kozu: elitlerin yarısı kaçak çıkar
 		if is_instance_valid(G.run) and G.run.kacak_plus and G.chance(0.5):
 			affix = "kacak"
@@ -348,6 +349,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "YANKICI " + actor_name
 			"hayalet":
 				actor_name = "HAYALET " + actor_name
+			"cilgin":
+				actor_name = "CILGIN " + actor_name
 		# affix kaydı — LANET KIRANI başarımını besler
 		var seen: Array = G.meta.data.get("affix_seen", [])
 		if not seen.has(affix):
@@ -414,7 +417,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7", "ambarli": "c8e6c9", "kacak": "ffd54f", "fanatik": "ff5252", "bozucu": "ce93d8", "soguk": "bfe8ff", "yanki": "7986cb", "hayalet": "eceff1"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7", "ambarli": "c8e6c9", "kacak": "ffd54f", "fanatik": "ff5252", "bozucu": "ce93d8", "soguk": "bfe8ff", "yanki": "7986cb", "hayalet": "eceff1", "cilgin": "ff3d00"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -706,7 +709,7 @@ func _seek(d: float) -> void:
 			dir = -dir
 		elif dist < keep_max:
 			dir = dir.rotated(PI / 2 * sin(Time.get_ticks_msec() * 0.0008))
-	var spd := speed * (1.28 if lead_t > 0.0 else 1.0) * (1.4 if (affix == "hayalet" and _hay_t > 0.0) else 1.0) * (2.3 if _burrowed else 1.0) * (2.2 if _dive_t > 0.0 else 1.0) * (1.55 if _phased else 1.0) * (0.5 if chill_t > 0.0 else 1.0) * (0.72 if (is_instance_valid(G.player) and G.player.has_meta("wall") and pos.distance_to(G.player.pos) < 150.0) else 1.0)
+	var spd := speed * (1.28 if lead_t > 0.0 else 1.0) * (1.4 if (affix == "hayalet" and _hay_t > 0.0) else 1.0) * ((1.0 + (1.0 - hp / maxf(1.0, max_hp)) * 0.9) if affix == "cilgin" else 1.0) * (2.3 if _burrowed else 1.0) * (2.2 if _dive_t > 0.0 else 1.0) * (1.55 if _phased else 1.0) * (0.5 if chill_t > 0.0 else 1.0) * (0.72 if (is_instance_valid(G.player) and G.player.has_meta("wall") and pos.distance_to(G.player.pos) < 150.0) else 1.0)
 	var mdir := dir
 	if kind == EKind.KOCBASI:
 		if _charge_t > 0.0:
@@ -792,6 +795,14 @@ func _seek(d: float) -> void:
 				if is_instance_valid(body):
 					body.modulate = Color(0.6, 1.0, 0.9, 0.32)
 				G.fx.burst(pos, Px.C("7fe8d8"), 8, 90.0, 2.6, 0.3)
+	# çılgın elit: can yarısının altına düşünce öfkelenir — kırmızı kıvılcım püskürtür
+	if affix == "cilgin" and hp < max_hp * 0.5:
+		_cil_t -= d
+		if _cil_t <= 0.0:
+			_cil_t = 0.8
+			G.fx.burst(pos + Vector2(0, -14), Px.C("ff3d00"), 3, 60.0, 2.0, 0.2)
+		if _st == St.SEEK and is_instance_valid(body):
+			body.modulate = Color(1.6, 0.7, 0.55) if hp < max_hp * 0.25 else base_color
 	# döl yuması: sabit kuluçka — periyodik yavru kusar, yok edilene dek sürüyü besler
 	if kind == EKind.DOL:
 		_dol_t -= d
@@ -875,7 +886,7 @@ func _strike(d: float) -> void:
 		if is_instance_valid(G.room):
 			pos = G.room.clamp_pos(pos, radius)
 		if G.player != null and not G.player.dead and pos.distance_to(G.player.pos) < radius + G.player.hit_radius + 8.0:
-			G.player.take_hit({"dmg": touch_dmg, "type": G.DamageType.MELEE, "from": pos, "knock": 5.0, "source": self})
+			G.player.take_hit({"dmg": touch_dmg * (1.5 if (affix == "cilgin" and hp < max_hp * 0.4) else 1.0), "type": G.DamageType.MELEE, "from": pos, "knock": 5.0, "source": self})
 			if affix == "vampir":
 				hp = minf(hp + touch_dmg * 0.6, max_hp)
 			# EMICI: teması parçacık emer — kesince kesesi geri döker
