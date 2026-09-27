@@ -61,6 +61,7 @@ const DEFS := {
 	"i_tuy":      {"name": "Kuzgun Tüyü Dizi", "slot": "kolye",   "r": 1, "icon": "icn_dash",      "mods": {"spd": 0.04, "crit": 0.03}},
 	"i_boynuz":   {"name": "Kocboynuz Pencesi","slot": "kolye",   "r": 2, "icon": "icn_upg_dmg",   "mods": {"dmg": 0.06, "hp": 10}},
 	"i_korkul":   {"name": "Kor Külü Kolyesi","slot": "kolye",   "r": 2, "icon": "icn_mine",      "mods": {"dmg": 0.05, "crit": 0.04}},
+	"i_firtina":  {"name": "Fırtına Gözü",   "slot": "kolye",   "r": 2, "icon": "icn_dash",       "mods": {"spd": 0.08, "crit": 0.05}},
 	"i_zar":      {"name": "Tegan'ın Zarı",    "slot": "kolye",   "r": 2, "icon": "ico_frag",       "mods": {"frag": 0.08, "crit": 0.04}},
 	"i_barut":    {"name": "Barut Başlığı",    "slot": "bas",     "r": 1, "icon": "icn_mine",      "mods": {"dmg": 0.04, "hp": 12}},
 	"i_vurgu":    {"name": "Vurgu Halkası",    "slot": "yuzuk",   "r": 1, "icon": "icn_dagger",     "mods": {"skill": -0.09, "dmg": 0.03}},

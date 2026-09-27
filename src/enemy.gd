@@ -937,6 +937,8 @@ func die(h: Dictionary) -> void:
 		G.run.stats["kind_kills"] = kk
 		G.run.on_kill(elite)
 		Quests.tick("kind", kn)
+		if is_instance_valid(G.room) and float(G.room.storm_t) > 0.0:
+			Quests.tick("firtina")   # kum firtinasi sirasinda kesim
 		# gizli bataklık olayı: 30 sivri kesilirse bulutun kalbi kızar
 		if kind == EKind.SIVRI and int(kk.get(kn, 0)) == 30 and not bool(G.run.stats.get("dol_anasi", false)) and G.run.biome == 4 and is_instance_valid(G.room):
 			G.run.stats["dol_anasi"] = true

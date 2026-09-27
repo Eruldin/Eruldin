@@ -114,6 +114,7 @@ const DEFS := [
 	{"id": "q_orun",  "giver": "orun",   "name": "NABIZ AVCISI",         "desc": "Kafesten çıktım ama nabız kulağımda duruyor — koronun işaretlediği düğümde zafer kazan, davulunu sustur.", "obj": {"type": "baskin", "n": 1}, "rew": {"cho": 150, "rep": 2}},
 	{"id": "q_orun2", "giver": "orun",   "name": "ÇANIN İZİ",            "desc": "Davul sustu ama çan hâlâ yürüyor — üç baskının altında daha zafer kazan, koro yön değiştirsin.", "obj": {"type": "baskin", "n": 3}, "rew": {"cho": 260, "rep": 3}, "prereq": "q_orun"},
 	{"id": "q_orun3", "giver": "orun",   "name": "YOL YOLDAŞI",           "desc": "Kafesten çıkanlar yollarda erzak taşır — kulakları bende ama elleri sende. Üç yoldaş karşılaşması geçir; onların sana bıraktıklarını say, haber ağının kıymetini gör.", "obj": {"type": "cameo", "n": 3}, "rew": {"cho": 280, "rep": 3}, "prereq": "q_orun2"}, 
+	{"id": "q_orun4", "giver": "orun",   "name": "FIRTINANIN GÖZÜ",        "desc": "Çölde kum fırtınası düşerken koronun gözü kör olur — o yedi saniye avlanma vaktidir. Fırtına eserken yirmi beş kesim yap; sana rüzgâr okumanın tılsımını vereyim.", "obj": {"type": "firtina", "n": 25}, "rew": {"cho": 300, "item": "i_firtina", "rep": 3}, "prereq": "q_orun3"}, 
 	{"id": "q_bahis2", "giver": "tegan",  "name": "SİMSARIN SON BAHİSİ", "desc": "Büyük masa büyük bahis ister — ama teklifi herkese açmam. Tek koşuda 6000 skor: tüm kasa senin.", "obj": {"type": "score", "n": 6000}, "rew": {"cho": 400, "item": "i_cengel"}, "req_rep": 6},
 	{"id": "q_anit",  "giver": "ehnar",   "name": "ANIT NÖBETİ",         "desc": "Kül tepesinde bir anıt var — kovan oraya saygı duruşuna geliyor. Tek koşuda 500 kesim yaparsan girişi gösteririm.", "obj": {"type": "kills", "n": 500}, "rew": {"cho": 200, "node": "koranit"}, "prereq": "q_kul"},
 	{"id": "q_pence", "giver": "saphire", "name": "KOR PENCELER",        "desc": "Külde yürüyen askerler var — pençeleri hâlâ kor gibi yanıyor. On iki Kor Pençe kes; külünden bir kolye döveyim.", "obj": {"type": "kind", "k": "Kor Pençe", "n": 12}, "rew": {"cho": 200, "item": "i_korkul"}, "prereq": "q_anit"},
@@ -502,6 +503,7 @@ static func obj_text(q: Dictionary) -> String:
 		"geo":    return "%d damar jeotu kır" % need
 		"hazine": return "%d hazine düğümü yağmala" % need
 		"cameo":  return "%d yoldaş karşılaşması geçir" % need
+		"firtina": return "%d kesimi kum fırtınasında yap" % need
 		"baskin": return "%d baskın altında zafer" % need
 	return "?"
 

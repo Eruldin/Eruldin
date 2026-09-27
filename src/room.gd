@@ -54,6 +54,10 @@ const MOTE_COL := {
 	"hub": Color(1.0, 0.75, 0.45, 0.35),
 }
 var motes: Array = []   # [{s, vel}] atmosfer parcaciklari
+# KUM FIRTINASI (biome 6): periyodik ruzgar dalgasi — herkesi iter
+var storm_t := 0.0
+var storm_cd := 0.0
+var storm_dir := Vector2.RIGHT
 const REWARD_ICON := ["ico_boon", "ico_heal", "ico_frag"]
 
 var biome := 0
@@ -733,6 +737,7 @@ func _process(d: float) -> void:
 	_tick_veins(d)
 	_tick_doors()
 	_tick_motes(d)
+	_tick_storm(d)
 	_sort_children()
 	# campfire flicker
 	if has_meta("fire_light") and is_instance_valid(get_meta("fire_light")):
@@ -785,6 +790,31 @@ func _tick_motes(d: float) -> void:
 		if s.position.x > W * 0.5 + 40: s.position.x = -W * 0.5 - 40
 		if s.position.y < -H * 0.5 - 40: s.position.y = H * 0.5 + 40
 		if s.position.y > H * 0.5 + 40: s.position.y = -H * 0.5 - 40
+
+# Kizil Col: ara ara kum firtinasi eser — tum sahayi tek yone iter,
+# moteler siddetlenir. Ruzgari okuyup pozisyon korumak gerekir.
+func _tick_storm(d: float) -> void:
+	if is_hub or biome != 6:
+		return
+	if storm_t > 0.0:
+		storm_t -= d
+		var push := storm_dir * 46.0 * d
+		if G.player != null and not G.player.dead:
+			G.player.pos += push
+		for e in G.enemies:
+			if is_instance_valid(e) and not e.dead:
+				e.pos += push * 1.25
+		for m in motes:
+			m.s.position += storm_dir * 200.0 * d
+		if storm_t <= 0.0:
+			storm_cd = rng.randf_range(36.0, 55.0)
+		return
+	storm_cd -= d
+	if storm_cd <= 0.0:
+		storm_t = 7.0
+		storm_dir = Vector2.RIGHT.rotated(rng.randf_range(-0.45, 0.45) + (PI if rng.randf() < 0.5 else 0.0))
+		G.ui.toast("KUM FIRTINASI — ruzgara karsi koy")
+		G.audio.play("dash", 0.5, 0.8)
 
 # HoT-style side objective: stand by the resonance cluster to charge it;
 # a full charge cracks it open into two chests. Progress persists.
