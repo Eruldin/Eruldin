@@ -83,6 +83,8 @@ const ARCANAS := {
 	"kervan":  {"name": "KERVAN GÖZÜ",   "desc": "Sahada +3 kalıntı belirir — +40 toplama yarıçapı", "col": "80cbc4"},
 	"toren":   {"name": "SESSİZ TÖREN",  "desc": "+%25 hasar — ama silahlar %12 yavaş atar", "col": "b26bff"},
 	"nabiz":   {"name": "KORO NABZI",    "desc": "Q yeteneği %30 erken döner — ama -10 can", "col": "e8d060"},
+	"alacak":  {"name": "ALACAKARANLIK", "desc": "Sürü baskınları %25 sıklaşır — ödeme ×1.10", "col": "5c6bc0"},
+	"ocak":    {"name": "OCAK EKMEĞİ",    "desc": "Şifa küreleri yarı yarıya güçlü sarar", "col": "8bc34a"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -126,6 +128,11 @@ static func apply_arcana(id: String, p: Player) -> void:
 			p.skill_max *= 0.70
 			p.max_hp -= 10.0
 			p.hp = minf(p.hp, p.max_hp)
+		"alacak":
+			p.set_meta("surge_up", true)
+			G.run.reward_mult *= 1.10
+		"ocak":
+			p.set_meta("heal_plus", true)
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0

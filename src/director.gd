@@ -144,7 +144,7 @@ func _tick_events(d: float) -> void:
 	# surge events — a visible ring/flood every ~75s
 	_surge_t -= d
 	if _surge_t <= 0.0:
-		_surge_t = G.rf(62.0, 82.0) * (0.8 if G.run.hyper else 1.0)
+		_surge_t = G.rf(62.0, 82.0) * (0.8 if G.run.hyper else 1.0) * (0.75 if is_instance_valid(G.player) and G.player.has_meta("surge_up") else 1.0)
 		_surge(m)
 	# HoT-style side objective: a resonance cluster spawns once around 3:30
 	if not _mono_fired and m >= 3.5 and is_instance_valid(G.room) and G.player != null and not G.player.dead:
