@@ -12,7 +12,7 @@ const WIN_T := 780.0      # 13:00 failsafe — swarm collapses
 
 # per-sector bosses: miniboss is the previous sector's efendi (biome 0 keeps
 # the Host); the final is that sector's own boss — twins/Aeterna spawn as pairs
-const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM, Boss.BKind.TUMAN, Boss.BKind.TUMAN, Boss.BKind.KIRIN]
+const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM, Boss.BKind.TUMAN, Boss.BKind.TUMAN, Boss.BKind.KIRIN, Boss.BKind.KOR]
 const FINAL_KIND := [
 	[Boss.BKind.REX],
 	[Boss.BKind.HOST],
@@ -20,8 +20,8 @@ const FINAL_KIND := [
 	[Boss.BKind.KIRIN, Boss.BKind.CONST],
 	[Boss.BKind.DEV],
 	[Boss.BKind.KOR],
-	[Boss.BKind.NAHUM, Boss.BKind.CONST],
 	[Boss.BKind.ANASI],
+	[Boss.BKind.NAHUM, Boss.BKind.CONST],
 ]
 
 var t := 0.0
@@ -50,6 +50,7 @@ const RAIN_CFG := [
 	{"t": "SPOR PATLAMASI — şişkin mantarlar doluyor!", "col": "66bb6a", "r": 80.0, "n": 8, "pdmg": 20.0, "ptype": "EXPLOSION"},
 	{"t": "KOR YAĞMURU — gökyüzü kül kusuyor!", "col": "ff7722", "r": 90.0, "n": 8, "pdmg": 26.0, "ptype": "EXPLOSION"},
 	{"t": "KUM FIRTINASI — sürüklenen kumlar kabarır!", "col": "ffaa55", "r": 105.0, "n": 6, "pdmg": 18.0, "ptype": "SHOCK"},
+	{"t": "KRİSTAL YAĞMURU — çukurun tavanı düşüyor!", "col": "4dd0e1", "r": 75.0, "n": 9, "pdmg": 22.0, "ptype": "PURE"},
 ]
 var _min_ann := 0          # son duyurulan dakika kilometre taşı
 var _mini := false
@@ -287,6 +288,7 @@ func _comp(m: float) -> int:
 			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK, Enemy.EKind.SIVRI, Enemy.EKind.SIVRI])   # bataklık: konakçılar + kistler + balçıklar + sivri bulutları
 			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ]) # kül ovası: ateşi seven sert öncüler
 			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.AKREP, Enemy.EKind.AKREP, Enemy.EKind.DRONE, Enemy.EKind.KOCBASI])   # kızıl çöl: koşucular + gömülü akrepler + koçbaşları
+			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET])   # kristal çukur: gözler + kistler + sabit nöbetçiler
 	return G.pick(pool)
 
 func _hp_scale() -> float:

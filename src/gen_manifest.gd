@@ -46,9 +46,11 @@ const SPRITES := {
 	"gr_4": "art/gen/g_gr_4.png",
 	"gr_5": "art/gen/g_gr_5.png",
 	"gr_6": "art/gen/g_gr_6.png",
+	"gr_7": "art/gen/g_gr_7.png",
 	"gr_hub": "art/gen/g_gr_hub.png",
 	# Kızıl Çöl (biome 6): sinematik kart olarak da zemin resmi kullanılır
 	"cine_6_0": "art/gen/g_gr_6.png",
+	"cine_7_0": "art/gen/g_gr_7.png",
 	# Çürük Bataklık (biome 4): sinematik kart olarak da zemin resmi kullanılır
 	"cine_4_0": "art/gen/g_gr_4.png",
 	# Kül Ovası (biome 5): sinematik kart olarak da zemin resmi kullanılır

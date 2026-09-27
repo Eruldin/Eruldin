@@ -231,6 +231,12 @@ func _place_hazards_arena() -> void:
 					var tt := G.fx.tele_circle(p, 62.0, 9999.0, Color(1.0, 0.7, 0.35, 0.22))
 					tt.sr.modulate.a = 0.16
 					hazards.append({"pos": p, "r": 62.0, "dps": 8.0, "kind": "surgun", "t": -1.0, "tele": tt, "vel": Vector2.from_angle(rng.randf() * TAU) * 40.0, "sway": rng.randf() * TAU})
+			7:
+				# Kristal Çukur: damar kırığı — seyrek ama yüksek basınçlı choralim fışkırtıcı
+				var t7 := G.fx.tele_circle(p, 58.0, 9999.0, Color(0.35, 0.82, 0.88, 0.25))
+				t7.sr.modulate.a = 0.12
+				G.fx.mk_light(self, p, Px.C("4dd0e1"), 0.4, 1.5)
+				hazards.append({"pos": p, "r": 58.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(4, 9), "tele": t7, "erupt": 0.0, "col": "4dd0e1"})
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))
 
