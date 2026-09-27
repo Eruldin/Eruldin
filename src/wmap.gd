@@ -68,6 +68,7 @@ const NODES := [
 		{"label": "VARDİYA LİSTESİNİ TESLİM ET", "sub": "On bir isim, hepsi 'son iniş' yazıyor. Listeyi Lena'nın arşivine kat — madenciler kampta anılsın.", "rew": {"cho": 90, "rep": 2, "cine": [{"tex": "cine_7_0", "title": "VARDİYA LİSTESİ", "sub": "On bir ismi saydın — hepsini. Baraka kapanırken masada bir bardak daha az kaldı; listedeki hiçbir isim silinmedi."}]}},
 	]},
 	{"id": "buzul",  "name": "DONMUŞ ÇATLAK",      "icon": "icn_dash",    "pos": Vector2(1380, 500), "col": "9fd8ff", "kind": "arena", "biome": 8, "unlock": "node", "desc": "Kuzeyin buzulu — kar yağışı altında don patlamaları çatırdar, kaygan zemin koşuyu zorlaştırır.", "lore": "Protokol kuzeyi 'düşük değer' diye geçti — kimse bakmadı, kimse dönmedi. Buzun altında donmuş sürüler hâlâ ayakta; çatlak onları tek tek uyandırıyor.", "mods": {"hp": 1.3, "dmg": 1.15, "spawn": 1.1, "frag": 1.6, "loot": 1.4, "elite_t": 0.8, "dusk": true}},
+	{"id": "beyazufuk","name": "BEYAZ UFUK",        "icon": "icn_dash",    "pos": Vector2(1430, 300), "col": "eaf6ff", "kind": "arena", "biome": 8, "unlock": "node", "desc": "Buzulun en kuzeyi — karın içinde gökyüzü bile yok; Buz Anası'nın taht odası burada görüldü.", "lore": "Lena'nın haritasında bu köşe çizilmemiş — 'ufuk beyazsa harita biter' yazmış. Kırk gün kar durmadı; durunca sürülerin hepsi aynı yere baktı: içeri.", "mods": {"hp": 1.55, "dmg": 1.35, "spawn": 1.15, "frag": 2.0, "loot": 1.7, "elite_t": 0.65, "dusk": true}},
 	{"id": "kervan", "name": "DONMUŞ KERVAN",      "icon": "ico_loot",    "pos": Vector2(1345, 395), "col": "bfe8ff", "kind": "story", "unlock": "node", "desc": "Çatlağın kuzeyinde donmuş imparatorluk kervanı — yük ve yolcular hâlâ ayakta, hâlâ yürür vaziyette.", "lore": "Kervan defterinin son satırı: 'Hanım şarkı söyledi, atlar durdu, kar üstümüze kapandı. Yükü kimseye vermeyin — damarın içinde taşıdığımız şey buzda kalsın.' İçerideki sandık hâlâ mühürlü; mühür şimdi bizde.", "choices": [
 		{"label": "MÜHRÜ KIR — sandığı aç", "sub": "Sandık choralim dolu — ama defterin uyarısı gerçek: yük açılınca kovan kokuyu alır. Sonraki koşun daha sert geçecek.", "rew": {"cho": 320, "omen": {"hp": 1.12, "dmg": 1.1, "frag": 1.35}, "cine": [{"tex": "cine_8_0", "title": "MÜHÜR KIRILDI", "sub": "Sandık açıldı — içinde choralim dolu fişekler ve bir koro damgasının mührü. Kuzeyde bir şey yerinden kıpırdadı."}]}},
 		{"label": "KERVANI GÖM — yüke dokunma", "sub": "Defterin dediği gibi: bazı yükler buzda kalmalı. Kervanı kar altında göm, itibarın artsın, buzdan bir kalp hatıra kalsın.", "rew": {"cho": 100, "rep": 2, "item": "i_buzkalp", "cine": [{"tex": "cine_8_0", "title": "KERVAN GÖMÜLDÜ", "sub": "On iki deve ve dört arabacı kar altında. Buzda bekleyen yüke kimse dokunmadı — ve kuzey, seni ilk kez selamladı."}]}},
@@ -108,6 +109,7 @@ const EDGES := [
 	["kum", "vaha"], ["vaha", "fisilti"], ["vaha", "batik"],
 	["kum", "degirmen"], ["vaha", "degirmen"],
 	["cukur", "buzul"], ["damar", "buzul"], ["buzul", "kervan"],
+	["buzul", "beyazufuk"], ["kervan", "beyazufuk"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için

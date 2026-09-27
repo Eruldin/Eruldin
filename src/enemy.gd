@@ -248,7 +248,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev"][randi() % 18]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe"][randi() % 19]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -300,6 +300,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 				max_hp *= 1.8; touch_dmg *= 1.25; proj_dmg *= 1.25; speed *= 0.72
 				radius *= 1.55; hit_radius *= 1.5
 				actor_name = "DEV " + actor_name
+			"cazibe":
+				actor_name = "CAZİBELİ " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -348,7 +350,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -542,6 +544,20 @@ func _process(_d: float) -> void:
 			pos = G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * G.rf(160.0, 230.0)
 			pos = G.room.clamp_pos(pos, radius)
 			G.fx.burst(pos, Px.C("b388ff"), 10, 120.0, 4.0, 0.3)
+	# cazibe elit: saçılan kristalleri kendine çeker ve yutar — her kristal onu onarır,
+	# oyuncunun XP hasadını keser; öldürmek için öncelik hedefi
+	if affix == "cazibe" and is_instance_valid(G.room) and is_instance_valid(G.room.pickups_node):
+		for pk in G.room.pickups_node.get_children():
+			if str(pk.get_meta("kind", "")) != "xp":
+				continue
+			var gd: float = pk.position.distance_to(pos)
+			if gd < 300.0:
+				pk.position = pk.position.move_toward(pos + Vector2(0, -10), 240.0 * d)
+				if gd < 18.0:
+					hp = minf(max_hp, hp + max_hp * 0.04 + float(pk.get_meta("val", 1.0)))
+					G.fx.float_text(pos + Vector2(0, -30), "YUTTU", Px.C("ff6ee7"), 0.8)
+					G.fx.burst(pos + Vector2(0, -14), Px.C("ff6ee7"), 5, 100.0, 3.0, 0.25)
+					pk.queue_free()
 	if _cd_t > 0:
 		_cd_t -= d
 	_tick_anim(d)
