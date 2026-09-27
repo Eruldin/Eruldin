@@ -2859,6 +2859,26 @@ func arcana_choice() -> void:
 	_pause(true)
 	_show_cards("boon", "KOZ KARTI — koşu boyu süren kader  [1-%d]" % draw_n, Px.C("c9a227"), cards)
 
+# final boss ganimeti — zaferden önce 3 kartlık seçim; callback zinciri victory'ye gider
+func boss_loot(after: Callable) -> void:
+	if overlay_open() or not is_instance_valid(G.run) or not is_instance_valid(G.player):
+		after.call()
+		return
+	var iid := Items.roll(G.run.luck + 0.3)
+	var idef: Dictionary = Items.DEFS.get(iid, {})
+	var opts := [
+		{"kind": "bloot", "act": "frag", "name": "PARÇACIK KASASI", "icon": "ico_frag", "col": "00E5FF", "desc": "+%d parçacık — koşu kasasına girer" % _loot_frag_n(), "top": "CHORALİM", "w": 1.0},
+		{"kind": "bloot", "act": "item", "id": iid, "name": str(Items.disp_name(iid)).to_upper(), "icon": str(idef.get("icon", "ico_boon")), "col": "ff4fd8", "desc": "efendinin kişisel eşyası — koşu zulasına düşer", "top": "EŞYA", "w": 1.0},
+		{"kind": "bloot", "act": "camp", "name": "KAMP MÜLKÜ", "icon": "icn_crown", "col": "c9a227", "desc": "+150◆ doğrudan bankaya · kamp itibarı +2", "top": "İTİBAR", "w": 1.0},
+	]
+	_pause(true)
+	_show_cards("bloot", "EFENDİ GANİMETİ — birini al  [1-3]", Px.C("ffd75f"), opts)
+	if is_instance_valid(_overlay):
+		_overlay.set_meta("after", after)
+
+func _loot_frag_n() -> int:
+	return 80 + int(G.run.biome) * 40
+
 func chest_choice(evos: Array) -> void:
 	_pause(true)
 	var opts: Array = []
@@ -2924,7 +2944,26 @@ func _pick_card(o: Dictionary) -> void:
 	if not is_instance_valid(_overlay):
 		return
 	var kind := str(_overlay.get_meta("kind", ""))
-	if kind != "draft" and kind != "chest" and kind != "boon" and kind != "biomesel":
+	if kind != "draft" and kind != "chest" and kind != "boon" and kind != "biomesel" and kind != "bloot":
+		return
+	if kind == "bloot":
+		var cb: Callable = _overlay.get_meta("after", Callable())
+		match str(o.get("act", "")):
+			"frag":
+				G.run.fragments += _loot_frag_n()
+				toast("+%d parçacık" % _loot_frag_n())
+			"item":
+				Items.drop_to_run(str(o.get("id", "")))
+				toast("zula: %s" % Items.disp_name(str(o.get("id", ""))))
+			"camp":
+				G.meta.add_choralim(150)
+				G.meta.data["rep"] = int(G.meta.data.get("rep", 0)) + 2
+				G.meta.save()
+				toast("+150◆ · kamp itibarı +2")
+		_close_overlay()
+		G.audio.jingle("boon")
+		if cb.is_valid():
+			cb.call()
 		return
 	# KOV akışı: önce KOV kartı seçilir, sonra kovulan kart işaretlenir
 	if kind == "draft":
@@ -3001,7 +3040,7 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 	if ev.keycode == KEY_J and not overlay_open() and G.state in [G.State.ROOM, G.State.HUB]:
 		journal_panel()
 		return
-	if overlay_open() and str(_overlay.get_meta("kind", "")) in ["boon", "draft", "chest", "biomesel"]:
+	if overlay_open() and str(_overlay.get_meta("kind", "")) in ["boon", "draft", "chest", "biomesel", "bloot"]:
 		var opts: Array = _overlay.get_meta("opts", [])
 		var idx := int(ev.keycode) - int(KEY_1)
 		if idx >= 0 and idx < opts.size():

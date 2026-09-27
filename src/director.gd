@@ -466,7 +466,13 @@ func _on_boss_dead(b) -> void:
 			_final_alive -= 1
 			if _final_alive <= 0 and not _won:
 				_won = true
-				G.run.victory()
+				# efendi ganimeti: zafer ekranından önce 3 kartlık seçim
+				if is_instance_valid(G.ui):
+					G.ui.boss_loot(func():
+						if is_instance_valid(G.run):
+							G.run.victory())
+				else:
+					G.run.victory()
 			return
 		# miniboss loot: two chests + a fragment shower + garanti eşya
 		G.room.spawn_chest(b.pos + Vector2(-40, 0))
