@@ -231,6 +231,7 @@ const PDEFS := {
 	"edge":    {"name": "KESKİN KİLİT",       "icon": "icn_upg_frag",   "col": "ff9de2", "desc": "+%6 kritik şansı"},
 	"dup":     {"name": "ÇOĞALTAN",            "icon": "icn_crown",      "col": "b388ff", "desc": "+1 mermi/gülle adedi"},
 	"fortune": {"name": "TALİH MÜHRÜ",         "icon": "icn_crown",      "col": "ffd700", "desc": "+%8 şans — nadir düşüş ve lütuf kalitesini sallar"},
+	"avarice": {"name": "AÇGÖZ BOBİNİ",         "icon": "ico_frag",       "col": "ffb02e", "desc": "+%12 parçacık değeri"},
 }
 
 static func def(wid: String) -> Dictionary:
@@ -285,6 +286,7 @@ static func apply_passive(pid: String, p: Player) -> void:
 		"warp": p.proj_spd *= 1.09
 		"dup":  p.bonus_proj += 1
 		"fortune": G.run.luck += 0.08
+		"avarice": p.frag_mult += 0.12
 
 # which evolutions the player can cash in right now
 static func evo_ready(p: Player) -> Array:
