@@ -156,6 +156,7 @@ const DEFS := [
 	{"id": "q_nolur",  "giver": "mina",    "name": "NOLUR NOLMAZ",            "desc": "Sofra kurulmadan önce aşçı karnını doyurur — sen de koşuya çıkmadan damlalığını doldur. On iksir daha iç; ocak önlüğümü sana diktireyim.", "obj": {"type": "iksir", "n": 10}, "rew": {"cho": 240, "item": "i_onluk", "rep": 2}, "prereq": "q_karne"},
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
 	{"id": "q_ziyafet","giver": "mina",   "name": "KURTULUŞ ZİYAFETİ",    "desc": "Büyük sofra büyük malzeme ister. Otuz küre daha — karşılığında damlayı veririm, seni geri getirir.", "obj": {"type": "sifa", "n": 30}, "rew": {"cho": 320, "item": "i_neva"}, "prereq": "q_sofra"},
+	{"id": "q_emici", "giver": "vane",    "name": "KESE AVCISI",          "desc": "Enkazda parçacık emen bir sülük türü çıktı — temas ettiğinin kesesini boşaltıyor. On tanesini kes, keselerini bana getir; içlerindeki taşlar benim.", "obj": {"type": "kind", "k": "Parçacık Emicisi", "n": 10}, "rew": {"cho": 220, "rep": 2}},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
