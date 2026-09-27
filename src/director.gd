@@ -328,7 +328,22 @@ func _ambush() -> void:
 func _surge(m: float) -> void:
 	G.audio.play("roar", 0.7, 0.5)
 	var n := mini(34, 16 + int(m * 2.0))
-	match ["ring", "wall", "hunt", "twins"][randi() % 4]:
+	var shapes := ["ring", "wall", "hunt", "twins"]
+	if m >= 4.5:
+		shapes.append("alay")
+	match shapes[randi() % shapes.size()]:
+		"alay":
+			G.ui.toast("KORO ALAYI — sözcüler önde!")
+			var hn := 1 if m < 7.0 else 2
+			for i in hn:
+				var hp2 := G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * G.rf(300.0, 380.0)
+				Enemy.spawn(Enemy.EKind.HERALD, G.room.clamp_pos(hp2, 20.0), false, _hp_scale(), _dmg_scale(), G.room)
+			var cang := G.rf(0.0, TAU)
+			for i in n:
+				var p := G.player.pos + Vector2.from_angle(cang + G.rf(-0.9, 0.9)) * G.rf(560.0, 720.0)
+				p = G.room.clamp_pos(p, 20.0)
+				var sk := Enemy.EKind.VARL if i % 4 == 0 else Enemy.EKind.HUSK
+				Enemy.spawn(sk, p, false, _hp_scale() * 0.8, _dmg_scale(), G.room)
 		"twins":
 			G.ui.toast("İKİZ ELİTLER!")
 			for i in 2:
