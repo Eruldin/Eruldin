@@ -1974,6 +1974,32 @@ func records_panel() -> void:
 	if not qany:
 		var l := _lbl("henüz görev yok — NPC'lerdeki ! işaretini takip et", Vector2.ZERO, 11, Color(0.5, 0.5, 0.6))
 		v.add_child(l)
+	# UNVANLAR — başarımların açtığı lakaplar; takılı unvan zafer/ölüm ekranında görünür
+	v.add_child(_lbl("— UNVANLAR —", Vector2.ZERO, 12, Px.C("c9a227")))
+	var ucur := str(d.get("title", ""))
+	var urow := HBoxContainer.new()
+	urow.alignment = BoxContainer.ALIGNMENT_CENTER
+	urow.add_theme_constant_override("separation", 10)
+	for t in Meta.TITLES:
+		var tid := str(t.id)
+		var open := G.meta.title_open(tid)
+		var eq := ucur == tid
+		var ub := Button.new()
+		ub.text = ("◆ " if eq else "") + str(t.name)
+		ub.disabled = not open
+		ub.add_theme_font_override("font", ui_font())
+		ub.add_theme_font_size_override("font_size", 12)
+		ub.custom_minimum_size = Vector2(0, 26)
+		urow.add_child(ub)
+		if open:
+			ub.pressed.connect(func():
+				G.meta.data["title"] = "" if eq else tid
+				G.meta.save()
+				records_panel())
+	v.add_child(urow)
+	var ucur_l := _lbl("takılı: %s" % (G.meta.title_name() if G.meta.title_name() != "" else "—"), Vector2.ZERO, 11, Color(0.85, 0.78, 0.55))
+	ucur_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(ucur_l)
 	var ld: Dictionary = d.get("last_death", {})
 	if not ld.is_empty() and str(ld.get("killer", "")) != "":
 		var l := _lbl("son düşüş: %s @ %s" % [str(ld.get("killer")), BIOME_NAME[int(ld.get("biome", 0))]], Vector2.ZERO, 11, Color(0.6, 0.55, 0.6))
@@ -2461,6 +2487,11 @@ func death_screen(killer: String, gained: int) -> void:
 	var gl := _lbl("Choralim saflaştırıldı: ◆ +%d" % gained, Vector2.ZERO, 15, Px.C("c26bff"))
 	gl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(gl)
+	var uttl := G.meta.title_name()
+	if uttl != "":
+		var ul := _lbl("— %s —" % uttl, Vector2.ZERO, 13, Color(0.9, 0.78, 0.4))
+		ul.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(ul)
 	var tt := int(G.run.time)
 	var dl := _lbl("Dayanma: %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d" % [tt / 60, tt % 60, G.player.level if is_instance_valid(G.player) else 1, int(G.run.stats.get("kills", 0)), int(G.run.stats.get("best_streak", 0))], Vector2.ZERO, 12, Color(0.6, 0.6, 0.7))
 	dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2535,6 +2566,11 @@ func victory_screen(stats: Dictionary) -> void:
 	var t1 := _lbl(sub, Vector2.ZERO, 14, Color(0.7, 0.95, 1))
 	t1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t1)
+	var uttl := G.meta.title_name()
+	if uttl != "":
+		var ul := _lbl("— %s —" % uttl, Vector2.ZERO, 14, Color(0.9, 0.78, 0.4))
+		ul.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(ul)
 	var vt := int(stats.get("time", 0))
 	var t2 := _lbl("Süre %02d:%02d · Seviye %d · %d kesim · en uzun seri x%d\nChoralim saflaştırıldı: ◆ +%d\nToplam zafer: %d\nSkor: %d%s" % [vt / 60, vt % 60, int(stats.get("level", 1)), int(stats.get("kills", 0)), int(stats.get("best_streak", 0)), int(stats.get("gained", 0)), G.meta.data.victories, int(stats.get("score", 0)), " — YENİ REKOR!" if stats.get("new_record", false) else ""], Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
 	t2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

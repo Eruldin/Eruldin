@@ -66,6 +66,7 @@ var data := {
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"history": [],         # son 5 koşu: {n,k,t,w,s}
 	"won_nodes": [],       # zaferle fethedilmiş wmap node'ları — haraç öder
+	"title": "",           # takılı unvan (TITLES id) — koşu sonu ekranlarında görünür
 	"kind_kills": {},      # tür-bazlı toplam kesimler (Zirkon kayıtları)
 	"best_streak_all": 0,  # tüm zamanların en uzun serisi
 	"best_score": 0,       # en yüksek koşu skoru
@@ -147,6 +148,40 @@ func achievements() -> Array:
 		{"name": "ALTIN KIRICI", "desc": "toplam 10 şampiyon elit kes", "done": int(data.get("champs", 0)) >= 10, "rew": 400},
 		{"name": "PROTOKOLÜ KIRAN", "desc": "Aeterna Spire'ı düşür — gerçek sonu gör", "done": bool(data.get("ended", false)), "rew": 500},
 	]
+
+# unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
+const TITLES := [
+	{"id": "surus",   "name": "SÜRÜ AVCISI",    "src": "KOVAN KIRICI"},
+	{"id": "efendi",  "name": "EFENDİ AVCISI",  "src": "EFENDİ AVCISI"},
+	{"id": "arsiv",   "name": "ARŞİV BEKÇİSİ",  "src": "ARŞİVCİ"},
+	{"id": "harita",  "name": "HARİTA USTASI",  "src": "HARİTA USTASI"},
+	{"id": "altin",   "name": "ALTIN KIRICI",   "src": "ALTIN KIRICI"},
+	{"id": "s",       "name": "S SINIFI",       "src": "S SINIFI"},
+	{"id": "kolek",   "name": "KOLEKSİYONER",   "src": "KOLEKSİYONER"},
+	{"id": "kiran",   "name": "PROTOKOLÜ KIRAN", "src": "PROTOKOLÜ KIRAN"},
+]
+
+func title_open(tid: String) -> bool:
+	var src := ""
+	for t in TITLES:
+		if str(t.id) == tid:
+			src = str(t.src)
+	if src == "":
+		return false
+	for a in achievements():
+		if str(a.name) == src:
+			return bool(a.done)
+	return false
+
+# takılı unvanın görünen adı (kilitliyse boş döner — eski save'lerde güvenli)
+func title_name() -> String:
+	var tid := str(data.get("title", ""))
+	if tid == "" or not title_open(tid):
+		return ""
+	for t in TITLES:
+		if str(t.id) == tid:
+			return str(t.name)
+	return ""
 
 func _claimed_count() -> int:
 	var n := 0
