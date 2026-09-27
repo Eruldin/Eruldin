@@ -117,6 +117,7 @@ func init() -> void:
 	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
 	xp_mult += G.meta.upg(Meta.U.XP) * 0.08
 	crit_ch += G.meta.upg(Meta.U.CRIT) * 0.04
+	parry_window = 0.10 + G.meta.upg(Meta.U.PARRY) * 0.04
 	knock_resist = 2.0
 	skill_cd = 0.0
 	_haste_t = 0.0
@@ -756,6 +757,7 @@ func reset_for_run() -> void:
 	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
 	xp_mult += G.meta.upg(Meta.U.XP) * 0.08
 	crit_ch += G.meta.upg(Meta.U.CRIT) * 0.04
+	parry_window = 0.10 + G.meta.upg(Meta.U.PARRY) * 0.04
 	# ekipman modları — 7 slot HoT zırh/tılsım sistemi (items.gd)
 	var eq: Dictionary = Items.equip_stats()
 	max_hp += float(eq.get("hp", 0.0))
