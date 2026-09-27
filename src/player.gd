@@ -298,7 +298,7 @@ func _tick_skill(d: float) -> void:
 	var r_now := Input.is_key_pressed(KEY_R)
 	if r_now and not _iksir_held and iksir_n > 0 and not dead and hp < max_hp - 1.0 and G.state == G.State.ROOM:
 		iksir_n -= 1
-		heal(max_hp * 0.45)
+		heal(max_hp * 0.45 * (1.5 if has_meta("table") else 1.0))
 		G.fx.burst(pos, Px.C("8affc9"), 14, 140.0, 3.0, 0.5)
 		G.audio.play("heal", 1.2, 0.55)
 		G.ui.toast("choralim iksiri — can yenilendi")
@@ -309,7 +309,9 @@ func _tick_skill(d: float) -> void:
 	if f_now and not _over_held and boost_t <= 0 and G.state == G.State.ROOM and G.run.fragments >= _over_cost():
 		G.run.fragments -= _over_cost()
 		_over_used += 1
-		boost_t = 8.0
+		boost_t = 8.0 + float(get_meta("over_dur", 0.0))
+		G.meta.data["over_uses"] = int(G.meta.data.get("over_uses", 0)) + 1
+		G.meta.save()
 		G.fx.burst(pos, Px.C("ffd75f"), 18, 160.0, 3.0, 0.5)
 		G.fx.float_text(pos + Vector2(0, -44), "AŞIRI YÜK", Px.C("ffd75f"), 1.0)
 		G.audio.play("boon", 1.1, 0.6)
@@ -320,10 +322,10 @@ func _tick_skill(d: float) -> void:
 		if sarap_t <= 0.0:
 			dmg_mult *= 1.25
 			speed *= 1.08
-		sarap_t = maxf(sarap_t, 25.0)
+		sarap_t = maxf(sarap_t, 25.0 * (1.5 if has_meta("table") else 1.0))
 		G.fx.burst(pos, Px.C("ff7722"), 16, 150.0, 3.5, 0.5)
 		G.audio.play("boon", 0.9, 0.55)
-		G.ui.toast("KOR ŞARABI — 25sn güç ve hız")
+		G.ui.toast("KOR ŞARABI — %dsn güç ve hız" % int(sarap_t))
 	_sarap_held = t_now
 	if sarap_t > 0.0:
 		sarap_t -= d
@@ -366,7 +368,7 @@ func _use_skill() -> void:
 
 # şasi farkları oynanışı değiştirir: elyb ağır topçu, via hızlı keskin
 func _over_cost() -> int:
-	return 120 + 90 * _over_used
+	return int((120 + 90 * _over_used) * (1.0 + float(get_meta("over_cost", 0.0))))
 
 func _apply_hero() -> void:
 	var hk := str(G.meta.data.get("hero", "ely"))
