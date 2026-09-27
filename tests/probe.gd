@@ -142,6 +142,12 @@ func _process(_d: float) -> void:
 						G.meta.data["stash"] = st4
 						Items.equip("i_maske", "bas")
 						Items.equip("i_bilek", "eldiven")
+						if not st4.has("i_kemer_kum"):
+							st4.append("i_kemer_kum")
+							G.meta.data["stash"] = st4
+						Items.equip("i_kemer_kum", "kemer")
+						var es := Items.equip_stats()
+						print("[probe] kemer equipped=%s mag=%.0f" % [str((G.meta.data.get("equip", {}) as Dictionary).get("kemer")), float(es.get("mag", 0.0))])
 						G.ui.inventory_panel()      # set bonusları görünsün
 						for s in Items.set_state():
 							if s.active:
