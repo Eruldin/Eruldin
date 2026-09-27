@@ -238,6 +238,7 @@ func achievements() -> Array:
 		{"name": "ÇOBAN", "desc": "ağıla 8 sürüngen getir", "done": int(data.get("pets", 0)) >= 8, "rew": 180},
 		{"name": "BİLGİ İŞÇİSİ", "desc": "tek koşuda seviye 30'a ulaş", "done": int(data.get("best_level", 0)) >= 30, "rew": 300},
 		{"name": "KAN DAVASI", "desc": "geri dönen şampiyon KOPUZ'u üç perdede de kes", "done": int(data.get("nemesis_kills", 0)) >= 3, "rew": 320},
+		{"name": "VARYANT AVCISI", "desc": "mizaçlı efendilerden beşini düşür", "done": int(data.get("boss_variants", 0)) >= 5, "rew": 280},
 		{"name": "EFSANEVİ KOLEKSİYONU", "desc": "altı EFSANEVİ parçadan dördünü şampiyonlardan kopar", "done": (data.get("items_seen", []) as Array).filter(func(i: String) -> bool: return int(Items.DEFS.get(i, {}).get("r", 0)) == 4).size() >= 4, "rew": 450},
 	]
 
@@ -269,6 +270,7 @@ const TITLES := [
 	{"id": "lanet",   "name": "LANET KIRANI",     "src": "LANET KIRANI"},
 	{"id": "coban",   "name": "SÜRÜNGEN ÇOBANI",  "src": "ÇOBAN"},
 	{"id": "kopuz",   "name": "KOPUZ KESEN",      "src": "KAN DAVASI"},
+	{"id": "varyant", "name": "MİZAÇ BİLEN",      "src": "VARYANT AVCISI"},
 	{"id": "nur",     "name": "UFUK KIRICI",      "src": "FENER SÖNDÜREN"},
 	{"id": "kasa",    "name": "KASACI",           "src": "HAZİNE AVCISI"},
 	{"id": "efkol",   "name": "EFENDİ AVISI",     "src": "EFENDİ KOLEKSİYONCUSU"},

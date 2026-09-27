@@ -458,6 +458,35 @@ func _boss(kind: int, hs: float, ann: String, off := Vector2.ZERO, show_ui := tr
 	p = G.room.clamp_pos(p, 40.0)
 	var b := Boss.spawn_boss(kind, p, G.room, hs)
 	b.died.connect(_on_boss_dead)
+	# efendi varyantı — %25 ihtimalle boss ayrı bir mizaçla doğar (azgın/ağır/kanlı)
+	if G.chance(0.25):
+		var vk: String = G.pick(["azgin", "agir", "kanli"])
+		b.set_meta("variant", vk)
+		match vk:
+			"azgin":
+				b.speed *= 1.25
+				b.touch_dmg *= 1.15
+				b.proj_dmg *= 1.15
+				b.actor_name = "AZGIN " + b.actor_name
+				b.base_color = Color(1.0, 0.45, 0.25)
+			"agir":
+				b.max_hp *= 1.5
+				b.hp = b.max_hp
+				b.speed *= 0.85
+				b.touch_dmg *= 1.3
+				b.actor_name = "AĞIR " + b.actor_name
+				b.base_color = Color(0.65, 0.55, 0.5)
+			"kanli":
+				b.max_hp *= 0.78
+				b.hp = b.max_hp
+				b.touch_dmg *= 1.45
+				b.proj_dmg *= 1.2
+				b.actor_name = "KANLI " + b.actor_name
+				b.base_color = Color(0.95, 0.2, 0.2)
+		G.fx.mk_light(b, Vector2(0, -34), Px.C("ff5252"), 0.8, 2.6)
+		if is_instance_valid(G.ui):
+			G.ui.toast("EFENDİ VARYANTI — bu sefer %s mizaçta" % vk.to_upper())
+			G.audio.play("roar", 0.7, 0.5)
 	if show_ui:
 		G.room.boss = b
 		G.ui.boss_bar(true, b)
@@ -490,6 +519,12 @@ func _on_boss_dead(b) -> void:
 			Boss.BKind.NUR: bid = "nur"
 		G.meta.boss_down(bid)
 		Quests.tick("boss", bid)
+		if b.has_meta("variant"):
+			G.meta.data["boss_variants"] = int(G.meta.data.get("boss_variants", 0)) + 1
+			G.meta.save()
+			G.run.drop_fragments(b.pos + Vector2(0, 20), 45)
+			G.room.spawn_chest(b.pos + Vector2(24, 0))
+			G.ui.toast("varyant efendi düştü — ek ganimet")
 	if is_instance_valid(G.room):
 		G.room.boss = null
 		# efendi ölümü sahnede hissedilsin: patlama + hitstop + sarsıntı
