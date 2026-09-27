@@ -4,7 +4,7 @@ extends CanvasLayer
 # All UI is built in code: HUD, boss bar, banners, toasts, dialogue panel,
 # boon draft, upgrade shop (Dr. Vane), death/victory screens, title, CRT tint.
 
-const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK"]
+# BIOME_NAME Room'dan gelir (tek kaynak — ui'daki eski kopya 5 bioma takılı kalmıştı)
 
 const LINES := {
 	"rhasa": [
@@ -471,7 +471,7 @@ func _tick_hud() -> void:
 		s.mouse_entered.connect(func(): _show_tip(s, spec))
 		s.mouse_exited.connect(func(): _tip.visible = false)
 	if G.state == G.State.ROOM and is_instance_valid(G.room):
-		_room_lbl.text = str(G.run.node_name) if str(G.run.node_name) != "" else BIOME_NAME[clampi(G.run.biome, 0, BIOME_NAME.size() - 1)]
+		_room_lbl.text = str(G.run.node_name) if str(G.run.node_name) != "" else Room.BIOME_NAME[clampi(G.run.biome, 0, Room.BIOME_NAME.size() - 1)]
 	elif G.state == G.State.HUB:
 		_room_lbl.text = "VIATOR KAMPI"
 	else:
@@ -1116,7 +1116,7 @@ func biome_panel() -> void:
 	var opts: Array = []
 	for i in 4:
 		var tag := "◈ SEÇİLİ" if i == cur else "SAHA %d" % (i + 1)
-		opts.append({"kind": "biome", "id": i, "name": "%s\n%s" % [BIOME_NAME[i], tag],
+		opts.append({"kind": "biome", "id": i, "name": "%s\n%s" % [Room.BIOME_NAME[i], tag],
 			"icon": boss_por[i], "col": ["00E5FF", "00E676", "ffb74d", "c26bff"][i],
 			"desc": "%s\nzorluk %s" % [_biome_desc(i), "★".repeat(i + 1)], "top": "", "w": 1.0})
 	var hyp := bool(G.meta.data.get("hyper", false))
@@ -1882,7 +1882,7 @@ func records_panel() -> void:
 	for i in 4:
 		var bid: String = Run.BOSS_IDS[i]
 		var done: bool = dn.has(bid)
-		var l := _lbl("%s  %s" % ["◆" if done else "◇", "%s — %s" % [BIOME_NAME[i], Run.BOSS_NAMES[i]]],
+		var l := _lbl("%s  %s" % ["◆" if done else "◇", "%s — %s" % [Room.BIOME_NAME[i], Run.BOSS_NAMES[i]]],
 			Vector2.ZERO, 13, Color(0.95, 0.85, 0.4) if done else Color(0.5, 0.5, 0.6))
 		v.add_child(l)
 	var tk: Dictionary = d.get("kind_kills", {})
@@ -2051,7 +2051,7 @@ func records_panel() -> void:
 	v.add_child(ucur_l)
 	var ld: Dictionary = d.get("last_death", {})
 	if not ld.is_empty() and str(ld.get("killer", "")) != "":
-		var l := _lbl("son düşüş: %s @ %s" % [str(ld.get("killer")), BIOME_NAME[int(ld.get("biome", 0))]], Vector2.ZERO, 11, Color(0.6, 0.55, 0.6))
+		var l := _lbl("son düşüş: %s @ %s" % [str(ld.get("killer")), Room.BIOME_NAME[clampi(int(ld.get("biome", 0)), 0, Room.BIOME_NAME.size() - 1)]], Vector2.ZERO, 11, Color(0.6, 0.55, 0.6))
 		v.add_child(l)
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	v.add_child(h)
@@ -2560,7 +2560,7 @@ func _pick_card(o: Dictionary) -> void:
 		else:
 			G.meta.data["arena_biome"] = bid
 			G.meta.save()
-			G.ui.toast("saha: %s — portal o koordinata açılıyor" % BIOME_NAME[bid])
+			G.ui.toast("saha: %s — portal o koordinata açılıyor" % Room.BIOME_NAME[clampi(bid, 0, Room.BIOME_NAME.size() - 1)])
 		G.audio.jingle("boon")
 		return
 	if str(o.get("kind", "")) == "reroll":

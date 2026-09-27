@@ -1199,6 +1199,7 @@ static func _wall2(key: String) -> Texture2D:
 		"2": top = C("4a4440"); front = C("2e2926"); acc = C("ff7722")
 		"3": top = C("322c4a"); front = C("1c1830"); acc = C("c9a227")
 		"4": top = C("2e4432"); front = C("16251c"); acc = C("66bb6a")
+		"6": top = C("7a4a2e"); front = C("4a2c1c"); acc = C("ff9944")
 		_: top = C("5f452a"); front = C("3a2818"); acc = C("a8842f")
 	var t := _img(64, 56)
 	for y in 56:
@@ -1236,6 +1237,12 @@ static func _wall2(key: String) -> Texture2D:
 				_p(t, 16 + i * 12, 16, acc)
 				_p(t, 17 + i * 12, 22, acc)
 			_rect(t, 10, 32, 44, 2, shade(acc, 0.5))
+		"6":
+			for i in 2:
+				_rect(t, 8 + i * 24, 10, 20, 26, shade(front, 0.9))
+				_rect(t, 8 + i * 24, 10, 20, 2, shade(top, 1.35))
+			_rect(t, 10, 34, 44, 2, shade(acc, 0.6))
+			_p(t, 22, 18, acc); _p(t, 48, 24, acc)
 	return _tex(t)
 
 # ---------- biome backdrops (1180x200 silhouette strip) ----------
@@ -1250,6 +1257,7 @@ static func _backdrop(key: String) -> Texture2D:
 		"1": sky1 = Color(0.04, 0.08, 0.08); sky2 = Color(0.08, 0.16, 0.12); sil = C("0e1a14"); glow = C("00E676")
 		"2": sky1 = Color(0.10, 0.06, 0.05); sky2 = Color(0.20, 0.10, 0.06); sil = C("1c1210"); glow = C("ff7722")
 		"3": sky1 = Color(0.06, 0.04, 0.12); sky2 = Color(0.14, 0.10, 0.24); sil = C("120e20"); glow = C("c9a227")
+		"6": sky1 = Color(0.14, 0.06, 0.03); sky2 = Color(0.30, 0.12, 0.06); sil = C("22120c"); glow = C("ff9944")
 		_: sky1 = Color(0.10, 0.06, 0.10); sky2 = Color(0.20, 0.12, 0.14); sil = C("1a1210"); glow = C("ffb74d")
 	# sky gradient (alpha fades toward bottom so it blends with the dark)
 	for y in 200:
