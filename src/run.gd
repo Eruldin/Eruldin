@@ -35,6 +35,7 @@ var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var pending_ambush := false  # YOL OLAYI pusu: arenaya kuşatılmış girilir
 var _skip_waylay := false    # TEKRAR DENE: aynı node'a dönerken yol olayı atlanır
 var pending_dmg := 0.0     # YOL OLAYI harabe: girişte alınan enkaz hasarı
+var pending_heal := 0.0    # YOL OLAYI sığınak: girişte dinlenme canı
 var force_waylay := ""     # probe/debug: yol olayını zorla
 var _first_visit := false   # bu koşu düğüme ilk iniş mi (lore kartı için)
 var daily := {}             # günlük protokol mutasyonu (Wmap.daily)
@@ -151,6 +152,7 @@ func start_run() -> void:
 	curse = 0
 	pending_ambush = false
 	pending_dmg = 0.0
+	pending_heal = 0.0
 	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
 	# saha keşfi: görevler için distinct biome sayısı birikir
@@ -173,7 +175,7 @@ func start_run() -> void:
 		_skip_waylay = false
 		wk = ""
 	elif wk == "" and randf() < 0.35:
-		wk = G.pick(["pusu", "kervan", "harabe", "gezgin"])
+		wk = G.pick(["pusu", "kervan", "harabe", "gezgin", "siginak"])
 	if wk != "":
 		G.ui.travel_event(wk, node_name)
 	else:
@@ -226,6 +228,10 @@ func _enter_arena() -> void:
 		G.player.hp = maxf(1.0, G.player.hp - pending_dmg)
 		pending_dmg = 0.0
 		G.ui.toast("enkaz altında kaldın")
+	if pending_heal > 0.0:
+		G.player.heal(pending_heal)
+		pending_heal = 0.0
+		G.ui.toast("SIĞINAK DİNLENMESİ — +30 can ile iniyorsun")
 	# ilk ziyaret: bölge kartı (BG2 "yeni alan" hissi) — lore varsa oynat
 	if _first_visit:
 		_first_visit = false

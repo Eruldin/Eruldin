@@ -1881,6 +1881,9 @@ const WAYLAY := {
 	"gezgin": {"name": "YALNIZ GEZGİN", "col": "c26bff",
 		"sub": "Bacağı tüten bir şasi yolun kenarında duruyor. Sırt çantası ağzına kadar eşya dolu: 'Kaliteli mal, düşük fiyat. Viator'a indirim yok.'",
 		"opts": ["AL — ◆120, rasgele eşya", "GEÇ — yola devam"]},
+	"siginak": {"name": "GÖÇEBE SIĞINAĞI", "col": "66bb6a",
+		"sub": "Yolun kıyısında terk edilmiş bir göçebe barınağı — emberleri hâlâ sıcak, rafları dolu. Viator burada dinlenir; yağmacılar da.",
+		"opts": ["KONAKLA — +30 can ve +%10 şansla sahaya in", "SÖK — rasgele eşya, ama kovan alarmı çalar (kuşatılmış giriş)"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -1954,6 +1957,15 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				toast("gezgin takası — eşya çantaya girdi")
 			else:
 				toast("gezgin yoluna devam etti")
+		"siginak":
+			if idx == 0:
+				G.run.pending_heal = 30.0
+				G.run.luck += 0.1
+				toast("sığınakta dinlendin — sahaya tok iniyorsun")
+			else:
+				G.run.pending_ambush = true
+				Items.drop_to_run(Items.roll(G.run.luck))
+				toast("sığınak söküldü — eşya alındı, kovan uyandı")
 	G.audio.jingle("boon")
 	_close_overlay()
 	G.run._enter_arena()
