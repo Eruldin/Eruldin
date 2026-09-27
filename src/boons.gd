@@ -104,6 +104,8 @@ const ARCANAS := {
 	"narakad": {"name": "NARA KADERİ",      "desc": "Fanatik elitler çok daha sık çıkar — ama -6 azami can", "col": "ff5252"},
 	"itibar":  {"name": "KAMP ELBİSESİ",    "desc": "Kamp itibar kademesi başına +%6 hasar", "col": "c9a227"},
 	"geri":    {"name": "GERİ KAZANIM",      "desc": "Her taslak seçimi +8 parçacık döker — ama -%8 deneyim", "col": "39ff14"},
+	"mahzen":  {"name": "MAHZEN MÜHRÜ",      "desc": "Hazine kasaları 1 dakika erken açılır — ama sürü +%10 kalabalık", "col": "ffd75f"},
+	"metron":  {"name": "METRONOM",          "desc": "+%12 saldırı hızı — ama şasi yeteneği %15 daha yavaş dolar", "col": "8fd4ff"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -210,6 +212,12 @@ static func apply_arcana(id: String, p: Player) -> void:
 			p.dmg_mult *= 1.0 + Quests.rep_tier() * 0.06
 		"geri":
 			p.xp_mult *= 0.92
+		"mahzen":
+			G.run.node_mods["spawn"] = float(G.run.node_mods.get("spawn", 1.0)) * 1.10
+			G.run.win_target = minf(G.run.win_target, 300.0)
+		"metron":
+			p.atk_speed *= 1.12
+			p.skill_max *= 1.15
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0
