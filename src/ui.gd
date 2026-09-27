@@ -2185,6 +2185,12 @@ const WAYLAY := {
 
 func travel_event(wkind: String, dest: String) -> void:
 	_pause(true)
+	# yol olayı koleksiyonu — hangi karşılaşmalar görüldü
+	var ws: Array = G.meta.data.get("waylay_seen", [])
+	if not ws.has(wkind):
+		ws.append(wkind)
+		G.meta.data["waylay_seen"] = ws
+		G.meta.save()
 	var d: Dictionary = WAYLAY.get(wkind, WAYLAY["pusu"])
 	var v := _show_panel("waylay", "YOL OLAYI — " + dest, Px.C(str(d.col)))
 	var nm := _lbl(str(d.name), Vector2.ZERO, 16, Px.C(str(d.col)))
