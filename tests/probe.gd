@@ -189,6 +189,10 @@ func _process(_d: float) -> void:
 				for hz in G.room.hazards:
 					hk[str(hz.get("kind", "?"))] = int(hk.get(str(hz.get("kind", "?")), 0)) + 1
 				print("[probe] hazards %s" % str(hk))
+				if int(G.room.biome) == 6:
+					var p2 := G.player.pos + Vector2(220, 0)
+					G.room.hazards.append({"pos": p2, "r": 60.0, "dps": 4.0, "kind": "surgun", "t": 1.5, "tele": G.fx.tele_circle(p2, 60.0, 9999.0, Color(1, 0.7, 0.3, 0.2)), "vel": Vector2(30, 0), "sway": 0.0})
+					print("[probe] surgun test planted")
 		3:
 			if G.ui.overlay_open():
 				var k := str(G.ui._overlay.get_meta("kind", ""))

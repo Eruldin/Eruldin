@@ -1006,6 +1006,14 @@ func _tick_hazards(d: float) -> void:
 					h.tele.sr.modulate.a = 0.5  # warning flare
 		elif h.kind == "surgun":
 			# gezici kum hortumu: alanı süpürür, içindekini döndürerek iter
+			# t>0 ise fırtına hortumu — süresi dolunca tele'i temizleyip düşer
+			if float(h.get("t", -1.0)) > 0.0:
+				h.t -= d
+				if h.t <= 0.0:
+					if h.has("tele"):
+						G.fx.kill_tele(h.tele)
+					hazards.remove_at(i)
+					continue
 			h.sway = float(h.get("sway", 0.0)) + d
 			var v: Vector2 = h.get("vel", Vector2.ZERO)
 			v = v.rotated(sin(float(h.sway) * 0.7) * d * 1.5)
