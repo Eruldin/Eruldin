@@ -587,6 +587,7 @@ func _process(d: float) -> void:
 	_tick_pickups(d)
 	_tick_monolith(d)
 	_tick_trial()
+	_tick_fener()
 	_tick_merchant(d)
 	_tick_stray(d)
 	_tick_critters(d)
@@ -602,6 +603,8 @@ func _process(d: float) -> void:
 
 var _trial_elites: Array = []
 var _trial_pos := Vector2.ZERO
+var _fener_champs: Array = []
+var _fener_pos := Vector2.ZERO
 
 # DENEME TOTEMİ: iki elit doğar — ikisi de düşünce sandık+eşya öder
 func _tick_trial() -> void:
@@ -616,6 +619,23 @@ func _tick_trial() -> void:
 		var tiid := Items.roll(G.run.luck + 0.2)
 		if tiid != "":
 			spawn_loot(tiid, _trial_pos + Vector2(40, 0))
+
+# SİNYAL FENERİ: üstüne basınca ikiz şampiyon yankı uyanır — ikisi de düşerse
+# çift sandık + eşya + ağır parçacık öder (istençli yüksek-risk yan savaşı)
+func _tick_fener() -> void:
+	if _fener_champs.is_empty():
+		return
+	_fener_champs = _fener_champs.filter(func(e): return is_instance_valid(e) and not e.dead)
+	if _fener_champs.is_empty():
+		G.ui.toast("SİNYAL KIRILDI — yankı hazinesi düştü")
+		G.audio.jingle("boss")
+		Quests.tick("fener")
+		spawn_chest(_fener_pos)
+		spawn_chest(_fener_pos + Vector2(46, 6))
+		G.run.drop_fragments(_fener_pos, G.ri(40, 60))
+		var fiid := Items.roll(G.run.luck + 0.35)
+		if fiid != "":
+			spawn_loot(fiid, _fener_pos + Vector2(-46, 6))
 
 func _tick_motes(d: float) -> void:
 	var t := Time.get_ticks_msec() * 0.001
@@ -1116,6 +1136,20 @@ func _collect(pk: Node) -> void:
 				var sp := clamp_pos(pk.position + Vector2.from_angle(ang) * 220.0, 40.0)
 				var ek: int = G.pick([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI])
 				_trial_elites.append(Enemy.spawn(ek, sp, true, G.director._hp_scale() * 1.1, G.director._dmg_scale(), self))
+		"fener":
+			if not _fener_champs.is_empty():
+				return
+			_fener_pos = pk.position
+			G.ui.toast("SİNYAL FENERİ — ikiz yankı uyandı")
+			G.audio.play("alarm", 0.9, 0.7)
+			G.fx.tele_ring(pk.position, 240.0, 1.0, Color(1.0, 0.2, 0.3, 0.5))
+			for i in 2:
+				var ang := TAU * float(i) / 2.0 + G.rf(0.0, 0.5)
+				var sp := clamp_pos(pk.position + Vector2.from_angle(ang) * 230.0, 40.0)
+				var ek: int = G.pick([Enemy.EKind.ALFA, Enemy.EKind.KONAKCI])
+				var e := Enemy.spawn(ek, sp, true, G.director._hp_scale() * 1.2, G.director._dmg_scale() * 1.1, self)
+				e.promote_champ()
+				_fener_champs.append(e)
 		"chest":
 			G.run.open_chest()
 		"loot":
@@ -1199,6 +1233,9 @@ func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 		"totem":
 			pk.texture = Px.S2("icn_skull") if Px.S2("icn_skull") != null else Px.S("dot")
 			col = "ff6d3d"
+		"fener":
+			pk.texture = Px.S2("icn_crown") if Px.S2("icn_crown") != null else Px.S("dot")
+			col = "ff3355"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	pk.scale = Vector2.ONE * (0.95 if kind == "cursed" else 0.8)
 	pk.modulate = Px.C(col)
