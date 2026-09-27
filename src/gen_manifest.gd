@@ -55,6 +55,7 @@ const SPRITES := {
 	"cine_6_0": "art/gen/g_gr_6.png",
 	"cine_7_0": "art/gen/g_gr_7.png",
 	"cine_8_0": "art/gen/g_gr_8.png",
+	"por_nur": "art/gen/g_nur_0.png",
 	# Çürük Bataklık (biome 4): sinematik kart olarak da zemin resmi kullanılır
 	"cine_4_0": "art/gen/g_gr_4.png",
 	# Kül Ovası (biome 5): sinematik kart olarak da zemin resmi kullanılır
@@ -169,7 +170,7 @@ const FRAMES := {
 	"husk": {}, "sentinel": {}, "spitter": {}, "turret": {}, "drone": {},
 	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {}, "c_herald": {}, "c_akrep": {}, "c_balcik": {}, "c_gozetmen": {}, "c_copcu": {}, "c_dinamitci": {}, "c_kuzgun": {}, "c_sivri": {}, "c_koc": {}, "c_gol": {}, "c_fisilti": {}, "c_pence": {}, "c_tayf": {},
 	"rex": {}, "host": {}, "nahum": {}, "tuman": {}, "kirin": {}, "const": {},
-	"anasi": {}, "dev": {}, "kor": {}, "damar": {}, "buz": {},
+	"anasi": {}, "dev": {}, "kor": {}, "damar": {}, "buz": {}, "nur": {},
 }
 
 static func frames() -> Dictionary:
@@ -179,7 +180,7 @@ static func frames() -> Dictionary:
 	for k in ["c_varl", "c_cereb", "c_konakci", "c_alfa", "c_herald", "c_akrep", "c_balcik", "c_gozetmen", "c_copcu", "c_dinamitci", "c_kuzgun", "c_sivri", "c_koc", "c_gol", "c_fisilti", "c_pence", "c_tayf"]:
 		d[k] = _en("g_" + k.trim_prefix("c_"))
 	d["c_carrier"] = _en("g_carrier")
-	for k in ["rex", "host", "nahum", "tuman", "kirin", "const", "anasi", "dev", "kor", "damar", "buz"]:
+	for k in ["rex", "host", "nahum", "tuman", "kirin", "const", "anasi", "dev", "kor", "damar", "buz", "nur"]:
 		d[k] = _bs("g_" + k)
 	d["c_h9"] = _hero("g_h9")
 	d["c_k7"] = _hero("g_k7")
