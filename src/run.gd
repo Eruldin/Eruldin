@@ -509,6 +509,8 @@ func victory() -> void:
 	if tribute > 0:
 		G.ui.toast("FETİH HARACI  +%d◆" % tribute)
 	G.meta.data["victories"] += 1
+	if int(stats.get("baskin", 0)) > 0:
+		G.meta.data["baskin_wins"] = int(G.meta.data.get("baskin_wins", 0)) + 1
 	G.meta.data["ng"] = int(G.meta.data.get("ng", 0)) + 1
 	stats["ng"] = int(G.meta.data.get("ng", 0))
 	var first_end := node_id == "b3" and not bool(G.meta.data.get("ended", false))
