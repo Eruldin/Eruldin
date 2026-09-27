@@ -19,6 +19,7 @@ const NODES := [
 	{"id": "b3",     "name": "AETERNA SPIRE",      "icon": "icn_crown",   "pos": Vector2(760, 520), "col": "c26bff", "kind": "arena", "biome": 3, "unlock": "boss twins","desc": "Protokolün kalbi. Efendiler: Kirin & Constantin.", "mods": {}},
 	{"id": "yol",    "name": "PUSLU GEÇİT",        "icon": "icn_dash",    "pos": Vector2(430, 130), "col": "8fd4ff", "kind": "arena", "biome": 1, "unlock": "node", "desc": "Elitler sık doğar, ganimet bol — keşif koşusu.", "lore": "Kervanların kaybolduğu geçit. Sis perdesi arkasında elit sürüler dönüyor — cesareti olan ganimeti kapar.", "mods": {"elite_t": 0.55, "frag": 1.2, "dusk": true}},
 	{"id": "tarla",  "name": "YANIK TARLALAR",     "icon": "ico_frag",    "pos": Vector2(600, 430), "col": "ff9e4d", "kind": "arena", "biome": 0, "unlock": "node", "desc": "Kül tarlaları — parçacık bereketi, kovan seyrek.", "lore": "Eski imparatorluğun tahıl ambarı. Küllerin altında hâlâ choralim kristalleri çiçek açıyor.", "mods": {"spawn": 1.25, "frag": 1.5, "hp": 0.85}},
+	{"id": "karakol","name": "KIRIK KARAKOL",      "icon": "ico_run",     "pos": Vector2(360, 300), "col": "8fd4ff", "kind": "arena", "biome": 0, "unlock": "node", "desc": "Düşmüş sınır karakolu — sürü seyrek ama devamlı, parçacık bereketli kasılma sahası.", "lore": "Viator'ın batı sınır karakolu — çatısı çöktü, alarmı hâlâ vızıldıyor. Praetorian nöbetçileri burada son mesajlarını kazıdı; kovan enkazı sevdi, parçacıklar çatlaklarda birikti.", "mods": {"spawn": 1.15, "frag": 1.25, "hp": 0.9}},
 	{"id": "pazar",  "name": "HURDA PAZARI",       "icon": "ico_boon",    "pos": Vector2(180, 180), "col": "c9a227", "kind": "arena", "biome": 2, "unlock": "node", "desc": "Yıkık çarşı — eşya düşüşü yoğun, sürü zayıf.", "lore": "Tüccarların son durağı. Raflar devrildi ama eşya hâlâ orada — kovanın artıkları arasında.", "mods": {"loot": 2.5, "hp": 0.75, "frag": 0.8}},
 	{"id": "kuyu",   "name": "DERİN KUYU",         "icon": "icn_skull",   "pos": Vector2(980, 560), "col": "ff5533", "kind": "arena", "biome": 3, "unlock": "node", "desc": "Aeterna'nın dibi — en sert kovan, en iyi ganimet.", "lore": "Kulenin temel kuyusu. Aşağıda ışık yok; kovanın kalbi burada atıyor. Geri dönüş garanti değil.", "mods": {"hp": 1.5, "dmg": 1.3, "loot": 2.0, "frag": 1.6}},
 	{"id": "yuvalar","name": "KOVAN YUVALARI",     "icon": "icn_kovan",   "pos": Vector2(760, 60),  "col": "ff5c5c", "kind": "arena", "biome": 2, "unlock": "node", "desc": "Kovanın üreme ocağı — sürü kesintisiz, frag bereketli.", "lore": "Enkazın altında kovan kuluçkası. Duvarlar nabız atıyor; her çatlaktan yeni bir sürü doğuyor.", "mods": {"spawn": 1.45, "elite_t": 0.8, "frag": 1.4, "hp": 1.1}},
@@ -129,6 +130,7 @@ const EDGES := [
 	["beyazufuk", "buzkasa"], ["buzul", "buzkasa"],
 	["batak", "batikfener"], ["damar", "batikfener"],
 	["cukur", "damarkasa"], ["damar", "damarkasa"], ["kaos", "damarkasa"],
+	["kamp", "karakol"], ["karakol", "b0"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için
