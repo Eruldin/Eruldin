@@ -113,6 +113,7 @@ var _dash_row: HBoxContainer
 var _skill_lbl: Label
 var _iksir_lbl: Label
 var _tonic_lbl: Label
+var _over_lbl: Label
 var _frag_lbl: Label
 var _boon_row: HBoxContainer
 var _room_lbl: Label
@@ -247,6 +248,8 @@ func _build_hud() -> void:
 	_hud.add_child(_iksir_lbl)
 	_tonic_lbl = _lbl("", Vector2(150, 678), 12, Px.C("ff7722"))
 	_hud.add_child(_tonic_lbl)
+	_over_lbl = _lbl("", Vector2(190, 678), 12, Px.C("ffd75f"))
+	_hud.add_child(_over_lbl)
 
 	_frag_lbl = _lbl("◆ 0", Vector2(1140, 648), 16, Px.C("c26bff"))
 	_hud.add_child(_frag_lbl)
@@ -308,7 +311,7 @@ func _build_hud() -> void:
 	_quest_lbl = _lbl("", Vector2(20, 152), 11, Color(0.82, 0.78, 0.55))
 	_hud.add_child(_quest_lbl)
 
-	_hint_lbl = _lbl("WASD hareket · SPACE dash · Q yetenek · R iksir · T şarap · E etkileşim · ESC duraklat", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
+	_hint_lbl = _lbl("WASD hareket · SPACE dash · Q yetenek · F aşırı yük · R iksir · T şarap · E etkileşim · ESC duraklat", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
 	_hud.add_child(_hint_lbl)
 
 	# boon tooltip
@@ -448,6 +451,16 @@ func _tick_hud() -> void:
 		_iksir_lbl.text = ("R ×%d" % p.iksir_n) if p.iksir_n > 0 else ""
 	if is_instance_valid(_tonic_lbl):
 		_tonic_lbl.text = ("T ×%d" % p.sarap_n) if p.sarap_n > 0 else ""
+	if is_instance_valid(_over_lbl):
+		if p.boost_t > 0.0:
+			_over_lbl.text = str(int(ceil(p.boost_t)))
+			_over_lbl.add_theme_color_override("font_color", Px.C("ffd75f"))
+		elif G.state == G.State.ROOM and G.run != null and G.run.fragments >= p._over_cost():
+			_over_lbl.text = "F"
+			_over_lbl.add_theme_color_override("font_color", Px.C("ffd75f"))
+		else:
+			_over_lbl.text = "F"
+			_over_lbl.add_theme_color_override("font_color", Color(0.3, 0.3, 0.35))
 		_tonic_lbl.add_theme_color_override("font_color", Px.C("ffcf6e") if p.sarap_t > 0.0 else Px.C("ff7722"))
 	_frag_lbl.text = "◆ %d  (+%d)" % [G.meta.data.choralim, int(G.run.fragments * G.meta.frag_mult())]
 	_xp_bar.size.x = 1280.0 * clampf(p.xp / maxf(p.xp_next, 1.0), 0.0, 1.0)
