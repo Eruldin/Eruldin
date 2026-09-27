@@ -252,6 +252,7 @@ func achievements() -> Array:
 		{"name": "KADER KUMARI", "desc": "mezar soycusundan üç kez boş çuval çek", "done": int(data.get("mezar_bos", 0)) >= 3, "rew": 200},
 		{"name": "İHALECİ", "desc": "günlük ihale panosundan 12 kontrat tuttur", "done": int(data.get("bounties_done", 0)) >= 12, "rew": 320},
 		{"name": "YOL KOLEKSİYONCUSU", "desc": "on beş yol olayının hepsini geçir — pusudan hayalete", "done": (data.get("waylay_seen", []) as Array).size() >= 15, "rew": 380},
+		{"name": "YUMURTA KIRICI", "desc": "on iki Döl Yuması'nı kökünden sök", "done": int((data.get("kind_kills", {}) as Dictionary).get("Döl Yuması", 0)) >= 12, "rew": 220},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
@@ -294,6 +295,7 @@ const TITLES := [
 	{"id": "ihale",   "name": "İHALE KESKİNİ",     "src": "İHALECİ"},
 	{"id": "altikasa","name": "MÜHÜR KIRAN",        "src": "ALTI MÜHÜR"},
 	{"id": "yolcu",  "name": "YOL TERCÜMANI",       "src": "YOL KOLEKSİYONCUSU"},
+	{"id": "kulu",   "name": "KULUÇKA KESEN",      "src": "YUMURTA KIRICI"},
 ]
 
 func title_open(tid: String) -> bool:

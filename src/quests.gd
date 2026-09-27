@@ -164,6 +164,7 @@ const DEFS := [
 	{"id": "q_hayalet","giver": "vane",   "name": "GÖRÜNMEZ NÖBET",       "desc": "Yeni lanet raporu: bazı elitler faz geçiriyor — saydamken hiçbir silah onları tutmuyor. Altı HAYALET eliti penceresi kapanır kapanmaz kes; sabrını öderim.", "obj": {"type": "affix", "k": "hayalet", "n": 6}, "rew": {"cho": 300, "rep": 3}, "prereq": "q_yankises"},
 	{"id": "q_enkazkasa","giver": "tegan","name": "SEVKİYAT MÜHRÜ",       "desc": "Sinyal Kulesi'nin arkasında enkaza son sevkiyat gömülmüş — manifest 'Emici bölüğü eşlik etsin' diyor. Sekiz Parçacık Emicisi kes; keselerindeki taşlar listeyi tamamlar, kasa yolunu çizerim.", "obj": {"type": "kind", "k": "Parçacık Emicisi", "n": 8}, "rew": {"cho": 300, "node": "enkazkasa", "rep": 2}, "prereq": "q_buzkasa"},
 	{"id": "q_batikkasa","giver": "tegan","name": "BATIK AMBAR",          "desc": "Gözyuvanın dibinde suya batmış bir sal-kasası var — zincirler hâlâ iskelede. Sekiz Balçık Adamı zincirde dolaştır; ağırlıkları mührü gevşetir, ambar kendi açılır.", "obj": {"type": "kind", "k": "Balçık Adam", "n": 8}, "rew": {"cho": 320, "node": "batikkasa", "rep": 3}, "prereq": "q_enkazkasa"},
+	{"id": "q_dolav",  "giver": "rhasa",  "name": "KULUÇKA AVI",           "desc": "Bataklık sürüsü gökten gelmiyor — kökünde duran keseler yavru kusuyor. Altı Döl Yumasını kesin yerinde parçala; kovanın mutfağı kapansın.", "obj": {"type": "kind", "k": "Döl Yuması", "n": 6}, "rew": {"cho": 340, "rep": 3}, "prereq": "q_seri"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
