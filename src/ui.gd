@@ -2869,6 +2869,8 @@ const BETS := [
 	 "name": "KESİM FİŞİ",   "desc": "sonraki koşuda 350 kesime ulaşırsan kazanırsın — zafer şart değil"},
 	{"type": "elite",   "need": 4,   "stake": 120, "pay": 380,
 	 "name": "AV FİŞİ",      "desc": "sonraki koşuda 4 elit kesersen kazanırsın — şampiyonlar da sayılır"},
+	{"type": "nodmg",   "need": 30,  "stake": 150, "pay": 460,
+	 "name": "TEMİZ FİŞİ",   "desc": "sonraki koşuda 30 sn hasarsız seri yaparsan kazanırsın — tek temas fişi yatırır"},
 ]
 
 func bet_panel() -> void:
