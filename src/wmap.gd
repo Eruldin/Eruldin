@@ -112,6 +112,10 @@ const NODES := [
 	{"id": "ayaz",   "name": "AYAZ KUYUSU",      "icon": "icn_dash",   "pos": Vector2(1270, 620), "col": "bfe8ff", "kind": "arena", "biome": 8, "unlock": "node", "desc": "Buzulun güneyinde dibi görünmeyen dikey kuyu — bora buradan iner, donmuş sürüler buradan tırmanır.", "lore": "İzcilerin son notu: 'kuyu nefes alıyor — bora onun nefesi, sürüler onun öksürüğü.' Kuyunun dibinde koro'nun ilk şarkısı buzda saklı; buz Anası o şarkıyı duymak için bekliyordu.", "mods": {"hp": 1.4, "dmg": 1.2, "spawn": 1.15, "frag": 1.7, "loot": 1.5, "elite_t": 0.75, "dusk": true}},
 	{"id": "enkazkasa","name": "ENKAZ KASASI",    "icon": "ico_loot",   "pos": Vector2(920, 60),  "col": "ffb74d", "kind": "hazine","biome": 2, "unlock": "node", "desc": "Sinyal Kulesi'nin arkasında gömülü imparatorluk nakliye kasası — efendi yok; mühür 6 dakika sonra çözülür, içi son sevkiyat ganimeti.", "lore": "Kule 'hattı tutun' diye yayın yaparken son sevkiyat buraya gömüldü — mühür zincire değil saate bağlı. Kovan kasayı çiğneyemedi; manifestte 'Parçacık Emicisi bölüğü eşlik etsin' yazar — keselerindeki taşlar listenin yarısı hâlâ orada.", "mods": {"loot": 2.4, "frag": 1.9, "hp": 1.1, "spawn": 1.15, "elite_t": 0.75}},
 	{"id": "batikkasa","name": "BATIK AMBAR",    "icon": "ico_loot",   "pos": Vector2(940, 640), "col": "9ccc65", "kind": "hazine","biome": 4, "unlock": "node", "desc": "Gözyuvanın dibinde suya batmış sal-kasası — efendi yok; zincirler 6 dakika sonra gevşer, içi bataklık yağması.", "lore": "Bataklığın tek taşıma yolu sallardı — son ambar fırtınada suya indi, zincirleri hâlâ salın iskelesine bağlı. Balçık adamlar zincirde yürüyor; ağırlıkları sayılırsa mühür kendi kendine gevşer.", "mods": {"loot": 2.5, "frag": 2.0, "hp": 1.2, "spawn": 1.1, "elite_t": 0.7, "dusk": true}},
+	{"id": "sondaj", "name": "SONDAJ KULESİ",    "icon": "icn_mine",   "pos": Vector2(1430, 640), "col": "80ffd4", "kind": "story", "unlock": "node", "desc": "Çukurun güney ucunda terk edilmiş sondaj kulesi — matkabı hâlâ damarın içinde, tamburu hâlâ dolu.", "lore": "İmparatorluğun son sondajı: matkap damar kalbine ulaştığı gün ekip çekildi — tambur kayıtları 'nabız duyduk, kazıyı durdurduk' diye bitiyor. İçeride yedi metrelik ham choralim silindiri hâlâ sökülmeyi bekliyor.", "choices": [
+		{"label": "TAMBURU SÖK — silindiri çıkar", "sub": "Tambur ham choralim dolu — ama kuleyi çökertmek çukurun dibinde yankılanır: sonraki koşunda sürü sıklaşır, ganimet kabarır.", "rew": {"cho": 240, "omen": {"spawn": 1.12, "loot": 1.25}, "cine": [{"tex": "cine_7_0", "title": "SONDAJ KULESİ", "sub": "Tambur çıktı — yedi metre ham choralim. Çukurun dibinden bir uğultu yükseldi; Damar Kalbi rüyasında döndü."}]}},
+		{"label": "KULEYİ MÜHÜRLE — sondaj kapansın", "sub": "Matkabı kilitlersin; damar huzursuzluğu diner. Kamp bunu duyar — Lena haritasına kuleyi 'güvenli' diye işler.", "rew": {"cho": 90, "rep": 2, "omen": {"heal": 1.15}, "cine": [{"tex": "cine_7_0", "title": "SONDAJ MÜHÜRLENDİ", "sub": "Kilidi çevirdin; kule içindeki uğultu sustu. Çukurun nabzı bir gece için yumuşadı."}]}},
+	]},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -165,6 +169,7 @@ const EDGES := [
 	["mezarlik", "kutuphane"], ["sinyal", "kutuphane"],
 	["yuvalar", "enkazkasa"], ["mezarlik", "enkazkasa"], ["sinyal", "enkazkasa"],
 	["gozyuva", "batikkasa"], ["batak", "batikkasa"], ["sarnic", "batikkasa"],
+	["kaos", "sondaj"], ["damar", "sondaj"], ["damarkasa", "sondaj"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için

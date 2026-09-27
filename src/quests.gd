@@ -166,6 +166,7 @@ const DEFS := [
 	{"id": "q_batikkasa","giver": "tegan","name": "BATIK AMBAR",          "desc": "Gözyuvanın dibinde suya batmış bir sal-kasası var — zincirler hâlâ iskelede. Sekiz Balçık Adamı zincirde dolaştır; ağırlıkları mührü gevşetir, ambar kendi açılır.", "obj": {"type": "kind", "k": "Balçık Adam", "n": 8}, "rew": {"cho": 320, "node": "batikkasa", "rep": 3}, "prereq": "q_enkazkasa"},
 	{"id": "q_dolav",  "giver": "rhasa",  "name": "KULUÇKA AVI",           "desc": "Bataklık sürüsü gökten gelmiyor — kökünde duran keseler yavru kusuyor. Altı Döl Yumasını kesin yerinde parçala; kovanın mutfağı kapansın.", "obj": {"type": "kind", "k": "Döl Yuması", "n": 6}, "rew": {"cho": 340, "rep": 3}, "prereq": "q_seri"},
 	{"id": "q_cilgin","giver": "vane",   "name": "ÖFKE TERBİYESİ",        "desc": "Yeni rapor: bazı elitler yaralandıkça deliriyor — canı azaldıkça hızlanıyor, son çeyrekte iki kat vuruyor. Altı CILGIN eliti öfkesine yenilmeden kes; sinirlerini bobine sararım.", "obj": {"type": "affix", "k": "cilgin", "n": 6}, "rew": {"cho": 320, "rep": 3}, "prereq": "q_hayalet"},
+	{"id": "q_sondaj","giver": "lena",   "name": "TAMBUR SESLERİ",        "desc": "Çukurun güney ucunda eski bir sondaj kulesi duruyor — matkabı hâlâ damarın içinde. Kaos damarının civarında dönen sekiz Damar Fısıltısını dağıt; tamburun kilidini sana işlerim.", "obj": {"type": "kind", "k": "Damar Fısıltısı", "n": 8}, "rew": {"cho": 300, "node": "sondaj", "rep": 2}, "prereq": "q_kaos"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
