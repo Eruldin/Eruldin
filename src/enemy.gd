@@ -198,7 +198,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur"][randi() % 14]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile"][randi() % 15]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -234,6 +234,11 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "KORUYUCU " + actor_name
 			"yansi":
 				actor_name = "YANSITICI " + actor_name
+			"bile":
+				max_hp *= 0.6
+				touch_dmg *= 1.6
+				proj_dmg *= 1.6
+				actor_name = "BİLEYLİ " + actor_name
 			"muhur":
 				_muhur_t = 3.5
 				actor_name = "MÜHÜRLÜ " + actor_name
@@ -285,7 +290,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -735,6 +740,9 @@ func die(h: Dictionary) -> void:
 	super.die(h)
 	G.enemies.erase(self)
 	G.meta.data.kills += 1
+	if bool(h.get("keg", false)):
+		G.meta.data["keg_kills"] = int(G.meta.data.get("keg_kills", 0)) + 1
+		G.fx.float_text(pos + Vector2(0, -44), "kovanın ateşi", Px.C("ff7043"), 0.7)
 	if is_instance_valid(G.run):
 		G.run.stats.kills = int(G.run.stats.get("kills", 0)) + 1
 		var kk: Dictionary = G.run.stats.get("kind_kills", {})
