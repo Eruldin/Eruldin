@@ -6,8 +6,8 @@ extends Node
 # evolution chests; miniboss at 5:30, final boss at 11:00 — kill it to win,
 # or outlast the collapse timer at 13:00.
 
-const MINI_T := 330.0     # 5:30
-const FINAL_T := 660.0    # 11:00
+var mini_t := 330.0       # 5:30 (EFENDİ SAATİ kozu kısaltabilir)
+var final_t := 660.0      # 11:00
 const WIN_T := 780.0      # 13:00 failsafe — swarm collapses
 
 # per-sector bosses: miniboss is the previous sector's efendi (biome 0 keeps
@@ -241,7 +241,7 @@ func _tick_events(d: float) -> void:
 				rb.set_meta("rush_boss", true)
 				_rush_next = INF
 	# miniboss
-	if not _rush() and not _mini and t >= MINI_T:
+	if not _rush() and not _mini and t >= mini_t:
 		_mini = true
 		var mk := int(MINI_KIND[clampi(biome, 0, MINI_KIND.size() - 1)])
 		_boss(mk, 1.0 + m * 0.10 + biome * 0.35, "%s geliyor" % Boss.NAMES[mk])
@@ -266,7 +266,7 @@ func _tick_events(d: float) -> void:
 			G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard", "iksir", "sarap"]), lp2)
 			G.ui.toast("mahzen sızıyor — sandık görüldü")
 	# final boss — kill it to clear the stage
-	if not _hz and not _rush() and not _final and t >= FINAL_T:
+	if not _hz and not _rush() and not _final and t >= final_t:
 		_final = true
 		var kinds: Array = FINAL_KIND[clampi(biome, 0, FINAL_KIND.size() - 1)]
 		if is_instance_valid(G.run) and G.run.node_id == "beyazufuk":

@@ -93,6 +93,8 @@ const ARCANAS := {
 	"borclu":  {"name": "BORÇLU KADER",    "desc": "+300 koşu parçacığı — ama ödeme ×0.85", "col": "c9a227"},
 	"sur":     {"name": "SUR ÇİZGİSİ",     "desc": "150 adım içindeki sürü %28 yavaşlar — ama -8 can", "col": "80d8ff"},
 	"mercek":  {"name": "MERCEK DÜZENİ",   "desc": "+%22 etki alanı — ama -%8 hareket hızı", "col": "b26bff"},
+	"ikiz":    {"name": "İKİZ SANDIK",     "desc": "Her sandık yanına bir eşiyle doğar — ama -%8 deneyim", "col": "ffb74d"},
+	"efsaat":  {"name": "EFENDİ SAATİ",    "desc": "Efendiler %20 erken doğar — ama -8 azami can", "col": "ff5533"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -165,6 +167,15 @@ static func apply_arcana(id: String, p: Player) -> void:
 		"mercek":
 			p.area_mult *= 1.22
 			p.speed *= 0.92
+		"ikiz":
+			G.run.twin_chest = true
+			p.xp_mult *= 0.92
+		"efsaat":
+			if G.director != null:
+				G.director.mini_t *= 0.8
+				G.director.final_t *= 0.8
+			p.max_hp -= 8.0
+			p.hp = minf(p.hp, p.max_hp)
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0

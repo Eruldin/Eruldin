@@ -36,6 +36,7 @@ func has_arcana(a: String) -> bool:
 	return arcana == a or arcana2 == a
 var elite_fever := false   # SARI HAT: elitler %20 sık doğar
 var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
+var twin_chest := false    # İKİZ SANDIK kozu: her sandık çift doğar
 var pending_ambush := false  # YOL OLAYI pusu: arenaya kuşatılmış girilir
 var _skip_waylay := false   # TEKRAR DENE: aynı node'a dönerken yol olayı atlanır
 var _keep_sefer := false    # sefer zinciri: respawn_to_hub sefer sayacını silmez
@@ -185,6 +186,7 @@ func start_run() -> void:
 	arcana2 = ""
 	elite_fever = false
 	slow_all = false
+	twin_chest = false
 	curse = 0
 	pending_ambush = false
 	pending_dmg = 0.0

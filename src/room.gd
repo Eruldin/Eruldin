@@ -1491,7 +1491,7 @@ func spawn_gem(p: Vector2, val: float) -> void:
 	if val >= 10.0:
 		G.fx.mk_light(pk, Vector2.ZERO, pk.modulate, 0.5, 1.1)
 
-func spawn_chest(p: Vector2) -> void:
+func spawn_chest(p: Vector2, _twin := false) -> void:
 	var pk := Sprite2D.new()
 	pk.texture = Px.S("crate")
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -1503,6 +1503,10 @@ func spawn_chest(p: Vector2) -> void:
 	pickups_node.add_child(pk)
 	G.fx.mk_light(pk, Vector2(0, -14), Px.C("ffb74d"), 0.7, 1.6)
 	G.fx.float_text(p + Vector2(0, -34), "SANDIK!", Px.C("ffb74d"), 1.1)
+	# İKİZ SANDIK kozu: her sandık yanına bir eş doğar
+	if G.run != null and G.run.twin_chest and not _twin:
+		var _to := Vector2(G.rf(34.0, 60.0) * (1.0 if randf() < 0.5 else -1.0), G.rf(-22.0, 22.0))
+		spawn_chest(clamp_pos(p + _to, 60.0), true)
 
 # rare field items (VS floor pickups): vacuum draws every gem in, bomb hits
 # the whole swarm, freeze staggers it for a few seconds
