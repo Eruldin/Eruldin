@@ -991,6 +991,8 @@ func die(h: Dictionary) -> void:
 					G.room.spawn_loot(iid2, pos + Vector2(0, -26))
 				G.run.stats["champ_kills"] = int(G.run.stats.get("champ_kills", 0)) + 1
 				G.meta.data["champs"] = int(G.meta.data.get("champs", 0)) + 1
+				if has_meta("midboss"):
+					Quests.tick("orta")
 				G.fx.shake(0.3, 0.45)
 			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
 			Quests.tick("elites")

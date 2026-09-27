@@ -58,6 +58,7 @@ var _min_ann := 0          # son duyurulan dakika kilometre taşı
 var _mini := false
 var _final := false
 var _won := false
+var _midboss := false   # orta efendi — koşuda bir kez, 6:30'da biome imza türünün şampiyonu
 var _final_alive := 0     # final-boss count still standing (pairs need both down)
 var _merch_fired := false # gezgin tüccar — koşuda bir kez
 var _stray_fired := false  # kayıp şasi — koşuda bir kez
@@ -271,6 +272,18 @@ func _tick_events(d: float) -> void:
 			var lp2 := G.room.clamp_pos(G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * G.rf(180.0, 380.0), 60.0)
 			G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard", "iksir", "sarap"]), lp2)
 			G.ui.toast("mahzen sızıyor — sandık görüldü")
+	# orta efendi: 6:30'da sahanin imza türünün altin sampiyonu uyanir — garantili yağma anı
+	if not _midboss and not _hz and not _rush() and t >= 390.0:
+		_midboss = true
+		var mk: Array = [Enemy.EKind.KOCBASI, Enemy.EKind.DINAMITCI, Enemy.EKind.COPCU, Enemy.EKind.GOZETMEN, Enemy.EKind.BALCIK, Enemy.EKind.KORP, Enemy.EKind.AKREP, Enemy.EKind.DAMARGOL, Enemy.EKind.BUZRUH]
+		var mkk: int = int(mk[clampi(biome, 0, mk.size() - 1)])
+		var mb := _spawn(mkk, true)
+		if mb != null:
+			mb.promote_champ()
+			mb.set_meta("midboss", true)
+			G.ui.banner("ORTA EFENDİ", "%s uyanıyor" % Enemy.KIND_NAME.get(mkk, "?"))
+			G.audio.play("roar", 1.2, 0.5)
+			G.fx.shake(0.3, 0.6)
 	# final boss — kill it to clear the stage
 	if not _hz and not _rush() and not _final and t >= final_t:
 		_final = true
