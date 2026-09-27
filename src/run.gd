@@ -143,6 +143,16 @@ func start_run() -> void:
 		G.meta.save()
 		stats["baskin"] = 1
 		G.ui.toast("KORO BASKINI — bu düğümde sürü yoğun akıyor, ganimet bereketli")
+	# kervan laneti: hikaye düğümü seçiminden kalan tek seferlik sürü sertleşmesi
+	var omen: Dictionary = G.meta.data.get("omen", {})
+	if not omen.is_empty():
+		for mk in omen:
+			node_mods[mk] = float(node_mods.get(mk, 1.0)) * float(omen[mk])
+		frag_node = float(node_mods.get("frag", 1.0))
+		G.meta.data["omen"] = {}
+		G.meta.save()
+		stats["omen"] = 1
+		G.ui.toast("KERVANIN LANETİ — sürü bu koşuda daha sert, parçacık bereketli")
 	if bool(node_mods.get("noheal", false)):
 		G.ui.toast("YEMİN DARESİ — şifa küresi düşmez, tek yaşamla sınan")
 	alive = true
