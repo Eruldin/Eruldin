@@ -78,6 +78,8 @@ var data := {
 	"kind_kills": {},      # tür-bazlı toplam kesimler (Zirkon kayıtları)
 	"best_streak_all": 0,  # tüm zamanların en uzun serisi
 	"best_score": 0,       # en yüksek koşu skoru
+	"bet": {},             # Tegan'ın aktif bahsi: {type,stake,pay,need}
+	"bets_won": 0,         # Tegan'da tutan bahis sayısı
 	"arcanas_seen": [],    # kullanılan koz kartları (KOLEKSİYONCUSU besler)
 	"wep_unlocked": [],    # görev ödülüyle açılan silahlar (feat koşulunu atlar)
 	"_last_contract_key": "",  # Ehnar sözleşme tekrar engeli

@@ -38,6 +38,7 @@ const DEFS := [
 	{"id": "q_dua",    "giver": "ahusk",   "name": "SESSİZ DUA",       "desc": "Mabed hâlâ dinliyor. Bir koşuda 300 sn boyunca tek parça kal — tapınağın yolu açılır.", "obj": {"type": "time", "n": 300}, "rew": {"cho": 90, "node": "mabed"}},
 	{"id": "q_nobet",  "giver": "ehnar",   "name": "SON NÖBET",        "desc": "Mezardaki nöbetçiler sayıyor. Tek koşuda 10 elit kes — mezarın kapağı kalkar.", "obj": {"type": "elites", "n": 10}, "rew": {"cho": 110, "node": "mezarlik"}, "prereq": "q_elit"},
 	{"id": "q_batak",  "giver": "david",   "name": "BATAKLIK ROTASI",   "desc": "Konakçı Yaratıkların izi doğuda bir bataklığa çıkıyor. 8 tanesini kes — rotayı çizerim.", "obj": {"type": "kind", "k": "Konakçı Yaratık", "n": 8}, "rew": {"cho": 90, "node": "batak"}, "prereq": "q_gez"},
+	{"id": "q_sans",   "giver": "tegan",   "name": "SİMSAR'IN ŞANSI",   "desc": "Masa döner — 3 bahis tuttur, sana şanslı zarını veririm.", "obj": {"type": "bets", "n": 3}, "rew": {"cho": 150, "item": "i_zar"}},
 	{"id": "q_sis",    "giver": "ahusk",   "name": "SİS PERDESİ",        "desc": "Kistlerin şarkısı batıda bir geçidi işaretliyor. 12 Cerebellum Kisti kes — geçidi bulayım.", "obj": {"type": "kind", "k": "Cerebellum Kisti", "n": 12}, "rew": {"cho": 100, "node": "sisgecidi"}, "prereq": "q_dua"},
 	{"id": "q_sinir",  "giver": "david",   "name": "HARİTA SINIRI",      "desc": "Haritanın tamamı yankılanmalı. Altı farklı sahada koşu yap.", "obj": {"type": "biomes", "n": 6}, "rew": {"cho": 150}, "prereq": "q_batak"},
 	{"id": "q_nobet2", "giver": "ehnar",   "name": "NÖBETÇİNİN KİLİDİ",  "desc": "Elitler defterde iz bırakır. Tek koşuda 15 elit kes — rekoru kır.", "obj": {"type": "elites", "n": 15}, "rew": {"cho": 140, "item": "i_gocek"}, "prereq": "q_nobet"},
@@ -119,6 +120,8 @@ static func state(id: String) -> String:
 			cur = int(G.meta.data.get("over_uses", 0))
 		elif t == "keg":
 			cur = int(G.meta.data.get("keg_kills", 0))
+		elif t == "bets":
+			cur = int(G.meta.data.get("bets_won", 0))
 		if cur >= 0:
 			_q()[id]["prog"] = maxi(prog(id), cur)
 		if cur >= int(q.obj.get("n", 1)):

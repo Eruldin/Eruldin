@@ -460,6 +460,22 @@ func _write_last_run(win: bool) -> void:
 	if win and curse >= 2:
 		G.meta.data["curse_wins"] = int(G.meta.data.get("curse_wins", 0)) + 1
 		G.meta.save()
+	# Simsar Tegan'ın bahsi koşu sonunda çözülür
+	var bet: Dictionary = G.meta.data.get("bet", {})
+	if not bet.is_empty():
+		G.meta.data["bet"] = {}
+		var bt := str(bet.get("type", ""))
+		var ok := win if bt == "win" else int(time) >= int(bet.get("need", 0))
+		if ok:
+			var pay := int(bet.get("pay", 0))
+			G.meta.add_choralim(pay)
+			G.meta.data["bets_won"] = int(G.meta.data.get("bets_won", 0)) + 1
+			stats["bet_won"] = pay
+			if is_instance_valid(G.ui):
+				G.ui.toast("TEGAN'IN BAHİSİ TUTTU  +%d◆" % pay)
+		elif is_instance_valid(G.ui):
+			G.ui.toast("TEGAN: bahis yattı — ◆%d kaybedildi" % int(bet.get("stake", 0)))
+		G.meta.save()
 
 func _contract_met(c: Dictionary, lr: Dictionary) -> bool:
 	if c.is_empty() or lr.is_empty():
