@@ -222,7 +222,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile"][randi() % 15]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal"][randi() % 16]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -266,6 +266,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 			"muhur":
 				_muhur_t = 3.5
 				actor_name = "MÜHÜRLÜ " + actor_name
+			"kristal":
+				actor_name = "KRİSTALLİ " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -314,7 +316,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -931,6 +933,11 @@ func die(h: Dictionary) -> void:
 	# HASAT ŞENLİĞİ kozu: kesim başına küçük parçacık damlası
 	if is_instance_valid(G.run) and is_instance_valid(G.player) and G.player.has_meta("harvest") and G.chance(0.02):
 		G.run.drop_fragments(pos, 1)
+	# kristalli elit: ölünce çevreye parçacık yağmuru saçar — damar yemi
+	if elite and affix == "kristal" and is_instance_valid(G.run):
+		G.run.drop_fragments(pos, G.ri(8, 14))
+		G.fx.burst(pos, Px.C("80ffd4"), 18, 160.0, 5.0, 0.5)
+		G.fx.float_text(pos + Vector2(0, -52), "DAMAR SAÇILDI", Px.C("80ffd4"), 0.9)
 	# hamal taşıyıcı yükünü düşürür — rastgele saha kalıntısı
 	if kind == EKind.CARRIER and is_instance_valid(G.room):
 		G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard", "iksir", "sarap"]), pos)
