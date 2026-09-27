@@ -2178,6 +2178,9 @@ const WAYLAY := {
 	"ilahi": {"name": "KORO İLAHİSİ", "col": "7c4dff",
 		"sub": "Yolun ortasında bir koro habercisi ilahi okuyor — sesi düşman değil, davet. Eski devirlerde bu ilahi avcıları sahaya elitlerin üstüne salarmış; ödersen senin koşuna da okur, okursan sürü çeker ama av bereketli olur.",
 		"opts": ["İLAHİ SATIN AL — ◆30: elitler sıklaşır, parçacık ×1.25", "GEÇ — şarkı arkanda söndü"]},
+	"saganak": {"name": "CHORALİM SAĞANAĞI", "col": "c26bff",
+		"sub": "Gökyüzü çatırdadı ve ham choralim yağmaya başladı — kristal taneleri yola çakılıyor, seslerini kilometrelerce öteden kovan duyar. Yağmurun altında duranların yaraları mor ışıkla kapanır; yol kenarına eğilip toplayanların heybesi dolar ama kokusu kalır.",
+		"opts": ["TOPLAYA KAL — parçacık ×1.2, ama kovan kokuyu alır (sürü sıkılaşır)", "YIKAN — yağmur yaraları kapatır (+25 can, şans +%10)"]},
 	"hayalet": {"name": "KOVAN HAYALETİ", "col": "90a4ae",
 		"sub": "Yolun ortasında titreyen bir kayıt duruyor — düşmüş bir şasinin son koşusu karanlıkta hâlâ oynanıyor, aynı adımlar, aynı son kesiş. Yankının çekirdeğinde kullanılmamış bir eşya parlıyor; ona dokunursan alarm kovana da ulaşır. Ya da kaydı huzuruna bırak — sana ufak bir anı bırakıp söner.",
 		"opts": ["YANKIYI YAKALA — rasgele eşya, ama kuşatılmış giriş", "HÜZNÜNE BIRAK — ◈15 parçacık ve sessiz yol"]},
@@ -2411,6 +2414,17 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				G.run.fragments += 15
 				toast("yankı söndü — ◈+15 anısı kaldı")
 			Quests.tick("hayalet")
+		"saganak":
+			var yag := G.run.arcana == "sagnk" or G.run.arcana2 == "sagnk"
+			if idx == 0:
+				G.run.node_mods["frag"] = float(G.run.node_mods.get("frag", 1.0)) * (1.4 if yag else 1.2)
+				G.run.node_mods["spawn"] = float(G.run.node_mods.get("spawn", 1.0)) * 1.12
+				G.run.frag_node = float(G.run.node_mods.get("frag", 1.0))
+				toast("heybe doldu — parçacık ×%s, kovan kokuyu aldı" % ("1.4" if yag else "1.2"))
+			else:
+				G.run.pending_heal = 50.0 if yag else 25.0
+				G.run.luck += 0.1
+				toast("yağmur yaraları kapadı — sahaya tok iniyorsun")
 		"konservi":
 			if idx == 0:
 				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar

@@ -272,13 +272,15 @@ func start_run() -> void:
 		G.meta.data["calm_routes"] = int(G.meta.data.get("calm_routes", 0)) - 1
 		G.meta.save()
 	elif wk == "" and randf() < waylay_chance:
-		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi", "duel", "ayin", "surungen", "multeci", "mezarci", "kuyu", "ilahi", "hayalet"]
+		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi", "duel", "ayin", "surungen", "multeci", "mezarci", "kuyu", "ilahi", "hayalet", "saganak"]
 		# kurtarılan yoldaşlar yolda karşına çıkabilir
 		if bool(G.meta.data.get("rescued_mina", false)) or bool(G.meta.data.get("rescued_lena", false)) or bool(G.meta.data.get("rescued_orun", false)):
 			wk_list.append("muhafiz")
 		wk = G.pick(wk_list)
 	if wk != "":
 		Quests.tick("waylay")
+		if arcana == "gurbet" or arcana2 == "gurbet":
+			fragments += 25
 		G.ui.travel_event(wk, node_name)
 	else:
 		_enter_arena()
