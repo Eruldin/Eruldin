@@ -1046,6 +1046,7 @@ func _collect(pk: Node) -> void:
 		"heal":
 			G.player.heal(24.0)
 			G.audio.play("heal", 1.0, 0.5)
+			Quests.tick("sifa")
 		"tome":
 			G.fx.burst(pk.position, Px.C("c9a227"), 16, 160.0, 5.0, 0.5)
 			G.ui.boon_choice()
