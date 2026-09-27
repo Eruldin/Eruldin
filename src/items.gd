@@ -47,6 +47,7 @@ const DEFS := {
 	"i_firis":    {"name": "Feragat Başlığı",  "slot": "bas",     "r": 0, "icon": "icn_upg_dash",   "mods": {"dash_regen": 0.12}},
 	"i_hisar":    {"name": "Hisar Kalkanı",    "slot": "govde",   "r": 1, "icon": "icn_upg_shield", "mods": {"armor": 2.0, "spd": -0.02}},
 	"i_cevher":   {"name": "Cevher Yüzüğü",    "slot": "yuzuk",   "r": 0, "icon": "ico_frag",       "mods": {"frag": 0.08, "xp": 0.04}},
+	"i_sivriasi": {"name": "Sivri Aşısı",      "slot": "kolye",   "r": 1, "icon": "icn_zap",        "mods": {"spd": 0.04, "ls": 0.01}},
 	"i_cengel":   {"name": "Av Çengeli",       "slot": "eldiven", "r": 2, "icon": "icn_sword",      "mods": {"dmg": 0.08, "ls": 0.015}},
 	"i_pusula":   {"name": "Kuzey Pusulası",   "slot": "kolye",   "r": 2, "icon": "icn_dash",       "mods": {"xp": 0.10, "mag": 50.0}},
 	"i_nabiz":    {"name": "Nabız Söndürücü",  "slot": "kolye",   "r": 2, "icon": "icn_zap",        "mods": {"skill": -0.16}},

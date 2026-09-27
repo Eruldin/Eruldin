@@ -774,6 +774,15 @@ func die(h: Dictionary) -> void:
 		G.run.stats["kind_kills"] = kk
 		G.run.on_kill(elite)
 		Quests.tick("kind", kn)
+		# gizli bataklık olayı: 30 sivri kesilirse bulutun kalbi kızar
+		if kind == EKind.SIVRI and int(kk.get(kn, 0)) == 30 and not bool(G.run.stats.get("dol_anasi", false)) and G.run.biome == 4 and is_instance_valid(G.room):
+			G.run.stats["dol_anasi"] = true
+			G.ui.banner("DÖL ANASI", "bulutun kalbi seni buldu")
+			G.audio.play("roar", 1.0, 0.6)
+			var anasi := Enemy.spawn(EKind.KONAKCI, G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * 380.0, true, 1.4, 1.2, G.room)
+			if anasi != null:
+				anasi.promote_champ()
+				anasi.actor_name = "DÖL ANASI"
 	G.audio.play("die", G.rf(0.9, 1.2), 0.6)
 	G.fx.light_flash(pos + Vector2(0, -12), Color(1, 0.5, 0.3), 1.4, 2.4, 0.2)
 	var kcol := Px.C(str(KIND_COL.get(kind, "801020")))
