@@ -100,6 +100,8 @@ const DEFS := [
 	{"id": "q_nuve",  "giver": "ahusk",   "name": "DAMARIN ÇEYİZİ",    "desc": "Damar kıran iyi beslenir — on damar kır, nüve halkasını takarım.", "obj": {"type": "vein", "n": 10}, "rew": {"cho": 220, "item": "i_nuve"}, "prereq": "q_balcik"},
 	{"id": "q_govde","giver": "david",   "name": "HER GÖVDE BİR DERS",  "desc": "Ely'nin kasası tek başına kovanı yormaz — her şasi ayrı ders. Üç farklı gövdeyle zafer kazan; hangi şasiyle dönersen dön, seni bekleyen şeyi çizim yapayım.", "obj": {"type": "heros", "n": 3}, "rew": {"cho": 300, "item": "i_ikiz"}, "prereq": "q_gez"},
 	{"id": "q_sefer", "giver": "david",   "name": "SEFER KOMUTANI",      "desc": "Zafer tek düğümle bitmez — zaferin sıcağında bir sonraki düğüme yürümek seferdir. Üç ayaklık bir zincir kur; müfrete geleneği senin adınla yazılır.", "obj": {"type": "sefer", "n": 3}, "rew": {"cho": 340, "rep": 4}, "prereq": "q_anil"},
+	{"id": "q_muhur12","giver": "zirkon", "name": "ON İKİNCİ MÜHÜR",     "desc": "Kamp itibarının ardı arkası kesilmez — defterde bir sayfa daha var, ama sadece tanınan ellere açılır. Beyaz Ufuk'u fethet, protokolün kuzeyini kapayalım.", "obj": {"type": "won_node", "id": "beyazufuk", "n": 1}, "rew": {"cho": 500, "rep": 4}, "req_rep": 10},
+	{"id": "q_bahis2", "giver": "tegan",  "name": "SİMSARIN SON BAHİSİ", "desc": "Büyük masa büyük bahis ister — ama teklifi herkese açmam. Tek koşuda 6000 skor: tüm kasa senin.", "obj": {"type": "score", "n": 6000}, "rew": {"cho": 400, "item": "i_cengel"}, "req_rep": 6},
 	{"id": "q_anit",  "giver": "ehnar",   "name": "ANIT NÖBETİ",         "desc": "Kül tepesinde bir anıt var — kovan oraya saygı duruşuna geliyor. Tek koşuda 500 kesim yaparsan girişi gösteririm.", "obj": {"type": "kills", "n": 500}, "rew": {"cho": 200, "node": "koranit"}, "prereq": "q_kul"},
 	{"id": "q_pence", "giver": "saphire", "name": "KOR PENCELER",        "desc": "Külde yürüyen askerler var — pençeleri hâlâ kor gibi yanıyor. On iki Kor Pençe kes; külünden bir kolye döveyim.", "obj": {"type": "kind", "k": "Kor Pençe", "n": 12}, "rew": {"cho": 200, "item": "i_korkul"}, "prereq": "q_anit"},
 	{"id": "q_kor",   "giver": "ehnar",   "name": "KÜLLERİN EFENDİSİ",  "desc": "Kül Ovası'nda son efendi oturuyor — imparatorluğunun tahtı hâlâ yanıyor. Kor Yücelten'i düşür; tacını sana miğfer yaparım.", "obj": {"type": "boss", "k": "kor"}, "rew": {"cho": 240, "item": "i_kortac"}, "prereq": "q_kul"},
@@ -183,6 +185,9 @@ static func available_for(nid: String) -> Array:
 			continue
 		var pre := str(q.get("prereq", ""))
 		if pre != "" and state(pre) != "claimed":
+			continue
+		# itibar kapısı: kampın güvenini kazanmadan sunulmayan görevler
+		if int(q.get("req_rep", 0)) > int(G.meta.data.get("rep", 0)):
 			continue
 		out.append(q)
 	return out
