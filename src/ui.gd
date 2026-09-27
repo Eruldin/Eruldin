@@ -1127,7 +1127,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray", "kitchen", "routes":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray", "kitchen", "routes", "storychoice":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1434,27 +1434,75 @@ func _story_node(nid: String) -> void:
 	if sd.has(nid):
 		toast("bu yankı sustu — bir kez dinlenir")
 		return
-	sd.append(nid)
-	G.meta.data["story_done"] = sd
-	var rew: Dictionary = n.get("rew", {})
+	var ch: Array = n.get("choices", [])
+	if not ch.is_empty():
+		_story_choices(nid, n, ch)
+		return
+	_story_finish(nid, n, n.get("rew", {}))
+
+# düğümün oynatılacak kartları: cards → rew.cine → biome fallback
+func _story_cards(n: Dictionary, rew: Dictionary) -> Array:
+	var cards: Array = n.get("cards", [])
+	if cards.is_empty() and rew.get("cine") is Array:
+		cards = rew.get("cine", [])
+	if cards.is_empty():
+		cards = [{"tex": "bg%d" % int(n.get("biome", 0)), "title": str(n.get("name", "")), "sub": str(n.get("lore", n.get("desc", "")))}]
+	return cards
+
+# ödülü uygular, düğümü tüketir, kartları oynatır
+func _story_finish(nid: String, n: Dictionary, rew: Dictionary) -> void:
+	var sd: Array = G.meta.data.get("story_done", [])
+	if not sd.has(nid):
+		sd.append(nid)
+		G.meta.data["story_done"] = sd
 	if int(rew.get("cho", 0)) > 0:
 		G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) + int(rew.cho)
+	if int(rew.get("rep", 0)) != 0:
+		G.meta.data["rep"] = int(G.meta.data.get("rep", 0)) + int(rew.rep)
 	if str(rew.get("item", "")) != "":
 		var st: Array = G.meta.data.get("stash", [])
 		st.append(str(rew.item))
 		G.meta.data["stash"] = st
 		toast("zula: %s envantere eklendi" % str(rew.item))
+	if rew.get("omen") is Dictionary:
+		G.meta.data["omen"] = (rew.omen as Dictionary).duplicate()
+		toast("LANET — sonraki koşun sertleşecek, ganimeti artacak")
 	G.meta.save()
-	# haritayı kapat, kartları oynat
 	if overlay_open():
 		_advance_overlay()
-	var cards: Array = n.get("cards", [])
-	if cards.is_empty():
-		cards = [{"tex": "bg%d" % int(n.get("biome", 0)), "title": str(n.name), "sub": str(n.get("lore", n.get("desc", "")))}]
-	cine_seq(cards)
+	cine_seq(_story_cards(n, rew))
 	G.audio.jingle("boon")
 	if int(rew.get("cho", 0)) > 0:
 		toast("+%d ◆ choralim" % int(rew.cho))
+
+# BG2 diyalog seçimi: hikaye düğümü birden fazla yanıt sunar
+func _story_choices(nid: String, n: Dictionary, ch: Array) -> void:
+	_pause(true)
+	var ncol := Px.C(str(n.get("col", "bfe8ff")))
+	var v := _show_panel("storychoice", str(n.get("name", "")), ncol)
+	var d := _lbl(str(n.get("desc", "")), Vector2.ZERO, 13, Color(0.85, 0.8, 0.7))
+	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	d.custom_minimum_size = Vector2(420, 0)
+	v.add_child(d)
+	for c in ch:
+		var b := Button.new()
+		b.text = str(c.get("label", "..."))
+		b.custom_minimum_size = Vector2(300, 28)
+		b.add_theme_font_override("font", ui_font())
+		var bc := CenterContainer.new()
+		bc.add_child(b)
+		v.add_child(bc)
+		var s := _lbl(str(c.get("sub", "")), Vector2.ZERO, 11, Color(0.55, 0.5, 0.45))
+		s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		s.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		s.custom_minimum_size = Vector2(420, 0)
+		v.add_child(s)
+		var rew: Dictionary = c.get("rew", {})
+		b.pressed.connect(func(): _story_finish(nid, n, rew))
+	var h := _lbl("[E] kararsız dön — yankı bekler", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
 
 # ---------------------------------------------------------------- görev panosu
 
