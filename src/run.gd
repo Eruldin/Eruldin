@@ -272,7 +272,7 @@ func start_run() -> void:
 		G.meta.data["calm_routes"] = int(G.meta.data.get("calm_routes", 0)) - 1
 		G.meta.save()
 	elif wk == "" and randf() < waylay_chance:
-		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi", "duel", "ayin", "surungen", "multeci", "mezarci", "kuyu", "ilahi"]
+		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi", "duel", "ayin", "surungen", "multeci", "mezarci", "kuyu", "ilahi", "hayalet"]
 		# kurtarılan yoldaşlar yolda karşına çıkabilir
 		if bool(G.meta.data.get("rescued_mina", false)) or bool(G.meta.data.get("rescued_lena", false)) or bool(G.meta.data.get("rescued_orun", false)):
 			wk_list.append("muhafiz")
