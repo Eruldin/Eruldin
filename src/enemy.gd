@@ -1000,6 +1000,13 @@ func die(h: Dictionary) -> void:
 					Quests.tick("orta")
 				if has_meta("duel"):
 					Quests.tick("duel")
+				# EFSANEVİ düşüş: r4 parça sadece altın şampiyon katmanından kopar
+				var leg_p := 0.10 + (0.25 if has_meta("midboss") else 0.0)
+				var lids := Items.legendary_ids()
+				if not lids.is_empty() and G.chance(leg_p):
+					G.room.spawn_loot(G.pick(lids), pos + Vector2(-30, 0))
+					G.ui.toast("EFSANEVİ PARÇA düştü")
+					G.audio.play("roar", 0.8, 0.5)
 				G.fx.shake(0.3, 0.45)
 			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
 			Quests.tick("elites")

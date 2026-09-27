@@ -234,6 +234,7 @@ func achievements() -> Array:
 		{"name": "ALTI GÖVDE", "desc": "altı farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 6, "rew": 500},
 		{"name": "MİMAR", "desc": "kampın altı binasını da kur", "done": (data.get("camp_builds", {}) as Dictionary).size() >= 6, "rew": 350},
 		{"name": "SEFERKÂR", "desc": "üç ayaklık sefer zinciri kur", "done": int(data.get("sefer_best", 0)) >= 3, "rew": 200},
+		{"name": "EFSANEVİ KOLEKSİYONU", "desc": "dört EFSANEVİ parçayı da şampiyonlardan kopar", "done": (data.get("items_seen", []) as Array).filter(func(i: String) -> bool: return int(Items.DEFS.get(i, {}).get("r", 0)) == 4).size() >= 4, "rew": 450},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
