@@ -68,6 +68,7 @@ var _stray_armed := true
 var _merge_t := 80.0            # kristal konsolidasyonu sayacı
 var critters: Array = []        # [{s, vel}] — zararsiz yaban hayatı; üstüne koşarsan yakalanır
 var caches: Array = []          # gizli gömülü sandıklar — işaretlenmez, yaklaşınca açılır
+var veins: Array = []           # CHORALİM DAMARI — yanında durup kazılan parçacık madeni {node,t,pos}
 var decals: Node2D
 var pending_reward: int = Reward.FRAGMENTS
 var cleared := false
@@ -171,6 +172,7 @@ func build(biome_idx: int, rt: int, promise: int, depth: int, seed_val: int) -> 
 	_scatter_props()
 	_scatter_critters()
 	_scatter_caches()
+	_scatter_veins()
 	_place_hazards(depth)
 	_make_doors()
 	G.audio.play_music("mus_boss" if rt == Type.BOSS else "mus_%d" % biome)
@@ -589,6 +591,7 @@ func _process(d: float) -> void:
 	_tick_stray(d)
 	_tick_critters(d)
 	_tick_caches()
+	_tick_veins(d)
 	_tick_doors()
 	_tick_motes(d)
 	_sort_children()
@@ -812,6 +815,50 @@ func _scatter_caches() -> void:
 		s.z_index = int(p.y) - 1
 		add_child(s)
 		caches.append(s)
+
+# grind yakıtı: altın damar düğümü — 90px içinde 2.6sn kazınca parçacık saçar
+func _scatter_veins() -> void:
+	if rtype == Type.BOSS:
+		return
+	for i in 2:
+		var p := Vector2(rng.randf_range(BOUNDS.position.x + 140, BOUNDS.end.x - 140), rng.randf_range(BOUNDS.position.y + 140, BOUNDS.end.y - 140))
+		var s := Sprite2D.new()
+		s.texture = Px.S("crystal")
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		s.modulate = Px.C("ffd75f")
+		s.scale = Vector2.ONE * 1.25
+		s.position = p
+		s.z_index = int(p.y)
+		add_child(s)
+		G.fx.mk_light(s, Vector2(0, -12), Px.C("ffd75f"), 0.8, 1.8)
+		veins.append({"node": s, "pos": p, "t": 0.0, "need": 2.6})
+
+func _tick_veins(d: float) -> void:
+	if veins.is_empty() or G.player == null or G.player.dead:
+		return
+	for i in range(veins.size() - 1, -1, -1):
+		var v: Dictionary = veins[i]
+		var s: Sprite2D = v["node"]
+		if not is_instance_valid(s):
+			veins.remove_at(i)
+			continue
+		if G.player.pos.distance_to(v["pos"]) < 90.0:
+			v["t"] = float(v["t"]) + d
+			var pr := float(v["t"]) / float(v["need"])
+			s.scale = Vector2.ONE * (1.25 + 0.5 * pr)
+			s.rotation = sin(Time.get_ticks_msec() * 0.02) * 0.08 * pr
+			if float(v["t"]) >= float(v["need"]):
+				veins.remove_at(i)
+				var p: Vector2 = v["pos"]
+				s.queue_free()
+				G.fx.burst(p, Px.C("ffd75f"), 26, 240.0, 6.0, 0.7)
+				G.fx.light_flash(p, Px.C("ffd75f"), 1.8, 2.6, 0.35)
+				G.fx.shake(0.14, 0.22)
+				G.audio.jingle("boon")
+				G.ui.toast("CHORALİM DAMARI kırıldı — parçacık saçıldı")
+				G.run.drop_fragments(p, G.ri(16, 26))
+				if G.chance(0.3):
+					spawn_special(G.pick(["heal", "boost", "guard"]), p + Vector2(0, -14))
 
 func _tick_caches() -> void:
 	if caches.is_empty() or G.player == null or G.player.dead:
