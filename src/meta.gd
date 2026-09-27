@@ -129,7 +129,7 @@ func upg_cost(u: int) -> int:
 	var lvl := upg(u)
 	if lvl >= int(UPG[u]["max"]):
 		return -1
-	return int(UPG[u]["base"]) * (lvl + 1)
+	return Quests.rep_price(int(UPG[u]["base"]) * (lvl + 1))
 
 func buy(u: int) -> bool:
 	var cost := upg_cost(u)
@@ -140,14 +140,17 @@ func buy(u: int) -> bool:
 	save()
 	return true
 
+func build_cost(b: String) -> int:
+	return Quests.rep_price(int(BUILDS.get(b, {}).get("cost", 0)))
+
 func has_build(b: String) -> bool:
 	return bool((data.get("camp_builds", {}) as Dictionary).get(b, false))
 
 func buy_build(b: String) -> bool:
 	var spec: Dictionary = BUILDS.get(b, {})
-	if spec.is_empty() or has_build(b) or data["choralim"] < int(spec.cost):
+	if spec.is_empty() or has_build(b) or data["choralim"] < build_cost(b):
 		return false
-	data["choralim"] -= int(spec.cost)
+	data["choralim"] -= build_cost(b)
 	var cb: Dictionary = data.get("camp_builds", {})
 	cb[b] = true
 	data["camp_builds"] = cb

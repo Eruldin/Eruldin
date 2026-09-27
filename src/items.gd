@@ -265,7 +265,7 @@ static func forge_price(id: String) -> int:
 	var d: Dictionary = DEFS.get(id, {})
 	if d.is_empty() or item_lvl(id) >= 3:
 		return 0
-	return int([70, 130, 240, 420][int(d.r)] * (item_lvl(id) + 1) * (0.75 if G.meta.has_build("atolye") else 1.0))
+	return Quests.rep_price(int([70, 130, 240, 420][int(d.r)] * (item_lvl(id) + 1) * (0.75 if G.meta.has_build("atolye") else 1.0)))
 
 static func forge(id: String) -> int:
 	var p := forge_price(id)
@@ -318,7 +318,7 @@ static func shop_stock() -> Array:
 	return stock
 
 static func buy_price(id: String) -> int:
-	return sell_price(id) * 3
+	return Quests.rep_price(sell_price(id) * 3)
 
 # 0 = stokta yok · -1 = choralim yetmez · >0 = alındı (ödenen fiyat)
 static func buy(id: String) -> int:

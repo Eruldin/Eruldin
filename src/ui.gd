@@ -1548,6 +1548,10 @@ func inventory_panel() -> void:
 	var money := _lbl("Saf Choralim: ◆ %d" % int(G.meta.data.get("choralim", 0)), Vector2.ZERO, 13, Px.C("c26bff"))
 	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(money)
+	if Quests.rep_tier() > 0:
+		var disc2 := _lbl("kamp itibarı: %s — fiyatlarda −%%%d" % [Quests.rep_name(), int(round((1.0 - Quests.rep_discount()) * 100.0))], Vector2.ZERO, 11, Color(0.55, 0.85, 0.6))
+		disc2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(disc2)
 	var eq: Dictionary = G.meta.data.get("equip", {})
 	var estats := Items.equip_stats()
 	var top := HBoxContainer.new()
@@ -1811,6 +1815,10 @@ func shop_panel() -> void:
 	var money := _lbl("Saf Choralim: ◆ %d" % int(G.meta.data.get("choralim", 0)), Vector2.ZERO, 13, Px.C("c26bff"))
 	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(money)
+	if Quests.rep_tier() > 0:
+		var disc := _lbl("kamp itibarı: %s — fiyatlarda −%%%d" % [Quests.rep_name(), int(round((1.0 - Quests.rep_discount()) * 100.0))], Vector2.ZERO, 11, Color(0.55, 0.85, 0.6))
+		disc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(disc)
 	var hint := _lbl("stok her koşu dönüşünde yenilenir — sahipsiz eşyalar gelir", Vector2.ZERO, 12, Color(0.7, 0.7, 0.8))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(hint)
@@ -1873,7 +1881,7 @@ func shop_panel() -> void:
 	irow.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_child(irow)
 	var ib := Button.new()
-	var iprice := 40
+	var iprice := Quests.rep_price(40)
 	var icap := 4 if G.meta.has_build("yuva") else 3
 	ib.text = "CHORALİM İKSİRİ ◆%d  (R — elde %d/%d)" % [iprice, G.player.iksir_n if is_instance_valid(G.player) else 0, icap]
 	ib.add_theme_font_override("font", ui_font())
@@ -1896,7 +1904,7 @@ func shop_panel() -> void:
 	srow.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_child(srow)
 	var sb := Button.new()
-	var sprice := 55
+	var sprice := Quests.rep_price(55)
 	var scap := 3 if G.meta.has_build("yuva") else 2
 	sb.text = "KOR ŞARABI ◆%d  (T — 25sn güç, elde %d/%d)" % [sprice, G.player.sarap_n if is_instance_valid(G.player) else 0, scap]
 	sb.add_theme_font_override("font", ui_font())
@@ -2339,16 +2347,17 @@ func routes_panel() -> void:
 	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(money)
 	var btn := Button.new()
-	btn.text = "✓ ROTA İŞARETLENDİ — sahaya in" if has else "◆ 40 — GÜZERGÂH AL"
-	btn.disabled = has or G.meta.data.choralim < 40
+	var rprice := Quests.rep_price(40)
+	btn.text = "✓ ROTA İŞARETLENDİ — sahaya in" if has else "◆ %d — GÜZERGÂH AL" % rprice
+	btn.disabled = has or G.meta.data.choralim < rprice
 	btn.custom_minimum_size = Vector2(200, 30)
 	btn.add_theme_font_override("font", ui_font())
 	var bc := CenterContainer.new()
 	bc.add_child(btn)
 	v.add_child(bc)
 	btn.pressed.connect(func():
-		if not has and G.meta.data.choralim >= 40:
-			G.meta.data["choralim"] -= 40
+		if not has and G.meta.data.choralim >= rprice:
+			G.meta.data["choralim"] -= rprice
 			G.meta.data["lena_route"] = true
 			G.meta.save()
 			G.audio.jingle("boon")
@@ -2445,16 +2454,17 @@ func blessing_panel() -> void:
 	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(money)
 	var btn := Button.new()
-	btn.text = "✓ HAZIR — sahaya in" if has else "◆ 80 — SATIN AL"
-	btn.disabled = has or G.meta.data.choralim < 80
+	var bprice := Quests.rep_price(80)
+	btn.text = "✓ HAZIR — sahaya in" if has else "◆ %d — SATIN AL" % bprice
+	btn.disabled = has or G.meta.data.choralim < bprice
 	btn.custom_minimum_size = Vector2(200, 30)
 	btn.add_theme_font_override("font", ui_font())
 	var bc := CenterContainer.new()
 	bc.add_child(btn)
 	v.add_child(bc)
 	btn.pressed.connect(func():
-		if not has and G.meta.data.choralim >= 80:
-			G.meta.data["choralim"] -= 80
+		if not has and G.meta.data.choralim >= bprice:
+			G.meta.data["choralim"] -= bprice
 			G.meta.data["blessing"] = true
 			G.meta.save()
 			G.audio.play("boon", 1.1, 0.6)
@@ -3103,8 +3113,8 @@ func upgrade_panel() -> void:
 		ds2.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row2.add_child(ds2)
 		var bb := Button.new()
-		bb.text = "✓" if built else "◆ %d" % int(spec.cost)
-		bb.disabled = built or not req_ok or G.meta.data.choralim < int(spec.cost)
+		bb.text = "✓" if built else "◆ %d" % G.meta.build_cost(bid)
+		bb.disabled = built or not req_ok or G.meta.data.choralim < G.meta.build_cost(bid)
 		bb.custom_minimum_size = Vector2(90, 26)
 		bb.add_theme_font_override("font", ui_font())
 		row2.add_child(bb)
@@ -3253,8 +3263,9 @@ func hero_panel() -> void:
 			for pi in range(Items.PERKS.get(key, []).size()):
 				var p: Dictionary = Items.PERKS[key][pi]
 				var have: bool = owned.has(p.id)
-				var afford: bool = int(G.meta.data.get("choralim", 0)) >= int(p.cost)
-				var pl := _lbl("%s — %s\n[%s]" % [p.name, p.desc, "SAHİP" if have else "◆ %d" % int(p.cost)], Vector2.ZERO, 9, Color(0.55, 0.85, 0.6) if have else (Color(0.9, 0.78, 0.42) if afford else Color(0.45, 0.4, 0.34)))
+				var pc := Quests.rep_price(int(p.cost))
+				var afford: bool = int(G.meta.data.get("choralim", 0)) >= pc
+				var pl := _lbl("%s — %s\n[%s]" % [p.name, p.desc, "SAHİP" if have else "◆ %d" % pc], Vector2.ZERO, 9, Color(0.55, 0.85, 0.6) if have else (Color(0.9, 0.78, 0.42) if afford else Color(0.45, 0.4, 0.34)))
 				pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				cv.add_child(pl)
 				if not have:
@@ -3280,7 +3291,7 @@ func _buy_perk(hero: String, pi: int) -> void:
 	if int(G.meta.data.get("choralim", 0)) < int(p.cost):
 		G.audio.play("alarm", 1.2, 0.4)
 		return
-	G.meta.data["choralim"] -= int(p.cost)
+	G.meta.data["choralim"] -= Quests.rep_price(int(p.cost))
 	lst.append(p.id)
 	owned[hero] = lst
 	G.meta.data["perks"] = owned
