@@ -23,8 +23,9 @@ func build_arena(biome_idx: int) -> void:
 	_vignette_arena()
 	_atmos()
 	_place_hazards_arena()
-	# a few field items scattered like VS floor pickups
-	for i in 6:
+	# a few field items scattered like VS floor pickups; KERVAN GÖZÜ kozu +3 ekler
+	var n_pick := 6 + (3 if G.run != null and G.run.arcana == "kervan" else 0)
+	for i in n_pick:
 		var p := Vector2(rng.randf_range(BOUNDS.position.x + 140, BOUNDS.end.x - 140), rng.randf_range(BOUNDS.position.y + 140, BOUNDS.end.y - 140))
 		if p.distance_to(Vector2.ZERO) < 280.0:
 			continue

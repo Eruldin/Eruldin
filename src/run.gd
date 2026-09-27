@@ -265,6 +265,9 @@ func on_kill(_elite: bool) -> void:
 	Quests.tick("kills")
 
 func open_chest() -> void:
+	if arcana == "kasa":
+		fragments += 25
+		G.fx.float_text(G.player.pos + Vector2(0, -30), "+25", Px.C("c9a227"), 0.8)
 	var evos := Weapons.evo_ready(G.player)
 	if evos.is_empty():
 		fragments += 120
