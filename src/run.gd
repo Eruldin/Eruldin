@@ -82,6 +82,8 @@ func hub() -> void:
 		if str(_n.get("kind", "")) == "arena" and Wmap.can_enter(str(_n.id)):
 			cands.append(str(_n.id))
 	G.meta.data["hot_node"] = str(G.pick(cands)) if not cands.is_empty() else ""
+	cands.erase(str(G.meta.data["hot_node"]))
+	G.meta.data["yield_node"] = str(G.pick(cands)) if not cands.is_empty() else ""
 	G.meta.save()
 
 # ilk kampa inişte tek seferlik açılış sinematiği (seen_story ile korunur)
@@ -156,6 +158,16 @@ func start_run() -> void:
 		G.meta.save()
 		stats["baskin"] = 1
 		G.ui.toast("KORO BASKINI — bu düğümde sürü yoğun akıyor, ganimet bereketli")
+	# verim noktası: sessiz ikinci işaret — ek sürü yok, sadece hasat bereketi
+	if str(G.meta.data.get("yield_node", "")) == nid:
+		for vmk in {"frag": 1.4, "loot": 1.2}:
+			node_mods[vmk] = float(node_mods.get(vmk, 1.0)) * {"frag": 1.4, "loot": 1.2}[vmk]
+		frag_node = float(node_mods.get("frag", 1.0))
+		reward_mult *= 1.1
+		G.meta.data["yield_node"] = ""
+		G.meta.save()
+		stats["verim"] = 1
+		G.ui.toast("VERİM NOKTASI — hasat bereketi: parçacık ×1.4 · ganimet ×1.2")
 	# kervan laneti: hikaye düğümü seçiminden kalan tek seferlik sürü sertleşmesi
 	var omen: Dictionary = G.meta.data.get("omen", {})
 	if not omen.is_empty():
@@ -668,6 +680,9 @@ func victory() -> void:
 	if int(stats.get("baskin", 0)) > 0:
 		G.meta.data["baskin_wins"] = int(G.meta.data.get("baskin_wins", 0)) + 1
 		Quests.tick("baskin")
+	if int(stats.get("verim", 0)) > 0:
+		G.meta.data["verim_wins"] = int(G.meta.data.get("verim_wins", 0)) + 1
+		Quests.tick("verim")
 	if str(stats.get("kaos", "")) != "":
 		G.meta.data["kaos_wins"] = int(G.meta.data.get("kaos_wins", 0)) + 1
 		Quests.tick("kaos")

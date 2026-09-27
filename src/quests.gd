@@ -108,6 +108,7 @@ const DEFS := [
 	{"id": "q_sivri", "giver": "ahusk",   "name": "BULUT KESİCİ",       "desc": "Bulut kervanların üstüne çöküyor — kırk sivri kes, kanlarından aşı çıkarayım. Kim bilir, kalbi de kızarsa durma.", "obj": {"type": "kind", "k": "Sivri Bulutu", "n": 40}, "rew": {"cho": 200, "item": "i_sivriasi"}, "prereq": "q_balcik"},
 	{"id": "q_fener2","giver": "ahusk",   "name": "FENER IŞIĞI",        "desc": "Bataklığın içinde eğik bir fener hâlâ şarkı söylüyor — eski yolların kılavuzu. Balçıktan yürüyenler kuleyi kuşattı; on ikisini durdur, fenerin yolunu sana göstereyim.", "obj": {"type": "kind", "k": "Balçık Adam", "n": 12}, "rew": {"cho": 200, "node": "batikfener"}, "prereq": "q_sivri"},
 	{"id": "q_zehir", "giver": "ahusk",   "name": "ZEHİR TUZAĞI",        "desc": "Bataklığın yeşil fışkiyeleri sadece senin ciğerini yakmaz — koronun da işine gelir. Gaz havuzunun içinde yirmi düşman çökert; zehir bezini sana yaparım.", "obj": {"type": "zehir", "n": 20}, "rew": {"cho": 240, "item": "i_zehir"}, "prereq": "q_fener2"},
+	{"id": "q_verim", "giver": "ahusk",   "name": "VERİM ROTASI",         "desc": "Haritada sessiz işaretler var — koro işaretlemeden hasat veren düğümler. İkisinde zafer kazan; rotaları senin için okumaya devam edeyim.", "obj": {"type": "verim", "n": 2}, "rew": {"cho": 260, "rep": 2}, "prereq": "q_zehir"},
 	{"id": "q_dokuz", "giver": "zirkon",  "name": "SON DEFTER",        "desc": "Defterde sekiz efendi sayfası var — hepsi düşerse protokolün savaş kısmı biter. Son kapanışta praetorian gövde zırhını veririm.", "obj": {"type": "bosses", "n": 8}, "rew": {"cho": 300, "item": "i_praetorian"}, "prereq": "q_final"},
 	{"id": "q_efsane","giver": "zirkon",  "name": "EFSANE SESLERİ",    "desc": "Altın madalyonların ötesinde bir katman var — şampiyonların taşıdığı parçalar destansı değil, efsanevi. Dört şampiyonu kes; defterde onlara ayrılmış sayfayı doldurayım, pencesini al.", "obj": {"type": "champ", "n": 4}, "rew": {"cho": 350, "item": "i_efendipence", "rep": 4}, "prereq": "q_dokuz"},
 	{"id": "q_soy",  "giver": "zirkon",  "name": "TÜM SOY",            "desc": "Kaydın eksik — kovanın her soyundan birini görmeden defter kapanmaz. Yirmi bir türü de gözle; kemer takasını yapayım.", "obj": {"type": "kinds", "n": 21}, "rew": {"cho": 260, "item": "i_soykemer"}, "prereq": "q_dokuz"},
@@ -536,6 +537,7 @@ static func obj_text(q: Dictionary) -> String:
 		"keg":    return "%d kesimi fıçıya saydır" % need
 		"geo":    return "%d damar jeotu kır" % need
 		"hazine": return "%d hazine düğümü yağmala" % need
+		"verim": return "verim noktasında %d zafer kazan" % need
 		"cameo":  return "%d yoldaş karşılaşması geçir" % need
 		"firtina": return "%d kesimi kum fırtınasında yap" % need
 		"zehir":  return "%d kesimi gaz havuzunda yap" % need

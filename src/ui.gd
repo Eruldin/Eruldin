@@ -1363,6 +1363,10 @@ func worldmap_panel() -> void:
 			var htag := _lbl("▲ BASKIN", Vector2.ZERO, 8, Px.C("ff5533"))
 			htag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			bb.add_child(htag)
+		if nid == Wmap.yield_node() and can:
+			var ytag := _lbl("◆ VERİM", Vector2.ZERO, 8, Px.C("80ffd4"))
+			ytag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			bb.add_child(ytag)
 		var wnd := int((G.meta.data.get("bruised", {}) as Dictionary).get(nid, 0))
 		if wnd > 0 and can:
 			var wtag := _lbl("◆ YARA ×%d" % wnd, Vector2.ZERO, 8, Px.C("e05050"))
@@ -1381,6 +1385,8 @@ func worldmap_panel() -> void:
 			var line := "%s — %s%s" % [str(n.name), str(n.desc), "" if can else "   [%s]" % Wmap.unlock_text(nid)]
 			if nid == Wmap.hot_node() and can:
 				line += "   ▲ KORO BASKINI — sürü yoğun, ganimet bereketli"
+			if nid == Wmap.yield_node() and can:
+				line += "   ◆ VERİM NOKTASI — hasat bereketi: parçacık ×1.4 · ganimet ×1.2"
 			var wnd2 := int((G.meta.data.get("bruised", {}) as Dictionary).get(nid, 0))
 			if wnd2 > 0 and can:
 				line += "   ◆ SAHA YARASI ×%d — savunma sertleşti, ödül büyüdü" % wnd2
