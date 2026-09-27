@@ -848,6 +848,8 @@ func _tick_geode(d: float) -> void:
 			geo.ring.queue_free()
 			geo = {}
 			G.run.drop_fragments(p, 70)
+			G.meta.data["geodes"] = int(G.meta.data.get("geodes", 0)) + 1
+			G.meta.save()
 			G.fx.burst(p + Vector2(0, -16), Px.C("4dd0e1"), 36, 300.0, 7.0, 0.7)
 			G.fx.flash(Px.C("4dd0e1"), 0.4)
 			G.fx.shake(0.4, 0.35)

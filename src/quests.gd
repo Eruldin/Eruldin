@@ -73,6 +73,7 @@ const DEFS := [
 	{"id": "q_gol",   "giver": "ehnar",   "name": "KRİSTAL YUMRUK",       "desc": "Çukurda damardan yürüyen golemler var — on tanesini çökert; yumruğunu sana eldiven yaparım, arkasında madenci barakasının yolunu da işlerim.", "obj": {"type": "kind", "k": "Damar Golemi", "n": 10}, "rew": {"cho": 240, "item": "i_golkalp", "node": "baraka"}, "prereq": "q_cukur"},
 	{"id": "q_kalp",  "giver": "zirkon",  "name": "KALP DURDURAN",        "desc": "Defterin son sayfası boş — çukurun dibindeki kalp atmayı bırakırsa protokolün bütün damarları sayılır. Damar Kalbi'ni düşür; kalbin parçasını yüzük yapayım.", "obj": {"type": "boss", "k": "damar"}, "rew": {"cho": 320, "item": "i_kalpparca"}, "prereq": "q_vdamar"},
 	{"id": "q_dg",    "giver": "vane",    "name": "GÖVDENİN ŞARKISI",     "desc": "Kalp kalıntılarından bir kasa dövdüm — G-1'i sahada sınamadan kampı salmam. O gövdeyle bir zafer getir; nabız çekirdeğini kemerine takarım.", "obj": {"type": "hero_won", "id": "dg", "n": 1}, "rew": {"cho": 280, "item": "i_nabizcek"}, "prereq": "q_kalp"},
+	{"id": "q_jeot",  "giver": "lena",    "name": "ÇATLAK SESLERİ",       "desc": "Çukurda ara sıra jeotlar çatlıyor — içleri saf damar dolu. İkisini kır, çatlaklardan çıkan gözü kolye yapayım.", "obj": {"type": "geo", "n": 2}, "rew": {"cho": 220, "item": "i_jeotgoz"}, "prereq": "q_cukur"},
 	{"id": "q_copcu","giver": "saphire", "name": "ÇÖPÇÜ AVI",           "desc": "Enkazdaki çöpçü kurtlar dökülen kristalleri yutuyor — benim payımı da mideye indiriyorlar. On ikisini kes, dişlerinden dizi yapayım.", "obj": {"type": "kind", "k": "Çöpçü Kurt", "n": 12}, "rew": {"cho": 200, "item": "i_kurtdis"}, "prereq": "q_lena"},
 	{"id": "q_barut","giver": "david",   "name": "BARUT TOZU",          "desc": "Simithar'ın tayfleri fıçı taşıyor — biri patlarsa konvoy bölünür. On tanesini kes, fitilini yüzük yapayım.", "obj": {"type": "kind", "k": "Dinamitçi Tayf", "n": 10}, "rew": {"cho": 200, "item": "i_fitil"}, "prereq": "q_gez"},
 	{"id": "q_kendiatesi","giver": "david","name": "KOVANIN ATEŞİ",       "desc": "Barutçunun fıçısı kör — sürüsüne de sarar. On beş kesimi fıçıya saydır; maden başlığımı veririm.", "obj": {"type": "keg", "n": 15}, "rew": {"cho": 220, "item": "i_barut"}, "prereq": "q_barut"},
@@ -131,6 +132,8 @@ static func state(id: String) -> String:
 			cur = int(G.meta.data.get("over_uses", 0))
 		elif t == "keg":
 			cur = int(G.meta.data.get("keg_kills", 0))
+		elif t == "geo":
+			cur = int(G.meta.data.get("geodes", 0))
 		elif t == "bets":
 			cur = int(G.meta.data.get("bets_won", 0))
 		elif t == "heros":
@@ -363,6 +366,7 @@ static func obj_text(q: Dictionary) -> String:
 		"won_node": return "%s fethi" % str(Wmap.node(str(o.get("id", ""))).get("name", str(o.get("id", ""))))
 		"over":   return "%d aşırı yük kullan" % need
 		"keg":    return "%d kesimi fıçıya saydır" % need
+		"geo":    return "%d damar jeotu kır" % need
 	return "?"
 
 static func _claimed_count() -> int:
