@@ -333,6 +333,23 @@ const DEFS := {
 		"b": {"dmg": 38.0, "cd": 1.15, "n": 4.0, "spd": 560.0, "bnc": 8.0},
 		"hidden": true,
 	},
+	# graviton kuyusu arketipi: hedef kümeye düşen çekim alanı — sürüyü içeri
+	# dolar ve çürütür; kalabalığı tek noktaya toplayan kontrol silahı
+	"kuyus": {
+		"name": "ÇEKİM KUYUSU", "icon": "icn_kovan", "col": "7c4dff",
+		"desc": "En yakın kümeye graviton kuyusu — sürüyü içeri çeker, çürütür",
+		"b": {"dmg": 4.0, "cd": 4.4, "r": 95.0, "dur": 3.2, "pull": 30.0},
+		"inc": {"dmg": 1.3, "r": 5.0, "pull": 2.5, "dur": 0.22, "cd": -0.06},
+		"feats": {5: {"r": 20.0}, 8: {"pull": 12.0}},
+		"evo": "lens", "into": "kuyus_x",
+		"req": {"kills": 3500},
+	},
+	"kuyus_x": {
+		"name": "OLAY UFKU", "icon": "icn_kovan", "col": "b388ff",
+		"desc": "Devasa kuyu — kovanı tek noktaya dolar",
+		"b": {"dmg": 12.0, "cd": 3.8, "r": 150.0, "dur": 5.0, "pull": 48.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -644,6 +661,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"kirbac", "kirbac_x": _whip(st, p, w, wid)
 		"cekic", "cekic_x": _cekic(st, p)
 		"seken", "seken_x": _seken(st, p)
+		"kuyus", "kuyus_x": _kuyus(st, p, w)
 
 # çekic arketipi: işaretli noktaya gecikmeli ağır darbe — telegraph halkası
 # görünür, çekiç inince alan içindeki herkes dağılır; evo sürümü damar kırıp
@@ -1036,6 +1054,26 @@ static func _sis(st: Dictionary, p: Player, w: Dictionary) -> void:
 	w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0, "wpn": str(w.id), "type": int(G.DamageType.POISON), "chill": true})
 	G.audio.play("shoot", 0.4, 0.3)
 
+# çekim kuyusu: en yakın kümeye düşen graviton havuzu — havuz altyapısının
+# "pull" alanı _tick_pools'ta her karede işler; sürü içeri dolarken çürür
+static func _kuyus(st: Dictionary, p: Player, w: Dictionary) -> void:
+	var e := _nearest(p.pos + Vector2(G.rf(-120, 120), G.rf(-90, 90)), 560.0)
+	var at := e.pos if e != null else p.pos + p.aim_dir.normalized() * 160.0
+	var r := float(st.r) * p.area_mult
+	var node := Sprite2D.new()
+	node.texture = Px.S("circle")
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	node.scale = Vector2.ONE * (r * 2.0) / 72.0
+	node.modulate = Color(0.42, 0.3, 1.0, 0.3)
+	node.position = at
+	node.z_index = -1500
+	if is_instance_valid(G.room):
+		G.room.add_child(node)
+	else:
+		G.game.world.add_child(node)
+	w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0, "wpn": str(w.id), "type": int(G.DamageType.SHOCK), "pull": float(st.get("pull", 30.0))})
+	G.audio.play("plasma", 0.6, 0.4)
+
 static func _dagger(st: Dictionary, p: Player) -> void:
 	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)
 	var tgt := _nearest(p.pos, 500.0)
@@ -1250,6 +1288,16 @@ static func _tick_pools(w: Dictionary, p: Player, d: float) -> void:
 				tw.tween_callback(pl.node.queue_free)
 			pools.remove_at(i)
 			continue
+		var pull := float(pl.get("pull", 0.0))
+		if pull > 0.0:
+			if is_instance_valid(pl.node):
+				pl.node.rotation += d * 2.4
+			for e2 in G.enemies:
+				if not is_instance_valid(e2) or e2.dead:
+					continue
+				var dd := (pl.pos as Vector2).distance_to(e2.pos)
+				if dd < float(pl.r) * 1.8 and dd > 14.0:
+					e2.pos = (e2.pos as Vector2).move_toward(pl.pos as Vector2, pull * d)
 		if float(pl.acc) >= 0.35:
 			var tick_dmg := float(pl.dps) * float(pl.acc)
 			pl.acc = 0.0
