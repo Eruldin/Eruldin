@@ -100,6 +100,8 @@ const DEFS := {
 	"i_kemer_par": {"name": "Parazit Kemeri",  "slot": "kemer",   "r": 1, "icon": "icn_kovan",      "mods": {"hp": 18, "ls": 0.015}},
 	"i_kemer_ef":  {"name": "Efendi Tokası",   "slot": "kemer",   "r": 2, "icon": "icn_crown",      "mods": {"skill": -0.12, "armor": 0.6}},
 	"i_duvar":     {"name": "Yemin Plakası",   "slot": "govde",   "r": 3, "icon": "icn_upg_shield", "mods": {"hp": 45, "armor": 1.0, "spd": -0.03}},
+	"i_pelerin":   {"name": "İhbarcı Pelerini","slot": "govde",   "r": 2, "icon": "icn_dash",       "mods": {"spd": 0.06, "hp": 12}},
+	"i_onluk":     {"name": "Ocak Önlüğü",     "slot": "govde",   "r": 2, "icon": "icn_upg_shield", "mods": {"hp": 22, "armor": 0.6}},
 	"i_tayfperde": {"name": "Tayf Pelerini",   "slot": "govde",   "r": 3, "icon": "icn_dash",       "mods": {"spd": 0.06, "dash_regen": 0.18, "skill": -0.06}},
 	"i_nurfener": {"name": "Ufuk Feneri",     "slot": "kolye",   "r": 3, "icon": "icn_crown",      "mods": {"skill": -0.12, "xp": 0.12, "ls": 0.02, "frag": 0.1}},
 }
