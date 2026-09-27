@@ -332,6 +332,7 @@ func _tick_skill(d: float) -> void:
 		G.fx.burst(pos, Px.C("ff7722"), 16, 150.0, 3.5, 0.5)
 		G.audio.play("boon", 0.9, 0.55)
 		G.ui.toast("KOR ŞARABI — %dsn güç ve hız" % int(sarap_t))
+		Quests.tick("sarap")
 	_sarap_held = t_now
 	if sarap_t > 0.0:
 		sarap_t -= d
