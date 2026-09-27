@@ -2750,6 +2750,9 @@ func epilog(nid: String) -> String:
 		"batak": "Bataklık çamuru ilk kez birini geri verdi.",
 		"kulovasi": "Kül söndü — imparatorluğun yangını yüz yıl sonra bitti.",
 		"avlis": "Zincir kırıldı — altı efendi tek koşuda düştü.",
+		"kum": "Kızıl kum ilk kez duruldu — kervan yolu yeniden açık.",
+		"vaha": "Vahanın suyu kovanın zehrinden arındı.",
+		"batik": "Batık boşaldı — kraliçesinin üstünde güneş açtı.",
 	}.get(nid, ""))
 
 func victory_screen(stats: Dictionary) -> void:
