@@ -2758,6 +2758,8 @@ const BETS := [
 	 "name": "ZAFER YÜKSEĞİ", "desc": "sonraki koşuyu zaferle bitirirsen kazanırsın"},
 	{"type": "kills",   "need": 350, "stake": 110, "pay": 320,
 	 "name": "KESİM FİŞİ",   "desc": "sonraki koşuda 350 kesime ulaşırsan kazanırsın — zafer şart değil"},
+	{"type": "elite",   "need": 4,   "stake": 120, "pay": 380,
+	 "name": "AV FİŞİ",      "desc": "sonraki koşuda 4 elit kesersen kazanırsın — şampiyonlar da sayılır"},
 ]
 
 func bet_panel() -> void:
