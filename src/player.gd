@@ -637,6 +637,7 @@ func reset_for_run() -> void:
 	hp = max_hp
 	dash_charges = dash_max
 	_apply_hero()
+	skill_max = maxf(4.0, skill_max * (1.0 + float(eq.get("skill", 0.0))))
 	_load_frames(_hero_set(), 7.0)
 	Px.fit(body, 94.0)
 	_combo = 0; _combo_t = 0.0; _combo_lock = 0.0; _plasma_charge = -1.0
