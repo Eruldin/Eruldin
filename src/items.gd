@@ -127,6 +127,11 @@ static func drop_to_run(id: String) -> void:
 	var bag: Array = G.run.stats.get("loot", [])
 	bag.append(id)
 	G.run.stats["loot"] = bag
+	# koleksiyon: görülen her farklı eşya kalıcı kayda geçer
+	var seen: Array = G.meta.data.get("items_seen", [])
+	if not seen.has(id):
+		seen.append(id)
+		G.meta.data["items_seen"] = seen
 	var d: Dictionary = DEFS[id]
 	G.ui.toast("%s bulundu: %s" % [RARITY_NAME[int(d.r)], str(d.name)])
 	G.audio.jingle("boon")

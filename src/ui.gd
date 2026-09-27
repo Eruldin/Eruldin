@@ -2196,6 +2196,7 @@ func records_panel() -> void:
 		"en uzun seri: x%d" % int(d.get("best_streak_all", 0)),
 		"altın nüve: %d   (+%0.1f%% kalıcı hasar)" % [int(d.get("eggs", 0)), int(d.get("eggs", 0)) * 0.5],
 		"efendi koleksiyonu: %d farklı efendi   (+%d%% kalıcı hasar)" % [(d.get("bosses", []) as Array).size(), (d.get("bosses", []) as Array).size()],
+		"eşya koleksiyonu: %d/%d parça görüldü" % [(d.get("items_seen", []) as Array).size(), Items.DEFS.size()],
 	]
 	for r in rows:
 		var l := _lbl(r, Vector2.ZERO, 14, Color(0.85, 0.85, 0.92))
