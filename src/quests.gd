@@ -103,6 +103,7 @@ const DEFS := [
 	{"id": "q_dokuz", "giver": "zirkon",  "name": "SON DEFTER",        "desc": "Defterde sekiz efendi sayfası var — hepsi düşerse protokolün savaş kısmı biter. Son kapanışta praetorian gövde zırhını veririm.", "obj": {"type": "bosses", "n": 8}, "rew": {"cho": 300, "item": "i_praetorian"}, "prereq": "q_final"},
 	{"id": "q_soy",  "giver": "zirkon",  "name": "TÜM SOY",            "desc": "Kaydın eksik — kovanın her soyundan birini görmeden defter kapanmaz. Yirmi bir türü de gözle; kemer takasını yapayım.", "obj": {"type": "kinds", "n": 21}, "rew": {"cho": 260, "item": "i_soykemer"}, "prereq": "q_dokuz"},
 	{"id": "q_kuzgun","giver": "saphire", "name": "KUZGUN TÜYÜ",       "desc": "Tarlalarda yeni bir şey dalıyor — tüyleri işlenirse iyi satılır. 12 Tarla Kuzgunu kes, tüyünü kolye yaparım.", "obj": {"type": "kind", "k": "Tarla Kuzgunu", "n": 12}, "rew": {"cho": 180, "item": "i_tuy"}, "prereq": "q_copcu"},
+	{"id": "q_bora", "giver": "lena",    "name": "BORA SESLERİ",        "desc": "Çatlağın üstüne boralar iniyor — rüzgar sürüyü donakaltırken kesmek kolay, sayısı zor. Bora altında yirmi kesim yap; fırtınanın sesini kemere işlerim.", "obj": {"type": "bora", "n": 20}, "rew": {"cho": 300, "item": "i_bora"}, "prereq": "q_buzruh"},
 	{"id": "q_ark",  "giver": "saphire", "name": "ŞİMŞEK TERBİYESİ",    "desc": "Enkazın kabloları hâlâ canlı — ark sıçramaları iki tarafı da vurur. Sürüyü tellerin arasından geçir, on beş kesimi yıldırım yapsın; telden bileziği senin için döveyim.", "obj": {"type": "ark", "n": 15}, "rew": {"cho": 240, "item": "i_arkhalka"}, "prereq": "q_boynuz"},
 	{"id": "q_boynuz","giver": "saphire", "name": "BOYNUZ TAKASI",      "desc": "Çoraklıkta boynuzlu bir şey insanları devirmiş — koçbaşı sürüsü çizgisine dikkat et. Sekiz Kocboynuz kes, boynuzundan pence yapayım.", "obj": {"type": "kind", "k": "Kocboynuz", "n": 8}, "rew": {"cho": 200, "item": "i_boynuz"}, "prereq": "q_kuzgun"},
 	{"id": "q_yuk",   "giver": "zirkon",  "name": "YÜK USTASI",         "desc": "Aşırı yük motoru ısınmadan öğrenilmez — deftere 15 yakma kaydı düş, kayışını takayım.", "obj": {"type": "over", "n": 15}, "rew": {"cho": 240, "item": "i_sarj"}, "prereq": "q_soy"},
@@ -517,6 +518,7 @@ static func obj_text(q: Dictionary) -> String:
 		"orta":   return "%d orta efendi devir" % need
 		"duel":   return "%d koro düellosu kazan" % need
 		"ark":    return "%d kesimi ark sıçramasına yaptır" % need
+		"bora":   return "%d kesimi donmuş borada yap" % need
 		"baskin": return "%d baskın altında zafer" % need
 	return "?"
 
