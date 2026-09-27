@@ -54,6 +54,7 @@ const NODES := [
 	{"id": "damar",  "name": "DAMAR YATAĞI",        "icon": "ico_frag",    "pos": Vector2(1150, 420), "col": "80ffd4", "kind": "arena", "biome": 7, "unlock": "node", "desc": "Çukurun ana damarı — kristalin doğrudan kabuğa bastığı yatak. Sürü sık ama saçılan parçacık zengin.", "lore": "Maden defterlerinde 'ana yatak' diye geçer — imparatorluğun choralim'in yarısını buradan çektiği söylenir. Damar hâlâ dolu; kovan da bunu biliyor.", "mods": {"spawn": 1.25, "frag": 2.1, "loot": 1.3, "hp": 1.3, "dmg": 1.15, "elite_t": 0.85}},
 	{"id": "baraka", "name": "MADENCİ BARAKASI",    "icon": "icn_kovan",   "pos": Vector2(1080, 490), "col": "90a4ae", "kind": "story", "unlock": "node", "desc": "Çukur girişinde terk edilmiş madenci barakası — son vardiyanın defteri hâlâ masada.", "lore": "Defterin son satırı: 'Damar bugün kendi bekçisini çıkardı. Kristal yürüdü. Kimse inanmadı.' Vardiya o gün inmedi; baraka kilitli kaldı.", "rew": {"cho": 150, "cine": [{"tex": "cine_7_0", "title": "MADENCİ BARAKASI", "sub": "Masadaki defterin son sayfasında tek cümle: 'Kristal yürüyorsa, damar yaşıyor — ve damar kimseyi sevmez.'"}]}},
 	{"id": "buzul",  "name": "DONMUŞ ÇATLAK",      "icon": "icn_dash",    "pos": Vector2(1380, 500), "col": "9fd8ff", "kind": "arena", "biome": 8, "unlock": "node", "desc": "Kuzeyin buzulu — kar yağışı altında don patlamaları çatırdar, kaygan zemin koşuyu zorlaştırır.", "lore": "Protokol kuzeyi 'düşük değer' diye geçti — kimse bakmadı, kimse dönmedi. Buzun altında donmuş sürüler hâlâ ayakta; çatlak onları tek tek uyandırıyor.", "mods": {"hp": 1.3, "dmg": 1.15, "spawn": 1.1, "frag": 1.6, "loot": 1.4, "elite_t": 0.8, "dusk": true}},
+	{"id": "kervan", "name": "DONMUŞ KERVAN",      "icon": "ico_loot",    "pos": Vector2(1345, 395), "col": "bfe8ff", "kind": "story", "unlock": "node", "desc": "Çatlağın kuzeyinde donmuş imparatorluk kervanı — yük ve yolcular hâlâ ayakta, hâlâ yürür vaziyette.", "lore": "Kervan defterinin son satırı: 'Hanım şarkı söyledi, atlar durdu, kar üstümüze kapandı. Yükü kimseye vermeyin — damarın içinde taşıdığımız şey buzda kalsın.' İçerideki sandık hâlâ mühürlü; mühür şimdi bizde.", "rew": {"cho": 220, "cine": [{"tex": "cine_8_0", "title": "DONMUŞ KERVAN", "sub": "On iki deve, dört arabacı, bir sandık — hepsi aynı adımda durdu. Buz, kervanın son saatini saklıyor."}]}},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -89,7 +90,7 @@ const EDGES := [
 	["b0", "kum"], ["pazar", "kum"], ["kum", "fisilti"],
 	["kum", "vaha"], ["vaha", "fisilti"], ["vaha", "batik"],
 	["kum", "degirmen"], ["vaha", "degirmen"],
-	["cukur", "buzul"], ["damar", "buzul"],
+	["cukur", "buzul"], ["damar", "buzul"], ["buzul", "kervan"],
 ]
 
 static func node(id: String) -> Dictionary:
