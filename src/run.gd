@@ -358,14 +358,20 @@ func _biome_sub(b: int) -> String:
 			"Simithar damarları — kovanın derinliklere uzandığı yer.",
 			"Sol Primus enkazı — imparatorluğun çürüyen tahtı.",
 			"Aeterna Kulesi — protokolün kalbi.",
-			"Çürük Bataklık — imparatorluğun unuttuğu çamur, burada hiçbir şey temiz çürümez."][mini(b, 4)]
+			"Çürük Bataklık — imparatorluğun unuttuğu çamur, burada hiçbir şey temiz çürümez.",
+			"Kül Ovası — praetorian yangınının hâlâ sıcak külleri.",
+			"Kızıl Çöl — imparatorluğun haritasında boş bırakılan kum denizi.",
+			"Kristal Çukur — choralim damarlarının ham haliyle yüzeye çıktığı kuyu."][mini(b, 7)]
 
 func _boss_intro_sub(b: int) -> String:
 	return ["Alfa-05 · Düşmüş Kardeş — transistörü hâlâ şarkı söylüyor.",
 			"Proterian Yeni Nesil Konakçı — kovan eti hatırlıyor.",
 			"Nahum & Tuman — ikiz protokol, çift ölüm.",
 			"Kirin & Constantin — masanın son iki sandalyesi.",
-			"Kirin & Constantin — masanın son iki sandalyesi."][mini(b, 4)]
+			"Bataklık Devi — çamurun biriktirdiği son taş.",
+			"Kor Yücelten — külün içinden çıkan praetorian.",
+			"Kum Anası — fırtınanın yuva kurduğu kraliçe.",
+			"Çukurun Bekçisi — kristal damarın dibindeki nöbetçi."][mini(b, 7)]
 
 func _elite_room() -> bool:
 	return depth == 1 and G.chance(0.35)

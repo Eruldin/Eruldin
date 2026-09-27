@@ -145,6 +145,7 @@ func _synth(n: String) -> PackedByteArray:
 		"mus_4": return _drone2([44.0, 65.4, 87.3], 13.0, 0.22, [174.0, 196.0, 262.0, 349.0], true)
 		"mus_5": return _drone2([38.9, 58.3, 77.8], 12.0, 0.25, [155.0, 185.0, 233.0, 311.0], true)
 		"mus_6": return _drone2([43.7, 65.4, 87.3], 13.5, 0.2, [174.0, 208.0, 262.0, 349.0], true)
+		"mus_7": return _drone2([32.7, 49.0, 65.4], 15.0, 0.26, [131.0, 165.0, 196.0, 262.0], true)
 		# boss dövüşü: alçak kök + hızlı nabız + keskin motif
 		"mus_boss": return _drone2([36.7, 55.0, 73.4], 7.0, 0.3, [147.0, 156.0, 220.0, 311.0], true)
 	return PackedByteArray()

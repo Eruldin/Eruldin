@@ -12,7 +12,7 @@ var W := 1180.0
 var H := 660.0
 var BOUNDS := Rect2(-540, -290, 1080, 580)
 
-const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK", "KÜL OVASI", "KIZIL ÇÖL"]
+const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK", "KÜL OVASI", "KIZIL ÇÖL", "KRİSTAL ÇUKUR"]
 # biome'a ozgu uretilmis prop setleri (prop_<key>_<i>) — BG2 tarzi scatter
 const PROP_SPR := {
 	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5"],
@@ -25,6 +25,8 @@ const PROP_SPR := {
 	"5": ["prop_5_0", "prop_5_1", "prop_5_2", "prop_5_3", "prop_5_4", "prop_5_5"],
 	# Kızıl Çöl: kaktüs/kafes kemik/kuru çalı/taş anıt/bazalt/kemik totem
 	"6": ["prop_6_0", "prop_6_1", "prop_6_2", "prop_6_3", "prop_6_4", "prop_6_5"],
+	# Kristal Çukur: Simithar'in kristal/mantar seti çukura da uyar
+	"7": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
 	"hub": ["prop_hub_0", "prop_hub_1", "prop_hub_2", "prop_hub_3", "prop_hub_4", "prop_hub_5"],
 }
 # isik veren prop'lar (kristal, mantar, fener, turbin, obelisk, ateslik)
@@ -44,6 +46,7 @@ const MOTE_COL := {
 	"4": Color(0.45, 0.9, 0.5, 0.4),
 	"5": Color(1.0, 0.5, 0.2, 0.4),
 	"6": Color(1.0, 0.72, 0.4, 0.4),
+	"7": Color(0.35, 0.9, 1.0, 0.4),
 	"hub": Color(1.0, 0.75, 0.45, 0.35),
 }
 var motes: Array = []   # [{s, vel}] atmosfer parcaciklari
@@ -102,6 +105,7 @@ const DARK := [
 	Color(0.44, 0.52, 0.42),   # Çürük Bataklık — murky fungal gloom
 	Color(0.50, 0.42, 0.38),   # Kül Ovası — kor altında koyu kül
 	Color(0.62, 0.44, 0.32),   # Kızıl Çöl — sıcak kum akşamı
+	Color(0.45, 0.48, 0.62),   # Kristal Çukur — mor-gece kristal ışığı
 ]
 const HUB_DARK := Color(0.62, 0.56, 0.47)
 
@@ -325,7 +329,7 @@ func _build_floor_named(key: String) -> void:
 func _build_walls_named(key: String) -> void:
 	var tex := Px.S2("w2_" + key)
 	var x := -W * 0.5 - 64
-	var lamp_col: Color = [Px.C("ffb74d"), Px.C("00E676"), Px.C("ff7722"), Px.C("c9a227"), Px.C("66bb6a"), Px.C("ff5522"), Px.C("ffaa55")][clampi(biome, 0, 6)]
+	var lamp_col: Color = [Px.C("ffb74d"), Px.C("00E676"), Px.C("ff7722"), Px.C("c9a227"), Px.C("66bb6a"), Px.C("ff5522"), Px.C("ffaa55"), Px.C("4dd0e1")][clampi(biome, 0, 7)]
 	var xi := 0
 	while x <= W * 0.5 + 64:
 		for off in [Vector2(0, 0), Vector2(0, -64)]:

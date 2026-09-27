@@ -1200,6 +1200,7 @@ static func _wall2(key: String) -> Texture2D:
 		"3": top = C("322c4a"); front = C("1c1830"); acc = C("c9a227")
 		"4": top = C("2e4432"); front = C("16251c"); acc = C("66bb6a")
 		"6": top = C("7a4a2e"); front = C("4a2c1c"); acc = C("ff9944")
+		"7": top = C("2e2a4e"); front = C("1a1832"); acc = C("4dd0e1")
 		_: top = C("5f452a"); front = C("3a2818"); acc = C("a8842f")
 	var t := _img(64, 56)
 	for y in 56:
@@ -1243,6 +1244,14 @@ static func _wall2(key: String) -> Texture2D:
 				_rect(t, 8 + i * 24, 10, 20, 2, shade(top, 1.35))
 			_rect(t, 10, 34, 44, 2, shade(acc, 0.6))
 			_p(t, 22, 18, acc); _p(t, 48, 24, acc)
+		"7":
+			# kristal çukur: duvar yüzü dikey kristal facetleri
+			for i in 3:
+				var fx := 10 + i * 18
+				_rect(t, fx, 12, 4, 20, shade(acc, 0.55))
+				_rect(t, fx - 2, 8, 8, 3, shade(acc, 0.8))
+				_p(t, fx + 1, 14, shade(acc, 1.3))
+			_rect(t, 8, 34, 48, 2, shade(acc, 0.5))
 	return _tex(t)
 
 # ---------- biome backdrops (1180x200 silhouette strip) ----------
