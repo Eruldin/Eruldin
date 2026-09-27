@@ -4,11 +4,11 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK, GOZETMEN, COPCU }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK, GOZETMEN, COPCU, DINAMITCI }
 
 # tür-bazlı ölüm patlaması rengi — kesimden kimin öldüğü görsel okunur
-const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73", EKind.GOZETMEN: "b388ff", EKind.COPCU: "d7a05a"}
-const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam", EKind.GOZETMEN: "Gözetmen", EKind.COPCU: "Çöpçü Kurt"}
+const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73", EKind.GOZETMEN: "b388ff", EKind.COPCU: "d7a05a", EKind.DINAMITCI: "ff7043"}
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam", EKind.GOZETMEN: "Gözetmen", EKind.COPCU: "Çöpçü Kurt", EKind.DINAMITCI: "Dinamitçi Tayf"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
@@ -18,6 +18,7 @@ const KIND_SET := {
 	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa", EKind.CARRIER: "c_carrier",
 	EKind.MUHFIZ: "c_alfa", EKind.HERALD: "c_herald", EKind.AKREP: "c_akrep",
 	EKind.BALCIK: "c_balcik", EKind.GOZETMEN: "c_gozetmen", EKind.COPCU: "c_copcu",
+	EKind.DINAMITCI: "c_dinamitci",
 }
 
 # tür lore'u — Zirkon'un kayıtlarında kesim sayısının altında gösterilir
@@ -38,6 +39,7 @@ const KIND_LORE := {
 	EKind.BALCIK: "Bataklığın biriktirdiği gövde — yarası çamurla kapanır; bırakırsan toparlanır.",
 	EKind.GOZETMEN: "Aeterna'nın süzülen gözü — uzaktan ölçer, halkasını açınca ağır mermi gelir.",
 	EKind.COPCU: "Enkazın aç çöpçüsü — yere saçılan kristalleri yutar, kesmeden önce hızlı davran.",
+	EKind.DINAMITCI: "Madenin barutçusu — fıçıyı yuvarlar, fitil yanınca patlama iki tarafı da vurur. Yakınında durma.",
 }
 
 var kind: int = EKind.HUSK
@@ -188,6 +190,11 @@ func _setup_stats(hs: float, ds: float) -> void:
 			max_hp = 88; speed = 120; touch_dmg = 9; radius = 14; hit_radius = 16
 			windup_t = 0.4; recover_t = 0.5; attack_cd = 0.9; touch_r = 34
 			actor_name = "Çöpçü Kurt"
+		EKind.DINAMITCI:
+			max_hp = 64; speed = 74; touch_dmg = 7; radius = 13; hit_radius = 15
+			windup_t = 0.9; recover_t = 0.9; attack_cd = 2.6; touch_r = 30
+			keep_min = 210; keep_max = 340; proj_spd = 300; proj_dmg = 16
+			actor_name = "Dinamitçi Tayf"
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
@@ -521,7 +528,7 @@ func _seek(d: float) -> void:
 		match kind:
 			EKind.TURRET:
 				if dist < 400.0: _begin_windup()
-			EKind.SPITTER, EKind.CEREB, EKind.HERALD, EKind.GOZETMEN:
+			EKind.SPITTER, EKind.CEREB, EKind.HERALD, EKind.GOZETMEN, EKind.DINAMITCI:
 				if dist < keep_max + 40.0: _begin_windup()
 			EKind.DRONE:
 				if dist < 55.0: _begin_windup()
@@ -600,6 +607,8 @@ func _do_strike() -> void:
 			_shoot_at(G.player.pos, proj_spd, proj_dmg, Px.C("e8d060"), 9.0)
 		EKind.GOZETMEN:
 			_shoot_at(G.player.pos, proj_spd, proj_dmg, Px.C("b388ff"), 13.0)
+		EKind.DINAMITCI:
+			_lob_keg(G.player.pos)
 		EKind.TURRET:
 			_burst_co()
 		EKind.DRONE:
@@ -630,6 +639,21 @@ func _lob(target: Vector2) -> void:
 	p.aoe = blast_r
 	p.source = self
 	G.audio.play("shoot", G.rf(0.7, 0.9), 0.5)
+
+# dinamitçi fıçısı: barut iki tarafı da vurur — sürüye karşı kullanılabilir
+func _lob_keg(target: Vector2) -> void:
+	var dist := pos.distance_to(target)
+	var flight := clampf(dist / 300.0, 0.5, 1.5)
+	G.fx.tele_circle(target, 90.0, flight, Color(1.0, 0.55, 0.2, 0.3))
+	var p := Projectile.new()
+	G.game.world.add_child(p)
+	var dir := (target - pos).normalized()
+	p.setup(G.Team.ENEMY, pos + dir * 14.0, dir * (dist / flight), proj_dmg, 10.0, Px.C("ff7043"), "dot")
+	p.life = flight
+	p.aoe = 90.0
+	p.both_sides = true
+	p.source = self
+	G.audio.play("shoot", 0.6, 0.5)
 
 func _shoot_dir(dir: Vector2, spd: float, dmg: float, col: Color, rad: float) -> void:
 	var p := Projectile.new()
@@ -737,7 +761,7 @@ func die(h: Dictionary) -> void:
 		G.fx.burst(pos, Px.C("8dc63f"), 14, 150.0, 4.0, 0.4)
 	if is_instance_valid(G.room):
 		# XP gem every kill; elites also drop a chest; rare heal orb
-		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0, 7.0, 6.0, 5.0, 3.0, 7.0, 5.0, 4.0][kind] + (10.0 if elite else 0.0)
+		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0, 7.0, 6.0, 5.0, 3.0, 7.0, 5.0, 4.0, 4.0][kind] + (10.0 if elite else 0.0)
 		G.room.spawn_gem(pos, xp_val)
 		if _stolen > 0.0:
 			# yuttuğu kristaller faiziyle geri döner
