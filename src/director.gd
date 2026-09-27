@@ -12,7 +12,7 @@ const WIN_T := 780.0      # 13:00 failsafe — swarm collapses
 
 # per-sector bosses: miniboss is the previous sector's efendi (biome 0 keeps
 # the Host); the final is that sector's own boss — twins/Aeterna spawn as pairs
-const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM, Boss.BKind.TUMAN]
+const MINI_KIND := [Boss.BKind.HOST, Boss.BKind.REX, Boss.BKind.HOST, Boss.BKind.NAHUM, Boss.BKind.TUMAN, Boss.BKind.TUMAN, Boss.BKind.KIRIN]
 const FINAL_KIND := [
 	[Boss.BKind.REX],
 	[Boss.BKind.HOST],
@@ -20,6 +20,7 @@ const FINAL_KIND := [
 	[Boss.BKind.KIRIN, Boss.BKind.CONST],
 	[Boss.BKind.NAHUM, Boss.BKind.TUMAN],
 	[Boss.BKind.REX, Boss.BKind.KIRIN],
+	[Boss.BKind.NAHUM, Boss.BKind.CONST],
 ]
 
 var t := 0.0
@@ -47,6 +48,7 @@ const RAIN_CFG := [
 	{"t": "IŞIK HÜZMESİ — kubbe odaklanıyor!", "col": "ffe9a8", "r": 62.0, "n": 9, "pdmg": 22.0, "ptype": "PURE"},
 	{"t": "SPOR PATLAMASI — şişkin mantarlar doluyor!", "col": "66bb6a", "r": 80.0, "n": 8, "pdmg": 20.0, "ptype": "EXPLOSION"},
 	{"t": "KOR YAĞMURU — gökyüzü kül kusuyor!", "col": "ff7722", "r": 90.0, "n": 8, "pdmg": 26.0, "ptype": "EXPLOSION"},
+	{"t": "KUM FIRTINASI — sürüklenen kumlar kabarır!", "col": "ffaa55", "r": 105.0, "n": 6, "pdmg": 18.0, "ptype": "SHOCK"},
 ]
 var _min_ann := 0          # son duyurulan dakika kilometre taşı
 var _mini := false
@@ -277,6 +279,7 @@ func _comp(m: float) -> int:
 			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA])
 			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB])   # bataklık: şişkin konakçılar + kistler
 			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ]) # kül ovası: ateşi seven sert öncüler
+			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.DRONE, Enemy.EKind.SPITTER])   # kızıl çöl: hızlı koşucular + menzilli
 	return G.pick(pool)
 
 func _hp_scale() -> float:
