@@ -69,6 +69,8 @@ var _trail_t := 0.0     # iz süren elit: kor izi bırakma sayacı
 var _warp_t := 0.0      # ışınlanan elit: teleport sayacı
 var _herald_t := 3.0    # koro sözcüsü: çan aurası sayacı
 var _yanki_t := 0.0     # yankıcı elit: şok halkası sayacı
+var _hay_cd := 0.0      # hayalet elit: faz geçişi bekleme sayacı
+var _hay_t := 0.0       # hayalet elit: hayalet penceresi kalan süre
 var _yanki_hit := 0.0   # yankıcı elit: halkanın ineceği an
 var _muhur_t := 0.0     # mühürlü elit: sonraki mühür penceresine kalan süre
 var _muhur_win := 0.0   # mühür penceresi açıkken kalan süre (hasar yemez)
@@ -264,7 +266,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak", "fanatik", "bozucu", "soguk", "yanki"][randi() % 25]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak", "fanatik", "bozucu", "soguk", "yanki", "hayalet"][randi() % 26]
 		# KAÇAK GÜZERGÂHI kozu: elitlerin yarısı kaçak çıkar
 		if is_instance_valid(G.run) and G.run.kacak_plus and G.chance(0.5):
 			affix = "kacak"
@@ -336,6 +338,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "AYAZLI " + actor_name
 			"yanki":
 				actor_name = "YANKICI " + actor_name
+			"hayalet":
+				actor_name = "HAYALET " + actor_name
 		# affix kaydı — LANET KIRANI başarımını besler
 		var seen: Array = G.meta.data.get("affix_seen", [])
 		if not seen.has(affix):
@@ -402,7 +406,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7", "ambarli": "c8e6c9", "kacak": "ffd54f", "fanatik": "ff5252", "bozucu": "ce93d8", "soguk": "bfe8ff", "yanki": "7986cb"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40", "cazibe": "ff6ee7", "ambarli": "c8e6c9", "kacak": "ffd54f", "fanatik": "ff5252", "bozucu": "ce93d8", "soguk": "bfe8ff", "yanki": "7986cb", "hayalet": "eceff1"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -601,6 +605,21 @@ func _process(_d: float) -> void:
 				_muhur_win = 1.6
 				G.fx.tele_ring(pos, radius * 2.8, 0.35, Color(0.55, 0.85, 1.0, 0.5))
 				G.audio.play("parry", 0.8, 0.3)
+	# hayalet elit: döngüsel faz geçişi — saydamlaşır, vurulamaz, sürünün içinden akar
+	if affix == "hayalet":
+		if _hay_t > 0.0:
+			_hay_t -= d
+			if is_instance_valid(body):
+				body.modulate = Color(base_color.r, base_color.g, base_color.b, 0.3)
+			if _hay_t <= 0.0 and is_instance_valid(body):
+				body.modulate = base_color
+		else:
+			_hay_cd -= d
+			if _hay_cd <= 0.0:
+				_hay_cd = 6.0
+				_hay_t = 1.7
+				G.fx.burst(pos, Px.C("eceff1"), 8, 110.0, 2.8, 0.3)
+				G.audio.play("dash", 0.5, 0.22)
 	# ışınlanan elit: uzak kalırsa oyuncunun yanına teleport eder — arka hat güvenli değil
 	if affix == "warp" and _st == St.SEEK and is_instance_valid(G.room):
 		_warp_t -= d
@@ -679,7 +698,7 @@ func _seek(d: float) -> void:
 			dir = -dir
 		elif dist < keep_max:
 			dir = dir.rotated(PI / 2 * sin(Time.get_ticks_msec() * 0.0008))
-	var spd := speed * (1.28 if lead_t > 0.0 else 1.0) * (2.3 if _burrowed else 1.0) * (2.2 if _dive_t > 0.0 else 1.0) * (1.55 if _phased else 1.0) * (0.5 if chill_t > 0.0 else 1.0) * (0.72 if (is_instance_valid(G.player) and G.player.has_meta("wall") and pos.distance_to(G.player.pos) < 150.0) else 1.0)
+	var spd := speed * (1.28 if lead_t > 0.0 else 1.0) * (1.4 if (affix == "hayalet" and _hay_t > 0.0) else 1.0) * (2.3 if _burrowed else 1.0) * (2.2 if _dive_t > 0.0 else 1.0) * (1.55 if _phased else 1.0) * (0.5 if chill_t > 0.0 else 1.0) * (0.72 if (is_instance_valid(G.player) and G.player.has_meta("wall") and pos.distance_to(G.player.pos) < 150.0) else 1.0)
 	var mdir := dir
 	if kind == EKind.KOCBASI:
 		if _charge_t > 0.0:
@@ -961,6 +980,13 @@ func take_hit(h: Dictionary) -> void:
 			h["_muhur_fx"] = true
 			G.fx.burst(pos + Vector2(0, -16), Px.C("7fdbff"), 4, 70.0, 2.4, 0.2)
 			G.audio.play("parry", 1.4, 0.18)
+	# HAYALET: faz geçişindeyken vurulamaz — saydam hali gör, pencere kapanınca yanıtla
+	if affix == "hayalet" and _hay_t > 0.0:
+		h["dmg"] = 0.0
+		if not h.has("_hay_fx"):
+			h["_hay_fx"] = true
+			G.fx.burst(pos + Vector2(0, -16), Px.C("eceff1"), 4, 60.0, 2.2, 0.2)
+			G.audio.play("dash", 1.8, 0.14)
 	if kind == EKind.MUHFIZ and is_instance_valid(G.player) and h.has("from"):
 		var fw := (G.player.pos - pos).normalized()
 		var aw := (Vector2(h.get("from")) - pos).normalized()
