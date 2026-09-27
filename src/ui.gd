@@ -2149,6 +2149,9 @@ const WAYLAY := {
 	"muhafiz": {"name": "ESKİ MUHAFIZ", "col": "8fd4ff",
 		"sub": "Yolun taşında tanıdık bir sırt çantası — kafesten kurtardığın yoldaşlardan biri erzak taşıyor. Kampın sınırına kadar sana eşlik eder.",
 		"opts": ["PAYLAŞ — yoldaşın zulasını sana açar", "SELAMLA — ◈20 ve iyi yolculuklar"]},
+	"surungen": {"name": "KAYIP SÜRÜNGEN", "col": "8dc63f",
+		"sub": "Yolun kenarında korkudan büzülmüş bir sürüngen — senden kaçmıyor, kampın kokusunu almış. Ağıl varsa onu yuvasına götürebilirsin; yoksa salıvermek de bir lütuftur.",
+		"opts": ["KUCAKLA — ağıl varsa hayvan olur, yoksa ◈20 bırakır", "SERBEST BIRAK — sahaya tok in (+14 can)"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -2284,6 +2287,18 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				G.run.fragments += 20
 				toast("yoldaş selamladı — ◈+20")
 			Quests.tick("cameo")
+		"surungen":
+			if idx == 0:
+				if G.meta.has_build("ahir") and int(G.meta.data.get("pets", 0)) < 12:
+					G.meta.data["pets"] = int(G.meta.data.get("pets", 0)) + 1
+					G.meta.save()
+					toast("sürüngen ağıla döndü (%d/12)" % int(G.meta.data.get("pets", 0)))
+				else:
+					G.run.fragments += 20
+					toast("sürüngen ürkek bakışla gitti — ◈+20")
+			else:
+				G.run.pending_heal = 14.0
+				toast("sürüngen serbest — sahaya tok iniyorsun")
 		"konservi":
 			if idx == 0:
 				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar
