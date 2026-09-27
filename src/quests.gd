@@ -61,6 +61,8 @@ const DEFS := [
 	{"id": "q_fener", "giver": "ehnar",  "name": "YANKI AVCISI",         "desc": "Sahalardaki sinyal fenerleri yankı şampiyonları uyandırıyor. Üç feneri kır — deneme alanı temizlensin.", "obj": {"type": "fener", "n": 3}, "rew": {"cho": 280, "item": "i_cengel"}, "prereq": "q_deneme"},
 	{"id": "q_ocak",  "giver": "ehnar",   "name": "OCAĞIN KAPISI",       "desc": "Kuzeyde çatlak bir ocak var — elitler nabzını koruyor. Tek koşuda 12 elit kes — kapıyı göstereyim.", "obj": {"type": "elites", "n": 12}, "rew": {"cho": 160, "node": "tasocagi"}, "prereq": "q_nobet"},
 	{"id": "q_lena",  "giver": "lena",    "name": "LENA'NIN HARİTASI",    "desc": "Kafes beni haritadan attı; haritayı geri çizelim. Üç farklı düğümde zafer getir — pusulamı sana bırakırım.", "obj": {"type": "nodes", "n": 3}, "rew": {"cho": 200, "item": "i_pusula"}},
+	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
+	{"id": "q_ziyafet","giver": "mina",   "name": "KURTULUŞ ZİYAFETİ",    "desc": "Büyük sofra büyük malzeme ister. Otuz küre daha — karşılığında damlayı veririm, seni geri getirir.", "obj": {"type": "sifa", "n": 30}, "rew": {"cho": 320, "item": "i_neva"}, "prereq": "q_sofra"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
