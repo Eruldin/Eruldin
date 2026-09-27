@@ -24,6 +24,9 @@ var _merch_ck := false
 var _merch_close := false
 var _stray_done := false
 var _stray_ck := false
+var _boss_done := false
+var _boss_p2 := false
+var _boss_ref: WeakRef = null
 var _ceset_done := false
 var _node := "batak"   # --node=<id> ile hangi düğüm koşulacağı seçilir
 var _stray_sub := -1
@@ -237,6 +240,22 @@ func _process(_d: float) -> void:
 				_edge_done = true
 				G.player.pos = Vector2(1350, -880)
 				_shot_at = t + 1.0
+			# DAMAR KALBI kapsaması: boss spawn -> AI/attack loop -> faz-2 shatter
+			if not _boss_done and t >= 58.0:
+				_boss_done = true
+				var bb := Boss.spawn_boss(Boss.BKind.DAMAR, G.player.pos + Vector2(260, -80), G.room)
+				bb._intro_t = 0.0
+				bb._atk_t = 0.2
+				_boss_ref = weakref(bb)
+				print("[probe] damar boss spawned")
+			if _boss_done and not _boss_p2 and t >= 92.0:
+				_boss_p2 = true
+				var bb2: Boss = _boss_ref.get_ref() if _boss_ref != null else null
+				if is_instance_valid(bb2):
+					bb2.hp = bb2.max_hp * 0.45
+					print("[probe] damar boss -> phase 2")
+				else:
+					print("[probe] damar boss already dead")
 			# rezonans kümesi kapsaması: oyuncunun dibinde doğur, kısa şarjla çözülmesini bekle
 			if not _mono_done and t >= 95.0:
 				_mono_done = true
