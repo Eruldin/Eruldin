@@ -611,6 +611,7 @@ func _write_last_run(win: bool) -> void:
 			"win":   ok = win
 			"kills": ok = int(stats.get("kills", 0)) >= int(bet.get("need", 0))
 			"elite": ok = int(stats.get("elite_kills", 0)) >= int(bet.get("need", 0))
+			"nodmg": ok = int(stats.get("best_nodmg", 0)) >= int(bet.get("need", 0))
 			_:       ok = int(time) >= int(bet.get("need", 0))
 		if ok:
 			var pay := int(bet.get("pay", 0))
