@@ -4,7 +4,7 @@ extends RefCounted
 # Persistent meta-progression: Pure Choralim currency, permanent upgrades,
 # death/run stats, boss flags, seen dialogue lines. JSON save at user://.
 
-enum U { HP, DMG, DASH, REVIVE, FRAG, SHIELD, SPD, MAG, LUCK, XP, CRIT }
+enum U { HP, DMG, DASH, REVIVE, FRAG, SHIELD, SPD, MAG, LUCK, XP, CRIT, PARRY }
 
 const UPG := {
 	U.HP:     {"name": "Sinirsel Dayanıklılık", "desc": "+20 azami can", "max": 5, "base": 40},
@@ -18,6 +18,7 @@ const UPG := {
 	U.LUCK:   {"name": "Talih Devresi", "desc": "+0.15 şans — daha iyi taslaklar", "max": 3, "base": 75, "icon": "icn_upg_revive"},
 	U.XP:     {"name": "Kolektif Bilinç", "desc": "+%8 deneyim kazancı", "max": 3, "base": 65, "icon": "icn_upg_frag"},
 	U.CRIT:   {"name": "Nişan Bobini", "desc": "+%4 kritik şansı", "max": 3, "base": 80, "icon": "icn_dagger"},
+	U.PARRY:  {"name": "Muhafız Refleksi", "desc": "+0.04sn parry penceresi", "max": 3, "base": 90, "icon": "icn_upg_shield"},
 }
 
 # kamp inşaatı — Vane'nin panelinde tek seferlik satın alınan kalıcı binalar
@@ -127,7 +128,7 @@ func reset_all() -> void:
 	save()
 
 static func _key(u: int) -> String:
-	return ["hp","dmg","dash","revive","frag","shield","spd","mag","luck","xp","crit"][u]
+	return ["hp","dmg","dash","revive","frag","shield","spd","mag","luck","xp","crit","parry"][u]
 
 func upg(u: int) -> int:
 	return int(data["upg"].get(_key(u), 0))
