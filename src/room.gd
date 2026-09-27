@@ -1012,6 +1012,7 @@ func _tick_hazards(d: float) -> void:
 				if h.t <= 0.0:
 					if h.has("tele"):
 						G.fx.kill_tele(h.tele)
+					G.fx.burst(h.pos, Px.C("e8a050"), 16, 110.0, 4.0, 0.5)
 					hazards.remove_at(i)
 					continue
 			h.sway = float(h.get("sway", 0.0)) + d
@@ -1100,7 +1101,7 @@ func _collect(pk: Node) -> void:
 				G.fx.float_text(pk.position + Vector2(0, -18), "+%d" % roundi(xv), Px.C("7fd4ff"), 0.85)
 			G.audio.play("pickup", G.rf(1.2, 1.4), 0.35)
 		"heal":
-			G.player.heal(24.0)
+			G.player.heal(24.0 * (1.5 if G.player.has_meta("heal_plus") else 1.0))
 			G.audio.play("heal", 1.0, 0.5)
 			Quests.tick("sifa")
 		"tome":
