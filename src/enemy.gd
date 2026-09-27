@@ -1029,6 +1029,12 @@ func die(h: Dictionary) -> void:
 				G.meta.save()
 				G.run.drop_fragments(pos + Vector2(0, 24), 20 + nl2 * 8)
 				G.ui.toast("KOPUZ düştü — kovan onu yeniden kuracak")
+				# üç perdelik kan davası çözülünce KOPUZ mirasını bırakır
+				if nl2 >= 3:
+					var lids2 := Items.legendary_ids()
+					if not lids2.is_empty():
+						G.room.spawn_loot(G.pick(lids2), pos + Vector2(-44, 10))
+						G.ui.toast("KOPUZ'un mirası — EFSANEVİ PARÇA düştü")
 			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
 			Quests.tick("elites")
 			G.fx.flash(Px.C("ffd75f"), 0.13)
