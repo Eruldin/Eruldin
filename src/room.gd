@@ -150,6 +150,9 @@ func build_hub() -> void:
 	NPC.make("ehnar", Vector2(60, -300), self)
 	NPC.make("ahusk", Vector2(-140, -260), self)
 	NPC.make("elyb", Vector2(320, -120), self)
+	# kurtarılmış yolcu: sahada kafesi kırılan Mina kampta mutfağını kurar
+	if bool(G.meta.data.get("rescued_mina", false)):
+		NPC.make("mina", Vector2(-300, 200), self)
 	# efendi kupaları: düşürülen her boss kamp ateşinin kuzeyinde kafatası bırakır
 	var tb := 0
 	for bid in (G.meta.data.get("bosses", []) as Array):
@@ -1150,6 +1153,20 @@ func _collect(pk: Node) -> void:
 				var e := Enemy.spawn(ek, sp, true, G.director._hp_scale() * 1.2, G.director._dmg_scale() * 1.1, self)
 				e.promote_champ()
 				_fener_champs.append(e)
+		"mahkum":
+			# kafesteki yolcu: kır, serbest bırak — Aşçı Mina kampa katılır
+			if bool(G.meta.data.get("rescued_mina", false)):
+				return
+			G.meta.data["rescued_mina"] = true
+			G.meta.save()
+			G.fx.burst(pk.position + Vector2(0, -20), Px.C("d4a017"), 22, 200.0, 5.0, 0.6)
+			G.fx.float_text(pk.position + Vector2(0, -50), "KURTARILDI", Px.C("ffd700"), 1.2)
+			G.fx.flash(Px.C("d4a017"), 0.2)
+			G.audio.jingle("boss")
+			G.ui.toast("bir yolcu serbest kaldı — Aşçı Mina kampa katılacak")
+			for i in 3:
+				spawn_heal(pk.position + Vector2(G.rf(-50, 50), G.rf(-36, 36)))
+			G.run.drop_fragments(pk.position, G.ri(15, 25))
 		"chest":
 			G.run.open_chest()
 		"loot":
@@ -1236,8 +1253,11 @@ func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 		"fener":
 			pk.texture = Px.S2("icn_crown") if Px.S2("icn_crown") != null else Px.S("dot")
 			col = "ff3355"
+		"mahkum":
+			pk.texture = Px.S2("prop_mahkum") if Px.S2("prop_mahkum") != null else Px.S("dot")
+			col = "d4a017"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	pk.scale = Vector2.ONE * (0.95 if kind == "cursed" else 0.8)
+	pk.scale = Vector2.ONE * (0.95 if kind == "cursed" else (0.9 if kind == "mahkum" else 0.8))
 	pk.modulate = Px.C(col)
 	pk.position = p
 	pk.z_index = int(p.y)

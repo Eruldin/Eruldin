@@ -6,7 +6,7 @@ extends Node2D
 static var NAMES := {
 	"rhasa": "GENEL RHASA", "neva": "NEVA", "saphire": "SAPHIRE", "vane": "DR. VANE",
 	"david": "İZ SÜRÜCÜ DAVID", "zirkon": "VEZİR ZİRKON", "ehnar": "ESKİ ŞÖVALYE EHNAR",
-	"ahusk": "GÖÇEBE AHUSK", "elyb": "ELY-B"
+	"ahusk": "GÖÇEBE AHUSK", "elyb": "ELY-B", "mina": "AŞÇI MINA"
 }
 
 # BG2 ortam replikleri — oyuncu yakınken NPC ara sıra mırıldanır
@@ -20,6 +20,7 @@ static var BARKS := {
 	"ehnar":   ["sözleşme masada.", "sınır hâlâ sıcak.", "kılıç paslanmamalı."],
 	"ahusk":   ["kovan kokusu...", "sis bugün kalın.", "geçit hâlâ açık."],
 	"elyb":    ["uyku modu: %60.", "şasi sinyali stabil.", "hazırım."],
+	"mina":    ["kazan sıcak.", "tarhana varsa her şey geçer.", "seni o kafesten çıkardılar — borç ödenmez."],
 }
 
 var nid := ""
