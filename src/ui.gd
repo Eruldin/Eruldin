@@ -2404,6 +2404,7 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 			else:
 				G.run.fragments += 15
 				toast("yankı söndü — ◈+15 anısı kaldı")
+			Quests.tick("hayalet")
 		"konservi":
 			if idx == 0:
 				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar
