@@ -218,6 +218,33 @@ static func set_state() -> Array:
 		out.append({"name": str(s.name), "have": have, "need": (s.ids as Array).size(), "active": have == (s.ids as Array).size()})
 	return out
 
+# sasi gelistirme — ELY-B panelinde choralim ile alinan kalici perkler
+# (sasi basina 2; mod anahtarlari equip_stats ile ayni sozluk)
+const PERKS := {
+	"ely":  [{"id": "ely_p1",  "name": "Keskin Geometri",    "desc": "+%6 hasar",          "cost": 300, "mods": {"dmg": 0.06}},
+	          {"id": "ely_p2",  "name": "Nova Sogutucu",      "desc": "Q bekleme -%12",     "cost": 400, "mods": {"skill": -0.12}}],
+	"elyb": [{"id": "elyb_p1", "name": "Agir Balistik",      "desc": "+%8 hasar",          "cost": 350, "mods": {"dmg": 0.08}},
+	          {"id": "elyb_p2", "name": "Reaksiyon Zirhi",    "desc": "+1.0 zirh",          "cost": 350, "mods": {"armor": 1.0}}],
+	"via":  [{"id": "via_p1",  "name": "Kesif Rotorlari",    "desc": "+%6 hiz",            "cost": 300, "mods": {"spd": 0.06}},
+	          {"id": "via_p2",  "name": "Nisan Modulu",       "desc": "+%8 kritik",         "cost": 400, "mods": {"crit": 0.08}}],
+	"h9":   [{"id": "h9_p1",   "name": "Derin Manyetik",     "desc": "+70 toplama yaricapi","cost": 300, "mods": {"mag": 70.0}},
+	          {"id": "h9_p2",   "name": "Hurda Verimi",       "desc": "+%10 parcacik",      "cost": 400, "mods": {"frag": 0.10}}],
+	"k7":   [{"id": "k7_p1",   "name": "Duvar Refleksi",     "desc": "+40 can",            "cost": 350, "mods": {"hp": 40}},
+	          {"id": "k7_p2",   "name": "Siginak Akusu",      "desc": "Q bekleme -%10",     "cost": 400, "mods": {"skill": -0.10}}],
+	"dg":   [{"id": "dg_p1",   "name": "Damar Takviyesi",    "desc": "+50 can · +0.5 zirh","cost": 450, "mods": {"hp": 50, "armor": 0.5}},
+	          {"id": "dg_p2",   "name": "Kristal Asiriyukleme","desc": "+%7 hasar",         "cost": 450, "mods": {"dmg": 0.07}}],
+}
+
+# aktif sasinin alinmis perklerinin mod toplami
+static func perk_stats(hid: String) -> Dictionary:
+	var out := {}
+	var owned: Array = (G.meta.data.get("perks", {}) as Dictionary).get(hid, [])
+	for p in PERKS.get(hid, []):
+		if owned.has(p.id):
+			for k in p.mods:
+				out[k] = float(out.get(k, 0.0)) + float(p.mods[k])
+	return out
+
 static func slot_of(id: String) -> String:
 	return str(DEFS.get(id, {}).get("slot", ""))
 

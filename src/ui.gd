@@ -3214,7 +3214,7 @@ func hero_panel() -> void:
 		card.add_theme_stylebox_override("panel", _style_panel(Color(0.07, 0.06, 0.09, 0.95), Px.C(s.col) if not locked else Color(0.3, 0.3, 0.35), 3 if active else 2, 4))
 		var cv := VBoxContainer.new()
 		cv.add_theme_constant_override("separation", 6)
-		cv.custom_minimum_size = Vector2(220, 190)
+		cv.custom_minimum_size = Vector2(220, 252)
 		card.add_child(cv)
 		var ic := TextureRect.new()
 		ic.texture = Px.S2(s.por)
@@ -3239,6 +3239,22 @@ func hero_panel() -> void:
 			var lk := _lbl(ltxt, Vector2.ZERO, 10, Px.C("ff6e40"))
 			lk.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			cv.add_child(lk)
+		else:
+			# şasi perkleri — choralim ile alınan kalıcı modlar
+			var owned: Array = (G.meta.data.get("perks", {}) as Dictionary).get(key, [])
+			for pi in range(Items.PERKS.get(key, []).size()):
+				var p: Dictionary = Items.PERKS[key][pi]
+				var have: bool = owned.has(p.id)
+				var afford: bool = int(G.meta.data.get("choralim", 0)) >= int(p.cost)
+				var pl := _lbl("%s — %s\n[%s]" % [p.name, p.desc, "SAHİP" if have else "◆ %d" % int(p.cost)], Vector2.ZERO, 9, Color(0.55, 0.85, 0.6) if have else (Color(0.9, 0.78, 0.42) if afford else Color(0.45, 0.4, 0.34)))
+				pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				cv.add_child(pl)
+				if not have:
+					pl.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+					pl.gui_input.connect(func(ev: InputEvent):
+						if ev is InputEventMouseButton and ev.pressed:
+							pl.accept_event()
+							_buy_perk(key, pi))
 		row.add_child(card)
 		card.gui_input.connect(func(ev: InputEvent):
 			if ev is InputEventMouseButton and ev.pressed and not active and not locked:
@@ -3246,6 +3262,25 @@ func hero_panel() -> void:
 	var h := _lbl("[E / tık dışarısı] kapat", Vector2.ZERO, 10, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
+
+func _buy_perk(hero: String, pi: int) -> void:
+	var p: Dictionary = Items.PERKS[hero][pi]
+	var owned: Dictionary = G.meta.data.get("perks", {})
+	var lst: Array = owned.get(hero, [])
+	if lst.has(p.id):
+		return
+	if int(G.meta.data.get("choralim", 0)) < int(p.cost):
+		G.audio.play("alarm", 1.2, 0.4)
+		return
+	G.meta.data["choralim"] -= int(p.cost)
+	lst.append(p.id)
+	owned[hero] = lst
+	G.meta.data["perks"] = owned
+	G.meta.save()
+	G.audio.play("boon", 1.2, 0.6)
+	toast("Perk: %s" % p.name)
+	_close_overlay()
+	hero_panel()
 
 func _pick_hero(key: String) -> void:
 	var sh: Dictionary = HEROES[key]
