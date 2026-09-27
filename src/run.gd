@@ -607,6 +607,10 @@ func victory() -> void:
 	if str(Wmap.node(node_id).get("kind", "")) == "hazine":
 		G.meta.data["hazine_wins"] = int(G.meta.data.get("hazine_wins", 0)) + 1
 		Quests.tick("hazine")
+		# kasanın içeriği — garantili eşya düşüşü (yağma koşusunun asıl ödülü)
+		var _vi := Items.roll(luck + 0.5)
+		Items.drop_to_run(_vi)
+		stats["vault_item"] = _vi
 	G.meta.data["ng"] = int(G.meta.data.get("ng", 0)) + 1
 	stats["ng"] = int(G.meta.data.get("ng", 0))
 	var first_end := node_id == "b3" and not bool(G.meta.data.get("ended", false))
@@ -628,7 +632,7 @@ func victory() -> void:
 	elif str(Wmap.node(node_id).get("kind", "")) == "hazine":
 		# yağma koşusunun kendi zafer kartı — mühür çözüldü, kasa açık
 		G.ui.cine_seq([
-			{"tex": "cine_hazine", "title": "MAHZEN AÇILDI", "sub": (node_name + "\nMühür çözüldü — içerisi yılların choralim'i ve imparatorluk yüküyle dolu.")},
+			{"tex": "cine_hazine", "title": "MAHZEN AÇILDI", "sub": (node_name + "\nMühür çözüldü — içerisi yılların choralim'i ve imparatorluk yüküyle dolu.\nKasanın beklediği parça: " + Items.disp_name(str(stats.get("vault_item", ""))))},
 			{"tex": "por_neva", "title": "NEVA", "sub": "Kasanın içindekini saymadın bile — ama duydun mu? Mühür kırılırken kamp yerin altından gülümsedi."},
 		], func(): G.ui.victory_screen(stats))
 	else:
