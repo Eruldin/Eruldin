@@ -139,6 +139,7 @@ const DEFS := [
 	{"id": "q_orta",  "giver": "ehnar",   "name": "ORTA YEMİN",           "desc": "Her sahanın yarısında bir orta efendi uyanır — altın zırhlı, sahanın en ağırı. Beşini devir; nişanını miğferine takayım.", "obj": {"type": "orta", "n": 5}, "rew": {"cho": 320, "item": "i_efendin"}, "prereq": "q_nodmg"},
 	{"id": "q_duel",  "giver": "ehnar",   "name": "ŞAMPİYON NARASI",      "desc": "Yollarda altın muhafızlar düello çağırır — çoğu savaşçı duymazdan gelir. Üç düello kazan; mızrağının yankısını bileğine sararım.", "obj": {"type": "duel", "n": 3}, "rew": {"cho": 340, "item": "i_duel"}, "prereq": "q_orta"},
 	{"id": "q_devriye","giver": "ehnar",   "name": "KOL KESİCİ",            "desc": "Koro artık devriye kolları halinde geziyor — kolu durdurmanın tek yolu başındaki muhafızı düşürmek. Dört devriye başı kes; aparatını kemerine takayım.", "obj": {"type": "devriye", "n": 4}, "rew": {"cho": 360, "item": "i_devriye", "rep": 2}, "prereq": "q_duel"},
+	{"id": "q_parry", "giver": "ehnar",   "name": "ÇELİK CEVAP",           "desc": "Şampiyon narasını duyan kaçar; şövalye dinler ve cevap verir — savuşturma, vuruştan üstün zanaattir. Tek koşuda yirmi beş kez parry yap; muhafız manşetini takarsın.", "obj": {"type": "parry", "n": 25}, "rew": {"cho": 340, "item": "i_manset", "rep": 2}, "prereq": "q_duel"},
 	{"id": "q_karne", "giver": "mina",    "name": "İKSİR KARNESİ",        "desc": "Şifa içecek şişe değil, disiplin ister. Altı iksir iç — karneni ocak defterine işlerim.", "obj": {"type": "iksir", "n": 6}, "rew": {"cho": 140, "item": "i_kemer_par"}, "prereq": "q_sofra"},
 	{"id": "q_nolur",  "giver": "mina",    "name": "NOLUR NOLMAZ",            "desc": "Sofra kurulmadan önce aşçı karnını doyurur — sen de koşuya çıkmadan damlalığını doldur. On iksir daha iç; ocak önlüğümü sana diktireyim.", "obj": {"type": "iksir", "n": 10}, "rew": {"cho": 240, "item": "i_onluk", "rep": 2}, "prereq": "q_karne"},
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
@@ -404,6 +405,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"koz":     cur = (G.meta.data.get("arcanas_seen", []) as Array).size()
 			"nodmg":   cur = int(G.run.stats.get("best_nodmg", 0))
 			"crits":   cur = int(G.run.stats.get("crits", 0))
+			"parry":   cur = int(G.run.stats.get("parries", 0))
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
 		if cur >= need:
@@ -549,6 +551,7 @@ static func obj_text(q: Dictionary) -> String:
 		"crits":   return "tek koşuda %d kritik vuruş yap" % need
 		"kacak":   return "%d kaçak elit yakala" % need
 		"kuyu":    return "%d kez ses kuyusuyla uğraş" % need
+		"parry":   return "tek koşuda %d kez parry yap" % need
 	return "?"
 
 static func _claimed_count() -> int:

@@ -661,6 +661,9 @@ func take_hit(h: Dictionary) -> void:
 		G.fx.hitstop(0.09)
 		G.fx.shake(0.12, 0.15)
 		G.fx.float_text(pos + Vector2(0, -36), "PARRY!", Px.C("00E5FF"), 1.1)
+		if is_instance_valid(G.run):
+			G.run.stats["parries"] = int(G.run.stats.get("parries", 0)) + 1
+			Quests.tick("parry")
 		src.stagger = maxf(src.stagger, 1.3)
 		invuln = maxf(invuln, 0.35)
 		if b_parry_shock:
