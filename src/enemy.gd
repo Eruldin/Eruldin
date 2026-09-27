@@ -4,11 +4,11 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK }
 
 # tür-bazlı ölüm patlaması rengi — kesimden kimin öldüğü görsel okunur
-const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050"}
-const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi"}
+const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73"}
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
@@ -17,6 +17,7 @@ const KIND_SET := {
 	EKind.VARL: "c_varl", EKind.CEREB: "c_cereb",
 	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa", EKind.CARRIER: "c_carrier",
 	EKind.MUHFIZ: "c_alfa", EKind.HERALD: "c_herald", EKind.AKREP: "c_akrep",
+	EKind.BALCIK: "c_balcik",
 }
 
 # tür lore'u — Zirkon'un kayıtlarında kesim sayısının altında gösterilir
@@ -34,6 +35,7 @@ const KIND_LORE := {
 	EKind.MUHFIZ: "Eski alayın kalkanı — önden vurulmaz, yandan çözülür.",
 	EKind.HERALD: "Koro'nun ses taşıyıcısı — çanı çaldıkça sürü hızlanır; önce onu kes.",
 	EKind.AKREP: "Kızıl kumun altında gezen iğne — gömülünce mermi geçer, çıkınca hamle var.",
+	EKind.BALCIK: "Bataklığın biriktirdiği gövde — yarası çamurla kapanır; bırakırsan toparlanır.",
 }
 
 var kind: int = EKind.HUSK
@@ -52,6 +54,8 @@ var _muhur_t := 0.0     # mühürlü elit: sonraki mühür penceresine kalan sü
 var _muhur_win := 0.0   # mühür penceresi açıkken kalan süre (hasar yemez)
 var _muhur_sp: Sprite2D = null
 var _sum_n := 0     # bu elitin saldığı döl sayısı
+var _balcik_cd := 0.0  # balçık adam: hasar sonrası rejenerasyon beklemesi
+var _regen_fx := 0.0   # rejenerasyon parıltısı sayacı
 var speed := 100.0
 var touch_dmg := 10.0
 var touch_r := 36.0
@@ -166,6 +170,11 @@ func _setup_stats(hs: float, ds: float) -> void:
 			max_hp = 48; speed = 155; touch_dmg = 12; radius = 13; hit_radius = 15
 			windup_t = 0.4; recover_t = 0.5; attack_cd = 1.0; touch_r = 32
 			actor_name = "Kum Akrebi"
+		EKind.BALCIK:
+			max_hp = 190; speed = 50; touch_dmg = 16; radius = 18; hit_radius = 22
+			windup_t = 0.75; recover_t = 0.9; attack_cd = 1.7; touch_r = 46
+			actor_name = "Balçık Adam"
+			knock_resist = 70.0
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
@@ -240,12 +249,14 @@ func _make_body() -> void:
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(body)
 	var kn: String = KIND_SET.get(kind, EKind.keys()[kind].to_lower())
+	if kind == EKind.BALCIK:
+		base_color = Color(0.82, 1.0, 0.85)
 	if is_instance_valid(G.room) and G.room.biome > 0:
 		var bk := "%s_%d" % [kn, G.room.biome]
 		if not Px._ext_frames(bk).is_empty():
 			kn = bk
 	_load_frames(kn, 5.0)
-	Px.fit(body, 118.0 if elite else (108.0 if kind == EKind.KONAKCI else 86.0))
+	Px.fit(body, 118.0 if elite else (108.0 if kind == EKind.KONAKCI or kind == EKind.BALCIK else 86.0))
 	if kind == EKind.CARRIER and not elite:
 		base_color = Color(1.0, 0.85, 0.45)
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("ffb74d"), 0.4, 1.4)
@@ -294,6 +305,15 @@ func _process(_d: float) -> void:
 		_hp_fg.size.x = 46.0 * clampf(float(hp) / float(max_hp), 0.0, 1.0)
 	var d := get_process_delta_time()
 	tick(d)
+	# balçık adam: son 2.5sn'dir hasar yemediyse çamurla kapanır (12 can/sn)
+	if kind == EKind.BALCIK and not dead:
+		_balcik_cd -= d
+		if _balcik_cd <= 0.0 and hp < max_hp:
+			hp = minf(hp + 12.0 * d, max_hp)
+			_regen_fx -= d
+			if _regen_fx <= 0.0:
+				_regen_fx = 0.9
+				G.fx.burst(pos + Vector2(0, -14), Px.C("6fbf73"), 4, 60.0, 2.2, 0.3)
 	if stagger > 0:
 		_cancel_attack()
 		return
@@ -476,7 +496,7 @@ func _seek(d: float) -> void:
 				if dist < keep_max + 40.0: _begin_windup()
 			EKind.DRONE:
 				if dist < 55.0: _begin_windup()
-			EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA, EKind.AKREP:
+			EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA, EKind.AKREP, EKind.BALCIK:
 				if dist < 110.0:
 					if _has_tok or G.melee_tokens > 0:
 						if not _has_tok:
@@ -497,9 +517,10 @@ func _begin_windup() -> void:
 	if kind == EKind.DRONE:
 		_tele = G.fx.tele_circle(pos, 55.0, windup_t, Color(1, 0.3, 0.1, 0.3))
 		_tele["follow"] = self
-	elif kind in [EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA, EKind.AKREP]:
+	elif kind in [EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA, EKind.AKREP, EKind.BALCIK]:
 		var ang := rad_to_deg((G.player.pos - pos).angle())
-		_tele = G.fx.tele_wedge(pos, ang, 78.0 if kind != EKind.KONAKCI else 104.0, windup_t)
+		var wlen := 96.0 if kind == EKind.BALCIK else (104.0 if kind == EKind.KONAKCI else 78.0)
+		_tele = G.fx.tele_wedge(pos, ang, wlen, windup_t)
 	G.audio.play("ui", 0.6, 0.3)
 
 func _windup(d: float) -> void:
@@ -518,13 +539,14 @@ func _windup(d: float) -> void:
 
 func _strike(d: float) -> void:
 	_state_t -= d
-	if kind in [EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA]:
+	if kind in [EKind.HUSK, EKind.SENTINEL, EKind.VARL, EKind.KONAKCI, EKind.ALFA, EKind.BALCIK]:
 		var lunge := 320.0
 		match kind:
 			EKind.SENTINEL: lunge = 420.0
 			EKind.VARL: lunge = 400.0
 			EKind.ALFA: lunge = 470.0
 			EKind.KONAKCI: lunge = 240.0
+			EKind.BALCIK: lunge = 210.0
 		pos += _strike_dir * lunge * d
 		if is_instance_valid(G.room):
 			pos = G.room.clamp_pos(pos, radius)
@@ -638,6 +660,8 @@ func take_hit(h: Dictionary) -> void:
 				G.fx.burst(pos + aw * 20.0 + Vector2(0, -10), Px.C("80d8ff"), 6, 90.0, 3.0, 0.25)
 				G.audio.play("dash", 2.2, 0.25)
 	super.take_hit(h)
+	if kind == EKind.BALCIK and float(h.get("dmg", 0.0)) > 0.0:
+		_balcik_cd = 2.5
 	if _st == St.RISE:
 		_rise_t = minf(_rise_t, 0.15)
 	# YANSITICI: hasarın %12'si saldırana geri sıçrar
@@ -681,7 +705,7 @@ func die(h: Dictionary) -> void:
 		G.fx.burst(pos, Px.C("8dc63f"), 14, 150.0, 4.0, 0.4)
 	if is_instance_valid(G.room):
 		# XP gem every kill; elites also drop a chest; rare heal orb
-		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0, 7.0, 6.0, 5.0, 3.0][kind] + (10.0 if elite else 0.0)
+		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0, 7.0, 6.0, 5.0, 3.0, 7.0][kind] + (10.0 if elite else 0.0)
 		G.room.spawn_gem(pos, xp_val)
 		if elite:
 			G.room.spawn_chest(pos)

@@ -55,6 +55,7 @@ const DEFS := {
 	"i_anasi_igne": {"name": "Kraliçe İğnesi", "slot": "yuzuk",   "r": 3, "icon": "icn_dagger",     "mods": {"crit": 0.10, "ls": 0.02}},
 	"i_devkalp": {"name": "Batak Kalbi",     "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 40, "armor": 0.8}},
 	"i_kortac":  {"name": "Kor Tacı",        "slot": "bas",     "r": 3, "icon": "icn_crown",      "mods": {"dmg": 0.08, "skill": -0.10}},
+	"i_balcikkalp": {"name": "Balçık Kalbi", "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 30, "ls": 0.02}},
 	# kemer slotu — 8. ekipman yuvası
 	"i_kemer_kum": {"name": "Kum Kemeri",      "slot": "kemer",   "r": 0, "icon": "icn_dash",       "mods": {"spd": 0.04, "mag": 25.0}},
 	"i_kemer_par": {"name": "Parazit Kemeri",  "slot": "kemer",   "r": 1, "icon": "icn_kovan",      "mods": {"hp": 18, "ls": 0.015}},
