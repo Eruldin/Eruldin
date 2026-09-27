@@ -243,6 +243,7 @@ func achievements() -> Array:
 		{"name": "ŞÖVALYE ZIRHI", "desc": "Ehnar'ın dört parçasını birden kuşan — şövalye setini tamamla", "done": Items.set_active("sovalye"), "rew": 350},
 		{"name": "EFSANEVİ KOLEKSİYONU", "desc": "altı EFSANEVİ parçadan dördünü şampiyonlardan kopar", "done": (data.get("items_seen", []) as Array).filter(func(i: String) -> bool: return int(Items.DEFS.get(i, {}).get("r", 0)) == 4).size() >= 4, "rew": 450},
 		{"name": "KAOS TERCÜMANI", "desc": "kaos damarını üç kez zaferle sindir — her sızıntı başka mutasyon", "done": int(data.get("kaos_wins", 0)) >= 3, "rew": 300},
+		{"name": "KESKİN GÖZ", "desc": "tek koşuda 400 kritik vuruş yap", "done": int(data.get("best_crits", 0)) >= 400, "rew": 250},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı

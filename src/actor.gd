@@ -99,6 +99,8 @@ func take_hit(h: Dictionary) -> void:
 	G.fx.burst(pos + Vector2(0, -12), blood, 14 if h.get("crit", false) else 7, 130.0, 3.0, 0.35, 6.0)
 	if h.get("crit", false):
 		G.audio.play("crit", G.rf(0.95, 1.1), 0.55)
+		if team == G.Team.ENEMY and h.get("source") == G.player and is_instance_valid(G.run):
+			G.run.stats["crits"] = int(G.run.stats.get("crits", 0)) + 1
 	G.fx.float_text(pos + Vector2(0, -30), str(roundi(dmg)), Color(1, 0.85, 0.2) if h.get("crit", false) else Color.WHITE, 1.3 if h.get("crit", false) else 0.9)
 	if team == G.Team.ENEMY:
 		G.fx.splat(pos + Vector2(0, 4), Color(0.35, 0.02, 0.02), 0.5)
