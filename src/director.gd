@@ -65,6 +65,7 @@ var _geo_fired := false    # damar jeotu — çukur koşusunda bir kez
 var _harvest_t := 30.0    # endless-mode reaper cadence
 var _quest_t := 0.0       # 1sn'lik görev tick'i
 var _koz2_fired := false  # 7. dakikada ikinci KOZ taslağı (VS arcana chest)
+var _haz_t := 50.0        # hazine düğümü: yağma yağmuru sayacı
 
 func _process(d: float) -> void:
 	if not running or G.state != G.State.ROOM or G.player == null or G.player.dead:
@@ -254,6 +255,16 @@ func _tick_events(d: float) -> void:
 		G.run.drop_fragments(G.player.pos + Vector2(0, -40), 60)
 		G.run.victory()
 		return
+	# yağma koşusu: kasa açılana dek mahzenden sandık ve kalıntı sızar
+	if _hz and not _won:
+		_haz_t -= d
+		if _haz_t <= 0.0:
+			_haz_t = 70.0
+			var lp := G.room.clamp_pos(G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * G.rf(220.0, 420.0), 60.0)
+			G.room.spawn_chest(lp)
+			var lp2 := G.room.clamp_pos(G.player.pos + Vector2.from_angle(G.rf(0, TAU)) * G.rf(180.0, 380.0), 60.0)
+			G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard", "iksir", "sarap"]), lp2)
+			G.ui.toast("mahzen sızıyor — sandık görüldü")
 	# final boss — kill it to clear the stage
 	if not _hz and not _rush() and not _final and t >= FINAL_T:
 		_final = true
@@ -462,6 +473,12 @@ func _on_boss_dead(b) -> void:
 		Quests.tick("boss", bid)
 	if is_instance_valid(G.room):
 		G.room.boss = null
+		# efendi ölümü sahnede hissedilsin: patlama + hitstop + sarsıntı
+		if is_instance_valid(G.fx):
+			var _fb: bool = b.has_meta("final_boss")
+			G.fx.boom(b.pos, Px.C("ffd75f") if _fb else Px.C("ffb74d"), 170.0 if _fb else 110.0)
+			G.fx.hitstop(0.3 if _fb else 0.18)
+			G.fx.shake(15.0 if _fb else 9.0, 0.5)
 		if b.has_meta("final_boss"):
 			_final_alive -= 1
 			if _final_alive <= 0 and not _won:
