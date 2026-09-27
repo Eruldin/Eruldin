@@ -70,6 +70,7 @@ var data := {
 	"wep_mastery": {},     # silah başına kümülatif hasar — 25K/50K/75K'de kalıcı +%4
 	"node_rec": {},        # node başına rekor: {s: skor, w: zafer, d: yenilgi}
 	"camp_tier": 0,        # kamp büyüme aşaması — talep edilen görev sayısına göre
+	"over_uses": 0,        # toplam AŞIRI YÜK (F) kullanımı
 	"baskin_wins": 0,      # koro baskını altında kazanılan zaferler
 	"contracts_done": 0,  # Ehnar'da tutan sözleşme sayısı
 	"title": "",           # takılı unvan (TITLES id) — koşu sonu ekranlarında görünür
