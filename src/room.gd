@@ -208,6 +208,21 @@ func build_hub() -> void:
 		if G.meta.has_build("sur"):
 			for sp in [Vector2(-560, 300), Vector2(-280, 360), Vector2(0, 380), Vector2(280, 360), Vector2(560, 300)]:
 				_prop(sp, 16, "prop_hub_0")
+		if G.meta.has_build("ahir"):
+			_prop(Vector2(240, 300), 15, "prop_hub_3")
+			_prop(Vector2(280, 330), 11, "prop_hub_5")
+			# ağıldaki sürüngenler kampta gezinir (yakalanmaz — pet işaretli)
+			var fpet: Array = Px.F("c_varl").get("idle", [])
+			for i in mini(int(G.meta.data.get("pets", 0)), 8):
+				var ps := Sprite2D.new()
+				ps.texture = fpet[0] if not fpet.is_empty() else Px.S("dot")
+				ps.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+				Px.fit(ps, 18.0)
+				ps.modulate = Color(0.95, 0.9, 0.6, 0.9)
+				ps.position = Vector2(rng.randf_range(140, 380), rng.randf_range(240, 380))
+				ps.z_index = 30
+				add_child(ps)
+				critters.append({"s": ps, "vel": Vector2(rng.randf_range(-20, 20), rng.randf_range(-20, 20)), "pet": true})
 	if tier > int(G.meta.data.get("camp_tier", 0)):
 		G.meta.data["camp_tier"] = tier
 		G.meta.save()
@@ -877,9 +892,15 @@ func _tick_critters(d: float) -> void:
 			continue
 		var to_p: Vector2 = s.position - G.player.pos
 		var dist := to_p.length()
-		if dist < 24.0:
+		if dist < 24.0 and not bool(c.get("pet", false)):
 			critters.remove_at(i)
-			G.run.drop_fragments(s.position, 3)
+			# Ağıl binası: yakalanan sürüngen kampın hayvanı olur, koşu başına öder
+			if is_instance_valid(G.meta) and G.meta.has_build("ahir") and int(G.meta.data.get("pets", 0)) < 12 and not is_hub:
+				G.meta.data["pets"] = int(G.meta.data.get("pets", 0)) + 1
+				G.meta.save()
+				G.ui.toast("sürüngen ağıla döndü (%d/12)" % int(G.meta.data.get("pets", 0)))
+			else:
+				G.run.drop_fragments(s.position, 3)
 			G.fx.burst(s.position, Px.C("e8c468"), 8, 90.0, 3.0, 0.4)
 			G.audio.play("pickup", G.rf(1.2, 1.4), 0.35)
 			s.queue_free()

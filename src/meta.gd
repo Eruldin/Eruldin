@@ -25,6 +25,7 @@ const BUILDS := {
 	"kule":   {"name": "Nöbet Kulesi",   "cost": 450, "icon": "icn_upg_dash",   "desc": "Kamp gözcüsü — her koşuya koruyucu zarf + iksirle çıkarsın"},
 	"kuyu":   {"name": "Kuyu",           "cost": 500, "icon": "icn_upg_hp",     "req": "yuva", "desc": "Temiz su — her koşunun başında iki şifa küresi sahaya düşer"},
 	"sur":    {"name": "Sur Duvarı",     "cost": 600, "icon": "icn_upg_shield", "req": "kule", "desc": "Kamp surları — her sahada ekstra bir sandık bekler"},
+	"ahir":   {"name": "Ağıl",           "cost": 550, "icon": "icn_kovan",      "req": "kuyu", "desc": "Yakaladığın sürüngenler kampına döner — her biri koşu başına +3 parçacık (en çok 12)"},
 }
 
 const SAVE_PATH := "user://dusus_save.json"
@@ -54,6 +55,7 @@ var data := {
 	"equip": {},           # slot -> item id (7 slots, items.gd)
 	"item_lvl": {},        # item id -> işleme seviyesi (Saphire forge, max 3)
 	"camp_builds": {},     # satın alınan kamp binaları: id -> true
+	"pets": 0,             # ağıla dönen sürüngen sayısı (Ağıl binası)
 	"loot_found": 0,       # lifetime item drops
 	"seen_story": [],      # cinematic cards already shown (one-shot story beats)
 	"story_done": [],      # tamamlanan hikaye düğümleri — haritada tek seferlik duraklar,
@@ -206,7 +208,7 @@ func achievements() -> Array:
 		{"name": "SÖZLEŞME USTASI", "desc": "Ehnar'da 8 sözleşme tuttur", "done": int(data.get("contracts_done", 0)) >= 8, "rew": 200},
 		{"name": "MASA KIRANI", "desc": "Tegan'da 6 bahis tuttur", "done": int(data.get("bets_won", 0)) >= 6, "rew": 180},
 		{"name": "BEŞ GÖVDE", "desc": "beş farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 5, "rew": 400},
-		{"name": "MİMAR", "desc": "kampın beş binasını da kur", "done": (data.get("camp_builds", {}) as Dictionary).size() >= 5, "rew": 350},
+		{"name": "MİMAR", "desc": "kampın altı binasını da kur", "done": (data.get("camp_builds", {}) as Dictionary).size() >= 6, "rew": 350},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
