@@ -61,6 +61,11 @@ const LINES := {
 		"Her düğümün kokusu, her rotanın bedeli var. Ben bilirim — ben ödedim.",
 		"Harita çizilebilir ama kader işaretlenmez, Praetorian. Yine de bir güzergâh borçluyum sana.",
 	],
+	"tegan": [
+		"Kamp ateşinin yanında herkes dua eder; ben oran okurum, Praetorian.",
+		"Kovan bana bir şey öğretti: kesin olan tek şey kaybettirmesi. Ama sen... sen bir anomalisin.",
+		"Zar atmak yasak demedi Rhasa — çünkü beni görmüyor. Sen de görme, sadece oyna.",
+	],
 }
 
 const DEATH_LINES := [
@@ -89,6 +94,7 @@ const NPC_COL := {
 	"elyb": "9db4c8",    # B-serisi şasi — çelik mavisi
 	"mina": "e8a04c",    # aşçı — soba alevi amber
 	"lena": "7fb3c9",    # kartograf — tozlu çelik mavisi
+	"tegan": "2aa6a0",   # simsar — teal-altın pelerin
 }
 
 static var _font: Font
@@ -981,6 +987,8 @@ func dialogue(nid: String) -> void:
 		hint.text = "[E / tık] mutfak"
 	elif nid == "lena":
 		hint.text = "[E / tık] rota"
+	elif nid == "tegan":
+		hint.text = "[E / tık] bahis masası"
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
@@ -1042,6 +1050,9 @@ func _advance_overlay() -> void:
 			elif nid == "lena":
 				_close_overlay()
 				routes_panel()
+			elif nid == "tegan":
+				_close_overlay()
+				bet_panel()
 			elif nid == "saphire":
 				_close_overlay()
 				inventory_panel()
@@ -1171,6 +1182,7 @@ func _service_panel_for(nid: String) -> void:
 		"ahusk":   blessing_panel()
 		"mina":    kitchen_panel()
 		"lena":    routes_panel()
+		"tegan":   bet_panel()
 		"neva":    song_panel()
 		"saphire": inventory_panel()
 		"elyb":    hero_panel()
@@ -2251,6 +2263,72 @@ func routes_panel() -> void:
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
+
+# Simsar Tegan: kamptaki bahisçi — sonraki koşunun sonucuna choralim basar;
+# koşu bitince Run._write_last_run bahsi çözer (kazan → ödeme, yatır → stake yanar)
+const BETS := [
+	{"type": "survive", "need": 360, "stake": 80,  "pay": 190,
+	 "name": "SABIR KÂĞIDI", "desc": "sonraki koşuda 6:00'a ulaşırsan kazanırsın"},
+	{"type": "win",     "need": 0,   "stake": 140, "pay": 430,
+	 "name": "ZAFER YÜKSEĞİ", "desc": "sonraki koşuyu zaferle bitirirsen kazanırsın"},
+]
+
+func bet_panel() -> void:
+	_pause(true)
+	var v := _show_panel("bet", "SİMSAR TEGAN — bahis masası", Px.C("2aa6a0"))
+	var por := TextureRect.new()
+	por.texture = Px.S2("por_tegan")
+	por.custom_minimum_size = Vector2(72, 72)
+	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pc := CenterContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(por)
+	v.add_child(pc)
+	var active: Dictionary = G.meta.data.get("bet", {})
+	var l := _lbl("masada tek bahis oynanır — sonraki koşunun sonucuna basarsın; koşu bitince masa çözer", Vector2.ZERO, 13, Color(0.85, 0.8, 0.7))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l)
+	var money := _lbl("Saf Choralim: ◆ %d" % G.meta.data.choralim, Vector2.ZERO, 12, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
+	if not active.is_empty():
+		var nm := ""
+		for b in BETS:
+			if b.type == active.get("type", ""):
+				nm = b.name
+		var s := _lbl("AKTİF BAHİS: %s — ◆%d bastın, tutarsa ◆%d döner" % [nm, int(active.get("stake", 0)), int(active.get("pay", 0))], Vector2.ZERO, 12, Px.C("ffd700"))
+		s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(s)
+	else:
+		for b in BETS:
+			var btn := Button.new()
+			btn.text = "%s — ◆%d bas → ◆%d (%s)" % [b.name, int(b.stake), int(b.pay), b.desc]
+			btn.disabled = G.meta.data.choralim < int(b.stake)
+			btn.custom_minimum_size = Vector2(430, 30)
+			btn.add_theme_font_override("font", ui_font())
+			var bc := CenterContainer.new()
+			bc.add_child(btn)
+			v.add_child(bc)
+			var dd: Dictionary = b
+			btn.pressed.connect(func():
+				if G.meta.data.choralim >= int(dd.stake):
+					G.meta.data["choralim"] -= int(dd.stake)
+					G.meta.data["bet"] = {"type": dd.type, "stake": int(dd.stake), "pay": int(dd.pay), "need": int(dd.need)}
+					G.meta.save()
+					G.audio.jingle("boon")
+					G.ui.toast("TEGAN: %s masada — ◆%d" % [dd.name, int(dd.stake)])
+					_close_overlay()
+					bet_panel())
+	var won: int = int(G.meta.data.get("bets_won", 0))
+	if won > 0:
+		var wr := _lbl("masada tutan bahis: %d" % won, Vector2.ZERO, 11, Color(0.6, 0.65, 0.5))
+		wr.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(wr)
+	var h2 := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h2)
 
 func blessing_panel() -> void:
 	_pause(true)

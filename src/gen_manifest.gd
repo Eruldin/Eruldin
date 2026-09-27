@@ -22,6 +22,8 @@ const SPRITES := {
 	"prop_mahkum": "art/prop_mahkum.png",
 	"npc2_lena": "art/c_lena_idle_0.png", "npcb_lena": "art/c_lena_idle_1.png",
 	"por_lena": "art/por_lena.png",
+	"npc2_tegan": "art/gen/g_tegan_0.png", "npcb_tegan": "art/gen/g_tegan_1.png",
+	"por_tegan": "art/por_tegan.png",
 	"por_anasi": "art/por_anasi.png",
 	"por_dev": "art/por_dev.png",
 	"por_kor": "art/por_kor.png",

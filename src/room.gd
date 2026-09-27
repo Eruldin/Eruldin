@@ -158,6 +158,8 @@ func build_hub() -> void:
 	# kurtarılmış yolcu: sahada kafesi kırılan Mina kampta mutfağını kurar
 	if bool(G.meta.data.get("rescued_mina", false)):
 		NPC.make("mina", Vector2(-300, 200), self)
+	# kampın kenarında bahis masası kuran gezgin simsar — bahsi koşu sonunda çözülür
+	NPC.make("tegan", Vector2(-460, 170), self)
 	if bool(G.meta.data.get("rescued_lena", false)):
 		NPC.make("lena", Vector2(300, 210), self)
 	# efendi kupaları: düşürülen her boss kamp ateşinin kuzeyinde kafatası bırakır
