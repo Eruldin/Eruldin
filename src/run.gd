@@ -37,6 +37,8 @@ func has_arcana(a: String) -> bool:
 var elite_fever := false   # SARI HAT: elitler %20 sık doğar
 var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var twin_chest := false    # İKİZ SANDIK kozu: her sandık çift doğar
+var waylay_chance := 0.35  # OLAY YERİ kozu: yol olayı olasılığı (1.0 = her seyahat)
+var baskin_plus := false   # NABIZ KURŞUNU kozu: baskın düğümü bereketi artar
 var pending_ambush := false  # YOL OLAYI pusu: arenaya kuşatılmış girilir
 var _skip_waylay := false   # TEKRAR DENE: aynı node'a dönerken yol olayı atlanır
 var _keep_sefer := false    # sefer zinciri: respawn_to_hub sefer sayacını silmez
@@ -141,6 +143,10 @@ func start_run() -> void:
 	if str(G.meta.data.get("hot_node", "")) == nid:
 		for mk in {"spawn": 1.25, "frag": 1.5, "elite_t": 0.8, "loot": 1.3}:
 			node_mods[mk] = float(node_mods.get(mk, 1.0)) * {"spawn": 1.25, "frag": 1.5, "elite_t": 0.8, "loot": 1.3}[mk]
+		if baskin_plus:
+			for mk2 in {"spawn": 1.15, "frag": 1.3, "elite_t": 0.9, "loot": 1.2}:
+				node_mods[mk2] = float(node_mods.get(mk2, 1.0)) * {"spawn": 1.15, "frag": 1.3, "elite_t": 0.9, "loot": 1.2}[mk2]
+			reward_mult *= 1.15
 		frag_node = float(node_mods.get("frag", 1.0))
 		reward_mult *= 1.25
 		G.meta.data["hot_node"] = ""
@@ -187,6 +193,8 @@ func start_run() -> void:
 	elite_fever = false
 	slow_all = false
 	twin_chest = false
+	waylay_chance = 0.35
+	baskin_plus = false
 	curse = 0
 	pending_ambush = false
 	pending_dmg = 0.0
@@ -212,8 +220,8 @@ func start_run() -> void:
 	if _skip_waylay:
 		_skip_waylay = false
 		wk = ""
-	elif wk == "" and randf() < 0.35:
-		wk = G.pick(["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak"])
+	elif wk == "" and randf() < waylay_chance:
+		wk = G.pick(["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi"])
 	if wk != "":
 		G.ui.travel_event(wk, node_name)
 	else:
