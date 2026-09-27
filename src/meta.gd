@@ -151,6 +151,7 @@ func achievements() -> Array:
 		{"name": "ARŞİVCİ", "desc": "8 veri kütüğünü topla", "done": (data.get("lore", []) as Array).size() >= Quests.LORE.size(), "rew": 200},
 		{"name": "DERİN SEÇİLMİŞ", "desc": "3. derinliğe ulaş (3 zafer)", "done": int(data.get("ng", 0)) >= 3, "rew": 300},
 		{"name": "ALTIN KIRICI", "desc": "toplam 10 şampiyon elit kes", "done": int(data.get("champs", 0)) >= 10, "rew": 400},
+		{"name": "DARE KIRAN", "desc": "Yemin Daresini fethet (şifa küresiz zafer)", "done": (data.get("won_nodes", []) as Array).has("yemin"), "rew": 250},
 		{"name": "PROTOKOLÜ KIRAN", "desc": "Aeterna Spire'ı düşür — gerçek sonu gör", "done": bool(data.get("ended", false)), "rew": 500},
 	]
 
@@ -164,6 +165,7 @@ const TITLES := [
 	{"id": "s",       "name": "S SINIFI",       "src": "S SINIFI"},
 	{"id": "kolek",   "name": "KOLEKSİYONER",   "src": "KOLEKSİYONER"},
 	{"id": "kiran",   "name": "PROTOKOLÜ KIRAN", "src": "PROTOKOLÜ KIRAN"},
+	{"id": "dare",    "name": "DARE KIRAN",      "src": "DARE KIRAN"},
 ]
 
 func title_open(tid: String) -> bool:

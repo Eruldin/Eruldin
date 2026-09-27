@@ -660,7 +660,8 @@ func die(h: Dictionary) -> void:
 				sp.speed *= 1.15
 		G.fx.float_text(pos, "BÖLÜNDÜ", Color(1.0, 0.62, 0.3), 16)
 	# nadir şifa küresi — her kesimde %4.5 (mina yemeğiyle ×2), KARANLIK'ta hiç
-	if is_instance_valid(G.room) and G.chance(0.045 * (2.0 if is_instance_valid(G.player) and G.player.has_meta("heal_luck") else 1.0)) and not G.run.dark:
+	var _noheal := G.run.dark or (is_instance_valid(G.run) and bool(G.run.node_mods.get("noheal", false)))
+	if is_instance_valid(G.room) and G.chance(0.045 * (2.0 if is_instance_valid(G.player) and G.player.has_meta("heal_luck") else 1.0)) and not _noheal:
 		G.room.spawn_heal(pos)
 	# HASAT ŞENLİĞİ kozu: kesim başına küçük parçacık damlası
 	if is_instance_valid(G.run) and is_instance_valid(G.player) and G.player.has_meta("harvest") and G.chance(0.02):

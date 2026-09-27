@@ -121,6 +121,8 @@ func start_run() -> void:
 		reward_mult *= float(daily.get("rew", 1.0))
 		frag_node = float(node_mods.get("frag", 1.0))
 		stats["daily"] = str(daily.name)
+	if bool(node_mods.get("noheal", false)):
+		G.ui.toast("YEMİN DARESİ — şifa küresi düşmez, tek yaşamla sınan")
 	alive = true
 	endless = false
 	time = 0.0
