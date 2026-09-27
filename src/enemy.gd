@@ -340,6 +340,18 @@ func promote_champ() -> void:
 	G.fx.mk_light(self, Vector2(0, -18), Px.C("ffd700"), 0.85, 2.2)
 	G.fx.flash(Px.C("ffd700"), 0.18)
 	G.audio.play("roar", 0.5, 0.55)
+	# kan davası: bazı şampiyonlar geri dönen KOPUZ olur — her kesim bir sonrakini büyütür
+	if G.chance(0.30):
+		var nl: int = int(G.meta.data.get("nemesis_lvl", 0)) + 1
+		set_meta("nemesis", nl)
+		max_hp *= 1.0 + 0.35 * nl
+		hp = max_hp
+		touch_dmg *= 1.0 + 0.12 * nl
+		actor_name = "KOPUZ (kan davası %d)" % nl
+		base_color = Color(1.0, 0.45, 0.2)
+		G.fx.mk_light(self, Vector2(0, -30), Px.C("ff5252"), 0.7, 2.8)
+		if is_instance_valid(G.ui):
+			G.ui.toast("KOPUZ geri döndü — kan davası %d. perde" % nl)
 
 func init() -> void:
 	super.init()
@@ -1010,6 +1022,13 @@ func die(h: Dictionary) -> void:
 					G.ui.toast("EFSANEVİ PARÇA düştü")
 					G.audio.play("roar", 0.8, 0.5)
 				G.fx.shake(0.3, 0.45)
+			if has_meta("nemesis"):
+				var nl2 := int(get_meta("nemesis"))
+				G.meta.data["nemesis_lvl"] = nl2
+				G.meta.data["nemesis_kills"] = int(G.meta.data.get("nemesis_kills", 0)) + 1
+				G.meta.save()
+				G.run.drop_fragments(pos + Vector2(0, 24), 20 + nl2 * 8)
+				G.ui.toast("KOPUZ düştü — kovan onu yeniden kuracak")
 			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
 			Quests.tick("elites")
 			G.fx.flash(Px.C("ffd75f"), 0.13)
