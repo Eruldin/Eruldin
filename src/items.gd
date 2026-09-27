@@ -115,6 +115,10 @@ const DEFS := {
 	"i_onluk":     {"name": "Ocak Önlüğü",     "slot": "govde",   "r": 2, "icon": "icn_upg_shield", "mods": {"hp": 22, "armor": 0.6}},
 	"i_tayfperde": {"name": "Tayf Pelerini",   "slot": "govde",   "r": 3, "icon": "icn_dash",       "mods": {"spd": 0.06, "dash_regen": 0.18, "skill": -0.06}},
 	"i_nurfener": {"name": "Ufuk Feneri",     "slot": "kolye",   "r": 3, "icon": "icn_crown",      "mods": {"skill": -0.12, "xp": 0.12, "ls": 0.02, "frag": 0.1}},
+	# yansıtma (thorns): alınan yakın dövüş hasarının bir kısmı saldırana döner
+	"i_dikenman": {"name": "Dikenli Manşon",  "slot": "eldiven", "r": 2, "icon": "icn_upg_shield", "mods": {"armor": 0.8, "thorns": 0.18}},
+	"i_kirpikemer":{"name": "Kirpi Kuşağı",   "slot": "kemer",   "r": 2, "icon": "icn_kovan",      "mods": {"hp": 14, "thorns": 0.15}},
+	"i_dikenyuzuk":{"name": "Diken Yüzüğü",   "slot": "yuzuk",   "r": 3, "icon": "icn_dagger",     "mods": {"thorns": 0.25, "crit": 0.03}},
 }
 
 const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700", "ff4fd8", "f5f5f5"]
@@ -430,7 +434,7 @@ static func stat_text(id: String) -> String:
 	var names := {"hp": "can", "armor": "zırh", "dmg": "hasar", "spd": "hız",
 		"crit": "kritik", "critmult": "kritik×", "ls": "can emme", "mag": "mıknatıs",
 		"xp": "XP", "frag": "parçacık", "dash_regen": "dash yenileme", "revive": "dirilme",
-		"skill": "Q bekleme"}
+		"skill": "Q bekleme", "thorns": "yansıtma"}
 	var parts: Array = []
 	for k in d.mods:
 		var f := float(d.mods[k]) * (1.0 if k == "revive" else _lscale(id))

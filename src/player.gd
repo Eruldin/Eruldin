@@ -14,6 +14,7 @@ var crit_ch := 0.05
 var crit_mult := 2.0
 var dmg_taken_mult := 1.0
 var lifesteal := 0.0
+var thorns := 0.0         # eşya modu: alınan melee hasarının saldırana dönen kısmı
 var heal_on_kill := 0.0
 var dash_max := 1
 var dash_regen := 1.1
@@ -694,6 +695,10 @@ func take_hit(h: Dictionary) -> void:
 		chill_t = maxf(chill_t, 1.6)
 		G.fx.float_text(pos + Vector2(0, -62), "DONAKALDIN!", Px.C("bfe8ff"), 0.9)
 		G.fx.burst(pos + Vector2(0, -10), Px.C("bfe8ff"), 10, 120.0, 3.0, 0.3)
+	# yansıtma (thorns): alınan yakın dövüş hasarının bir kısmı saf hasar olarak saldırana döner
+	if thorns > 0.0 and is_instance_valid(src) and src is Actor and not src.dead and h.get("type") == G.DamageType.MELEE:
+		src.take_hit({"dmg": dmg * thorns, "type": G.DamageType.PURE, "from": pos, "knock": 0.0, "source": self})
+		G.fx.burst(src.pos, Px.C("8ea0b5"), 4, 70.0, 2.5, 0.2)
 	set_flash()
 	_anim = ""
 	_set_anim("hurt", 6.0)
@@ -736,7 +741,7 @@ func reset_for_run() -> void:
 	# wipe run-scoped boons/metas, re-apply meta upgrades, full heal
 	melee_dmg = 14.0; plasma_dmg = 26.0; dmg_mult = 1.0; plasma_mult = 1.0
 	atk_speed = 1.0; crit_ch = 0.05; crit_mult = 2.0; dmg_taken_mult = 1.0
-	lifesteal = 0.0; heal_on_kill = 0.0; dash_regen_mult = 1.0
+	lifesteal = 0.0; heal_on_kill = 0.0; dash_regen_mult = 1.0; thorns = 0.0
 	b_gravity_well = false; b_homing = false; b_poison = false
 	b_emp = false; b_parry_shock = false; b_stealth_dash = false
 	stealth_t = 0.0; revived = false; revives_extra = 0; boost_t = 0.0; _over_used = 0; _over_held = false
@@ -788,6 +793,7 @@ func reset_for_run() -> void:
 	frag_mult += float(eq.get("frag", 0.0))
 	dash_regen_mult += float(eq.get("dash_regen", 0.0))
 	revives_extra += int(eq.get("revive", 0))
+	thorns += float(eq.get("thorns", 0.0))
 	hp = max_hp
 	dash_charges = dash_max
 	_apply_hero()

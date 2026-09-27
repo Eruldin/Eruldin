@@ -1773,12 +1773,12 @@ func inventory_panel() -> void:
 					inventory_panel())
 		top.add_child(cell)
 	var stats_txt := []
-	for k in ["hp", "armor", "dmg", "spd", "crit", "critmult", "ls", "mag", "xp", "dash_regen", "revive", "skill"]:
+	for k in ["hp", "armor", "dmg", "spd", "crit", "critmult", "ls", "mag", "xp", "dash_regen", "revive", "skill", "thorns"]:
 		var f := float(estats.get(k, 0))
 		if f == 0.0:
 			continue
 		var fmt := "%+d" % int(f) if absf(f) >= 1.5 else "%+d%%" % int(f * 100)
-		stats_txt.append("%s %s" % [fmt, {"hp": "can", "armor": "zırh", "dmg": "hasar", "spd": "hız", "crit": "kritik", "critmult": "kritik×", "ls": "can emme", "mag": "mıknatıs", "xp": "XP", "dash_regen": "dash yenileme", "revive": "dirilme", "skill": "Q bekleme"}[k]])
+		stats_txt.append("%s %s" % [fmt, {"hp": "can", "armor": "zırh", "dmg": "hasar", "spd": "hız", "crit": "kritik", "critmult": "kritik×", "ls": "can emme", "mag": "mıknatıs", "xp": "XP", "dash_regen": "dash yenileme", "revive": "dirilme", "skill": "Q bekleme", "thorns": "yansıtma"}[k]])
 	var sl2 := _lbl("ekipman toplamı:  %s" % ("   ·   ".join(stats_txt) if not stats_txt.is_empty() else "—"), Vector2.ZERO, 11, Color(0.7, 0.8, 0.9))
 	sl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sl2)
@@ -1808,7 +1808,7 @@ func inventory_panel() -> void:
 	if stash_sorted.is_empty():
 		var l := _lbl("zula boş — elitler ve boss'lar eşya düşürür", Vector2.ZERO, 12, Color(0.5, 0.5, 0.6))
 		grid.add_child(l)
-	var stat_names := {"hp": "can", "armor": "zırh", "dmg": "hasar", "spd": "hız", "crit": "kritik", "critmult": "kritik×", "ls": "can emme", "mag": "mıknatıs", "xp": "XP", "dash_regen": "dash yenileme", "revive": "dirilme", "skill": "Q bekleme", "frag": "parçacık", "siphon": "yük", "over": "aşırı"}
+	var stat_names := {"hp": "can", "armor": "zırh", "dmg": "hasar", "spd": "hız", "crit": "kritik", "critmult": "kritik×", "ls": "can emme", "mag": "mıknatıs", "xp": "XP", "dash_regen": "dash yenileme", "revive": "dirilme", "skill": "Q bekleme", "frag": "parçacık", "siphon": "yük", "over": "aşırı", "thorns": "yansıtma"}
 	for iid in stash_sorted:
 		var d: Dictionary = Items.DEFS.get(str(iid), {})
 		if d.is_empty():
