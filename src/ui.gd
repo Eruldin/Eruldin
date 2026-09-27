@@ -2076,6 +2076,9 @@ func contract_panel() -> void:
 	var l3 := _lbl(prog, Vector2.ZERO, 11, Color(0.6, 0.6, 0.72))
 	l3.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(l3)
+	var l4 := _lbl("tutan sözleşme: %d" % int(G.meta.data.get("contracts_done", 0)), Vector2.ZERO, 11, Px.C("c9a227"))
+	l4.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l4)
 	var h := _lbl("[E / tık] kapat — sözleşme kampa döndüğünde değerlendirilir", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)

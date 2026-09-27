@@ -69,6 +69,7 @@ var data := {
 	"wep_mastery": {},     # silah başına kümülatif hasar — 25K/50K/75K'de kalıcı +%4
 	"node_rec": {},        # node başına rekor: {s: skor, w: zafer, d: yenilgi}
 	"baskin_wins": 0,      # koro baskını altında kazanılan zaferler
+	"contracts_done": 0,  # Ehnar'da tutan sözleşme sayısı
 	"title": "",           # takılı unvan (TITLES id) — koşu sonu ekranlarında görünür
 	"kind_kills": {},      # tür-bazlı toplam kesimler (Zirkon kayıtları)
 	"best_streak_all": 0,  # tüm zamanların en uzun serisi
@@ -156,6 +157,7 @@ func achievements() -> Array:
 		{"name": "DARE KIRAN", "desc": "Yemin Daresini fethet (şifa küresiz zafer)", "done": (data.get("won_nodes", []) as Array).has("yemin"), "rew": 250},
 		{"name": "PROTOKOLÜ KIRAN", "desc": "Aeterna Spire'ı düşür — gerçek sonu gör", "done": bool(data.get("ended", false)), "rew": 500},
 		{"name": "BASKIN AVCISI", "desc": "koro baskını altında 3 zafer kazan", "done": int(data.get("baskin_wins", 0)) >= 3, "rew": 220},
+		{"name": "SÖZLEŞME USTASI", "desc": "Ehnar'da 8 sözleşme tuttur", "done": int(data.get("contracts_done", 0)) >= 8, "rew": 200},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
@@ -168,6 +170,7 @@ const TITLES := [
 	{"id": "s",       "name": "S SINIFI",       "src": "S SINIFI"},
 	{"id": "kolek",   "name": "KOLEKSİYONER",   "src": "KOLEKSİYONER"},
 	{"id": "baskin",  "name": "BASKIN KIRICI",  "src": "BASKIN AVCISI"},
+	{"id": "sozlesme","name": "SÖZLEŞME KILICI", "src": "SÖZLEŞME USTASI"},
 	{"id": "kiran",   "name": "PROTOKOLÜ KIRAN", "src": "PROTOKOLÜ KIRAN"},
 	{"id": "dare",    "name": "DARE KIRAN",      "src": "DARE KIRAN"},
 ]

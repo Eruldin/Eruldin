@@ -377,6 +377,10 @@ const CONTRACTS := [
 	{"key": "level", "need": 10,  "reward": 40},
 	{"key": "level", "need": 16,  "reward": 70},
 	{"key": "win",   "need": 1,   "reward": 120},
+	{"key": "elites","need": 8,   "reward": 70},
+	{"key": "elites","need": 16,  "reward": 110},
+	{"key": "frag",  "need": 900, "reward": 65},
+	{"key": "frag",  "need": 1800,"reward": 100},
 ]
 
 func contract_text(c: Dictionary) -> String:
@@ -387,6 +391,8 @@ func contract_text(c: Dictionary) -> String:
 		"time":  return "Tek koşuda %d saniye dayan" % int(c.need)
 		"level": return "Tek koşuda seviye %d'e ulaş" % int(c.need)
 		"win":   return "Son efendiyi düşür ve dön"
+		"elites": return "Tek koşuda %d elit kes" % int(c.need)
+		"frag":  return "Tek koşuda %d parçacık topla" % int(c.need)
 	return "—"
 
 func _write_last_run(win: bool) -> void:
@@ -424,6 +430,8 @@ func _write_last_run(win: bool) -> void:
 		"time": int(time),
 		"level": G.player.level if is_instance_valid(G.player) else 1,
 		"win": win,
+		"elites": int(stats.get("elite_kills", 0)),
+		"frag": fragments,
 	}
 	# koşu geçmişi — Zirkon'un arşivi, son 5 koşu
 	var hist: Array = G.meta.data.get("history", [])
@@ -461,6 +469,8 @@ func _contract_met(c: Dictionary, lr: Dictionary) -> bool:
 		"time":  return int(lr.get("time", 0)) >= int(c.need)
 		"level": return int(lr.get("level", 0)) >= int(c.need)
 		"win":   return bool(lr.get("win", false))
+		"elites": return int(lr.get("elites", 0)) >= int(c.need)
+		"frag":  return int(lr.get("frag", 0)) >= int(c.need)
 	return false
 
 # evaluate the last run against Ehnar's contract, then hand out the next one
@@ -471,6 +481,7 @@ func _contract_tick() -> void:
 		G.meta.add_choralim(r)
 		G.ui.toast("EHNAR: sözleşme tuttu — +%d◆" % r)
 		G.audio.jingle("boon")
+		G.meta.data["contracts_done"] = int(G.meta.data.get("contracts_done", 0)) + 1
 		c = {}
 	if c.is_empty():
 		var nxt: Dictionary = CONTRACTS[randi() % CONTRACTS.size()]
