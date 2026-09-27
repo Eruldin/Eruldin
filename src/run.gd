@@ -288,6 +288,16 @@ func _enter_arena() -> void:
 		comp.cd = 0.85
 		comp.tint(Px.C("ffd75f"))
 		G.ui.toast("YOLDAŞ yanında — muhafız dronu koşu boyunca seninle")
+	if bool(G.meta.data.get("hired_merc", false)):
+		G.meta.data["hired_merc"] = false
+		G.meta.save()
+		var merc := Drone.spawn(1)
+		merc.dmg = 22.0
+		merc.cd = 0.7
+		merc.walk = true
+		merc.set_sprite("npcb_ehnar")
+		merc.tint(Color(1.0, 0.92, 0.75))
+		G.ui.toast("PARALI MUHAFIZ yanında — Orun'un adamı koşu boyunca seninle")
 	if pending_dmg > 0.0:
 		G.player.hp = maxf(1.0, G.player.hp - pending_dmg)
 		pending_dmg = 0.0

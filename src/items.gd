@@ -316,7 +316,7 @@ static func forge_price(id: String) -> int:
 	var d: Dictionary = DEFS.get(id, {})
 	if d.is_empty() or item_lvl(id) >= 3:
 		return 0
-	return Quests.rep_price(int([70, 130, 240, 420][int(d.r)] * (item_lvl(id) + 1) * (0.75 if G.meta.has_build("atolye") else 1.0)))
+	return Quests.rep_price(int([70, 130, 240, 420, 700][mini(int(d.r), 4)] * (item_lvl(id) + 1) * (0.75 if G.meta.has_build("atolye") else 1.0)))
 
 static func forge(id: String) -> int:
 	var p := forge_price(id)
@@ -334,7 +334,7 @@ static func sell_price(id: String) -> int:
 	var d: Dictionary = DEFS.get(id, {})
 	if d.is_empty():
 		return 0
-	return [20, 50, 110, 190][int(d.r)]
+	return [20, 50, 110, 190, 320][mini(int(d.r), 4)]
 
 static func sell(id: String) -> int:
 	var st: Array = G.meta.data.get("stash", [])

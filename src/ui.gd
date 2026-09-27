@@ -2745,6 +2745,26 @@ func orun_panel() -> void:
 			G.ui.toast("nabız kaydı — %s üzerinde atıyor" % str(Wmap.node(G.meta.data["hot_node"]).get("name", "?")))
 			_close_overlay()
 			orun_panel())
+	# paralı muhafız: BG2 yoldaş arketipi — koşu boyunca yaya eskort
+	var mprice := Quests.rep_price(140)
+	var merc_on := bool(G.meta.data.get("hired_merc", false))
+	var btn2 := Button.new()
+	btn2.text = "MUHAFIZ HAZIR — sonraki koşuda seninle" if merc_on else "PARALI MUHAFIZ — ◆%d (sonraki koşuda eski müfrette adamı yanında)" % mprice
+	btn2.disabled = merc_on or G.meta.data.choralim < mprice
+	btn2.custom_minimum_size = Vector2(430, 30)
+	btn2.add_theme_font_override("font", ui_font())
+	var bc2 := CenterContainer.new()
+	bc2.add_child(btn2)
+	v.add_child(bc2)
+	btn2.pressed.connect(func():
+		if G.meta.data.choralim >= mprice and not bool(G.meta.data.get("hired_merc", false)):
+			G.meta.data["choralim"] -= mprice
+			G.meta.data["hired_merc"] = true
+			G.meta.save()
+			G.audio.jingle("boon")
+			G.ui.toast("muhafız kiralandı — sonraki koşuda yanında")
+			_close_overlay()
+			orun_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)

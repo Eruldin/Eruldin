@@ -13,9 +13,11 @@ var idx := 0
 var total := 1
 var anchor := false    # nöbet kulesi modu: süzülmez, kurulduğu yerde durur
 var life := -1.0       # anchor'lı dronlar süreli yaşar
+var walk := false      # paralı muhafız modu: yörünge yerine yaya takip eder
 var spr: Sprite2D
 var _t := 0.5
 var _ang := 0.0
+var _bob := 0.0
 
 static func spawn(idx2: int) -> Drone:
 	var d := Drone.new()
@@ -36,6 +38,14 @@ func tint(col: Color) -> void:
 	if is_instance_valid(spr):
 		spr.modulate = col
 
+func set_sprite(key: String) -> void:
+	if is_instance_valid(spr):
+		var t := Px.S2(key)
+		if t != null:
+			spr.texture = t
+			spr.scale = Vector2.ONE * 1.15
+			spr.offset = Vector2(0, -t.get_height() * 0.5)
+
 func _process(d: float) -> void:
 	if G.state != G.State.ROOM:
 		queue_free()
@@ -49,7 +59,17 @@ func _process(d: float) -> void:
 			G.fx.burst(position, Px.C("ffb74d"), 8, 120.0, 3.0, 0.3)
 			queue_free()
 			return
-	if not anchor:
+	if walk:
+		# yaya eskort: oyuncunun ardında kalır, yürürken hafif yaylanır
+		var side := -40.0 if p.pos.x >= position.x else 40.0
+		var want := p.pos + Vector2(side, -8.0)
+		var dist := position.distance_to(want)
+		if dist > 6.0:
+			position = position.move_toward(want, minf(dist, 230.0 * d))
+			_bob += d * 10.0
+			spr.position.y = sin(_bob) * 2.0
+			spr.flip_h = (want.x - position.x) < 0.0
+	elif not anchor:
 		_ang += d * 1.9
 		var want := p.pos + Vector2.from_angle(_ang + TAU * float(idx) / maxf(1.0, float(total))) * 56.0 + Vector2(0, -16)
 		position = position.lerp(want, minf(1.0, d * 5.5))
