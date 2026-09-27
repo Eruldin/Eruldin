@@ -55,6 +55,7 @@ const DEFS := [
 	{"id": "q_kayit", "giver": "zirkon",  "name": "VERİ AVCISI",          "desc": "Sahalarda hâlâ kütük parçaları saçılı. Beş veri kütüğü topla — arşiv senden borçlu kalacak.", "obj": {"type": "kayit", "n": 5}, "rew": {"cho": 180, "item": "i_merdiven"}, "prereq": "q_final"},
 	{"id": "q_sampiyon","giver": "ehnar", "name": "ALTIN TEHDİT",        "desc": "Geç saatlerde altınla parlayan şampiyonlar geziyor — birini kes, madalyonun benim olsun.", "obj": {"type": "champ", "n": 1}, "rew": {"cho": 220}, "prereq": "q_nobet2"},
 	{"id": "q_anil",  "giver": "david",   "name": "SON İZLER",            "desc": "Müfretemin son izi Kül Ovası'nda bitti. Altı sahayı da gör — haritanın tamamı yankılansın, eski defter kapansın.", "obj": {"type": "biomes", "n": 6}, "rew": {"cho": 300, "cine": [{"tex": "por_david", "title": "DAVID", "sub": "Hepsini gördün. Müfretemin izi artık haritada değil — hatırada."}, {"tex": "cine_5_0", "title": "SON İZ", "sub": "Kül Ovası'nın kenarında yarım bir izcilik nişanı: S-7. Geri getiren tek parçacık oydu."}]}, "prereq": "q_kul"},
+	{"id": "q_tekel", "giver": "saphire", "name": "TEKEL BARIŞI",        "desc": "Açgöz bobinleri hâlâ işliyor — tek koşuda 1800 parçacık biriktir, bobinin kalibrasyon hakkı senin.", "obj": {"type": "frag", "n": 1800}, "rew": {"cho": 260}, "prereq": "q_damar"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
