@@ -86,6 +86,7 @@ const NODES := [
 		{"label": "KERVANI GÖM — yüke dokunma", "sub": "Defterin dediği gibi: bazı yükler buzda kalmalı. Kervanı kar altında göm, itibarın artsın, buzdan bir kalp hatıra kalsın.", "rew": {"cho": 100, "rep": 2, "item": "i_buzkalp", "cine": [{"tex": "cine_8_0", "title": "KERVAN GÖMÜLDÜ", "sub": "On iki deve ve dört arabacı kar altında. Buzda bekleyen yüke kimse dokunmadı — ve kuzey, seni ilk kez selamladı."}]}},
 	]},
 	{"id": "buzkasa","name": "BUZ KASASI",       "icon": "ico_loot",   "pos": Vector2(1505, 445), "col": "9fd8ff", "kind": "hazine","biome": 8, "unlock": "node", "desc": "Buzulun karnına gömülü imparatorluk kasası — efendi yok; buz mührü 6 dakika sonra çatlar, içi donmuş ganimet.", "lore": "Kervan defterinin kastettiği 'yük' bu kasaydı — imparatorluk choralim stokunu buza emanet etti. Buz Anası düşünce mühürdeki sesten pay alamadı; şimdi kasa sadece sabır istiyor.", "mods": {"loot": 2.7, "frag": 2.2, "hp": 1.2, "spawn": 1.15, "elite_t": 0.7}},
+	{"id": "damarkasa","name": "DAMAR KASASI",  "icon": "ico_loot",   "pos": Vector2(1300, 640), "col": "80ffd4", "kind": "hazine","biome": 7, "unlock": "node", "desc": "Çukurun dibinde damara gömülü zula — efendi yok; kristal mühür 6 dakika sonra düşer, içi ham choralim.", "lore": "Maden barakasının defterinde 'ana kasa damarın göbeğine gömüldü — mühür damardan besleniyor' yazar. Kasa kristalin içinde büyümüş; altı dakikalık sessizlik onu çözüyor.", "mods": {"loot": 2.6, "frag": 2.3, "hp": 1.15, "spawn": 1.2, "elite_t": 0.75, "dusk": true}},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -127,6 +128,7 @@ const EDGES := [
 	["buzul", "beyazufuk"], ["kervan", "beyazufuk"],
 	["beyazufuk", "buzkasa"], ["buzul", "buzkasa"],
 	["batak", "batikfener"], ["damar", "batikfener"],
+	["cukur", "damarkasa"], ["damar", "damarkasa"], ["kaos", "damarkasa"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için
