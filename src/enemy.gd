@@ -592,6 +592,20 @@ func _process(_d: float) -> void:
 	_tick_anim(d)
 
 func _seek(d: float) -> void:
+	# konvoy hamalı: oyuncuyu değil geçiş hattını izler — çıkışa varırsa ganimetiyle kaçar
+	if has_meta("convoy_dir"):
+		var cdir: Vector2 = get_meta("convoy_dir")
+		pos += cdir * speed * 1.15 * d
+		if is_instance_valid(G.room):
+			pos = G.room.clamp_pos(pos, radius)
+		if cdir.x != 0.0:
+			body.flip_h = cdir.x < 0.0
+		if pos.distance_to(get_meta("convoy_exit")) < 60.0:
+			G.fx.float_text(pos + Vector2(0, -34), "ganimet kaçtı", Px.C("ffd700"), 0.7)
+			G.fx.burst(pos, base_color, 8, 90.0, 3.0, 0.3)
+			G.enemies.erase(self)
+			queue_free()
+		return
 	var to_p: Vector2 = G.player.pos - pos
 	var dist := to_p.length()
 	# arena leash: far stragglers recycle back onto the off-screen ring

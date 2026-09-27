@@ -405,7 +405,29 @@ func _surge(m: float) -> void:
 	var shapes := ["ring", "wall", "hunt", "twins", "devriye"]
 	if m >= 4.5:
 		shapes.append("alay")
+	if m >= 5.5:
+		shapes.append("nakliye")
 	match shapes[randi() % shapes.size()]:
+		"nakliye":
+			# koro nakliyesi — muhafız kordonuyla sahayı boydan boya geçen hamal
+			# konvoyu; hamallar çıkışa varmadan düşürülmezse ganimet kaçar
+			G.ui.toast("KORO NAKLİYESİ — hamallar geçiyor, ganimetle!")
+			var ang3 := G.rf(0.0, TAU)
+			var entry3 := G.room.clamp_pos(G.player.pos + Vector2.from_angle(ang3) * 900.0, 30.0)
+			var exit3 := G.room.clamp_pos(G.player.pos + Vector2.from_angle(ang3 + PI) * 900.0, 30.0)
+			var dir3 := (exit3 - entry3).normalized()
+			var perp3 := dir3.orthogonal()
+			for i in 3:
+				var pp := entry3 + dir3 * float(i) * 46.0 + perp3 * G.rf(-14.0, 14.0)
+				var c := Enemy.spawn(Enemy.EKind.CARRIER, G.room.clamp_pos(pp, 20.0), false, _hp_scale() * 0.9, _dmg_scale(), G.room)
+				if c != null:
+					c.set_meta("convoy_dir", dir3)
+					c.set_meta("convoy_exit", exit3)
+			var gn := mini(7, 3 + int(m * 0.7))
+			for i in gn:
+				var gp := entry3 + dir3 * G.rf(-40.0, 140.0) + perp3 * G.rf(-60.0, 60.0)
+				var gk := Enemy.EKind.MUHFIZ if i % 3 == 0 else Enemy.EKind.ALFA
+				Enemy.spawn(gk, G.room.clamp_pos(gp, 20.0), false, _hp_scale() * 0.9, _dmg_scale(), G.room)
 		"devriye":
 			# koro devriyesi — kenardan oyuncuya yürüyen kol; başı elit, ödülü bol
 			G.ui.toast("KORO DEVRİYESİ — kol geçiyor")
