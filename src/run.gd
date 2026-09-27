@@ -27,6 +27,7 @@ var endless := false      # victory'den sonra SONSUZ mod — kovan geri döner, 
 var time := 0.0           # seconds survived this run (Director drives it)
 var pending_drafts := 0     # queued level-up drafts
 var draft_reroll := false   # one card reroll available per level-up draft
+var koz_rerolled := false   # Kader Tahtası binası — koşuda bir kez KOZ taslağı yenileme
 var draft_banish := false   # one card banish available per level-up draft
 var banished: Array = []    # ids kovulanlar — bu koşuda draft'a girmez
 var arcana := ""           # koşu başında seçilen KOZ kartı (VS arcana)
@@ -231,6 +232,7 @@ func start_run() -> void:
 	endless = false
 	time = 0.0
 	pending_drafts = 0
+	koz_rerolled = false
 	banished.clear()
 	arcana = ""
 	arcana2 = ""

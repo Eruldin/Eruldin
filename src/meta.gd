@@ -33,6 +33,7 @@ const BUILDS := {
 	"kehne":  {"name": "Kehanet Ocağı",   "cost": 750, "icon": "icn_crown",      "req": "kule",   "desc": "Koz kartlarını okuyan ocak — kader taslağı artık 4 kart sunar"},
 	"talim":  {"name": "Talim Sahası",    "cost": 800, "icon": "icn_upg_dmg",    "req": "atolye", "desc": "Ehnar'ın idman meydanı — koşuya 2. seviyeden başlarsın (ilk taslak bedava)"},
 	"umbar":  {"name": "Erzak Ambarı",    "cost": 700, "icon": "icn_upg_frag",   "req": "yuva",   "desc": "Mina'nın kileri — iksir ve şarap karnen birer adet büyür"},
+	"tahta":  {"name": "Kader Tahtası",   "cost": 900, "icon": "icn_crown",      "req": "kehne",  "desc": "Koz yazıtlarının tahtası — kader taslağı koşuda bir kez yenilenebilir"},
 }
 
 const SAVE_PATH := "user://dusus_save.json"
