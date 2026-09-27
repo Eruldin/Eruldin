@@ -224,6 +224,7 @@ func achievements() -> Array:
 		{"name": "BEŞ GÖVDE", "desc": "beş farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 5, "rew": 400},
 		{"name": "ALTI GÖVDE", "desc": "altı farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 6, "rew": 500},
 		{"name": "MİMAR", "desc": "kampın altı binasını da kur", "done": (data.get("camp_builds", {}) as Dictionary).size() >= 6, "rew": 350},
+		{"name": "SEFERKÂR", "desc": "üç ayaklık sefer zinciri kur", "done": int(data.get("sefer_best", 0)) >= 3, "rew": 200},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
@@ -250,6 +251,7 @@ const TITLES := [
 	{"id": "govde",   "name": "ÇOK GÖVDELİ",      "src": "BEŞ GÖVDE"},
 	{"id": "damarguc","name": "DAMARGÜÇ",         "src": "ALTI GÖVDE"},
 	{"id": "mimar",   "name": "KAMP MİMARI",      "src": "MİMAR"},
+	{"id": "sefer",   "name": "ZİNCİR TAŞIYAN",   "src": "SEFERKÂR"},
 ]
 
 func title_open(tid: String) -> bool:
