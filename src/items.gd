@@ -58,6 +58,9 @@ const DEFS := {
 	"i_balcikkalp": {"name": "Balçık Kalbi", "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 30, "ls": 0.02}},
 	"i_praetorian": {"name": "Praetorian Gövdesi", "slot": "govde", "r": 3, "icon": "icn_upg_shield", "mods": {"hp": 60, "armor": 1.2}},
 	"i_soykemer": {"name": "Soy Kemeri",      "slot": "kemer",   "r": 3, "icon": "icn_crown",      "mods": {"dmg": 0.07, "xp": 0.10}},
+	"i_efendipence": {"name": "Efendi Pencesi", "slot": "eldiven", "r": 3, "icon": "icn_dagger",   "mods": {"dmg": 0.10, "crit": 0.05}},
+	"i_kozcizme": {"name": "Koz Çizmesi",     "slot": "cizme",   "r": 3, "icon": "icn_dash",       "mods": {"spd": 0.05, "dash_regen": 0.20}},
+	"i_nuve":     {"name": "Nüve Halkası",    "slot": "yuzuk",   "r": 3, "icon": "ico_frag",       "mods": {"frag": 0.18, "mag": 45.0}},
 	# kemer slotu — 8. ekipman yuvası
 	"i_kemer_kum": {"name": "Kum Kemeri",      "slot": "kemer",   "r": 0, "icon": "icn_dash",       "mods": {"spd": 0.04, "mag": 25.0}},
 	"i_kemer_par": {"name": "Parazit Kemeri",  "slot": "kemer",   "r": 1, "icon": "icn_kovan",      "mods": {"hp": 18, "ls": 0.015}},
