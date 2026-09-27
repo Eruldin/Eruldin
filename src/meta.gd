@@ -193,6 +193,7 @@ func achievements() -> Array:
 		{"name": "ÇUKURUN EFENDİSİ", "desc": "Damar Kalbi'ni düşür", "done": (data["bosses"] as Array).has("damar"), "rew": 200},
 		{"name": "BUZ KIRICI", "desc": "Buz Anası'nı düşür", "done": (data["bosses"] as Array).has("buz"), "rew": 200},
 		{"name": "FENER SÖNDÜREN", "desc": "Nur'u düşür", "done": (data["bosses"] as Array).has("nur"), "rew": 240},
+		{"name": "HAZİNE AVCISI", "desc": "iki hazine düğümünü de yağmala", "done": int(data.get("hazine_wins", 0)) >= 2, "rew": 220},
 		{"name": "DERİN GEZGİN", "desc": "tek koşuda 10+ dakika dayan", "done": int(data["best_depth"]) >= 600 or int(data["victories"]) > 0, "rew": 100},
 		{"name": "İNATÇI", "desc": "10 koşuya çık", "done": int(data["runs"]) >= 10, "rew": 80},
 		{"name": "TAM ARSENAL", "desc": "tüm silahların kilidini aç", "done": arsenal, "rew": 250},
@@ -257,6 +258,7 @@ const TITLES := [
 	{"id": "sefer",   "name": "ZİNCİR TAŞIYAN",   "src": "SEFERKÂR"},
 	{"id": "lanet",   "name": "LANET KIRANI",     "src": "LANET KIRANI"},
 	{"id": "nur",     "name": "UFUK KIRICI",      "src": "FENER SÖNDÜREN"},
+	{"id": "kasa",    "name": "KASACI",           "src": "HAZİNE AVCISI"},
 ]
 
 func title_open(tid: String) -> bool:
