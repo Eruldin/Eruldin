@@ -183,6 +183,12 @@ func _enter_arena() -> void:
 		G.meta.save()
 		G.player.xp_mult *= 1.15
 		G.ui.toast("NEVA'NIN ŞARKISI — bu koşuda +%15 XP")
+	if bool(G.meta.data.get("mina_meal", false)):
+		G.meta.data["mina_meal"] = false
+		G.meta.save()
+		G.player.set_meta("heal_luck", true)
+		G.player.heal(25.0)
+		G.ui.toast("MINA'NIN YEMEĞİ — karnın tok, küreler bol düşecek")
 	if bool(G.meta.data.get("hired", false)):
 		G.meta.data["hired"] = false
 		G.meta.save()
@@ -259,6 +265,9 @@ func on_kill(_elite: bool) -> void:
 	Quests.tick("kills")
 
 func open_chest() -> void:
+	if arcana == "kasa":
+		fragments += 25
+		G.fx.float_text(G.player.pos + Vector2(0, -30), "+25", Px.C("c9a227"), 0.8)
 	var evos := Weapons.evo_ready(G.player)
 	if evos.is_empty():
 		fragments += 120
@@ -383,6 +392,14 @@ func _write_last_run(win: bool) -> void:
 	while hist.size() > 5:
 		hist.pop_front()
 	G.meta.data["history"] = hist
+	# düğüm başına rekor: en iyi skor + zafer/yenilgi sayacı — haritada hover'da okunur
+	var nr: Dictionary = G.meta.data.get("node_rec", {})
+	var rec: Dictionary = nr.get(node_id, {"s": 0, "w": 0, "d": 0})
+	rec["s"] = maxi(int(rec.get("s", 0)), score)
+	rec["w"] = int(rec.get("w", 0)) + (1 if win else 0)
+	rec["d"] = int(rec.get("d", 0)) + (0 if win else 1)
+	nr[node_id] = rec
+	G.meta.data["node_rec"] = nr
 	# tür-bazlı kesimler meta'ya birikir — Zirkon'un kayıtlarında listelenir
 	var kk: Dictionary = stats.get("kind_kills", {})
 	if not kk.is_empty():

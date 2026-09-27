@@ -66,6 +66,7 @@ var data := {
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"history": [],         # son 5 koşu: {n,k,t,w,s}
 	"won_nodes": [],       # zaferle fethedilmiş wmap node'ları — haraç öder
+	"node_rec": {},        # node başına rekor: {s: skor, w: zafer, d: yenilgi}
 	"title": "",           # takılı unvan (TITLES id) — koşu sonu ekranlarında görünür
 	"kind_kills": {},      # tür-bazlı toplam kesimler (Zirkon kayıtları)
 	"best_streak_all": 0,  # tüm zamanların en uzun serisi
@@ -77,6 +78,8 @@ var data := {
 	"shop_stock": [],      # Saphire'in tezgâh stoku — koşu başına yenilenir
 	"shop_gen": -1,        # stok üretimindeki koşu sayacı
 	"neva_song": false,    # Neva'nın şarkısı — sonraki koşuda +%15 XP
+	"rescued_mina": false, # sahada kafesten kurtarılan Aşçı Mina — kampa katılır
+	"mina_meal": false,    # Mina'nın yemeği — sonraki koşuda şifa küresi şansı ×2
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
 }
 

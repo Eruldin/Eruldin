@@ -659,14 +659,16 @@ func die(h: Dictionary) -> void:
 			if sp != null:
 				sp.speed *= 1.15
 		G.fx.float_text(pos, "BÖLÜNDÜ", Color(1.0, 0.62, 0.3), 16)
-		if G.chance(0.045 * (2.0 if is_instance_valid(G.player) and G.player.has_meta("heal_luck") else 1.0)) and not G.run.dark:
-			G.room.spawn_heal(pos)
-		# HASAT ŞENLİĞİ kozu: kesim başına küçük parçacık damlası
-		if is_instance_valid(G.player) and G.player.has_meta("harvest") and G.chance(0.02):
-			G.run.drop_fragments(pos, 1)
-		# hamal taşıyıcı yükünü düşürür — rastgele saha kalıntısı
-		if kind == EKind.CARRIER:
-			G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard"]), pos)
-			G.fx.float_text(pos + Vector2(0, -40), "YÜK DÜŞTÜ", Px.C("ffb74d"), 0.9)
+	# nadir şifa küresi — her kesimde %4.5 (mina yemeğiyle ×2), KARANLIK'ta hiç
+	if is_instance_valid(G.room) and G.chance(0.045 * (2.0 if is_instance_valid(G.player) and G.player.has_meta("heal_luck") else 1.0)) and not G.run.dark:
+		G.room.spawn_heal(pos)
+	# HASAT ŞENLİĞİ kozu: kesim başına küçük parçacık damlası
+	if is_instance_valid(G.run) and is_instance_valid(G.player) and G.player.has_meta("harvest") and G.chance(0.02):
+		G.run.drop_fragments(pos, 1)
+	# hamal taşıyıcı yükünü düşürür — rastgele saha kalıntısı
+	if kind == EKind.CARRIER and is_instance_valid(G.room):
+		G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard"]), pos)
+		G.fx.float_text(pos + Vector2(0, -40), "YÜK DÜŞTÜ", Px.C("ffb74d"), 0.9)
+	if is_instance_valid(G.room):
 		G.room.on_enemy_dead(self)
 	queue_free()

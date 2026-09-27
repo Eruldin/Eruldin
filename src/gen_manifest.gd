@@ -17,6 +17,9 @@ const SPRITES := {
 	"npc2_ehnar": "art/gen/g_npcb_2.png", "npcb_ehnar": "art/gen/g_npcb_2.png",
 	"npc2_ahusk": "art/gen/g_npcb_3.png", "npcb_ahusk": "art/gen/g_npcb_3.png",
 	"npc2_elyb": "art/gen/g_elyb_0.png", "npcb_elyb": "art/gen/g_elyb_1.png",
+	"npc2_mina": "art/c_mina_idle_0.png", "npcb_mina": "art/c_mina_idle_1.png",
+	"por_mina": "art/por_mina.png",
+	"prop_mahkum": "art/prop_mahkum.png",
 	# sahne vistalari (uretilmis): backdrop katmanlari + arena ufku
 	"bg_0": "art/gen/g_bg_0.png", "bg_1": "art/gen/g_bg_1.png",
 	"bg_2": "art/gen/g_bg_2.png", "bg_3": "art/gen/g_bg_3.png",

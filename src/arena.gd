@@ -23,8 +23,9 @@ func build_arena(biome_idx: int) -> void:
 	_vignette_arena()
 	_atmos()
 	_place_hazards_arena()
-	# a few field items scattered like VS floor pickups
-	for i in 6:
+	# a few field items scattered like VS floor pickups; KERVAN GÖZÜ kozu +3 ekler
+	var n_pick := 6 + (3 if G.run != null and G.run.arcana == "kervan" else 0)
+	for i in n_pick:
 		var p := Vector2(rng.randf_range(BOUNDS.position.x + 140, BOUNDS.end.x - 140), rng.randf_range(BOUNDS.position.y + 140, BOUNDS.end.y - 140))
 		if p.distance_to(Vector2.ZERO) < 280.0:
 			continue
@@ -38,6 +39,11 @@ func build_arena(biome_idx: int) -> void:
 		var fp := Vector2(rng.randf_range(BOUNDS.position.x + 180, BOUNDS.end.x - 180), rng.randf_range(BOUNDS.position.y + 180, BOUNDS.end.y - 180))
 		if fp.distance_to(Vector2.ZERO) > 360.0 and fp.distance_to(tp) > 420.0:
 			spawn_special("fener", fp)
+	# mahkum kafesi: Mina henüz kurtarılmadıysa sahalarda %70 ihtimalle belirir
+	if is_instance_valid(G.meta) and not bool(G.meta.data.get("rescued_mina", false)) and rng.randf() < 0.7:
+		var mp := Vector2(rng.randf_range(BOUNDS.position.x + 200, BOUNDS.end.x - 200), rng.randf_range(BOUNDS.position.y + 200, BOUNDS.end.y - 200))
+		if mp.distance_to(Vector2.ZERO) > 380.0:
+			spawn_special("mahkum", mp)
 	# ceset koşusu: önceki ölüm bu sahadaysa eski ceset parçacık iadesi taşır (BG2 corpse run)
 	var ld: Dictionary = G.meta.data.get("last_death", {}) if is_instance_valid(G.meta) else {}
 	if int(ld.get("biome", -1)) == biome and int(ld.get("depth", 0)) > 0:

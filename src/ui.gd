@@ -51,6 +51,11 @@ const LINES := {
 		"Şasimi takarsan Ely-B olursun: daha az can, daha çok vuruş, biraz daha yavaş.",
 		"Alfa-04 sahada ölürse ben inerim. Protokol tek bedene bağlanmaz.",
 	],
+	"mina": [
+		"O kafeste üç gün saydım, Praetorian. Kovan beni yemek yapmadı — yem yapmak için tutuyordu.",
+		"Savaşçı karnı doymadan kılıç sallamaz. Otur — kazan sıcak, kaşık temiz.",
+		"Kamptaki herkes acı çeker; sadece aç olan bana gelir. Sen de geleceksin — hep gelirler.",
+	],
 }
 
 const DEATH_LINES := [
@@ -77,6 +82,7 @@ const NPC_COL := {
 	"ehnar": "ff9e4d",   # eski şövalye — kızıl-kum
 	"ahusk": "6aa8a0",   # göçebe — soluk çelik
 	"elyb": "9db4c8",    # B-serisi şasi — çelik mavisi
+	"mina": "e8a04c",    # aşçı — soba alevi amber
 }
 
 static var _font: Font
@@ -496,6 +502,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "icn_skull", "col": "ff6d3d", "s": 24.0})
 			elif k == "fener":
 				out.append({"p": pk.position, "icon": "icn_crown", "col": "ff3355", "s": 24.0})
+			elif k == "mahkum":
+				out.append({"p": pk.position, "icon": "icn_skull", "col": "d4a017", "s": 22.0})
 		if G.room.mono_active:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
 		if G.room.merchant_active:
@@ -928,6 +936,8 @@ func dialogue(nid: String) -> void:
 		hint.text = "[E / tık] destek takası"
 	elif nid == "elyb":
 		hint.text = "[E / tık] şasi seçimi"
+	elif nid == "mina":
+		hint.text = "[E / tık] mutfak"
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
@@ -983,6 +993,9 @@ func _advance_overlay() -> void:
 			elif nid == "elyb":
 				_close_overlay()
 				hero_panel()
+			elif nid == "mina":
+				_close_overlay()
+				kitchen_panel()
 			elif nid == "saphire":
 				_close_overlay()
 				inventory_panel()
@@ -997,7 +1010,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray", "kitchen":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1110,6 +1123,7 @@ func _service_panel_for(nid: String) -> void:
 		"zirkon":  records_panel()
 		"ehnar":   contract_panel()
 		"ahusk":   blessing_panel()
+		"mina":    kitchen_panel()
 		"neva":    song_panel()
 		"saphire": inventory_panel()
 		"elyb":    hero_panel()
@@ -1204,7 +1218,13 @@ func worldmap_panel() -> void:
 			if ev is InputEventMouseButton and ev.pressed:
 				_wmap_pick(nid, info, sel))
 		btn.mouse_entered.connect(func():
-			info.text = "%s — %s%s" % [str(n.name), str(n.desc), "" if can else "   [%s]" % Wmap.unlock_text(nid)])
+			var line := "%s — %s%s" % [str(n.name), str(n.desc), "" if can else "   [%s]" % Wmap.unlock_text(nid)]
+			var recd: Dictionary = (G.meta.data.get("node_rec", {}) as Dictionary).get(nid, {})
+			if not recd.is_empty():
+				line += "   [rekor %d · zafer %d · yenilgi %d]" % [int(recd.get("s", 0)), int(recd.get("w", 0)), int(recd.get("d", 0))]
+			if (G.meta.data.get("won_nodes", []) as Array).has(nid):
+				line += "   ◆ FETHEDİLDİ"
+			info.text = line)
 	# mutator şeridi
 	var mut := HBoxContainer.new()
 	mut.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -2033,6 +2053,47 @@ func contract_panel() -> void:
 
 # Ahusk: a deserter from the swarm sells a war boon — next run starts with a
 # random boon for ◆80, buyable once per run.
+# Aşçı Mina: kurtarılmış yolcu — tek koşuluk 'mutfak seferi' satar
+func kitchen_panel() -> void:
+	_pause(true)
+	var v := _show_panel("kitchen", "AŞÇI MINA — kamp mutfağı", Px.C("e8a04c"))
+	var por := TextureRect.new()
+	por.texture = Px.S2("por_mina")
+	por.custom_minimum_size = Vector2(72, 72)
+	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pc := CenterContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(por)
+	v.add_child(pc)
+	var has := bool(G.meta.data.get("mina_meal", false))
+	var l := _lbl("mutfak seferi — sonraki koşuda tok başlarsın: +25 can, şifa küreleri iki kat sık düşer", Vector2.ZERO, 13, Color(0.85, 0.8, 0.7))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l)
+	var money := _lbl("Saf Choralim: ◆ %d" % G.meta.data.choralim, Vector2.ZERO, 12, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
+	var btn := Button.new()
+	btn.text = "✓ SERVİS HAZIR — sahaya in" if has else "◆ 45 — YEMEK YE"
+	btn.disabled = has or G.meta.data.choralim < 45
+	btn.custom_minimum_size = Vector2(200, 30)
+	btn.add_theme_font_override("font", ui_font())
+	var bc := CenterContainer.new()
+	bc.add_child(btn)
+	v.add_child(bc)
+	btn.pressed.connect(func():
+		if not has and G.meta.data.choralim >= 45:
+			G.meta.data["choralim"] -= 45
+			G.meta.data["mina_meal"] = true
+			G.meta.save()
+			G.audio.jingle("boon")
+			_close_overlay()
+			kitchen_panel())
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
 func blessing_panel() -> void:
 	_pause(true)
 	var v := _show_panel("blessing", "GÖÇEBE AHUSK — destek takası", Px.C("6aa8a0"))
