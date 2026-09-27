@@ -165,6 +165,31 @@ func build_hub() -> void:
 	for bid in (G.meta.data.get("bosses", []) as Array):
 		_prop(Vector2(-60 + tb * 44, -330), 7, "icn_skull")
 		tb += 1
+	# kamp büyür: talep edilen görevler kampa düzen getirir (çevre → sancaklar → güney konağı)
+	var done_n := 0
+	for qid in (G.meta.data.get("quests", {}) as Dictionary):
+		if str(G.meta.data["quests"][qid].get("st", "")) == "claimed":
+			done_n += 1
+	var tier := 0
+	if done_n >= 6: tier = 1
+	if done_n >= 14: tier = 2
+	if done_n >= 24: tier = 3
+	if tier >= 1:
+		for pp in [Vector2(-520, 40), Vector2(-500, 130), Vector2(520, 60), Vector2(490, -60)]:
+			_prop(pp, 18, "prop_hub_1")
+		_prop(Vector2(-540, -90), 24, "prop_hub_0")
+	if tier >= 2:
+		for pp in [Vector2(-260, -280), Vector2(-40, -340), Vector2(200, -290)]:
+			_prop(pp, 15, "prop_hub_3")
+		G.fx.mk_light(self, Vector2(-260, -280), Px.C("ffd75f"), 0.55, 2.0)
+	if tier >= 3:
+		for pp in [Vector2(-120, 300), Vector2(120, 310), Vector2(0, 340)]:
+			_prop(pp, 16, "prop_hub_5")
+		_fire(Vector2(-160, H * 0.5 - 90))
+	if tier > int(G.meta.data.get("camp_tier", 0)):
+		G.meta.data["camp_tier"] = tier
+		G.meta.save()
+		G.ui.toast("kamp büyüyor — halk sana güveniyor")
 	G.audio.play_music("mus_hub")
 	G.ui.banner("VIATOR KAMPI", "son güvenli toprak — konuşmak için E, kapıya yürü")
 
