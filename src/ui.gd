@@ -1306,9 +1306,13 @@ func quest_panel(nid: String) -> void:
 			G.audio.jingle("victory")
 			toast("ödül: %s" % Quests.rew_text(rew))
 			_close_overlay()
-			# bölge ödülü varsa sinematik açılış kartı oynar
+			# bölge ödülü varsa sinematik açılış kartı oynar; yoksa varsa anı kartları
 			if str(rew.get("node", "")) != "":
 				Wmap.unlock_cine(str(rew.node))
+			elif rew.get("cine") is Array and not (rew["cine"] as Array).is_empty():
+				cine_seq(rew["cine"], func(): quest_panel(nid))
+				if not overlay_open():
+					quest_panel(nid)
 			else:
 				quest_panel(nid)))
 	for q in Quests.active_for(nid):
