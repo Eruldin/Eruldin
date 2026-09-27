@@ -1148,6 +1148,14 @@ func _collect(pk: Node) -> void:
 				G.player.iksir_n += 1
 				G.ui.toast("CHORALİM İKSİRİ +1 — R ile içilir")
 			G.audio.play("pickup", 1.5, 0.45)
+		"sarap":
+			if G.player.sarap_n >= 2:
+				G.run.drop_fragments(pk.position, 5)
+				G.ui.toast("şarap karnen dolu — parçacığa döndü")
+			else:
+				G.player.sarap_n += 1
+				G.ui.toast("KOR ŞARABI +1 — T ile içilir")
+			G.audio.play("pickup", 1.6, 0.45)
 		"egg":
 			G.meta.data["eggs"] = int(G.meta.data.get("eggs", 0)) + 1
 			G.meta.save()
@@ -1320,6 +1328,9 @@ func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 		"iksir":
 			pk.texture = Px.S2("icn_upg_hp") if Px.S2("icn_upg_hp") != null else Px.S("dot")
 			col = "8affc9"
+		"sarap":
+			pk.texture = Px.S2("icn_dash") if Px.S2("icn_dash") != null else Px.S("dot")
+			col = "ff7722"
 		"egg":
 			pk.texture = Px.S("icn_crown")
 			col = "ffd700"
