@@ -160,6 +160,7 @@ const DEFS := [
 	{"id": "q_emici", "giver": "vane",    "name": "KESE AVCISI",          "desc": "Enkazda parçacık emen bir sülük türü çıktı — temas ettiğinin kesesini boşaltıyor. On tanesini kes, keselerini bana getir; içlerindeki taşlar benim.", "obj": {"type": "kind", "k": "Parçacık Emicisi", "n": 10}, "rew": {"cho": 220, "rep": 2}},
 	{"id": "q_yankises","giver": "vane",  "name": "YANKI SESLERİ",        "desc": "Elitlerden bazıları etrafına yankı halkası basıyor — içine gireni savuruyor. Altı YANKICI eliti kes; halka bobinlerini zırhının teli yaparım.", "obj": {"type": "affix", "k": "yanki", "n": 6}, "rew": {"cho": 280, "rep": 3}, "prereq": "q_emici"},
 	{"id": "q_vardiya","giver": "ahusk",  "name": "KAYIP VARDİYA",        "desc": "Gençliğimde Simithar'da bir vardiya kayboldu — galerinin kapağı hâlâ kapalı. Sekiz choralim damarı kır, sesleri onlara ulaştır; haritanda vardiyayı işaretlerim.", "obj": {"type": "vein", "n": 8}, "rew": {"cho": 200, "node": "kayipvardiya", "rep": 2}},
+	{"id": "q_mahzen", "giver": "neva",   "name": "MAHZEN ŞARKISI",       "desc": "Vatika'nın sessizliği altında bir mahzen şarkı söylüyor — rahipler oraya bir şey emanet etmiş. Önce sığınağı fethet; şarkının kaynağı sana açılır.", "obj": {"type": "won_node", "id": "vatika"}, "rew": {"cho": 260, "node": "mahzen", "rep": 3}, "prereq": "q_vatika"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
