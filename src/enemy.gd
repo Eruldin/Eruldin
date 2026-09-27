@@ -950,6 +950,8 @@ func die(h: Dictionary) -> void:
 					break
 		if bool(h.get("ark", false)):
 			Quests.tick("ark")   # Sol Primus zincir yildirimiyla dusen kesim
+		if bool(h.get("sarkit", false)):
+			Quests.tick("sarkit")   # maden sarkıtının altında düşen kesim
 		# gizli bataklık olayı: 30 sivri kesilirse bulutun kalbi kızar
 		if kind == EKind.SIVRI and int(kk.get(kn, 0)) == 30 and not bool(G.run.stats.get("dol_anasi", false)) and G.run.biome == 4 and is_instance_valid(G.room):
 			G.run.stats["dol_anasi"] = true
