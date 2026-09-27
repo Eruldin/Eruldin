@@ -35,6 +35,12 @@ var _dash_regen_t := 0.0
 var _dash_t := 0.0
 var _dash_cd := 0.0
 var _dash_dir := Vector2.ZERO
+# Q aktif yeteneği — şasi başına farklı (NOVA/SİPER/ATILIM)
+var skill_cd := 0.0
+var skill_max := 9.0
+var _haste_t := 0.0
+var _haste_mult := 1.0
+var _skill_held := false
 var _parry_t := 0.0
 var _parry_cd := 0.0
 var _combo := 0
@@ -103,6 +109,9 @@ func init() -> void:
 	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)
 	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
 	knock_resist = 2.0
+	skill_cd = 0.0
+	_haste_t = 0.0
+	_haste_mult = 1.0
 	_apply_hero()
 	super.init()
 	_apply_stance()
@@ -129,6 +138,7 @@ func _process(_d: float) -> void:
 		return
 	_read_input()
 	_tick_dash(d)
+	_tick_skill(d)
 	_auto_aim()
 	if G.state == G.State.ROOM:
 		Weapons.tick(self, d)
@@ -195,7 +205,7 @@ func _move(d: float) -> void:
 	if _dash_t > 0:
 		pos += _dash_dir * 560.0 * d
 		return
-	var sp := speed * _attack_slow * (G.room.slow_at(pos) if is_instance_valid(G.room) else 1.0) * (1.05 if stealth_t > 0 else 1.0)
+	var sp := speed * _attack_slow * (G.room.slow_at(pos) if is_instance_valid(G.room) else 1.0) * (1.05 if stealth_t > 0 else 1.0) * (_haste_mult if _haste_t > 0 else 1.0)
 	# Seri Ritim lütfu: katliam serisi x30 üstünde hız patlaması
 	if has_meta("streak_spd") and G.run != null and int(G.run.streak) >= 30:
 		sp *= 1.30
@@ -267,6 +277,50 @@ func _tick_dash(d: float) -> void:
 
 var _space_held := false
 
+func _tick_skill(d: float) -> void:
+	if skill_cd > 0:
+		skill_cd -= d
+	if _haste_t > 0:
+		_haste_t -= d
+		if _haste_t <= 0:
+			_haste_mult = 1.0
+	var q_now := Input.is_key_pressed(KEY_Q)
+	if q_now and not _skill_held and skill_cd <= 0 and _dash_t <= 0 and G.state == G.State.ROOM:
+		_use_skill()
+	_skill_held = q_now
+
+# şasi yeteneği: ely → NOVA (AoE), elyb → SİPER (zırh fazı), via → ATILIM (dash refill + hız)
+func _use_skill() -> void:
+	skill_cd = skill_max
+	match str(G.meta.data.get("hero", "ely")):
+		"elyb":
+			invuln = maxf(invuln, 1.6)
+			_haste_t = 3.0
+			_haste_mult = 1.15
+			G.fx.flash(Px.C("9db4c8"), 0.15)
+			G.fx.burst(pos + Vector2(0, -14), Px.C("9db4c8"), 20, 150.0, 4.0, 0.5)
+			G.fx.float_text(pos + Vector2(0, -44), "SİPER", Px.C("9db4c8"), 1.0)
+			G.audio.play("stance", 0.8)
+		"via":
+			dash_charges = dash_max
+			_haste_t = 2.5
+			_haste_mult = 1.45
+			G.fx.directional(pos + Vector2(0, -8), aim_dir, Px.C("00E5FF"), 14, 220.0, 5.0, 0.4)
+			G.fx.float_text(pos + Vector2(0, -44), "ATILIM", Px.C("00E5FF"), 1.0)
+			G.audio.play("dash", 1.25)
+		_:
+			G.fx.tele_ring(pos, 240.0, 0.4, Color(0.76, 0.42, 1.0, 0.45))
+			G.fx.flash(Px.C("c26bff"), 0.15)
+			G.fx.shake(0.2, 0.2)
+			G.fx.hitstop(0.06)
+			for e in G.enemies.duplicate():
+				if not is_instance_valid(e) or e.dead:
+					continue
+				if pos.distance_to(e.pos) < 240.0:
+					e.take_hit({"dmg": 45.0 * dmg_mult, "type": G.DamageType.SHOCK, "from": pos, "knock": 14.0, "stagger": 0.5, "source": self})
+			G.fx.float_text(pos + Vector2(0, -44), "NOVA", Px.C("c26bff"), 1.0)
+			G.audio.play("explode", 0.9, 0.6)
+
 # şasi farkları oynanışı değiştirir: elyb ağır topçu, via hızlı keskin
 func _apply_hero() -> void:
 	var hk := str(G.meta.data.get("hero", "ely"))
@@ -278,12 +332,14 @@ func _apply_hero() -> void:
 			hp = max_hp
 			dmg_mult += 0.12
 			speed *= 0.92
+			skill_max = 10.0
 		"via":
 			actor_name = "V-Serkay"
 			max_hp = maxi(40, max_hp - 12)
 			hp = max_hp
 			speed *= 1.08
 			crit_ch += 0.08
+			skill_max = 8.0
 
 func _hero_set() -> String:
 	return {"elyb": "c_elyb", "via": "c_viawar"}.get(str(G.meta.data.get("hero", "ely")), "ely")
