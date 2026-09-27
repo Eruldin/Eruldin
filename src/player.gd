@@ -368,6 +368,16 @@ func _use_skill() -> void:
 			G.audio.play("boon", 0.9)
 			if got > 0:
 				G.ui.toast("mıknatıs darbesi — %d kristal çekildi" % got)
+		"k7":
+			invuln = maxf(invuln, 2.4)
+			G.fx.tele_ring(pos, 260.0, 0.5, Color(0.5, 0.66, 0.8, 0.5))
+			G.fx.flash(Px.C("7fa8c9"), 0.18)
+			G.fx.shake(0.15, 0.2)
+			for e in G.enemies.duplicate():
+				if is_instance_valid(e) and not e.dead and pos.distance_to(e.pos) < 260.0:
+					e.take_hit({"dmg": 12.0 * dmg_mult, "type": G.DamageType.MELEE, "from": pos, "knock": 22.0, "stagger": 0.6, "source": self})
+			G.fx.float_text(pos + Vector2(0, -44), "SIĞINAK", Px.C("7fa8c9"), 1.0)
+			G.audio.play("parryOk", 0.8)
 		_:
 			G.fx.tele_ring(pos, 240.0, 0.4, Color(0.76, 0.42, 1.0, 0.45))
 			G.fx.flash(Px.C("c26bff"), 0.15)
@@ -411,12 +421,20 @@ func _apply_hero() -> void:
 			frag_mult += 0.15
 			magnet_r += 60.0
 			skill_max = 12.0
+		"k7":
+			actor_name = "K-7 Kalkan"
+			max_hp = maxi(40, max_hp + 45)
+			hp = max_hp
+			armor += 1.5
+			dmg_mult -= 0.12
+			speed *= 0.90
+			skill_max = 9.0
 
 func _hero_set() -> String:
-	return {"elyb": "c_elyb", "via": "c_viawar", "h9": "c_h9"}.get(str(G.meta.data.get("hero", "ely")), "ely")
+	return {"elyb": "c_elyb", "via": "c_viawar", "h9": "c_h9", "k7": "c_k7"}.get(str(G.meta.data.get("hero", "ely")), "ely")
 
 func _hero_start() -> String:
-	return {"elyb": "plasma", "via": "dagger", "h9": "mortar"}.get(str(G.meta.data.get("hero", "ely")), "blade")
+	return {"elyb": "plasma", "via": "dagger", "h9": "mortar", "k7": "sentry"}.get(str(G.meta.data.get("hero", "ely")), "blade")
 
 func _apply_stance() -> void:
 	st_arc = 1.0; st_dmg = 1.0; st_spd = 1.0; st_parry = 0.0; st_reach = 0.0

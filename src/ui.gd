@@ -3064,6 +3064,9 @@ const HEROES := {
 	"h9": {"name": "H-9 HURDACI", "por": "por_h9", "col": "ff8a50",
 		"desc": "Hurda toplama kasası. Başlangıç: Kristal Mancınık. −8 can · −%6 hasar · +%15 parçacık verimi · +60 toplama yarıçapı. Q: MIKNATIS — sahadaki tüm kristalleri çeker.",
 		"req_kills": 8000},
+	"k7": {"name": "K-7 KALKAN", "por": "por_k7", "col": "7fa8c9",
+		"desc": "Savunma şasisi. Başlangıç: Nöbet Kulesi. +45 can · +1.5 zırh · −%12 hasar · −%10 hız. Q: SIĞINAK — 2.4sn dokunulmazlık + sürüyü geri iten nabız.",
+		"req_kills": 12000},
 }
 
 func hero_panel() -> void:
