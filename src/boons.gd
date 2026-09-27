@@ -99,6 +99,8 @@ const ARCANAS := {
 	"kursun":  {"name": "NABIZ KURŞUNU",    "desc": "Baskın işaretli düğümde ganimet daha bereketli — ama sürü de sıklaşır", "col": "3ec8b8"},
 	"kalip":   {"name": "AĞIR KALIP",       "desc": "+%35 hasar — ama -%12 saldırı hızı", "col": "90a4ae"},
 	"celikk":  {"name": "ÇELİK KARIN",      "desc": "+30 azami can — ama -%10 hareket hızı", "col": "80d8ff"},
+	"guzergah":{"name": "KAÇAK GÜZERGÂHI",  "desc": "Kaçak elitler çok daha sık çıkar — ama sürü %8 sıklaşır", "col": "ffd54f"},
+	"yagma":   {"name": "KESKİN YAĞMA",     "desc": "Kritik vuruşlar %8 ihtimalle parçacık döker — ama -%10 deneyim", "col": "ffd75f"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -191,6 +193,12 @@ static func apply_arcana(id: String, p: Player) -> void:
 		"celikk":
 			p.max_hp += 30.0
 			p.speed *= 0.90
+		"guzergah":
+			G.run.kacak_plus = true
+			G.run.node_mods["spawn"] = float(G.run.node_mods.get("spawn", 1.0)) * 1.08
+		"yagma":
+			p.set_meta("crit_frag", true)
+			p.xp_mult *= 0.90
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0

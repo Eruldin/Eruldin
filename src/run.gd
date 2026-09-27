@@ -39,6 +39,7 @@ var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var twin_chest := false    # İKİZ SANDIK kozu: her sandık çift doğar
 var waylay_chance := 0.35  # OLAY YERİ kozu: yol olayı olasılığı (1.0 = her seyahat)
 var baskin_plus := false   # NABIZ KURŞUNU kozu: baskın düğümü bereketi artar
+var kacak_plus := false    # KAÇAK GÜZERGÂHI kozu: kaçak elitler çok daha sık
 var pending_ambush := false  # YOL OLAYI pusu: arenaya kuşatılmış girilir
 var _skip_waylay := false   # TEKRAR DENE: aynı node'a dönerken yol olayı atlanır
 var _keep_sefer := false    # sefer zinciri: respawn_to_hub sefer sayacını silmez
