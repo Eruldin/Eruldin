@@ -18,6 +18,13 @@ const UPG := {
 	U.LUCK:   {"name": "Talih Devresi", "desc": "+0.15 şans — daha iyi taslaklar", "max": 3, "base": 75, "icon": "icn_upg_revive"},
 }
 
+# kamp inşaatı — Vane'nin panelinde tek seferlik satın alınan kalıcı binalar
+const BUILDS := {
+	"yuva":   {"name": "Ehil Yuva",      "cost": 300, "icon": "icn_upg_hp",     "desc": "Mina'nın ocağı büyür — iksir stoğu 3→4, kor şarabı 2→3"},
+	"atolye": {"name": "Atölye",         "cost": 400, "icon": "icn_upg_shield", "desc": "Saphire'in tezgâhı kurulur — işleme bedeli %25 iner"},
+	"kule":   {"name": "Nöbet Kulesi",   "cost": 450, "icon": "icn_upg_dash",   "desc": "Kamp gözcüsü — her koşuya koruyucu zarf + iksirle çıkarsın"},
+}
+
 const SAVE_PATH := "user://dusus_save.json"
 
 var data := {
@@ -44,6 +51,7 @@ var data := {
 	"stash": [],           # collected items awaiting equipment
 	"equip": {},           # slot -> item id (7 slots, items.gd)
 	"item_lvl": {},        # item id -> işleme seviyesi (Saphire forge, max 3)
+	"camp_builds": {},     # satın alınan kamp binaları: id -> true
 	"loot_found": 0,       # lifetime item drops
 	"seen_story": [],      # cinematic cards already shown (one-shot story beats)
 	"story_done": [],      # tamamlanan hikaye düğümleri — haritada tek seferlik duraklar,
@@ -123,6 +131,20 @@ func buy(u: int) -> bool:
 		return false
 	data["choralim"] -= cost
 	data["upg"][_key(u)] = upg(u) + 1
+	save()
+	return true
+
+func has_build(b: String) -> bool:
+	return bool((data.get("camp_builds", {}) as Dictionary).get(b, false))
+
+func buy_build(b: String) -> bool:
+	var spec: Dictionary = BUILDS.get(b, {})
+	if spec.is_empty() or has_build(b) or data["choralim"] < int(spec.cost):
+		return false
+	data["choralim"] -= int(spec.cost)
+	var cb: Dictionary = data.get("camp_builds", {})
+	cb[b] = true
+	data["camp_builds"] = cb
 	save()
 	return true
 

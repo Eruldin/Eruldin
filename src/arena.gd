@@ -68,6 +68,11 @@ func build_arena(biome_idx: int) -> void:
 		var ck := spawn_special("ceset", cp)
 		ck.set_meta("val", int(clampf(float(ld.get("depth", 0)) * 0.4, 40.0, 400.0)))
 		G.ui.toast("bu sahada eski cesedin yatıyor — parçacıkların orada")
+	# kamp inşaatı: nöbet kulesi koşuya zarf + iksir kalıntısıyla başlatır
+	if is_instance_valid(G.meta) and G.meta.has_build("kule"):
+		spawn_special("guard", Vector2(110, 70))
+		spawn_special("iksir", Vector2(-100, 80))
+		G.ui.toast("nöbet kulesi devrede — zarf ve iksir yanında")
 	G.audio.play_music("mus_%d" % biome)
 	var nn := str(G.run.node_name) if G.run != null else ""
 	G.ui.banner(nn if nn != "" else BIOME_NAME[biome], "kovan akıyor — hayatta kal")
