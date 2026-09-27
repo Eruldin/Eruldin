@@ -4,11 +4,11 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK, GOZETMEN, COPCU, DINAMITCI, KUZGUN }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK, GOZETMEN, COPCU, DINAMITCI, KUZGUN, SIVRI }
 
 # tür-bazlı ölüm patlaması rengi — kesimden kimin öldüğü görsel okunur
-const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73", EKind.GOZETMEN: "b388ff", EKind.COPCU: "d7a05a", EKind.DINAMITCI: "ff7043", EKind.KUZGUN: "5e3f8c"}
-const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam", EKind.GOZETMEN: "Gözetmen", EKind.COPCU: "Çöpçü Kurt", EKind.DINAMITCI: "Dinamitçi Tayf", EKind.KUZGUN: "Tarla Kuzgunu"}
+const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73", EKind.GOZETMEN: "b388ff", EKind.COPCU: "d7a05a", EKind.DINAMITCI: "ff7043", EKind.KUZGUN: "5e3f8c", EKind.SIVRI: "7fe0b8"}
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam", EKind.GOZETMEN: "Gözetmen", EKind.COPCU: "Çöpçü Kurt", EKind.DINAMITCI: "Dinamitçi Tayf", EKind.KUZGUN: "Tarla Kuzgunu", EKind.SIVRI: "Sivri Bulutu"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
@@ -19,6 +19,7 @@ const KIND_SET := {
 	EKind.MUHFIZ: "c_alfa", EKind.HERALD: "c_herald", EKind.AKREP: "c_akrep",
 	EKind.BALCIK: "c_balcik", EKind.GOZETMEN: "c_gozetmen", EKind.COPCU: "c_copcu",
 	EKind.DINAMITCI: "c_dinamitci", EKind.KUZGUN: "c_kuzgun",
+	EKind.SIVRI: "c_sivri",
 }
 
 # tür lore'u — Zirkon'un kayıtlarında kesim sayısının altında gösterilir
@@ -41,6 +42,7 @@ const KIND_LORE := {
 	EKind.COPCU: "Enkazın aç çöpçüsü — yere saçılan kristalleri yutar, kesmeden önce hızlı davran.",
 	EKind.DINAMITCI: "Madenin barutçusu — fıçıyı yuvarlar, fitil yanınca patlama iki tarafı da vurur. Yakınında durma.",
 	EKind.KUZGUN: "Yanık tarlaların çöpçüsü — yüksekten dalışa geçer, pençesi hızlıdır. Uçarken hamlesini oku.",
+	EKind.SIVRI: "Bataklığın döl bulutu — tek sinek değil, sürü. Hızlı ve kalabalık gelir; alan silahı olmadan kovalanmaz.",
 }
 
 var kind: int = EKind.HUSK
@@ -202,6 +204,10 @@ func _setup_stats(hs: float, ds: float) -> void:
 			max_hp = 34; speed = 190; touch_dmg = 8; radius = 11; hit_radius = 13
 			windup_t = 0.3; recover_t = 0.4; attack_cd = 1.4; touch_r = 36
 			actor_name = "Tarla Kuzgunu"
+		EKind.SIVRI:
+			max_hp = 9; speed = 205; touch_dmg = 4; radius = 8; hit_radius = 11
+			windup_t = 0.28; recover_t = 0.3; attack_cd = 0.7; touch_r = 26
+			actor_name = "Sivri Bulutu"
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
@@ -786,7 +792,7 @@ func die(h: Dictionary) -> void:
 		G.fx.burst(pos, Px.C("8dc63f"), 14, 150.0, 4.0, 0.4)
 	if is_instance_valid(G.room):
 		# XP gem every kill; elites also drop a chest; rare heal orb
-		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0, 7.0, 6.0, 5.0, 3.0, 7.0, 5.0, 4.0, 4.0, 2.0][kind] + (10.0 if elite else 0.0)
+		var xp_val: float = [1.0, 2.0, 3.0, 1.0, 3.0, 1.0, 3.0, 6.0, 5.0, 7.0, 6.0, 5.0, 3.0, 7.0, 5.0, 4.0, 4.0, 2.0, 0.5][kind] + (10.0 if elite else 0.0)
 		G.room.spawn_gem(pos, xp_val)
 		if _stolen > 0.0:
 			# yuttuğu kristaller faiziyle geri döner

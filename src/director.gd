@@ -279,7 +279,7 @@ func _comp(m: float) -> int:
 			1: pool.append_array([Enemy.EKind.SPITTER, Enemy.EKind.DRONE, Enemy.EKind.DINAMITCI, Enemy.EKind.DINAMITCI])   # maden: barutçu tayfler
 			2: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.HUSK, Enemy.EKind.COPCU, Enemy.EKind.COPCU])   # enkaz: kristal yutan çöpçüler
 			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA, Enemy.EKind.GOZETMEN])   # kule: keskin nişancı gözetmenler
-			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK])   # bataklık: konakçılar + kistler + yenilenen balçıklar
+			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK, Enemy.EKind.SIVRI, Enemy.EKind.SIVRI])   # bataklık: konakçılar + kistler + balçıklar + sivri bulutları
 			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ]) # kül ovası: ateşi seven sert öncüler
 			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.AKREP, Enemy.EKind.AKREP, Enemy.EKind.DRONE])   # kızıl çöl: koşucular + gömülü akrepler
 	return G.pick(pool)
@@ -300,6 +300,10 @@ func _spawn(kind: int, elite: bool) -> Enemy:
 	var e := Enemy.spawn(kind, p, elite, _hp_scale(), _dmg_scale(), G.room)
 	if e != null and G.run.hyper:
 		e.speed *= 1.08
+	# sivri bulutu tek doğmaz — bulut halinde akar
+	if e != null and kind == Enemy.EKind.SIVRI and not elite:
+		for i in 3:
+			Enemy.spawn(kind, p + Vector2(G.rf(-46, 46), G.rf(-46, 46)), false, _hp_scale(), _dmg_scale(), G.room)
 	return e
 
 func _ring_pos() -> Vector2:
