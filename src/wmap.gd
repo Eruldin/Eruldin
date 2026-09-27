@@ -117,6 +117,7 @@ const NODES := [
 		{"label": "TAMBURU SÖK — silindiri çıkar", "sub": "Tambur ham choralim dolu — ama kuleyi çökertmek çukurun dibinde yankılanır: sonraki koşunda sürü sıklaşır, ganimet kabarır.", "rew": {"cho": 240, "omen": {"spawn": 1.12, "loot": 1.25}, "cine": [{"tex": "cine_7_0", "title": "SONDAJ KULESİ", "sub": "Tambur çıktı — yedi metre ham choralim. Çukurun dibinden bir uğultu yükseldi; Damar Kalbi rüyasında döndü."}]}},
 		{"label": "KULEYİ MÜHÜRLE — sondaj kapansın", "sub": "Matkabı kilitlersin; damar huzursuzluğu diner. Kamp bunu duyar — Lena haritasına kuleyi 'güvenli' diye işler.", "rew": {"cho": 90, "rep": 2, "omen": {"heal": 1.15}, "cine": [{"tex": "cine_7_0", "title": "SONDAJ MÜHÜRLENDİ", "sub": "Kilidi çevirdin; kule içindeki uğultu sustu. Çukurun nabzı bir gece için yumuşadı."}]}},
 	]},
+	{"id": "seren", "name": "SEREN TEPESİ",     "icon": "icn_dash",    "pos": Vector2(1450, 165), "col": "c8f0ff", "kind": "arena", "biome": 8, "unlock": "node", "desc": "Buzulun doğu omzunda aurora'nın yere değdiği tepe — tayflar burada yoğunlaşır, elit nöbetçiler ışığın altında döner.", "lore": "Lena'nın haritasında burası 'seren' diye işaretli — denizci diliyle 'göğün direği'. Auroranın düştüğü yerde tayflar katılaşır: gece boyunca tepenin üstünde dönen bir ışık kervanı var; katılan çıkamaz diyorlar.", "mods": {"hp": 1.35, "dmg": 1.2, "spawn": 0.95, "frag": 1.8, "loot": 1.55, "elite_t": 0.6, "dusk": true}},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -172,6 +173,7 @@ const EDGES := [
 	["gozyuva", "batikkasa"], ["batak", "batikkasa"], ["sarnic", "batikkasa"],
 	["kaos", "sondaj"], ["damar", "sondaj"], ["damarkasa", "sondaj"],
 	["koranit", "korgecidi"], ["kulovasi", "korgecidi"], ["korkasa", "korgecidi"], ["kuyu", "korgecidi"],
+	["beyazufuk", "seren"], ["kervan", "seren"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için
