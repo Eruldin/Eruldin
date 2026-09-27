@@ -249,6 +249,23 @@ const DEFS := {
 		"b": {"dmg": 42.0, "cd": 0.95, "n": 8.0, "hop": 240.0, "falloff": 0.92},
 		"hidden": true,
 	},
+	# iz-arketipi: oyuncunun bastığı yere yanan kalıntı düşer — kovalayan sürü
+	# üstünden geçerken yanar (savunma silahı, koşu kitingi)
+	"trail": {
+		"name": "KOR İZİ", "icon": "icn_mine", "col": "ff8a3d",
+		"desc": "Ardında yanan kalıntı bırakır — peşine düşen yanar",
+		"b": {"dmg": 5.0, "cd": 0.85, "r": 46.0, "dur": 3.6},
+		"inc": {"dmg": 1.6, "dur": 0.3, "r": 2.5, "cd": -0.02},
+		"feats": {5: {"dur": 1.2}},
+		"evo": "coil", "into": "trail_x",
+		"req": {"kills": 1500},
+	},
+	"trail_x": {
+		"name": "KOR HENDEK", "icon": "icn_mine", "col": "ffb05a",
+		"desc": "Geniş yanan hendek — sürüyü arkandan sıvı koru keser",
+		"b": {"dmg": 13.0, "cd": 0.55, "r": 72.0, "dur": 6.5},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -555,6 +572,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"aura", "aura_x": _aura(st, p)
 		"mortar", "mortar_x": _mortar(st, p, w)
 		"volt", "volt_x": _volt(st, p)
+		"trail", "trail_x": _trail(st, p, w)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
@@ -842,6 +860,25 @@ static func _spit(st: Dictionary, p: Player, w: Dictionary) -> void:
 		w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0, "wpn": str(w.id)})
 	G.audio.play("shoot", 0.7, 0.45)
 
+# kor izi: oyuncunun bastığı noktaya yanan kalıntı — _spit'in havuz altyapısını
+# kullanır ama hedef oyuncu pozisyonudur; renk/tür yangın paleti
+static func _trail(st: Dictionary, p: Player, w: Dictionary) -> void:
+	var at := p.pos - p.move_dir.normalized() * 14.0 if p.move_dir.length_squared() > 0.01 else p.pos
+	var node := Sprite2D.new()
+	node.texture = Px.S("circle")
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var r := float(st.r) * p.area_mult
+	node.scale = Vector2.ONE * (r * 2.0) / 72.0
+	node.modulate = Color(1.0, 0.5, 0.12, 0.3)
+	node.position = at
+	node.z_index = -1500
+	if is_instance_valid(G.room):
+		G.room.add_child(node)
+	else:
+		G.game.world.add_child(node)
+	w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0, "wpn": str(w.id), "type": int(G.DamageType.EXPLOSION)})
+	G.audio.play("shoot", 0.5, 0.25)
+
 static func _dagger(st: Dictionary, p: Player) -> void:
 	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)
 	var tgt := _nearest(p.pos, 500.0)
@@ -1063,7 +1100,7 @@ static func _tick_pools(w: Dictionary, p: Player, d: float) -> void:
 				if not is_instance_valid(e) or e.dead:
 					continue
 				if (pl.pos as Vector2).distance_to(e.pos) < float(pl.r) + e.hit_radius:
-					var h := {"dmg": tick_dmg, "type": G.DamageType.POISON, "from": pl.pos, "knock": 0.0, "source": p, "wpn": str(pl.get("wpn", ""))}
+					var h := {"dmg": tick_dmg, "type": int(pl.get("type", G.DamageType.POISON)), "from": pl.pos, "knock": 0.0, "source": p, "wpn": str(pl.get("wpn", ""))}
 					e.take_hit(h)
 					p.on_dealt_damage(e, h)
 	w.pools = pools
