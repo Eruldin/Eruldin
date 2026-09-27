@@ -2597,7 +2597,7 @@ func records_panel() -> void:
 		"surucu": "SÜRÜCÜ", "iz": "İZ SÜREN", "warp": "IŞINLANAN", "koruyucu": "KORUYUCU",
 		"yansi": "YANSITICI", "muhur": "MÜHÜRLÜ", "bile": "BİLEYLİ", "kristal": "KRİSTALLİ",
 		"hortlak": "HORTLAK", "dev": "DEV", "cazibe": "CAZİBELİ", "ambarli": "AMBARLI",
-		"kacak": "KAÇAK", "fanatik": "FANATİK", "bozucu": "BOZUCU", "soguk": "AYAZLI", "yanki": "YANKICI"}
+		"kacak": "KAÇAK", "fanatik": "FANATİK", "bozucu": "BOZUCU", "soguk": "AYAZLI", "yanki": "YANKICI", "hayalet": "HAYALET"}
 	for aid in ANAMES:
 		var has := aseen.has(aid)
 		acol.add_child(_lbl("%s  %s" % ["◆" if has else "◇", str(ANAMES[aid]) if has else "? ? ?"], Vector2.ZERO, 10,
