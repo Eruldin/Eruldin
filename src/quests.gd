@@ -167,6 +167,7 @@ const DEFS := [
 	{"id": "q_dolav",  "giver": "rhasa",  "name": "KULUÇKA AVI",           "desc": "Bataklık sürüsü gökten gelmiyor — kökünde duran keseler yavru kusuyor. Altı Döl Yumasını kesin yerinde parçala; kovanın mutfağı kapansın.", "obj": {"type": "kind", "k": "Döl Yuması", "n": 6}, "rew": {"cho": 340, "rep": 3}, "prereq": "q_seri"},
 	{"id": "q_cilgin","giver": "vane",   "name": "ÖFKE TERBİYESİ",        "desc": "Yeni rapor: bazı elitler yaralandıkça deliriyor — canı azaldıkça hızlanıyor, son çeyrekte iki kat vuruyor. Altı CILGIN eliti öfkesine yenilmeden kes; sinirlerini bobine sararım.", "obj": {"type": "affix", "k": "cilgin", "n": 6}, "rew": {"cho": 320, "rep": 3}, "prereq": "q_hayalet"},
 	{"id": "q_sondaj","giver": "lena",   "name": "TAMBUR SESLERİ",        "desc": "Çukurun güney ucunda eski bir sondaj kulesi duruyor — matkabı hâlâ damarın içinde. Kaos damarının civarında dönen sekiz Damar Fısıltısını dağıt; tamburun kilidini sana işlerim.", "obj": {"type": "kind", "k": "Damar Fısıltısı", "n": 8}, "rew": {"cho": 300, "node": "sondaj", "rep": 2}, "prereq": "q_kaos"},
+	{"id": "q_korgecidi","giver": "david","name": "GEÇİT ROTASI",         "desc": "Kül Ovası'yla Kor Anıtı arasında lavın üstünde yürüyen bir kanyon var — kor pençeleri orada yuvalanıyor. On tanesini kes; basamakların güvenli hattını haritana işlerim.", "obj": {"type": "kind", "k": "Kor Pençe", "n": 10}, "rew": {"cho": 340, "node": "korgecidi", "rep": 3}, "prereq": "q_kul"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
