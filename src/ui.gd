@@ -2166,6 +2166,9 @@ const WAYLAY := {
 	"multeci": {"name": "MÜLTECİ KAŞİFESİ", "col": "bcaaa4",
 		"sub": "Kampa dönmeye çalışan bir aile yolu kesiyor — babanın omzunda kırık bir parıltı taşı, çocuğun elinde kroki bir harita. Parçacık istiyorlar; kampı gerçekten bulup bulmayacaklarını kimse bilmiyor.",
 		"opts": ["◆30 VER — aile kampa ulaşır, itibarın artar", "GEÇ — yolunu aç, selametle"]},
+	"kuyu": {"name": "SES KUYUSU", "col": "4dd0e1",
+		"sub": "Yolun ortasında taş çemberli bir kuyu — içinden koro korosu gibi bir yankı yükseliyor. Eski madenciler kuyunun karanlıkla değil sesle ölçüldüğünü söyler; bir parçacık atarsan yankı cevap verir, kulak verirsen bedava ama kimi zaman koroyu da çağırır.",
+		"opts": ["◆35 AT — yankı cömert döner: ganimet ×1.35 · parçacık ×1.2", "KULAK VER — ücretsiz; yankı bazen sürüyü çağırır"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -2209,6 +2212,9 @@ func travel_event(wkind: String, dest: String) -> void:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		if wkind == "multeci" and i == 0 and int(G.meta.data.get("choralim", 0)) < 30:
+			ob.disabled = true
+			ob.modulate = Color(0.45, 0.45, 0.5)
+		if wkind == "kuyu" and i == 0 and int(G.meta.data.get("choralim", 0)) < 35:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		var oc := CenterContainer.new()
@@ -2346,6 +2352,25 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 					toast("parçacığın yetmedi — aile mahzun yoluna devam etti")
 			else:
 				toast("selametle — kaşifeler karanlığa karıştı")
+		"kuyu":
+			if idx == 0:
+				if int(G.meta.data.get("choralim", 0)) >= 35:
+					G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - 35
+					G.meta.save()
+					G.run.node_mods["loot"] = float(G.run.node_mods.get("loot", 1.0)) * 1.35
+					G.run.node_mods["frag"] = float(G.run.node_mods.get("frag", 1.0)) * 1.2
+					G.run.frag_node = float(G.run.node_mods.get("frag", 1.0))
+					toast("yankı zengin döndü — ganimet ×1.35 · parçacık ×1.2")
+				else:
+					toast("parçacık kuyunun dibini bulamadı")
+			else:
+				if randf() < 0.55:
+					G.run.fragments += 35
+					toast("yankı cömertti — ◈+35")
+				else:
+					G.run.node_mods["spawn"] = float(G.run.node_mods.get("spawn", 1.0)) * 1.15
+					toast("yankı koroyu çağırdı — sürü sıkılaşacak")
+			Quests.tick("kuyu")
 		"konservi":
 			if idx == 0:
 				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar

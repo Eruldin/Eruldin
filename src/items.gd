@@ -72,6 +72,7 @@ const DEFS := {
 	"i_kaos":     {"name": "Kararsız Çekirdek","slot": "kemer",  "r": 3, "icon": "icn_skull",      "mods": {"dmg": 0.08, "crit": 0.05, "hp": -10}},
 	"i_ritim":    {"name": "Ritim Bileziği",  "slot": "yuzuk2",  "r": 2, "icon": "icn_dagger",     "mods": {"crit": 0.05, "skill": -0.04}},
 	"i_kacakkordon": {"name": "Kese Kordonu", "slot": "kemer",   "r": 2, "icon": "ico_frag",       "mods": {"frag": 0.10, "spd": 0.05}},
+	"i_yanki":   {"name": "Yankı Taşı",      "slot": "yuzuk2",  "r": 2, "icon": "ico_frag",       "mods": {"mag": 50.0, "frag": 0.08}},
 	"i_arkhalka": {"name": "Ark Bileziği",    "slot": "yuzuk1",  "r": 2, "icon": "icn_zap",        "mods": {"skill": -0.06, "dmg": 0.04}},
 	"i_bora":     {"name": "Bora Zili",       "slot": "kemer",   "r": 2, "icon": "icn_dash",       "mods": {"spd": 0.05, "armor": 0.5}},
 	"i_ayin":     {"name": "Ayin Mumusu",     "slot": "eldiven", "r": 2, "icon": "icn_skull",      "mods": {"dmg": 0.05, "crit": 0.03}},
