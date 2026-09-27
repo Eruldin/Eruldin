@@ -2812,6 +2812,16 @@ func pause_panel() -> void:
 			var stl := _lbl("hasar ×%0.2f · hız %0.2f · krit %%%d·×%0.1f · zırh %d · çalma %%%d · KOZ: %s" % [p.dmg_mult, p.speed / 205.0, roundi(p.crit_ch * 100), p.crit_mult, roundi(p.armor), roundi(p.lifesteal * 100), str(Boons.ARCANAS.get(G.run.arcana, {}).get("name", "—"))], Vector2.ZERO, 11, Color(0.55, 0.65, 0.8))
 			stl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			v.add_child(stl)
+			var eq: Dictionary = G.meta.data.get("equip", {})
+			var names: Array = []
+			for sl in Items.SLOTS:
+				var iid := str(eq.get(sl, ""))
+				if iid != "":
+					names.append(str(Items.DEFS.get(iid, {}).get("name", iid)))
+			if not names.is_empty():
+				var el := _lbl("EKİPMAN: " + " · ".join(names), Vector2.ZERO, 10, Color(0.5, 0.62, 0.72))
+				el.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				v.add_child(el)
 		_build_recap(v)
 		var qb := Button.new()
 		qb.text = "KAMPA DÖN (koşuyu bırak)"

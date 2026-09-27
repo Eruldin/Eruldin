@@ -43,6 +43,11 @@ const DEFS := {
 	"i_atlama":   {"name": "Atlayıcı Çivisi",  "slot": "cizme",   "r": 1, "icon": "icn_dash",       "mods": {"armor": 1.0, "spd": 0.03}},
 	"i_koro":     {"name": "Koro Madalyonu",   "slot": "kolye",   "r": 1, "icon": "ico_frag",       "mods": {"frag": 0.12}},
 	"i_bosluk":   {"name": "Boşluk Halkası",   "slot": "yuzuk",   "r": 2, "icon": "icn_skull",      "mods": {"ls": 0.03, "crit": 0.04}},
+	# üçüncü dalga — boş stat kovalarını dolduran orta katman
+	"i_firis":    {"name": "Feragat Başlığı",  "slot": "bas",     "r": 0, "icon": "icn_upg_dash",   "mods": {"dash_regen": 0.12}},
+	"i_hisar":    {"name": "Hisar Kalkanı",    "slot": "govde",   "r": 1, "icon": "icn_upg_shield", "mods": {"armor": 2.0, "spd": -0.02}},
+	"i_cevher":   {"name": "Cevher Yüzüğü",    "slot": "yuzuk",   "r": 0, "icon": "ico_frag",       "mods": {"frag": 0.08, "xp": 0.04}},
+	"i_cengel":   {"name": "Av Çengeli",       "slot": "eldiven", "r": 2, "icon": "icn_sword",      "mods": {"dmg": 0.08, "ls": 0.015}},
 }
 
 const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700"]
