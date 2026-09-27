@@ -107,6 +107,7 @@ const NODES := [
 	]},
 	{"id": "buzkasa","name": "BUZ KASASI",       "icon": "ico_loot",   "pos": Vector2(1505, 445), "col": "9fd8ff", "kind": "hazine","biome": 8, "unlock": "node", "desc": "Buzulun karnına gömülü imparatorluk kasası — efendi yok; buz mührü 6 dakika sonra çatlar, içi donmuş ganimet.", "lore": "Kervan defterinin kastettiği 'yük' bu kasaydı — imparatorluk choralim stokunu buza emanet etti. Buz Anası düşünce mühürdeki sesten pay alamadı; şimdi kasa sadece sabır istiyor.", "mods": {"loot": 2.7, "frag": 2.2, "hp": 1.2, "spawn": 1.15, "elite_t": 0.7}},
 	{"id": "damarkasa","name": "DAMAR KASASI",  "icon": "ico_loot",   "pos": Vector2(1300, 640), "col": "80ffd4", "kind": "hazine","biome": 7, "unlock": "node", "desc": "Çukurun dibinde damara gömülü zula — efendi yok; kristal mühür 6 dakika sonra düşer, içi ham choralim.", "lore": "Maden barakasının defterinde 'ana kasa damarın göbeğine gömüldü — mühür damardan besleniyor' yazar. Kasa kristalin içinde büyümüş; altı dakikalık sessizlik onu çözüyor.", "mods": {"loot": 2.6, "frag": 2.3, "hp": 1.15, "spawn": 1.2, "elite_t": 0.75, "dusk": true}},
+	{"id": "ayaz",   "name": "AYAZ KUYUSU",      "icon": "icn_dash",   "pos": Vector2(1270, 620), "col": "bfe8ff", "kind": "arena", "biome": 8, "unlock": "node", "desc": "Buzulun güneyinde dibi görünmeyen dikey kuyu — bora buradan iner, donmuş sürüler buradan tırmanır.", "lore": "İzcilerin son notu: 'kuyu nefes alıyor — bora onun nefesi, sürüler onun öksürüğü.' Kuyunun dibinde koro'nun ilk şarkısı buzda saklı; buz Anası o şarkıyı duymak için bekliyordu.", "mods": {"hp": 1.4, "dmg": 1.2, "spawn": 1.15, "frag": 1.7, "loot": 1.5, "elite_t": 0.75, "dusk": true}},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -148,6 +149,7 @@ const EDGES := [
 	["cukur", "buzul"], ["damar", "buzul"], ["buzul", "kervan"],
 	["buzul", "beyazufuk"], ["kervan", "beyazufuk"],
 	["beyazufuk", "buzkasa"], ["buzul", "buzkasa"],
+	["cukur", "ayaz"], ["buzul", "ayaz"], ["beyazufuk", "ayaz"],
 	["batak", "batikfener"], ["damar", "batikfener"],
 	["cukur", "damarkasa"], ["damar", "damarkasa"], ["kaos", "damarkasa"],
 	["kamp", "karakol"], ["karakol", "b0"],
