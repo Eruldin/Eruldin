@@ -47,6 +47,9 @@ var lead_t := 0.0       # bu düşmanın üstündeki kalan sürücü buffı
 var _trail_t := 0.0     # iz süren elit: kor izi bırakma sayacı
 var _warp_t := 0.0      # ışınlanan elit: teleport sayacı
 var _herald_t := 3.0    # koro sözcüsü: çan aurası sayacı
+var _muhur_t := 0.0     # mühürlü elit: sonraki mühür penceresine kalan süre
+var _muhur_win := 0.0   # mühür penceresi açıkken kalan süre (hasar yemez)
+var _muhur_sp: Sprite2D = null
 var _sum_n := 0     # bu elitin saldığı döl sayısı
 var speed := 100.0
 var touch_dmg := 10.0
@@ -154,7 +157,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi"][randi() % 13]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur"][randi() % 14]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -190,6 +193,9 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "KORUYUCU " + actor_name
 			"yansi":
 				actor_name = "YANSITICI " + actor_name
+			"muhur":
+				_muhur_t = 3.5
+				actor_name = "MÜHÜRLÜ " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -236,7 +242,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -245,6 +251,13 @@ func _make_body() -> void:
 			aura.modulate = Color(0.5, 0.8, 0.77, 0.16)
 			aura.z_index = -40
 			add_child(aura)
+		if affix == "muhur":
+			_muhur_sp = Sprite2D.new()
+			_muhur_sp.texture = Px.S("ring")
+			_muhur_sp.scale = Vector2.ONE * ((radius * 2.4) / 72.0)
+			_muhur_sp.modulate = Color(0.55, 0.85, 1.0, 0.0)
+			_muhur_sp.z_index = 25
+			add_child(_muhur_sp)
 		_hp_bg = ColorRect.new()
 		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
 		_hp_bg.position = Vector2(-24, -80)
@@ -358,6 +371,21 @@ func _process(_d: float) -> void:
 			_trail_t = 0.9
 			var ds2: float = G.director._dmg_scale() if G.director != null else 1.0
 			G.room.add_hazard(pos + Vector2(G.rf(-8, 8), G.rf(-8, 8)), 26.0, 8.0 * ds2, 2.6, Color(1.0, 0.45, 0.15, 0.5))
+	# mühürlü elit: döngüsel hasarsızlık penceresi — halka belirirken vurma
+	if affix == "muhur":
+		if _muhur_win > 0.0:
+			_muhur_win -= d
+			if is_instance_valid(_muhur_sp):
+				_muhur_sp.modulate.a = minf(0.5, _muhur_sp.modulate.a + d * 6.0)
+		else:
+			_muhur_t -= d
+			if is_instance_valid(_muhur_sp) and _muhur_sp.modulate.a > 0.0:
+				_muhur_sp.modulate.a = 0.0
+			if _muhur_t <= 0.0:
+				_muhur_t = 5.5
+				_muhur_win = 1.6
+				G.fx.tele_ring(pos, radius * 2.8, 0.35, Color(0.55, 0.85, 1.0, 0.5))
+				G.audio.play("parry", 0.8, 0.3)
 	# ışınlanan elit: uzak kalırsa oyuncunun yanına teleport eder — arka hat güvenli değil
 	if affix == "warp" and _st == St.SEEK and is_instance_valid(G.room):
 		_warp_t -= d
@@ -560,6 +588,13 @@ func take_hit(h: Dictionary) -> void:
 					h["_ward_fx"] = true
 					G.fx.burst(pos + Vector2(0, -16), Px.C("80cbc4"), 5, 70.0, 2.6, 0.22)
 				break
+	# MÜHÜRLÜ: mühür penceresi açıkken gelen hasar sıfırlanır — zamanlamayı oku
+	if affix == "muhur" and _muhur_win > 0.0:
+		h["dmg"] = 0.0
+		if not h.has("_muhur_fx"):
+			h["_muhur_fx"] = true
+			G.fx.burst(pos + Vector2(0, -16), Px.C("7fdbff"), 4, 70.0, 2.4, 0.2)
+			G.audio.play("parry", 1.4, 0.18)
 	if kind == EKind.MUHFIZ and is_instance_valid(G.player) and h.has("from"):
 		var fw := (G.player.pos - pos).normalized()
 		var aw := (Vector2(h.get("from")) - pos).normalized()
