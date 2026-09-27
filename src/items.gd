@@ -52,6 +52,7 @@ const DEFS := {
 	"i_nabiz":    {"name": "Nabız Söndürücü",  "slot": "kolye",   "r": 2, "icon": "icn_zap",        "mods": {"skill": -0.16}},
 	"i_igne":     {"name": "İğne Kını",        "slot": "kemer",   "r": 2, "icon": "icn_dagger",     "mods": {"crit": 0.08, "dmg": 0.08}},
 	"i_gozcu":    {"name": "Gözcü Merceği",    "slot": "kolye",   "r": 2, "icon": "icn_zap",        "mods": {"critmult": 0.25, "dmg": 0.05}},
+	"i_kurtdis":  {"name": "Kurt Dişi Dizi",   "slot": "kolye",   "r": 1, "icon": "ico_frag",       "mods": {"frag": 0.10, "spd": 0.03}},
 	"i_vurgu":    {"name": "Vurgu Halkası",    "slot": "yuzuk",   "r": 1, "icon": "icn_dagger",     "mods": {"skill": -0.09, "dmg": 0.03}},
 	"i_anasi_igne": {"name": "Kraliçe İğnesi", "slot": "yuzuk",   "r": 3, "icon": "icn_dagger",     "mods": {"crit": 0.10, "ls": 0.02}},
 	"i_devkalp": {"name": "Batak Kalbi",     "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 40, "armor": 0.8}},
