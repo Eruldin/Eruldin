@@ -53,6 +53,7 @@ const SPRITES := {
 	"gr_hub": "art/gen/g_gr_hub.png",
 	# Kızıl Çöl (biome 6): sinematik kart olarak da zemin resmi kullanılır
 	"cine_6_0": "art/gen/g_gr_6.png",
+	"cine_hazine": "art/gen/g_cine_vault.png",
 	"cine_7_0": "art/gen/g_gr_7.png",
 	"cine_8_0": "art/gen/g_gr_8.png",
 	"por_nur": "art/gen/g_nur_0.png",
