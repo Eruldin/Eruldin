@@ -215,7 +215,19 @@ const SETS := {
 	"gezgin":   {"name": "GEZGİN SETİ",   "ids": ["i_palto", "i_ruzgar"],         "mods": {"spd": 0.08, "dash_regen": 0.10}},
 	"rezonans": {"name": "REZONANS SETİ", "ids": ["i_halo", "i_neva", "i_koro"],  "mods": {"xp": 0.15, "frag": 0.10}},
 	"bosluk":   {"name": "BOŞLUK SETİ",   "ids": ["i_bosluk", "i_final"],         "mods": {"ls": 0.04, "dmg": 0.05}},
+	"sovalye":  {"name": "ŞÖVALYE SETİ",  "ids": ["i_duvar", "i_hayalet", "i_efendin", "i_duel"], "mods": {"hp": 40, "armor": 2.0}},
 }
+
+# tamamı kuşanılmış mı — başarım kontrolü için
+static func set_active(sid: String) -> bool:
+	if not SETS.has(sid):
+		return false
+	var eq: Dictionary = G.meta.data.get("equip", {})
+	var worn: Array = eq.values()
+	for iid in SETS[sid].ids:
+		if not worn.has(iid):
+			return false
+	return true
 
 static func equip_stats() -> Dictionary:
 	var out := {"hp": 0.0, "armor": 0.0, "dmg": 0.0, "spd": 0.0, "crit": 0.0,
