@@ -2178,6 +2178,9 @@ const WAYLAY := {
 	"ilahi": {"name": "KORO İLAHİSİ", "col": "7c4dff",
 		"sub": "Yolun ortasında bir koro habercisi ilahi okuyor — sesi düşman değil, davet. Eski devirlerde bu ilahi avcıları sahaya elitlerin üstüne salarmış; ödersen senin koşuna da okur, okursan sürü çeker ama av bereketli olur.",
 		"opts": ["İLAHİ SATIN AL — ◆30: elitler sıklaşır, parçacık ×1.25", "GEÇ — şarkı arkanda söndü"]},
+	"hayalet": {"name": "KOVAN HAYALETİ", "col": "90a4ae",
+		"sub": "Yolun ortasında titreyen bir kayıt duruyor — düşmüş bir şasinin son koşusu karanlıkta hâlâ oynanıyor, aynı adımlar, aynı son kesiş. Yankının çekirdeğinde kullanılmamış bir eşya parlıyor; ona dokunursan alarm kovana da ulaşır. Ya da kaydı huzuruna bırak — sana ufak bir anı bırakıp söner.",
+		"opts": ["YANKIYI YAKALA — rasgele eşya, ama kuşatılmış giriş", "HÜZNÜNE BIRAK — ◈15 parçacık ve sessiz yol"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -2393,6 +2396,14 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				toast("ilahi koşunda söyleniyor — elitler sık, parçacık bereketli")
 			else:
 				toast("ilahi arkanda kaldı — yol sessiz")
+		"hayalet":
+			if idx == 0:
+				G.run.pending_ambush = true
+				Items.drop_to_run(Items.roll(G.run.luck))
+				toast("yankı dağıldı — eşya çantada, alarm kovana ulaştı")
+			else:
+				G.run.fragments += 15
+				toast("yankı söndü — ◈+15 anısı kaldı")
 		"konservi":
 			if idx == 0:
 				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar
