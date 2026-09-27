@@ -32,6 +32,9 @@ const SPRITES := {
 	"por_buz": "art/por_buz.png",
 	"por_h9": "art/por_h9.png",
 	"prop_mahkum2": "art/prop_mahkum2.png",
+	"npc2_orun": "art/gen/g_orun_0.png", "npcb_orun": "art/gen/g_orun_1.png",
+	"por_orun": "art/por_orun.png",
+	"prop_mahkum3": "art/prop_mahkum3.png",
 	# sahne vistalari (uretilmis): backdrop katmanlari + arena ufku
 	"bg_0": "art/gen/g_bg_0.png", "bg_1": "art/gen/g_bg_1.png",
 	"bg_2": "art/gen/g_bg_2.png", "bg_3": "art/gen/g_bg_3.png",

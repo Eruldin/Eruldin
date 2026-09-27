@@ -109,6 +109,11 @@ const LINES := {
 		"Her düğümün kokusu, her rotanın bedeli var. Ben bilirim — ben ödedim.",
 		"Harita çizilebilir ama kader işaretlenmez, Praetorian. Yine de bir güzergâh borçluyum sana.",
 	],
+	"orun": [
+		"Koro'nun müjdecisi idim — çanı ben çaldım, davulu ben dinledim. Kaçarken kafese attılar; kulaklarım hâlâ onların borusu.",
+		"Baskın gelmeden önce nabzı titrer — hangi düğümün üzerinde atıyor bilirim. Bilgi bedava değil ama kurtarıcıya ucuzdur.",
+		"Söyle ne duymak istiyorsun: koro şu an nerede toplanıyor, sana söyleyeyim — ya da kulaklarımı satın al, nabzı senin lehine kaydırırım.",
+	],
 	"tegan": [
 		"Kamp ateşinin yanında herkes dua eder; ben oran okurum, Praetorian.",
 		"Kovan bana bir şey öğretti: kesin olan tek şey kaybettirmesi. Ama sen... sen bir anomalisin.",
@@ -143,6 +148,7 @@ const NPC_COL := {
 	"mina": "e8a04c",    # aşçı — soba alevi amber
 	"lena": "7fb3c9",    # kartograf — tozlu çelik mavisi
 	"tegan": "2aa6a0",   # simsar — teal-altın pelerin
+	"orun":  "3ec8b8",   # ihbarcı — koro camgöbeği
 }
 
 static var _font: Font
@@ -609,6 +615,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "icn_skull", "col": "d4a017", "s": 22.0})
 			elif k == "mahkum2":
 				out.append({"p": pk.position, "icon": "icn_skull", "col": "7fb3c9", "s": 22.0})
+			elif k == "mahkum3":
+				out.append({"p": pk.position, "icon": "icn_skull", "col": "3ec8b8", "s": 22.0})
 		if G.room.mono_active:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
 		if G.room.merchant_active:
@@ -1049,6 +1057,8 @@ func dialogue(nid: String) -> void:
 		hint.text = "[E / tık] rota"
 	elif nid == "tegan":
 		hint.text = "[E / tık] bahis masası"
+	elif nid == "orun":
+		hint.text = "[E / tık] koro istihbaratı"
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
@@ -1113,6 +1123,9 @@ func _advance_overlay() -> void:
 			elif nid == "tegan":
 				_close_overlay()
 				bet_panel()
+			elif nid == "orun":
+				_close_overlay()
+				orun_panel()
 			elif nid == "saphire":
 				_close_overlay()
 				inventory_panel()
@@ -1243,6 +1256,7 @@ func _service_panel_for(nid: String) -> void:
 		"mina":    kitchen_panel()
 		"lena":    routes_panel()
 		"tegan":   bet_panel()
+		"orun":    orun_panel()
 		"neva":    song_panel()
 		"saphire": inventory_panel()
 		"elyb":    hero_panel()
@@ -2497,6 +2511,58 @@ func routes_panel() -> void:
 			G.audio.jingle("boon")
 			_close_overlay()
 			routes_panel())
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
+# İhbarcı Orun: kurtarılmış Koro müjdecisi — baskın işaretinin nerede olduğunu
+# söyler; ◆ karşılığında kulaklarını 'ayarlayıp' işareti başka düğüme kaydırır
+func orun_panel() -> void:
+	_pause(true)
+	var v := _show_panel("orun", "İHBARCI ORUN — koro istihbaratı", Px.C("3ec8b8"))
+	var por := TextureRect.new()
+	por.texture = Px.S2("por_orun")
+	por.custom_minimum_size = Vector2(72, 72)
+	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pc := CenterContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(por)
+	v.add_child(pc)
+	var hot := Wmap.hot_node()
+	var stat := _lbl("", Vector2.ZERO, 13, Px.C("3ec8b8"))
+	if hot != "":
+		stat.text = "koronun nabzı %s üzerinde atıyor —\norada sürü yoğun, ganimet bereketli (×1.25 ödeme)" % str(Wmap.node(hot).get("name", hot))
+	else:
+		stat.text = "koro bu tur sessiz — baskın işareti yok"
+	stat.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(stat)
+	var money := _lbl("Saf Choralim: ◆ %d" % G.meta.data.choralim, Vector2.ZERO, 12, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
+	var btn := Button.new()
+	var iprice := Quests.rep_price(25)
+	var cands: Array = []
+	for n in Wmap.NODES:
+		if str(n.get("kind", "")) == "arena" and Wmap.can_enter(str(n.id)) and str(n.id) != hot:
+			cands.append(str(n.id))
+	btn.text = "◆ %d — KULAĞI AYARLA (nabzı başka düğüme kaydır)" % iprice
+	btn.disabled = cands.is_empty() or G.meta.data.choralim < iprice
+	btn.custom_minimum_size = Vector2(320, 30)
+	btn.add_theme_font_override("font", ui_font())
+	var bc := CenterContainer.new()
+	bc.add_child(btn)
+	v.add_child(bc)
+	btn.pressed.connect(func():
+		if G.meta.data.choralim >= iprice and not cands.is_empty():
+			G.meta.data["choralim"] -= iprice
+			G.meta.data["hot_node"] = str(G.pick(cands))
+			G.meta.save()
+			G.audio.jingle("boon")
+			G.ui.toast("nabız kaydı — %s üzerinde atıyor" % str(Wmap.node(G.meta.data["hot_node"]).get("name", "?")))
+			_close_overlay()
+			orun_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)

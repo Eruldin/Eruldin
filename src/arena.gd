@@ -51,6 +51,8 @@ func build_arena(biome_idx: int) -> void:
 			spawn_special("mahkum", rp)
 		elif not bool(G.meta.data.get("rescued_lena", false)):
 			spawn_special("mahkum2", rp)
+		elif not bool(G.meta.data.get("rescued_orun", false)):
+			spawn_special("mahkum3", rp)
 	# Lena'nın keşif güzergâhı: işaretli koşuda ekstra sandık + kalıntı
 	if G.run != null and G.run.route_mark:
 		var cp2 := Vector2(rng.randf_range(BOUNDS.position.x + 160, BOUNDS.end.x - 160), rng.randf_range(BOUNDS.position.y + 160, BOUNDS.end.y - 160))
