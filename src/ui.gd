@@ -112,6 +112,7 @@ var _ch_bar: ColorRect
 var _dash_row: HBoxContainer
 var _skill_lbl: Label
 var _iksir_lbl: Label
+var _tonic_lbl: Label
 var _frag_lbl: Label
 var _boon_row: HBoxContainer
 var _room_lbl: Label
@@ -244,6 +245,8 @@ func _build_hud() -> void:
 	_hud.add_child(_skill_lbl)
 	_iksir_lbl = _lbl("", Vector2(112, 678), 12, Px.C("8affc9"))
 	_hud.add_child(_iksir_lbl)
+	_tonic_lbl = _lbl("", Vector2(150, 678), 12, Px.C("ff7722"))
+	_hud.add_child(_tonic_lbl)
 
 	_frag_lbl = _lbl("◆ 0", Vector2(1140, 648), 16, Px.C("c26bff"))
 	_hud.add_child(_frag_lbl)
@@ -305,7 +308,7 @@ func _build_hud() -> void:
 	_quest_lbl = _lbl("", Vector2(20, 152), 11, Color(0.82, 0.78, 0.55))
 	_hud.add_child(_quest_lbl)
 
-	_hint_lbl = _lbl("WASD hareket · SPACE dash · Q yetenek · R iksir · E etkileşim · ESC duraklat", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
+	_hint_lbl = _lbl("WASD hareket · SPACE dash · Q yetenek · R iksir · T şarap · E etkileşim · ESC duraklat", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
 	_hud.add_child(_hint_lbl)
 
 	# boon tooltip
@@ -443,6 +446,9 @@ func _tick_hud() -> void:
 		_skill_lbl.text = "Q" if p.skill_cd <= 0 else str(int(ceil(p.skill_cd)))
 	if is_instance_valid(_iksir_lbl):
 		_iksir_lbl.text = ("R ×%d" % p.iksir_n) if p.iksir_n > 0 else ""
+	if is_instance_valid(_tonic_lbl):
+		_tonic_lbl.text = ("T ×%d" % p.sarap_n) if p.sarap_n > 0 else ""
+		_tonic_lbl.add_theme_color_override("font_color", Px.C("ffcf6e") if p.sarap_t > 0.0 else Px.C("ff7722"))
 	_frag_lbl.text = "◆ %d  (+%d)" % [G.meta.data.choralim, int(G.run.fragments * G.meta.frag_mult())]
 	_xp_bar.size.x = 1280.0 * clampf(p.xp / maxf(p.xp_next, 1.0), 0.0, 1.0)
 	# choralim pulse (#6a3fd1 -> #2c9be8) per the art bible
@@ -1797,6 +1803,28 @@ func shop_panel() -> void:
 			G.player.iksir_n += 1
 			G.audio.jingle("boon")
 			toast("iksir alındı — R ile içilir (elde %d/3)" % G.player.iksir_n)
+			_close_overlay()
+			shop_panel())
+	# kor şarabı: 25sn güç/hız — T ile içilir, koşular arasında kalır
+	var srow := HBoxContainer.new()
+	srow.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(srow)
+	var sb := Button.new()
+	var sprice := 55
+	sb.text = "KOR ŞARABI ◆%d  (T — 25sn güç, elde %d/2)" % [sprice, G.player.sarap_n if is_instance_valid(G.player) else 0]
+	sb.add_theme_font_override("font", ui_font())
+	sb.custom_minimum_size = Vector2(300, 24)
+	sb.disabled = int(G.meta.data.get("choralim", 0)) < sprice or (is_instance_valid(G.player) and G.player.sarap_n >= 2)
+	if sb.disabled:
+		sb.modulate = Color(0.5, 0.5, 0.55)
+	srow.add_child(sb)
+	sb.pressed.connect(func():
+		if int(G.meta.data.get("choralim", 0)) >= sprice and is_instance_valid(G.player) and G.player.sarap_n < 2:
+			G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - sprice
+			G.meta.save()
+			G.player.sarap_n += 1
+			G.audio.jingle("boon")
+			toast("kor şarabı alındı — T ile içilir (elde %d/2)" % G.player.sarap_n)
 			_close_overlay()
 			shop_panel())
 	var back2 := Button.new()

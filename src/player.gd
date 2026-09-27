@@ -43,6 +43,9 @@ var _haste_mult := 1.0
 var _skill_held := false
 var _iksir_held := false
 var iksir_n := 0          # choralim iksiri stoğu — R ile içilir, koşular arasında kalır
+var _sarap_held := false
+var sarap_n := 0          # kor şarabı stoğu — T ile içilir: 25sn +%25 hasar +%8 hız
+var sarap_t := 0.0        # şarap etkisi kalan süre
 var _parry_t := 0.0
 var _parry_cd := 0.0
 var _combo := 0
@@ -297,7 +300,25 @@ func _tick_skill(d: float) -> void:
 		G.fx.burst(pos, Px.C("8affc9"), 14, 140.0, 3.0, 0.5)
 		G.audio.play("heal", 1.2, 0.55)
 		G.ui.toast("choralim iksiri — can yenilendi")
+		Quests.tick("iksir")
 	_iksir_held = r_now
+	var t_now := Input.is_key_pressed(KEY_T)
+	if t_now and not _sarap_held and sarap_n > 0 and not dead and G.state == G.State.ROOM:
+		sarap_n -= 1
+		if sarap_t <= 0.0:
+			dmg_mult *= 1.25
+			speed *= 1.08
+		sarap_t = maxf(sarap_t, 25.0)
+		G.fx.burst(pos, Px.C("ff7722"), 16, 150.0, 3.5, 0.5)
+		G.audio.play("boon", 0.9, 0.55)
+		G.ui.toast("KOR ŞARABI — 25sn güç ve hız")
+	_sarap_held = t_now
+	if sarap_t > 0.0:
+		sarap_t -= d
+		if sarap_t <= 0.0:
+			dmg_mult /= 1.25
+			speed /= 1.08
+			G.ui.toast("şarap etkisi geçti")
 
 # şasi yeteneği: ely → NOVA (AoE), elyb → SİPER (zırh fazı), via → ATILIM (dash refill + hız)
 func _use_skill() -> void:

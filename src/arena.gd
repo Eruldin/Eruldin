@@ -34,6 +34,11 @@ func build_arena(biome_idx: int) -> void:
 	var tp := Vector2(rng.randf_range(BOUNDS.position.x + 180, BOUNDS.end.x - 180), rng.randf_range(BOUNDS.position.y + 180, BOUNDS.end.y - 180))
 	if tp.distance_to(Vector2.ZERO) > 320.0:
 		spawn_special("totem", tp)
+	# kor şarabı: çöl pazarından kaçak mal — %45 sahada bir şişe
+	if rng.randf() < 0.45:
+		var wp := Vector2(rng.randf_range(BOUNDS.position.x + 160, BOUNDS.end.x - 160), rng.randf_range(BOUNDS.position.y + 160, BOUNDS.end.y - 160))
+		if wp.distance_to(Vector2.ZERO) > 300.0:
+			spawn_special("sarap", wp)
 	# sinyal feneri: isteğe bağlı ikiz şampiyon savaşı — boss-rush node'unda yok
 	if G.run == null or int(G.run.node_mods.get("rush", 0)) == 0:
 		var fp := Vector2(rng.randf_range(BOUNDS.position.x + 180, BOUNDS.end.x - 180), rng.randf_range(BOUNDS.position.y + 180, BOUNDS.end.y - 180))
