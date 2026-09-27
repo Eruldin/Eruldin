@@ -90,6 +90,7 @@ const DEFS := [
 	{"id": "q_degirmen", "giver": "lena",  "name": "DEĞİRMEN SESLERİ",   "desc": "Kum fırtınalarının arasında eski yel değirmenleri hâlâ dönüyor — tek koşuda 350 kesim yap, güzergâhını haritaya işlerim.", "obj": {"type": "kills", "n": 350}, "rew": {"cho": 150, "node": "degirmen"}, "prereq": "q_kum"},
 	{"id": "q_kervan", "giver": "tegan",   "name": "SİMSARIN KAYBI",     "desc": "Değirmenlerin ötesinde kumun altında bir han gömülü — kervanımın yarısı orada kaldı, mahzeni hâlâ dolu. Altı kum akrebi iğnesi getir, hanın kilidinin zamanını sana çözerim.", "obj": {"type": "kind", "k": "Kum Akrebi", "n": 6}, "rew": {"cho": 260, "node": "kervansaray", "rep": 2}, "prereq": "q_degirmen"},
 	{"id": "q_depot", "giver": "vane",    "name": "MÜHÜRLÜ DEPO",       "desc": "Simithar'ın planlarında bir 'maden kasası' var — mühür mekanik, kapı zamana bağlı; tek ihtiyacımız kasaya giden yolu temiz tutacak kadar parçacık saygınlığı. Tek koşuda 1100 parçacık biriktir, depo rotasını senin için açarım.", "obj": {"type": "frag", "n": 1100}, "rew": {"cho": 240, "node": "madenkasa", "rep": 2}, "prereq": "q_loot"},
+	{"id": "q_yagma", "giver": "tegan",   "name": "ÇİFT KASA",            "desc": "İki mühürlü kasa da açıldıysa kervan borcum kapanır — han ve depo, ikisini de yağmala, payımı alırım.", "obj": {"type": "hazine", "n": 2}, "rew": {"cho": 320, "rep": 3}, "prereq": "q_kervan"},
 	{"id": "q_dev",   "giver": "ahusk",   "name": "BATAKLIĞIN EFENDİSİ","desc": "Bataklığın dibinde bir dev oturuyor — gençliğimde ondan kaçtım, şimdi sen indir. Kalbi sana tılsım olur.", "obj": {"type": "boss", "k": "dev"}, "rew": {"cho": 240, "item": "i_devkalp"}, "prereq": "q_batak"},
 	{"id": "q_sarnic","giver": "ahusk",   "name": "SUYUN ALTINDA",      "desc": "Sarnıçların hâlâ dolu olduğunu bilirim — bataklıkta bir tanesi gördüm. Tek koşuda 1600 parçacık getir, girişin yerini çizeyim.", "obj": {"type": "frag", "n": 1600}, "rew": {"cho": 260, "node": "sarnic"}, "prereq": "q_batak"},
 	{"id": "q_balcik","giver": "ahusk",   "name": "ÇAMURUN İÇİNDEKİ",   "desc": "Balçıktan yürüyenler kervan yolunu kesiyor — bırakırsan yarası kapanıyor. On tanesini çökert, kalbini sana tılsım yapayım.", "obj": {"type": "kind", "k": "Balçık Adam", "n": 10}, "rew": {"cho": 200, "item": "i_balcikkalp"}, "prereq": "q_sarnic"},
@@ -489,6 +490,7 @@ static func obj_text(q: Dictionary) -> String:
 		"over":   return "%d aşırı yük kullan" % need
 		"keg":    return "%d kesimi fıçıya saydır" % need
 		"geo":    return "%d damar jeotu kır" % need
+		"hazine": return "%d hazine düğümü yağmala" % need
 	return "?"
 
 static func _claimed_count() -> int:
