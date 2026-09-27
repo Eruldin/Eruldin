@@ -136,6 +136,7 @@ func achievements() -> Array:
 		{"name": "KOVAN KIRICI", "desc": "toplam 10.000 kesim", "done": int(data["kills"]) >= 10000, "rew": 300},
 		{"name": "EFENDİ AVCISI", "desc": "dört efendiyi de düşür", "done": (data["bosses"] as Array).size() >= 4, "rew": 200},
 		{"name": "ÇÖLÜN HÜKÜMRARI", "desc": "Kum Anası'nı düşür", "done": (data["bosses"] as Array).has("anasi"), "rew": 180},
+		{"name": "BATAKLIĞIN EFENDİSİ", "desc": "Bataklık Devi'ni düşür", "done": (data["bosses"] as Array).has("dev"), "rew": 180},
 		{"name": "DERİN GEZGİN", "desc": "tek koşuda 10+ dakika dayan", "done": int(data["best_depth"]) >= 600 or int(data["victories"]) > 0, "rew": 100},
 		{"name": "İNATÇI", "desc": "10 koşuya çık", "done": int(data["runs"]) >= 10, "rew": 80},
 		{"name": "TAM ARSENAL", "desc": "tüm silahların kilidini aç", "done": arsenal, "rew": 250},
@@ -175,6 +176,7 @@ const TITLES := [
 	{"id": "kiran",   "name": "PROTOKOLÜ KIRAN", "src": "PROTOKOLÜ KIRAN"},
 	{"id": "dare",    "name": "DARE KIRAN",      "src": "DARE KIRAN"},
 	{"id": "kralice", "name": "ÇÖL TİRANI",      "src": "ÇÖLÜN HÜKÜMRARI"},
+	{"id": "dev",     "name": "BATAKLIK NÖBETÇİSİ","src": "BATAKLIĞIN EFENDİSİ"},
 ]
 
 func title_open(tid: String) -> bool:

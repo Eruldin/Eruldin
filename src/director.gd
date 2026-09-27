@@ -18,7 +18,7 @@ const FINAL_KIND := [
 	[Boss.BKind.HOST],
 	[Boss.BKind.NAHUM, Boss.BKind.TUMAN],
 	[Boss.BKind.KIRIN, Boss.BKind.CONST],
-	[Boss.BKind.NAHUM, Boss.BKind.TUMAN],
+	[Boss.BKind.DEV],
 	[Boss.BKind.REX, Boss.BKind.KIRIN],
 	[Boss.BKind.NAHUM, Boss.BKind.CONST],
 	[Boss.BKind.ANASI],
@@ -406,6 +406,7 @@ func _on_boss_dead(b) -> void:
 			Boss.BKind.HOST: bid = "host"
 			Boss.BKind.NAHUM, Boss.BKind.TUMAN: bid = "twins"
 			Boss.BKind.ANASI: bid = "anasi"
+			Boss.BKind.DEV: bid = "dev"
 		G.meta.boss_down(bid)
 		Quests.tick("boss", bid)
 	if is_instance_valid(G.room):
