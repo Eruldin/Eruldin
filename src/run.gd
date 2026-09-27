@@ -392,10 +392,11 @@ func _process(_d: float) -> void:
 # kill streak: chained kills within 2.5s pay milestone fragment bonuses
 var streak := 0
 var streak_t := 0.0
+var streak_window := 1.0   # KOZ 'ritu' ile genişler — seri zincirinin kopma süresi çarpanı
 
 func on_kill(_elite: bool) -> void:
 	streak += 1
-	streak_t = 2.5
+	streak_t = 2.5 * streak_window
 	if streak > int(stats.get("best_streak", 0)):
 		stats["best_streak"] = streak
 	var bonus := 0
