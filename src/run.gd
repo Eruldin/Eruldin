@@ -130,6 +130,7 @@ func start_run() -> void:
 	depth = -1
 	fragments = 0
 	boon_ids.clear()
+	stats = {"kills": 0, "rooms": 0}   # koşu işaretleri buradan önce yazılamaz — daily/baskin/omen/sefer blokları okur
 	luck = G.meta.upg(Meta.U.LUCK) * 0.15
 	# günlük protokol: tarihe göre seçilen mutasyon tüm koşuya uygulanır
 	daily = Wmap.daily()
@@ -182,6 +183,15 @@ func start_run() -> void:
 		reward_mult *= 1.5
 		stats["ilk_kosu"] = 1
 		G.ui.toast("GÜNÜN İLK KOŞUSU — choralim ödemesi ×1.5")
+	# saha yarası: bu düğümdeki önceki yenilgiler koro savunmasını pekiştirdi — sert ama bereketli
+	var br2: Dictionary = G.meta.data.get("bruised", {})
+	var yara := int(br2.get(nid, 0))
+	if yara > 0:
+		for mk in {"hp": 1.0 + 0.12 * yara, "dmg": 1.0 + 0.06 * yara}:
+			node_mods[mk] = float(node_mods.get(mk, 1.0)) * float({"hp": 1.0 + 0.12 * yara, "dmg": 1.0 + 0.06 * yara}[mk])
+		reward_mult *= 1.0 + 0.15 * yara
+		stats["yara"] = yara
+		G.ui.toast("SAHA YARASI ×%d — koro savunması pekişti, ganimet arttı" % yara)
 	if bool(node_mods.get("noheal", false)):
 		G.ui.toast("YEMİN DARESİ — şifa küresi düşmez, tek yaşamla sınan")
 	alive = true
@@ -201,7 +211,6 @@ func start_run() -> void:
 	pending_dmg = 0.0
 	pending_heal = 0.0
 	pending_duel = false
-	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
 	# saha keşfi: görevler için distinct biome sayısı birikir
 	var vis: Array = G.meta.data.get("visited", [])
@@ -632,6 +641,12 @@ func victory() -> void:
 		stats["vault_item"] = _vi
 	G.meta.data["ng"] = int(G.meta.data.get("ng", 0)) + 1
 	stats["ng"] = int(G.meta.data.get("ng", 0))
+	# saha yarası zaferle kapanır
+	var br3: Dictionary = G.meta.data.get("bruised", {})
+	if int(br3.get(node_id, 0)) > 0:
+		br3.erase(node_id)
+		G.meta.data["bruised"] = br3
+		G.ui.toast("SAHA YARASI kapandı — koro savunması çözüldü")
 	var first_end := node_id == "b3" and not bool(G.meta.data.get("ended", false))
 	if node_id == "b3":
 		G.meta.data["ended"] = true
@@ -708,6 +723,12 @@ func on_player_death(h: Dictionary) -> void:
 		stats["sefer"] = int(G.meta.data.get("sefer", 0))
 	G.meta.data["sefer"] = 0
 	G.meta.record_death(killer, biome, int(time), was_boss)
+	# yenilgi saha yarası bırakır — sonraki koşu daha sert ama daha bereketli (sonsuz ölümü yara açmaz, zafer çoktan yazıldı)
+	if not endless:
+		var brd: Dictionary = G.meta.data.get("bruised", {})
+		brd[node_id] = mini(3, int(brd.get(node_id, 0)) + 1)
+		G.meta.data["bruised"] = brd
+		G.meta.save()
 	var gained := int(fragments * G.meta.frag_mult() * reward_mult * Quests.rep_mult())
 	G.meta.add_choralim(gained)
 	fragments = 0

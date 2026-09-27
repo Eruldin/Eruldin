@@ -1363,6 +1363,11 @@ func worldmap_panel() -> void:
 			var htag := _lbl("▲ BASKIN", Vector2.ZERO, 8, Px.C("ff5533"))
 			htag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			bb.add_child(htag)
+		var wnd := int((G.meta.data.get("bruised", {}) as Dictionary).get(nid, 0))
+		if wnd > 0 and can:
+			var wtag := _lbl("◆ YARA ×%d" % wnd, Vector2.ZERO, 8, Px.C("e05050"))
+			wtag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			bb.add_child(wtag)
 		if is_cur:
 			var tag := _lbl("▼ HEDEF", Vector2.ZERO, 8, Px.C("ffd700"))
 			tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1376,6 +1381,9 @@ func worldmap_panel() -> void:
 			var line := "%s — %s%s" % [str(n.name), str(n.desc), "" if can else "   [%s]" % Wmap.unlock_text(nid)]
 			if nid == Wmap.hot_node() and can:
 				line += "   ▲ KORO BASKINI — sürü yoğun, ganimet bereketli"
+			var wnd2 := int((G.meta.data.get("bruised", {}) as Dictionary).get(nid, 0))
+			if wnd2 > 0 and can:
+				line += "   ◆ SAHA YARASI ×%d — savunma sertleşti, ödül büyüdü" % wnd2
 			var recd: Dictionary = (G.meta.data.get("node_rec", {}) as Dictionary).get(nid, {})
 			if not recd.is_empty():
 				line += "   [rekor %d · zafer %d · yenilgi %d]" % [int(recd.get("s", 0)), int(recd.get("w", 0)), int(recd.get("d", 0))]
