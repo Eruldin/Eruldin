@@ -535,8 +535,8 @@ func _tick_hud() -> void:
 	_time_lbl.text = ("%02d:%02d" % [tt / 60, tt % 60]) + ("   AZAP ×%d" % int(G.run.curse) if int(G.run.curse) > 0 else "") + ("   SEFER %d" % int(G.meta.data.get("sefer", 0)) if int(G.meta.data.get("sefer", 0)) > 0 else "")
 	_time_lbl.add_theme_color_override("font_color", Px.C("c26bff") if G.run.endless else (Px.C("ff5533") if (G.run.hyper or G.run.dark) else Color(0.9, 0.95, 1)))
 	if is_instance_valid(_prog_fg):
-		_prog_fg.size.x = 248.0 * clampf(G.run.time / Director.WIN_T, 0.0, 1.0)
-		_prog_fg.color = Px.C("c26bff") if G.run.endless else Px.C("00E5FF")
+		_prog_fg.size.x = 248.0 * clampf(G.run.time / float(G.run.win_target), 0.0, 1.0)
+		_prog_fg.color = Px.C("c26bff") if G.run.endless else (Px.C("ffd75f") if G.run.win_target < 700.0 else Px.C("00E5FF"))
 	_kills_lbl.text = "%d kesim" % int(G.run.stats.get("kills", 0))
 	if G.run.streak >= 10:
 		_kills_lbl.text += "  x%d" % G.run.streak

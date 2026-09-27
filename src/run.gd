@@ -47,6 +47,7 @@ var daily := {}             # günlük protokol mutasyonu (Wmap.daily)
 var stats := {"kills": 0, "rooms": 0}
 var node_id := "b0"       # wmap node this run entered through
 var node_name := ""       # banner'da node adı (fallback: biome adı)
+var win_target := 780.0   # HUD ilerleme barının hedefi — hazine düğümünde kısa
 var node_mods := {}       # spawn/hp/dmg/frag/loot/elite_t çarpanları
 var frag_node := 1.0      # node "frag" modu — parçacık düşüşlerini büyütür
 
@@ -115,6 +116,7 @@ func start_run() -> void:
 			nd = Wmap.node("b0")
 	node_id = nid
 	node_name = str(nd.get("name", ""))
+	win_target = 360.0 if str(nd.get("kind", "")) == "hazine" else float(Director.WIN_T)
 	node_mods = (nd.get("mods", {}) as Dictionary).duplicate()
 	frag_node = float(node_mods.get("frag", 1.0))
 	biome = clampi(int(nd.get("biome", 0)), 0, Room.BIOME_NAME.size() - 1)

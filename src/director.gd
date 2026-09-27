@@ -244,8 +244,18 @@ func _tick_events(d: float) -> void:
 		_mini = true
 		var mk := int(MINI_KIND[clampi(biome, 0, MINI_KIND.size() - 1)])
 		_boss(mk, 1.0 + m * 0.10 + biome * 0.35, "%s geliyor" % Boss.NAMES[mk])
+	# ganimet düğümü — efendi yok; kasa süresi dolunca mahzen açılır, zafer
+	var _hz := is_instance_valid(G.run) and str(Wmap.node(G.run.node_id).get("kind", "")) == "hazine"
+	if _hz and not _final and t >= 360.0:
+		_final = true
+		_won = true
+		G.audio.jingle("boon")
+		G.ui.toast("MAHZEN AÇILDI — vaha çıkışı hazır")
+		G.run.drop_fragments(G.player.pos + Vector2(0, -40), 60)
+		G.run.victory()
+		return
 	# final boss — kill it to clear the stage
-	if not _rush() and not _final and t >= FINAL_T:
+	if not _hz and not _rush() and not _final and t >= FINAL_T:
 		_final = true
 		var kinds: Array = FINAL_KIND[clampi(biome, 0, FINAL_KIND.size() - 1)]
 		if is_instance_valid(G.run) and G.run.node_id == "beyazufuk":
