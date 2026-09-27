@@ -76,6 +76,7 @@ const NODES := [
 		{"label": "MÜHRÜ KIR — sandığı aç", "sub": "Sandık choralim dolu — ama defterin uyarısı gerçek: yük açılınca kovan kokuyu alır. Sonraki koşun daha sert geçecek.", "rew": {"cho": 320, "omen": {"hp": 1.12, "dmg": 1.1, "frag": 1.35}, "cine": [{"tex": "cine_8_0", "title": "MÜHÜR KIRILDI", "sub": "Sandık açıldı — içinde choralim dolu fişekler ve bir koro damgasının mührü. Kuzeyde bir şey yerinden kıpırdadı."}]}},
 		{"label": "KERVANI GÖM — yüke dokunma", "sub": "Defterin dediği gibi: bazı yükler buzda kalmalı. Kervanı kar altında göm, itibarın artsın, buzdan bir kalp hatıra kalsın.", "rew": {"cho": 100, "rep": 2, "item": "i_buzkalp", "cine": [{"tex": "cine_8_0", "title": "KERVAN GÖMÜLDÜ", "sub": "On iki deve ve dört arabacı kar altında. Buzda bekleyen yüke kimse dokunmadı — ve kuzey, seni ilk kez selamladı."}]}},
 	]},
+	{"id": "buzkasa","name": "BUZ KASASI",       "icon": "ico_loot",   "pos": Vector2(1505, 445), "col": "9fd8ff", "kind": "hazine","biome": 8, "unlock": "node", "desc": "Buzulun karnına gömülü imparatorluk kasası — efendi yok; buz mührü 6 dakika sonra çatlar, içi donmuş ganimet.", "lore": "Kervan defterinin kastettiği 'yük' bu kasaydı — imparatorluk choralim stokunu buza emanet etti. Buz Anası düşünce mühürdeki sesten pay alamadı; şimdi kasa sadece sabır istiyor.", "mods": {"loot": 2.7, "frag": 2.2, "hp": 1.2, "spawn": 1.15, "elite_t": 0.7}},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -115,6 +116,7 @@ const EDGES := [
 	["kulovasi", "korkasa"], ["koranit", "korkasa"],
 	["cukur", "buzul"], ["damar", "buzul"], ["buzul", "kervan"],
 	["buzul", "beyazufuk"], ["kervan", "beyazufuk"],
+	["beyazufuk", "buzkasa"], ["buzul", "buzkasa"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için
