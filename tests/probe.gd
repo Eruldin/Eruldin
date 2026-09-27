@@ -28,6 +28,8 @@ var _ceset_done := false
 var _node := "batak"   # --node=<id> ile hangi düğüm koşulacağı seçilir
 var _stray_sub := -1
 var _pre_story_cho := 0
+var _hero := ""
+var _skill_done := false
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -36,11 +38,16 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--node="):
 			_node = a.trim_prefix("--node=")
+		elif a.begins_with("--hero="):
+			_hero = a.trim_prefix("--hero=")
 	print("[probe] armed (node=%s), shots -> %s" % [_node, ProjectSettings.globalize_path("user://probe")])
 
 func _process(_d: float) -> void:
 	match _step:
 		0:
+			if _hero != "":
+				G.meta.data["kills"] = 99999
+				G.meta.data["hero"] = _hero
 			if is_instance_valid(G.ui) and G.ui.overlay_open():
 				G.ui._advance_overlay()
 				_step = 1
@@ -213,6 +220,12 @@ func _process(_d: float) -> void:
 			if t >= _msg_at:
 				_msg_at = t + 15.0
 				print("[probe] t=%.0f hp=%.0f lvl=%d enemies=%d kills=%d pending=%d" % [t, G.player.hp, G.player.level, G.enemies.size(), int(G.run.stats.get("kills", 0)), G.run.pending_drafts])
+			# Q şasi yeteneği kapsaması: bir kez ateşle (hero=h9 ise MIKNATIS yolu)
+			if not _skill_done and t >= 20.0:
+				_skill_done = true
+				G.player.skill_cd = 0.0
+				G.player._use_skill()
+				print("[probe] skill fired hero=%s" % str(G.meta.data.get("hero", "ely")))
 			# visual coverage: roster of the new enemy kinds, then a vista shot at the arena edge
 			if not _roster_done and t >= 30.0:
 				_roster_done = true

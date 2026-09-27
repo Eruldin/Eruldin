@@ -353,6 +353,21 @@ func _use_skill() -> void:
 			G.fx.directional(pos + Vector2(0, -8), aim_dir, Px.C("00E5FF"), 14, 220.0, 5.0, 0.4)
 			G.fx.float_text(pos + Vector2(0, -44), "ATILIM", Px.C("00E5FF"), 1.0)
 			G.audio.play("dash", 1.25)
+		"h9":
+			var got := 0
+			for g2 in G.room.pickups_node.get_children():
+				if str(g2.get_meta("kind", "")) == "xp":
+					g2.set_meta("vac", 1)
+					got += 1
+			G.fx.tele_ring(pos, 340.0, 0.5, Color(1.0, 0.72, 0.2, 0.5))
+			G.fx.flash(Px.C("ffb74d"), 0.12)
+			for e in G.enemies.duplicate():
+				if is_instance_valid(e) and not e.dead and pos.distance_to(e.pos) < 200.0:
+					e.take_hit({"dmg": 20.0 * dmg_mult, "type": G.DamageType.SHOCK, "from": pos, "knock": 10.0, "source": self})
+			G.fx.float_text(pos + Vector2(0, -44), "MIKNATIS", Px.C("ffb74d"), 1.0)
+			G.audio.play("boon", 0.9)
+			if got > 0:
+				G.ui.toast("mıknatıs darbesi — %d kristal çekildi" % got)
 		_:
 			G.fx.tele_ring(pos, 240.0, 0.4, Color(0.76, 0.42, 1.0, 0.45))
 			G.fx.flash(Px.C("c26bff"), 0.15)
@@ -388,12 +403,20 @@ func _apply_hero() -> void:
 			speed *= 1.08
 			crit_ch += 0.08
 			skill_max = 8.0
+		"h9":
+			actor_name = "H-9 Hurdacı"
+			max_hp = maxi(40, max_hp - 8)
+			hp = max_hp
+			dmg_mult -= 0.06
+			frag_mult += 0.15
+			magnet_r += 60.0
+			skill_max = 12.0
 
 func _hero_set() -> String:
-	return {"elyb": "c_elyb", "via": "c_viawar"}.get(str(G.meta.data.get("hero", "ely")), "ely")
+	return {"elyb": "c_elyb", "via": "c_viawar", "h9": "c_h9"}.get(str(G.meta.data.get("hero", "ely")), "ely")
 
 func _hero_start() -> String:
-	return {"elyb": "plasma", "via": "dagger"}.get(str(G.meta.data.get("hero", "ely")), "blade")
+	return {"elyb": "plasma", "via": "dagger", "h9": "mortar"}.get(str(G.meta.data.get("hero", "ely")), "blade")
 
 func _apply_stance() -> void:
 	st_arc = 1.0; st_dmg = 1.0; st_spd = 1.0; st_parry = 0.0; st_reach = 0.0
@@ -656,6 +679,7 @@ func reset_for_run() -> void:
 	xp = 0.0
 	xp_next = xp_for(1)
 	magnet_r = 95.0; xp_mult = 1.0; cd_mult = 1.0; area_mult = 1.0; proj_spd = 1.0; bonus_proj = 0
+	frag_mult = 1.0
 	_attack_slow = 1.0; _pulse_t = 0.0
 	_apply_stance()
 	for k in ["shred", "shockslam", "aegis", "regen", "static", "pulse", "killer", "streak_spd", "elite_heal", "heal_luck", "drones", "harvest"]:

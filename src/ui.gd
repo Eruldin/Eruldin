@@ -2971,6 +2971,9 @@ const HEROES := {
 		"desc": "Ağır B-serisi. Başlangıç: Plazma Dizisi. −20 can · +%12 hasar · −%8 hız."},
 	"via": {"name": "V-SERKAY", "por": "por_c_viawar", "col": "ffb74d",
 		"desc": "Viator keşif kasası. Başlangıç: Fitil Bıçağı. −12 can · +%8 hız · +%8 kritik."},
+	"h9": {"name": "H-9 HURDACI", "por": "por_h9", "col": "ff8a50",
+		"desc": "Hurda toplama kasası. Başlangıç: Kristal Mancınık. −8 can · −%6 hasar · +%15 parçacık verimi · +60 toplama yarıçapı. Q: MIKNATIS — sahadaki tüm kristalleri çeker.",
+		"req_kills": 8000},
 }
 
 func hero_panel() -> void:
@@ -2989,8 +2992,9 @@ func hero_panel() -> void:
 	for key in HEROES:
 		var s: Dictionary = HEROES[key]
 		var active: bool = key == cur_id
+		var locked := int(G.meta.data.get("kills", 0)) < int(s.get("req_kills", 0))
 		var card := PanelContainer.new()
-		card.add_theme_stylebox_override("panel", _style_panel(Color(0.07, 0.06, 0.09, 0.95), Px.C(s.col), 3 if active else 2, 4))
+		card.add_theme_stylebox_override("panel", _style_panel(Color(0.07, 0.06, 0.09, 0.95), Px.C(s.col) if not locked else Color(0.3, 0.3, 0.35), 3 if active else 2, 4))
 		var cv := VBoxContainer.new()
 		cv.add_theme_constant_override("separation", 6)
 		cv.custom_minimum_size = Vector2(220, 190)
@@ -3001,26 +3005,34 @@ func hero_panel() -> void:
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ic.modulate = Color(1, 1, 1, 1) if not locked else Color(0.4, 0.4, 0.45, 0.7)
 		var icc := CenterContainer.new()
 		icc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		icc.add_child(ic)
 		cv.add_child(icc)
-		var nm := _lbl(("%s\n✓ AKTİF" % s.name) if active else s.name, Vector2.ZERO, 13, Px.C(s.col))
+		var nm := _lbl(("%s\n✓ AKTİF" % s.name) if active else s.name, Vector2.ZERO, 13, Px.C(s.col) if not locked else Color(0.45, 0.45, 0.5))
 		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		cv.add_child(nm)
-		var ds := _lbl(s.desc, Vector2.ZERO, 11, Color(0.78, 0.78, 0.85))
+		var ds := _lbl(s.desc, Vector2.ZERO, 11, Color(0.78, 0.78, 0.85) if not locked else Color(0.5, 0.5, 0.55))
 		ds.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		cv.add_child(ds)
+		if locked:
+			var lk := _lbl("KİLİTLİ — toplam %d kesim" % int(s.req_kills), Vector2.ZERO, 10, Px.C("ff6e40"))
+			lk.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			cv.add_child(lk)
 		row.add_child(card)
 		card.gui_input.connect(func(ev: InputEvent):
-			if ev is InputEventMouseButton and ev.pressed and not active:
+			if ev is InputEventMouseButton and ev.pressed and not active and not locked:
 				_pick_hero(key))
 	var h := _lbl("[E / tık dışarısı] kapat", Vector2.ZERO, 10, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 
 func _pick_hero(key: String) -> void:
+	var req := int((HEROES[key] as Dictionary).get("req_kills", 0))
+	if int(G.meta.data.get("kills", 0)) < req:
+		return
 	G.meta.data["hero"] = key
 	G.meta.save()
 	G.audio.play("boon", 1.1, 0.6)

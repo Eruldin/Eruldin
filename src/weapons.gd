@@ -397,7 +397,7 @@ static func draft_opts(p: Player, luck: float) -> Array:
 	for w in p.weapons:
 		var d: Dictionary = DEFS.get(str(w.id), {})
 		if int(w.lvl) < WPN_MAX and not d.get("hidden", false) and not ban.has(str(w.id)):
-			pool.append(_opt("wpn", w.id, int(w.lvl) + 1, "%s · Sv.%d" % [d.name, int(w.lvl) + 1], d.icon, d.col, _lvl_desc(w.id, int(w.lvl) + 1) + _evo_hint(d, p), 10.0))
+			pool.append(_opt("wpn", w.id, int(w.lvl) + 1, "%s · Sv.%d" % [str(d.get("name", w.id)), int(w.lvl) + 1], str(d.get("icon", "ico_boon")), str(d.get("col", "ffffff")), _lvl_desc(w.id, int(w.lvl) + 1) + _evo_hint(d, p), 10.0))
 	if p.weapons.size() < WPN_SLOTS:
 		for wid in DEFS:
 			var d: Dictionary = DEFS[wid]
