@@ -666,6 +666,10 @@ func victory() -> void:
 	if int(stats.get("baskin", 0)) > 0:
 		G.meta.data["baskin_wins"] = int(G.meta.data.get("baskin_wins", 0)) + 1
 		Quests.tick("baskin")
+	if str(stats.get("kaos", "")) != "":
+		G.meta.data["kaos_wins"] = int(G.meta.data.get("kaos_wins", 0)) + 1
+		Quests.tick("kaos")
+		G.ui.toast("KAOS DAMARI sindirildi — %s mutasyonu çözüldü" % str(stats["kaos"]))
 	if str(Wmap.node(node_id).get("kind", "")) == "hazine":
 		G.meta.data["hazine_wins"] = int(G.meta.data.get("hazine_wins", 0)) + 1
 		Quests.tick("hazine")

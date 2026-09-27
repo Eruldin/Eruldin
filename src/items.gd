@@ -69,6 +69,7 @@ const DEFS := {
 	"i_duel":     {"name": "Düello Yankısı",  "slot": "kemer",   "r": 3, "icon": "icn_dagger",     "mods": {"dmg": 0.05, "crit": 0.06}},
 	"i_devriye":  {"name": "Devriye Nişanı",  "slot": "kemer",   "r": 3, "icon": "icn_upg_mag",    "mods": {"dmg": 0.04, "frag": 0.14, "mag": 20.0}},
 	"i_konvoy":   {"name": "Konvoy Pusulası", "slot": "kolye",   "r": 2, "icon": "ico_frag",       "mods": {"frag": 0.15, "mag": 35.0}},
+	"i_kaos":     {"name": "Kararsız Çekirdek","slot": "kemer",  "r": 3, "icon": "icn_skull",      "mods": {"dmg": 0.08, "crit": 0.05, "hp": -10}},
 	"i_arkhalka": {"name": "Ark Bileziği",    "slot": "yuzuk1",  "r": 2, "icon": "icn_zap",        "mods": {"skill": -0.06, "dmg": 0.04}},
 	"i_bora":     {"name": "Bora Zili",       "slot": "kemer",   "r": 2, "icon": "icn_dash",       "mods": {"spd": 0.05, "armor": 0.5}},
 	"i_ayin":     {"name": "Ayin Mumusu",     "slot": "eldiven", "r": 2, "icon": "icn_skull",      "mods": {"dmg": 0.05, "crit": 0.03}},
