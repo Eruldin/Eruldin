@@ -245,6 +245,7 @@ func achievements() -> Array:
 		{"name": "KAOS TERCÜMANI", "desc": "kaos damarını üç kez zaferle sindir — her sızıntı başka mutasyon", "done": int(data.get("kaos_wins", 0)) >= 3, "rew": 300},
 		{"name": "KESKİN GÖZ", "desc": "tek koşuda 400 kritik vuruş yap", "done": int(data.get("best_crits", 0)) >= 400, "rew": 250},
 		{"name": "KADER KUMARI", "desc": "mezar soycusundan üç kez boş çuval çek", "done": int(data.get("mezar_bos", 0)) >= 3, "rew": 200},
+		{"name": "İHALECİ", "desc": "günlük ihale panosundan 12 kontrat tuttur", "done": int(data.get("bounties_done", 0)) >= 12, "rew": 320},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
@@ -284,6 +285,7 @@ const TITLES := [
 	{"id": "kafes",   "name": "KAFES KIRAN",       "src": "KAFES KIRAN"},
 	{"id": "dortkasa","name": "HAZİNE YÜRÜYEN",    "src": "DÖRT MÜHÜR"},
 	{"id": "kaos",    "name": "KAOS YOLCUSU",      "src": "KAOS TERCÜMANI"},
+	{"id": "ihale",   "name": "İHALE KESKİNİ",     "src": "İHALECİ"},
 ]
 
 func title_open(tid: String) -> bool:
