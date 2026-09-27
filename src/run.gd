@@ -625,6 +625,12 @@ func victory() -> void:
 			{"tex": "cine_3_2", "title": "PROTOKOL KIRILDI", "sub": "Kovanın şarkısı senin adınla bitiyor, Alfa-04."},
 			{"tex": "por_neva", "title": "NEVA", "sub": "Döndün. Bu sefer geride şarkı bırakmadın — yerine sessizlik, ve bir kamp ateşi."},
 		], func(): G.ui.victory_screen(stats))
+	elif str(Wmap.node(node_id).get("kind", "")) == "hazine":
+		# yağma koşusunun kendi zafer kartı — mühür çözüldü, kasa açık
+		G.ui.cine_seq([
+			{"tex": "cine_hazine", "title": "MAHZEN AÇILDI", "sub": (node_name + "\nMühür çözüldü — içerisi yılların choralim'i ve imparatorluk yüküyle dolu.")},
+			{"tex": "por_neva", "title": "NEVA", "sub": "Kasanın içindekini saymadın bile — ama duydun mu? Mühür kırılırken kamp yerin altından gülümsedi."},
+		], func(): G.ui.victory_screen(stats))
 	else:
 		var tex := "cine_%d_%d" % [ci, randi() % 4] if ci <= 3 else "cine_%d_0" % ci
 		var epi := G.ui.epilog(node_id)
