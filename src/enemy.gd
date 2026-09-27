@@ -147,7 +147,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp"][randi() % 11]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu"][randi() % 12]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -179,6 +179,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 			"warp":
 				_warp_t = 2.5
 				actor_name = "IŞINLANAN " + actor_name
+			"koruyucu":
+				actor_name = "KORUYUCU " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -225,8 +227,15 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
+		if affix == "koruyucu":
+			var aura := Sprite2D.new()
+			aura.texture = Px.S("ring")
+			aura.scale = Vector2.ONE * (420.0 / 72.0)
+			aura.modulate = Color(0.5, 0.8, 0.77, 0.16)
+			aura.z_index = -40
+			add_child(aura)
 		_hp_bg = ColorRect.new()
 		_hp_bg.color = Color(0.04, 0.02, 0.06, 0.85)
 		_hp_bg.position = Vector2(-24, -80)
@@ -519,6 +528,14 @@ func _cancel_attack() -> void:
 
 # Kalkan Muhafızı: cepheden gelen darbe kalkana çarpar — arkadan vur
 func take_hit(h: Dictionary) -> void:
+	if affix != "koruyucu":
+		for e2 in G.enemies:
+			if is_instance_valid(e2) and not e2.dead and e2.affix == "koruyucu" and e2 != self and e2.pos.distance_to(pos) < 210.0:
+				h["dmg"] = float(h.get("dmg", 0.0)) * 0.5
+				if not h.has("_ward_fx"):
+					h["_ward_fx"] = true
+					G.fx.burst(pos + Vector2(0, -16), Px.C("80cbc4"), 5, 70.0, 2.6, 0.22)
+				break
 	if kind == EKind.MUHFIZ and is_instance_valid(G.player) and h.has("from"):
 		var fw := (G.player.pos - pos).normalized()
 		var aw := (Vector2(h.get("from")) - pos).normalized()
