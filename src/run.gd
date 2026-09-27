@@ -196,6 +196,9 @@ func _enter_arena() -> void:
 	a.build_arena(biome)
 	_place_player(a)
 	G.player.reset_for_run()
+	if is_instance_valid(G.meta) and G.meta.has_build("talim"):
+		G.player.add_xp(G.player.xp_next + 0.01)
+		G.ui.toast("TALİM SAHASI — koşuya bir seviye önde başlıyorsun")
 	G.ui.hub_ui(false)
 	if hyper:
 		G.ui.toast("AŞILAMA AKTİF — kovan hızlı akıyor, ödeme ×1.5")

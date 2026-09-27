@@ -1966,7 +1966,7 @@ func shop_panel() -> void:
 	v.add_child(irow)
 	var ib := Button.new()
 	var iprice := Quests.rep_price(40)
-	var icap := 4 if G.meta.has_build("yuva") else 3
+	var icap := (4 if G.meta.has_build("yuva") else 3) + (1 if G.meta.has_build("umbar") else 0)
 	ib.text = "CHORALİM İKSİRİ ◆%d  (R — elde %d/%d)" % [iprice, G.player.iksir_n if is_instance_valid(G.player) else 0, icap]
 	ib.add_theme_font_override("font", ui_font())
 	ib.custom_minimum_size = Vector2(300, 24)
@@ -1989,7 +1989,7 @@ func shop_panel() -> void:
 	v.add_child(srow)
 	var sb := Button.new()
 	var sprice := Quests.rep_price(55)
-	var scap := 3 if G.meta.has_build("yuva") else 2
+	var scap := (3 if G.meta.has_build("yuva") else 2) + (1 if G.meta.has_build("umbar") else 0)
 	sb.text = "KOR ŞARABI ◆%d  (T — 25sn güç, elde %d/%d)" % [sprice, G.player.sarap_n if is_instance_valid(G.player) else 0, scap]
 	sb.add_theme_font_override("font", ui_font())
 	sb.custom_minimum_size = Vector2(300, 24)
@@ -2802,11 +2802,12 @@ func arcana_choice() -> void:
 	pool.erase(G.run.arcana2)
 	pool.shuffle()
 	var cards: Array = []
-	for aid in pool.slice(0, 3):
+	var draw_n := 4 if is_instance_valid(G.meta) and G.meta.has_build("kehne") else 3
+	for aid in pool.slice(0, draw_n):
 		var a: Dictionary = Boons.ARCANAS[aid]
 		cards.append({"kind": "arcana", "id": aid, "name": str(a["name"]), "icon": "icn_crown", "col": str(a["col"]), "desc": str(a["desc"]), "top": "KOZ", "w": 1.0})
 	_pause(true)
-	_show_cards("boon", "KOZ KARTI — koşu boyu süren kader  [1-3]", Px.C("c9a227"), cards)
+	_show_cards("boon", "KOZ KARTI — koşu boyu süren kader  [1-%d]" % draw_n, Px.C("c9a227"), cards)
 
 func chest_choice(evos: Array) -> void:
 	_pause(true)

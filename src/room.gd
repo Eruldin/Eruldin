@@ -219,6 +219,18 @@ func build_hub() -> void:
 		if G.meta.has_build("ahir"):
 			_prop(Vector2(240, 300), 15, "prop_hub_3")
 			_prop(Vector2(280, 330), 11, "prop_hub_5")
+		if G.meta.has_build("kehne"):
+			_prop(Vector2(-560, -140), 18, "prop_hub_0")
+			G.fx.mk_light(self, Vector2(-560, -160), Px.C("c9a227"), 0.55, 2.0)
+			_fire(Vector2(-560, -120))
+		if G.meta.has_build("talim"):
+			_prop(Vector2(140, -140), 15, "prop_hub_2")
+			_prop(Vector2(180, -120), 12, "prop_hub_5")
+		if G.meta.has_build("umbar"):
+			_prop(Vector2(-320, 330), 14, "prop_hub_4")
+			_prop(Vector2(-360, 350), 12, "prop_hub_4")
+			_prop(Vector2(-280, 355), 10, "prop_hub_5")
+		if G.meta.has_build("ahir"):
 			# ağıldaki sürüngenler kampta gezinir (yakalanmaz — pet işaretli)
 			var fpet: Array = Px.F("c_varl").get("idle", [])
 			for i in mini(int(G.meta.data.get("pets", 0)), 8):
@@ -1285,7 +1297,7 @@ func _collect(pk: Node) -> void:
 			G.audio.play("parry", 1.0, 0.6)
 			G.ui.toast("koruyucu zarf — 3sn dokunulmaz")
 		"iksir":
-			if G.player.iksir_n >= 3:
+			if G.player.iksir_n >= (3 if not is_instance_valid(G.meta) or not G.meta.has_build("umbar") else 4):
 				G.run.drop_fragments(pk.position, 5)
 				G.ui.toast("iksir karnen dolu — parçacığa döndü")
 			else:
@@ -1293,7 +1305,7 @@ func _collect(pk: Node) -> void:
 				G.ui.toast("CHORALİM İKSİRİ +1 — R ile içilir")
 			G.audio.play("pickup", 1.5, 0.45)
 		"sarap":
-			if G.player.sarap_n >= 2:
+			if G.player.sarap_n >= (2 if not is_instance_valid(G.meta) or not G.meta.has_build("umbar") else 3):
 				G.run.drop_fragments(pk.position, 5)
 				G.ui.toast("şarap karnen dolu — parçacığa döndü")
 			else:
