@@ -4,13 +4,13 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK, GOZETMEN, COPCU, DINAMITCI, KUZGUN, SIVRI, KOCBASI, DAMARGOL, FISILTI, KORP, BUZRUH, TAYF, EMICI }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK, GOZETMEN, COPCU, DINAMITCI, KUZGUN, SIVRI, KOCBASI, DAMARGOL, FISILTI, KORP, BUZRUH, TAYF, EMICI, DOL }
 
 # tür-bazlı ölüm patlaması rengi — kesimden kimin öldüğü görsel okunur
-const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73", EKind.GOZETMEN: "b388ff", EKind.COPCU: "d7a05a", EKind.DINAMITCI: "ff7043", EKind.KUZGUN: "5e3f8c", EKind.SIVRI: "7fe0b8", EKind.KOCBASI: "c97040", EKind.DAMARGOL: "4dd0e1", EKind.FISILTI: "8be9f5", EKind.KORP: "ff8a50", EKind.BUZRUH: "a8dcff", EKind.TAYF: "7fe8d8", EKind.EMICI: "6fd3c9"}
+const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73", EKind.GOZETMEN: "b388ff", EKind.COPCU: "d7a05a", EKind.DINAMITCI: "ff7043", EKind.KUZGUN: "5e3f8c", EKind.SIVRI: "7fe0b8", EKind.KOCBASI: "c97040", EKind.DAMARGOL: "4dd0e1", EKind.FISILTI: "8be9f5", EKind.KORP: "ff8a50", EKind.BUZRUH: "a8dcff", EKind.TAYF: "7fe8d8", EKind.EMICI: "6fd3c9", EKind.DOL: "9ccc65"}
 # biome rengi — sürü sahanın fener/mote paletine oturur (room.gd ile aynı sıra)
 const BIOME_TINT := ["ffb74d", "00E676", "ff7722", "c9a227", "66bb6a", "ff5522", "ffaa55", "4dd0e1", "9fd8ff"]
-const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam", EKind.GOZETMEN: "Gözetmen", EKind.COPCU: "Çöpçü Kurt", EKind.DINAMITCI: "Dinamitçi Tayf", EKind.KUZGUN: "Tarla Kuzgunu", EKind.SIVRI: "Sivri Bulutu", EKind.KOCBASI: "Kocboynuz", EKind.DAMARGOL: "Damar Golemi", EKind.FISILTI: "Damar Fısıltısı", EKind.KORP: "Kor Pençe", EKind.BUZRUH: "Buz Ruhu", EKind.TAYF: "Ufuk Tayfı", EKind.EMICI: "Parçacık Emicisi"}
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam", EKind.GOZETMEN: "Gözetmen", EKind.COPCU: "Çöpçü Kurt", EKind.DINAMITCI: "Dinamitçi Tayf", EKind.KUZGUN: "Tarla Kuzgunu", EKind.SIVRI: "Sivri Bulutu", EKind.KOCBASI: "Kocboynuz", EKind.DAMARGOL: "Damar Golemi", EKind.FISILTI: "Damar Fısıltısı", EKind.KORP: "Kor Pençe", EKind.BUZRUH: "Buz Ruhu", EKind.TAYF: "Ufuk Tayfı", EKind.EMICI: "Parçacık Emicisi", EKind.DOL: "Döl Yuması"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
@@ -23,7 +23,7 @@ const KIND_SET := {
 	EKind.DINAMITCI: "c_dinamitci", EKind.KUZGUN: "c_kuzgun",
 	EKind.SIVRI: "c_sivri", EKind.KOCBASI: "c_koc", EKind.DAMARGOL: "c_gol",
 	EKind.FISILTI: "c_fisilti", EKind.KORP: "c_pence", EKind.BUZRUH: "c_fisilti",
-	EKind.TAYF: "c_tayf", EKind.EMICI: "c_emici",
+	EKind.TAYF: "c_tayf", EKind.EMICI: "c_emici", EKind.DOL: "c_dol",
 }
 
 # tür lore'u — Zirkon'un kayıtlarında kesim sayısının altında gösterilir
@@ -54,6 +54,7 @@ const KIND_LORE := {
 	EKind.BUZRUH: "Çatlağın donmuş nefesi — süzülürken altında buz serilir, ölürken son bir donukluk bırakır. Buzunda durma.",
 	EKind.TAYF: "Beyaz Ufuk'un ışık hortlağı — aurora perdelerinden dokunmuş; belirir, dağılır, yeniden belirir. Mermiler dağılmış halinden geçer.",
 	EKind.EMICI: "Enkazın kese askeri — huni ağzı parçacık kokar, teması kesenden ◈ emer. Öldürürsen kesesini sana döker.",
+	EKind.DOL: "Bataklığın gömülü kuluçkası — kımıldamaz ama yavru kusar; yok edilmedikçe sürüyü sonsuz besler. Önce onu bul.",
 }
 
 var kind: int = EKind.HUSK
@@ -78,6 +79,8 @@ var _muhur_sp: Sprite2D = null
 var _sum_n := 0     # bu elitin saldığı döl sayısı
 var _balcik_cd := 0.0  # balçık adam: hasar sonrası rejenerasyon beklemesi
 var _stolen := 0.0     # çöpçü kurt: yuttuğu kristal değeri
+var _dol_t := 2.5      # döl yuması: yavru kusma sayacı
+var _dol_kids: Array = []  # döl yuması: canlı yavrular (adet sınırı için)
 var _scav_t := 0.0     # çöpçü kurt: kristal tarama sayacı
 var _regen_fx := 0.0   # rejenerasyon parıltısı sayacı
 var speed := 100.0
@@ -263,6 +266,11 @@ func _setup_stats(hs: float, ds: float) -> void:
 			max_hp = 40; speed = 148; touch_dmg = 6; radius = 12; hit_radius = 14
 			windup_t = 0.4; recover_t = 0.5; attack_cd = 1.0; touch_r = 32
 			actor_name = "Parçacık Emicisi"
+		EKind.DOL:
+			max_hp = 95; speed = 0; touch_dmg = 0; radius = 16; hit_radius = 19
+			windup_t = 0.6; recover_t = 1.0; attack_cd = 4.0; keep_min = 0; keep_max = 9999
+			actor_name = "Döl Yuması"
+			knock_resist = 95.0
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
@@ -784,6 +792,19 @@ func _seek(d: float) -> void:
 				if is_instance_valid(body):
 					body.modulate = Color(0.6, 1.0, 0.9, 0.32)
 				G.fx.burst(pos, Px.C("7fe8d8"), 8, 90.0, 2.6, 0.3)
+	# döl yuması: sabit kuluçka — periyodik yavru kusar, yok edilene dek sürüyü besler
+	if kind == EKind.DOL:
+		_dol_t -= d
+		if _dol_t <= 0.0:
+			_dol_t = 4.2
+			_dol_kids = _dol_kids.filter(func(c): return is_instance_valid(c) and not c.dead)
+			if _dol_kids.size() < 5 and is_instance_valid(G.run) and is_instance_valid(G.room):
+				var doff := Vector2.RIGHT.rotated(G.rf(0, TAU)) * 30.0
+				var kid := Enemy.spawn(EKind.VARL, pos + doff, false, G.run.hp_scale() * 0.5, G.run.dmg_scale() * 0.7, G.room)
+				if is_instance_valid(kid):
+					_dol_kids.append(kid)
+				G.fx.burst(pos + Vector2(0, -10), Px.C("9ccc65"), 9, 80.0, 2.6, 0.4)
+				G.audio.play("hurt", 1.4, 0.2)
 	# stealth: player hidden briefly after dash
 	var seen := G.player.stealth_t <= 0
 	if _cd_t <= 0 and seen and not _burrowed:
