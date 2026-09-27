@@ -377,6 +377,12 @@ func _write_last_run(win: bool) -> void:
 		"level": G.player.level if is_instance_valid(G.player) else 1,
 		"win": win,
 	}
+	# koşu geçmişi — Zirkon'un arşivi, son 5 koşu
+	var hist: Array = G.meta.data.get("history", [])
+	hist.append({"n": node_name, "k": int(stats.get("kills", 0)), "t": int(time), "w": win, "s": score})
+	while hist.size() > 5:
+		hist.pop_front()
+	G.meta.data["history"] = hist
 	# tür-bazlı kesimler meta'ya birikir — Zirkon'un kayıtlarında listelenir
 	var kk: Dictionary = stats.get("kind_kills", {})
 	if not kk.is_empty():

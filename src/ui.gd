@@ -1928,6 +1928,23 @@ func records_panel() -> void:
 		kl.custom_minimum_size = Vector2(190, 0)
 		klore.add_child(kl)
 	cols.add_child(klore)
+	# KOŞU GEÇMİŞİ — son 5 koşunun özeti
+	var hcol := VBoxContainer.new()
+	hcol.add_theme_constant_override("separation", 5)
+	hcol.add_child(_lbl("— KOŞU GEÇMİŞİ —", Vector2.ZERO, 12, Px.C("8fd4ff")))
+	var hist: Array = G.meta.data.get("history", [])
+	for i in range(hist.size() - 1, -1, -1):
+		var hr: Dictionary = hist[i]
+		var hl := _lbl("%s%s\n%d kesim · %02d:%02d · skor %d" % [
+			str(hr.get("n", "?")), "  ◆" if bool(hr.get("w", false)) else "",
+			int(hr.get("k", 0)), int(hr.get("t", 0)) / 60, int(hr.get("t", 0)) % 60, int(hr.get("s", 0))],
+			Vector2.ZERO, 10, Color(0.85, 0.85, 0.92) if bool(hr.get("w", false)) else Color(0.55, 0.55, 0.65))
+		hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hl.custom_minimum_size = Vector2(180, 0)
+		hcol.add_child(hl)
+	if hist.is_empty():
+		hcol.add_child(_lbl("— kayıt yok —", Vector2.ZERO, 10, Color(0.4, 0.4, 0.5)))
+	cols.add_child(hcol)
 	v.add_child(cols)
 	# görev defteri — kabul edilen / biten / teslim edilenler
 	var qsep := _lbl("— GÖREV DEFTERİ —", Vector2.ZERO, 12, Px.C("c9a227"))
