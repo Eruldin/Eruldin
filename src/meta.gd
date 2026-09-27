@@ -53,6 +53,7 @@ var data := {
 	"blessing": false,     # Ahusk'un desteği — koşu rasgele lütufla açılır
 	"hired": false,        # Ahusk yoldaşı — koşu boyunca muhafız dronu
 	"seen_kinds": [],      # ilk kez görülen düşman türleri (EKind id'leri)
+	"boss_seen": [],       # ilk karşılaşması sinematikle oynatılan efendi kind'leri
 	"intro_seen": false,   # açılış sinematik kartları bir kez oynatılır
 	"tut": false,          # ilk koşu ipucu dizisi oynatıldı mı
 	"ended": false,        # b3 zaferi — gerçek son gösterildi
@@ -154,6 +155,7 @@ func achievements() -> Array:
 		{"name": "HASAT AVCISI", "desc": "bir HASATÇI'yı kes", "done": int(data.get("reapers", 0)) > 0, "rew": 150},
 		{"name": "ŞAMPİYON AVCISI", "desc": "bir altın ŞAMPİYON elit kes", "done": int(data.get("champs", 0)) > 0, "rew": 180},
 		{"name": "KATALOGLUCU", "desc": "tüm düşman türlerini kayıt defterine işlet", "done": (data.get("seen_kinds", []) as Array).size() >= Enemy.EKind.size(), "rew": 120},
+		{"name": "DOKUZ HİKÂYE", "desc": "dokuz efendinin hepsiyle yüz yüze gel", "done": (data.get("boss_seen", []) as Array).size() >= 9, "rew": 160},
 		{"name": "EVRİM MİMARI", "desc": "tek koşuda 3 evrim tamamla", "done": int(data.get("best_evos", 0)) >= 3, "rew": 120},
 		{"name": "NÜVE AVCISI", "desc": "10 altın nüve topla", "done": int(data.get("eggs", 0)) >= 10, "rew": 120},
 		{"name": "AZAPLI ŞAMPİYON", "desc": "2+ karanlık sözleşmeyle zafer kazan", "done": int(data.get("curse_wins", 0)) > 0, "rew": 150},

@@ -391,8 +391,15 @@ func _boss(kind: int, hs: float, ann: String, off := Vector2.ZERO, show_ui := tr
 	if show_ui:
 		G.room.boss = b
 		G.ui.boss_bar(true, b)
-		G.ui.boss_intro(b)
 		G.audio.boss_sting()
+		# ilk karşılaşma sinematik kartla açılır; sonrakilerde sadece pankart
+		var seen: Array = G.meta.data.get("boss_seen", [])
+		if seen.has(b.bkind) or G.ui.overlay_open():
+			G.ui.boss_intro(b)
+		else:
+			seen.append(b.bkind)
+			G.meta.save()
+			G.ui.cine_seq([{"tex": "por_" + str(Boss.SPR[b.bkind]), "title": "%s — %s" % [b.actor_name, b.title], "sub": "«%s»" % b.bark}])
 	G.ui.toast(ann)
 	return b
 
