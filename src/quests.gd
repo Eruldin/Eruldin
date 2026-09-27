@@ -272,6 +272,9 @@ const BOUNTY_DEFS := [
 	{"type": "kind",   "k": "Balçık Adam",   "n": 8, "desc": "tek koşuda 8 Balçık Adam erit", "cho": 100},
 	{"type": "vein",   "n": 4,   "desc": "tek koşuda 4 choralim damarı kır", "cho": 90},
 	{"type": "champ",  "n": 1,   "desc": "tek koşuda 1 şampiyon kes",    "cho": 130},
+	{"type": "crits",  "n": 150, "desc": "tek koşuda 150 kritik vuruş",  "cho": 95},
+	{"type": "kacak",  "n": 1,   "desc": "tek koşuda 1 kaçak elit yakala","cho": 110},
+	{"type": "konvoy", "n": 2,   "desc": "tek koşuda 2 konvoy hamalı kes","cho": 100},
 ]
 
 static func daily() -> Array:
@@ -302,6 +305,9 @@ static func _bounty_cur(b: Dictionary) -> int:
 		"kind":   return int(G.run.stats.get("kind_kills", {}).get(str(b.get("k", "")), 0))
 		"vein":   return int(G.run.stats.get("veins", 0))
 		"champ":  return int(G.run.stats.get("champ_kills", 0))
+		"crits":  return int(G.run.stats.get("crits", 0))
+		"kacak":  return int(G.run.stats.get("kacak_kills", 0))
+		"konvoy": return int(G.run.stats.get("convoy_kills", 0))
 	return 0
 
 # koşu sonunda (tick_all içinden) — tutan ihaleler choralim öder
@@ -316,6 +322,7 @@ static func daily_check() -> void:
 			b["done"] = true
 			hit = true
 			G.meta.add_choralim(int(b.get("cho", 0)))
+			G.meta.data["bounties_done"] = int(G.meta.data.get("bounties_done", 0)) + 1
 			if is_instance_valid(G.ui):
 				G.ui.toast("İHALE TUTTU — %s  (◆ +%d)" % [str(b.get("desc", "")), int(b.get("cho", 0))])
 	if hit:
