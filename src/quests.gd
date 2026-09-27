@@ -81,6 +81,7 @@ const DEFS := [
 	{"id": "q_dg",    "giver": "vane",    "name": "GÖVDENİN ŞARKISI",     "desc": "Kalp kalıntılarından bir kasa dövdüm — G-1'i sahada sınamadan kampı salmam. O gövdeyle bir zafer getir; nabız çekirdeğini kemerine takarım.", "obj": {"type": "hero_won", "id": "dg", "n": 1}, "rew": {"cho": 280, "item": "i_nabizcek"}, "prereq": "q_kalp"},
 	{"id": "q_kaos",  "giver": "zirkon",  "name": "KAOS SIZINTISI",        "desc": "Çukurun güney ucunda damar kararsız — kayıtlarım orada tutarlı tek veri bırakmıyor. On dört Damar Golemi'ni çökert; sızıntının kaynağını haritaya işlerim.", "obj": {"type": "kind", "k": "Damar Golemi", "n": 14}, "rew": {"cho": 380, "node": "kaos", "rep": 2}, "prereq": "q_kalp"},
 	{"id": "q_kaos2", "giver": "zirkon",  "name": "KAOS ÇÖZÜMÜ",           "desc": "Sızıntı düğümünü açtın — şimdi onu sindir. Damarın üç sızıntısını da zaferle kapat; kararsız çekirdeği sana kemer yaparım.", "obj": {"type": "kaos", "n": 3}, "rew": {"cho": 450, "item": "i_kaos", "rep": 3}, "prereq": "q_kaos"},
+	{"id": "q_kacak", "giver": "lena",    "name": "KAÇAK AVI",            "desc": "Altın ışıklı elitler sahada ganimet kaçırıyor — yakalayıncaya kadar peşini bırakma. Üç kaçağı köşeye sıkıştır; kese kordonunu kemer yaparım.", "obj": {"type": "kacak", "n": 3}, "rew": {"cho": 260, "item": "i_kacakkordon", "rep": 2}, "prereq": "q_lena"},
 	{"id": "q_ritim", "giver": "ehnar",   "name": "KESKİN RİTM",           "desc": "Şövalyelik ritim işidir — her vuruşun keskin noktayı bulması. Tek koşuda iki yüz elli kritik vuruş yap; ritim bileziğini kuşanırsın.", "obj": {"type": "crits", "n": 250}, "rew": {"cho": 300, "item": "i_ritim", "rep": 2}, "prereq": "q_nobet2"},
 	{"id": "q_jeot",  "giver": "lena",    "name": "ÇATLAK SESLERİ",       "desc": "Çukurda ara sıra jeotlar çatlıyor — içleri saf damar dolu. İkisini kır, çatlaklardan çıkan gözü kolye yapayım.", "obj": {"type": "geo", "n": 2}, "rew": {"cho": 220, "item": "i_jeotgoz"}, "prereq": "q_cukur"},
 	{"id": "q_konvoy","giver": "lena",    "name": "GANİMET YOLU",         "desc": "Koro'nun nakliye konvoyları sahalarda boydan boya geçiyor — hamalları çıkışa varmadan düşür, yükü kampa insin. Altı konvoy hamalı kes; konvoy pusulamı boynuna takarım.", "obj": {"type": "konvoy", "n": 6}, "rew": {"cho": 320, "item": "i_konvoy", "rep": 2}, "prereq": "q_lena"},
@@ -538,6 +539,7 @@ static func obj_text(q: Dictionary) -> String:
 		"konvoy":  return "%d konvoy hamalı kes (çıkışa varmadan)" % need
 		"kaos":    return "%d kez kaos damarını zaferle sindir" % need
 		"crits":   return "tek koşuda %d kritik vuruş yap" % need
+		"kacak":   return "%d kaçak elit yakala" % need
 	return "?"
 
 static func _claimed_count() -> int:
