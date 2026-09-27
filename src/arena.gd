@@ -33,6 +33,11 @@ func build_arena(biome_idx: int) -> void:
 	var tp := Vector2(rng.randf_range(BOUNDS.position.x + 180, BOUNDS.end.x - 180), rng.randf_range(BOUNDS.position.y + 180, BOUNDS.end.y - 180))
 	if tp.distance_to(Vector2.ZERO) > 320.0:
 		spawn_special("totem", tp)
+	# sinyal feneri: isteğe bağlı ikiz şampiyon savaşı — boss-rush node'unda yok
+	if G.run == null or int(G.run.node_mods.get("rush", 0)) == 0:
+		var fp := Vector2(rng.randf_range(BOUNDS.position.x + 180, BOUNDS.end.x - 180), rng.randf_range(BOUNDS.position.y + 180, BOUNDS.end.y - 180))
+		if fp.distance_to(Vector2.ZERO) > 360.0 and fp.distance_to(tp) > 420.0:
+			spawn_special("fener", fp)
 	# ceset koşusu: önceki ölüm bu sahadaysa eski ceset parçacık iadesi taşır (BG2 corpse run)
 	var ld: Dictionary = G.meta.data.get("last_death", {}) if is_instance_valid(G.meta) else {}
 	if int(ld.get("biome", -1)) == biome and int(ld.get("depth", 0)) > 0:
