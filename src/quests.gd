@@ -121,6 +121,7 @@ const DEFS := [
 	{"id": "q_pence", "giver": "saphire", "name": "KOR PENCELER",        "desc": "Külde yürüyen askerler var — pençeleri hâlâ kor gibi yanıyor. On iki Kor Pençe kes; külünden bir kolye döveyim.", "obj": {"type": "kind", "k": "Kor Pençe", "n": 12}, "rew": {"cho": 200, "item": "i_korkul"}, "prereq": "q_anit"},
 	{"id": "q_kor",   "giver": "ehnar",   "name": "KÜLLERİN EFENDİSİ",  "desc": "Kül Ovası'nda son efendi oturuyor — imparatorluğunun tahtı hâlâ yanıyor. Kor Yücelten'i düşür; tacını sana miğfer yaparım.", "obj": {"type": "boss", "k": "kor"}, "rew": {"cho": 240, "item": "i_kortac"}, "prereq": "q_kul"},
 	{"id": "q_duvar", "giver": "ehnar",   "name": "ESKİ MUHAFIZIN YEMİNİ","desc": "Kalkan kasasını duydum — K-7, benim devriyemin duvar serisiydi. O gövdeyle bir zafer getir; yemin plakasını zırhına işlerim.", "obj": {"type": "hero_won", "id": "k7", "n": 1}, "rew": {"cho": 260, "item": "i_duvar"}},
+	{"id": "q_nodmg", "giver": "ehnar",   "name": "HASARSIZ",            "desc": "Şövalyenin asıl sınavı kılıç değil disiplin — sürü seni hiç değmeden yirmi beş saniye ayakta kal. Pelerini o zaman hak edersin.", "obj": {"type": "nodmg", "n": 25}, "rew": {"cho": 300, "item": "i_hayalet"}, "prereq": "q_duvar"},
 	{"id": "q_karne", "giver": "mina",    "name": "İKSİR KARNESİ",        "desc": "Şifa içecek şişe değil, disiplin ister. Altı iksir iç — karneni ocak defterine işlerim.", "obj": {"type": "iksir", "n": 6}, "rew": {"cho": 140, "item": "i_kemer_par"}, "prereq": "q_sofra"},
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
 	{"id": "q_ziyafet","giver": "mina",   "name": "KURTULUŞ ZİYAFETİ",    "desc": "Büyük sofra büyük malzeme ister. Otuz küre daha — karşılığında damlayı veririm, seni geri getirir.", "obj": {"type": "sifa", "n": 30}, "rew": {"cho": 320, "item": "i_neva"}, "prereq": "q_sofra"},
@@ -376,6 +377,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"sefer":   cur = int(G.run.stats.get("sefer", 0))
 			"kayit":   cur = (G.meta.data.get("lore", []) as Array).size()
 			"koz":     cur = (G.meta.data.get("arcanas_seen", []) as Array).size()
+			"nodmg":   cur = int(G.run.stats.get("best_nodmg", 0))
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
 		if cur >= need:
@@ -506,6 +508,7 @@ static func obj_text(q: Dictionary) -> String:
 		"cameo":  return "%d yoldaş karşılaşması geçir" % need
 		"firtina": return "%d kesimi kum fırtınasında yap" % need
 		"zehir":  return "%d kesimi gaz havuzunda yap" % need
+		"nodmg":  return "%d sn boyunca vurulma" % need
 		"baskin": return "%d baskın altında zafer" % need
 	return "?"
 
