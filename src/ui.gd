@@ -1187,6 +1187,23 @@ func worldmap_panel() -> void:
 		var ok := Wmap.can_enter(str(a.id)) and Wmap.can_enter(str(b.id))
 		ln.default_color = Color(0.35, 0.75, 0.95, 0.55) if ok else Color(0.3, 0.28, 0.35, 0.3)
 		edge_c.add_child(ln)
+	# biome bölge ışıkları — düğüm kartlarının altında yumuşak biome renk lekeleri;
+	# haritaya BG2 tarzı "bölge" okunabilirliği verir
+	var biome_c := Control.new()
+	biome_c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	biome_c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(biome_c)
+	for n2 in Wmap.NODES:
+		var bc2: Color = Room.MOTE_COL.get(str(n2.get("biome", "")), Color(0.5, 0.5, 0.6))
+		var bl := TextureRect.new()
+		bl.texture = Px.S2("disc_soft")
+		bl.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		bl.custom_minimum_size = Vector2(200, 200)
+		bl.stretch_mode = TextureRect.STRETCH_SCALE
+		bl.position = n2.pos * 0.92 + Vector2(45, 30) - Vector2(100, 100)
+		bl.modulate = Color(bc2.r, bc2.g, bc2.b, 0.14)
+		bl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		biome_c.add_child(bl)
 	var cur := str(G.meta.data.get("arena_node", "b0"))
 	var ngd := int(G.meta.data.get("ng", 0))
 	if ngd > 0:
