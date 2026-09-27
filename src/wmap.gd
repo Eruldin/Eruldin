@@ -45,6 +45,7 @@ const NODES := [
 	{"id": "kum",     "name": "KIZIL ÇÖL",        "icon": "ico_run",     "pos": Vector2(70, 300),  "col": "e8a050", "kind": "arena", "biome": 6, "unlock": "node", "desc": "Kızıl kum denizi — çölayan varl sürüleri, kum fırtınaları, seyrek ama sert kovan.", "lore": "İmparatorluk haritalarında burası boş bırakılmış — 'kızıl' denip geçilmiş. Kumun altında choralim kaktüsleri çiçek açıyor; varller izlerini rüzgâra gömer.", "mods": {"spawn": 0.9, "hp": 1.2, "dmg": 1.1, "frag": 1.5, "loot": 1.2}},
 	{"id": "sondurme","name": "SÖNDÜRÜLMÜŞ FIRIN",  "icon": "ico_frag",    "pos": Vector2(1120, 640), "col": "b0bec5", "kind": "story", "unlock": "boss twins","desc": "İmparatorluğun son fırını — gövdesi soğuk, içi hâlâ dolu.", "lore": "Efendiler burada dövüldü. Fırın söndü ama korları — içlerinde kilitli bir Hisar Kalkanı, kovanın eli değmemiş halde.", "rew": {"cho": 140, "item": "i_hisar"}},
 	{"id": "fisilti", "name": "FISILTI SARNICI",   "icon": "icn_kovan",   "pos": Vector2(90, 640),  "col": "e8a050", "kind": "story", "unlock": "node", "desc": "Kızıl Çöl'ün dibinde gömülü sarnıç — duvarları hâlâ fısıldıyor.", "lore": "Su taşıyanlar buraya susuzluktan değil, sesten kaçmak için indi. Sarnıç Koro'nun ilk prova odasıydı — her damla aynı notayı tekrarlıyor.", "rew": {"cho": 160, "cine": [{"tex": "cine_6_0", "title": "FISILTI SARNICI", "sub": "Duvarlardaki çatlaklardan aynı üç hece: KA-LI-NA. Kum bile ezberledi."}]}},
+	{"id": "vaha",   "name": "SESSİZ VAHA",        "icon": "ico_frag",    "pos": Vector2(40, 470),  "col": "5eead4", "kind": "arena", "biome": 6, "unlock": "node", "desc": "Çölün tek yeşilliği — şifa küreleri bol düşer, kovan yavaş ama sert.", "lore": "Kızıl kumun altında sığ bir akifer — choralim suyu. Kaktüsler burada daha uzun, varller daha sabırlı. Kim konaklarsa iyileşir; kim kalırsa gömülür.", "mods": {"spawn": 0.8, "hp": 1.25, "heal": 2.5, "frag": 1.4, "loot": 1.1}},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -78,6 +79,7 @@ const EDGES := [
 	["yol", "tasocagi"], ["tasocagi", "yuvalar"],
 	["avlis", "sondurme"], ["kulovasi", "sondurme"],
 	["b0", "kum"], ["pazar", "kum"], ["kum", "fisilti"],
+	["kum", "vaha"], ["vaha", "fisilti"],
 ]
 
 static func node(id: String) -> Dictionary:
