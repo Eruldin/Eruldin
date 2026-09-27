@@ -58,6 +58,7 @@ var motes: Array = []   # [{s, vel}] atmosfer parcaciklari
 var storm_t := 0.0
 var storm_cd := 0.0
 var storm_dir := Vector2.RIGHT
+var sarkit_cd := 9.0            # maden tavan çökmesi aralığı
 const REWARD_ICON := ["ico_boon", "ico_heal", "ico_frag"]
 
 var biome := 0
@@ -750,6 +751,7 @@ func _process(d: float) -> void:
 	_tick_doors()
 	_tick_motes(d)
 	_tick_storm(d)
+	_tick_sarkit(d)
 	_sort_children()
 	# campfire flicker
 	if has_meta("fire_light") and is_instance_valid(get_meta("fire_light")):
@@ -862,6 +864,20 @@ func spawn_monolith(p: Vector2) -> void:
 	mono = {"pos": p, "t": 0.0, "need": 14.0, "node": node, "ring": ring}
 	G.audio.jingle("boon")
 	G.ui.toast("REZONANS KÜMESİ doğdu — yakınında dur, şarj et")
+
+func _tick_sarkit(d: float) -> void:
+	# Simithar (biome 1): tavan sarkıtları rastgele telegraph'la düşer — iki tarafı da vurur
+	if is_hub or biome != 1:
+		return
+	sarkit_cd -= d
+	if sarkit_cd > 0.0:
+		return
+	sarkit_cd = rng.randf_range(6.5, 10.5)
+	var base: Vector2 = G.player.pos if (G.player != null and not G.player.dead) else Vector2.ZERO
+	var p := base + Vector2(rng.randf_range(-260.0, 260.0), rng.randf_range(-260.0, 260.0))
+	p.x = clampf(p.x, -W * 0.5 + 70.0, W * 0.5 - 70.0)
+	p.y = clampf(p.y, -H * 0.5 + 70.0, H * 0.5 - 70.0)
+	hazards.append({"pos": p, "r": 90.0, "dps": 0.0, "kind": "sarkit", "t": 1.4, "tele": G.fx.tele_circle(p, 90.0, 1.4, Color(0.85, 0.68, 0.35, 0.26))})
 
 func _tick_monolith(d: float) -> void:
 	if not mono_active or G.player == null or G.player.dead:
@@ -1285,6 +1301,21 @@ func _tick_hazards(d: float) -> void:
 				G.audio.play("zap", 1.3, 0.4)
 			elif is_instance_valid(h.get("tele", {}).get("sr")) and h.tele.sr.modulate.a > 0.12:
 				h.tele.sr.modulate.a = maxf(0.12, h.tele.sr.modulate.a - d * 0.4)
+		elif h.kind == "sarkit":
+			h.t -= d
+			if h.t <= 0.0:
+				if h.has("tele"):
+					G.fx.kill_tele(h.tele)
+				G.fx.burst(h.pos, Px.C("c8a860"), 18, 210.0, 5.0, 0.5)
+				G.fx.shake(0.22, 0.3)
+				G.audio.play("hitHeavy", 0.9, 0.6)
+				for e in G.enemies:
+					if is_instance_valid(e) and not e.dead and e.pos.distance_to(h.pos) < float(h.r):
+						e.take_hit({"dmg": 46.0 * (1.0 + biome * 0.1), "type": G.DamageType.HAZARD, "from": h.pos, "source": self, "sarkit": true})
+				if dist < h.r:
+					G.player.take_hit({"dmg": 24.0, "type": G.DamageType.HAZARD, "from": h.pos, "source": self})
+				hazards.remove_at(i)
+				continue
 		elif h.kind == "surgun":
 			# gezici kum hortumu: alanı süpürür, içindekini döndürerek iter
 			# t>0 ise fırtına hortumu — süresi dolunca tele'i temizleyip düşer
