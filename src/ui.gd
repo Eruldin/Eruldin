@@ -1,6 +1,54 @@
 class_name Ui
 extends CanvasLayer
 
+# mini harita — koşu içinde sağ alt köşede bölge radarı (BG2 minimap hissi)
+class _MiniMap:
+	extends Control
+	func _draw() -> void:
+		if G.state != G.State.ROOM or not is_instance_valid(G.room) or not is_instance_valid(G.cam):
+			return
+		var B: Rect2 = G.room.BOUNDS
+		var sc := minf((size.x - 10.0) / B.size.x, (size.y - 10.0) / B.size.y)
+		var off := Vector2(5, 5)
+		var map := func(p: Vector2) -> Vector2:
+			return off + (p - B.position) * sc
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.02, 0.045, 0.68), true)
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.42, 0.36, 0.58, 0.85), false, 1.5)
+		var n := 0
+		for e in G.enemies:
+			if n >= 160:
+				break
+			if is_instance_valid(e) and not e.dead:
+				n += 1
+				draw_circle(map.call(e.pos), 2.3 if e.elite else 1.2, Color(1.0, 0.78, 0.3) if e.elite else Color(0.9, 0.3, 0.32, 0.85))
+		if is_instance_valid(G.room.boss):
+			draw_circle(map.call(G.room.boss.pos), 3.4, Color(1, 0.2, 0.25))
+		if is_instance_valid(G.room.pickups_node):
+			for pk in G.room.pickups_node.get_children():
+				var k := str(pk.get_meta("kind", ""))
+				var c := Color(0, 0, 0, 0)
+				var r := 1.6
+				match k:
+					"chest": c = Color(1.0, 0.72, 0.28); r = 2.2
+					"cursed": c = Color(1.0, 0.2, 0.33); r = 2.0
+					"loot": c = Color(0.26, 0.83, 0.96); r = 1.8
+					"tome": c = Color(0.79, 0.63, 0.15); r = 2.0
+					"egg": c = Color(1.0, 0.84, 0.0); r = 1.8
+					"ceset", "totem", "fener", "mahkum", "mahkum2", "vein": c = Color(0.75, 0.85, 1.0); r = 1.8
+					"vacuum", "bomb", "freeze", "boost", "guard", "tus": c = Color(0.3, 0.9, 0.9, 0.7); r = 1.4
+					_: pass
+				if c.a > 0.05:
+					draw_circle(map.call(pk.position), r, c)
+		for it in [[G.room.mono_active, G.room.mono_pos, Color(0.76, 0.42, 1.0)], [G.room.geo_active, G.room.geo_pos, Color(0.3, 0.82, 0.88)], [G.room.merchant_active, G.room.merchant_pos, Color(1.0, 0.84, 0.0)]]:
+			if it[0]:
+				draw_circle(map.call(it[1]), 2.4, it[2])
+		for vv in G.room.veins:
+			draw_circle(map.call(vv["pos"]), 1.8, Color(1.0, 0.84, 0.37))
+		if is_instance_valid(G.player) and not G.player.dead:
+			var pp: Vector2 = map.call(G.player.pos)
+			draw_circle(pp, 4.4, Color(0.35, 1.0, 0.75, 0.28))
+			draw_circle(pp, 2.6, Color(0.35, 1.0, 0.75))
+
 # All UI is built in code: HUD, boss bar, banners, toasts, dialogue panel,
 # boon draft, upgrade shop (Dr. Vane), death/victory screens, title, CRT tint.
 
@@ -125,6 +173,7 @@ var _boon_row: HBoxContainer
 var _room_lbl: Label
 var _quest_lbl: Label
 var _hint_lbl: Label
+var _mmap: _MiniMap
 var _tip: PanelContainer
 var _tip_lbl: Label
 var _boss_wrap: Control
@@ -320,6 +369,13 @@ func _build_hud() -> void:
 	_hint_lbl = _lbl("WASD hareket · SPACE dash · Q yetenek · F aşırı yük · R iksir · T şarap · E etkileşim · ESC duraklat", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
 	_hud.add_child(_hint_lbl)
 
+	# mini harita — sağ alt köşe
+	_mmap = _MiniMap.new()
+	_mmap.position = Vector2(1096, 554)
+	_mmap.size = Vector2(168, 128)
+	_mmap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_mmap)
+
 	# boon tooltip
 	_tip = PanelContainer.new()
 	_tip.add_theme_stylebox_override("panel", _style_panel(Color(0.03, 0.02, 0.07, 0.96), Px.C("7B1FA2"), 1, 3))
@@ -423,6 +479,8 @@ func _process(d: float) -> void:
 	_tick_edge()
 
 func _tick_hud() -> void:
+	if is_instance_valid(_mmap):
+		_mmap.queue_redraw()
 	if G.player == null or not is_instance_valid(G.player) or G.run == null:
 		return
 	var p := G.player
