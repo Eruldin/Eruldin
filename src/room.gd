@@ -857,6 +857,7 @@ func _tick_veins(d: float) -> void:
 				G.audio.jingle("boon")
 				G.ui.toast("CHORALİM DAMARI kırıldı — parçacık saçıldı")
 				G.run.drop_fragments(p, G.ri(16, 26))
+				Quests.tick("vein")
 				if G.chance(0.3):
 					spawn_special(G.pick(["heal", "boost", "guard"]), p + Vector2(0, -14))
 

@@ -49,6 +49,7 @@ const DEFS := [
 	{"id": "q_frag",  "giver": "saphire", "name": "PARÇACIK HASADI",     "desc": "Tezgâh parçacıksız dönmez. Tek koşuda 600 parçacık topla — kesende dursun, teslime gerek yok.", "obj": {"type": "frag", "n": 600}, "rew": {"cho": 140}, "prereq": "q_loot"},
 	{"id": "q_glaive","giver": "ehnar",   "name": "AĞIR TAHMİS",         "desc": "Sırp diskleri depoda paslanıyor. Tek koşuda 400 kesim yaparsan birini sana kalibrarım.", "obj": {"type": "kills", "n": 400}, "rew": {"cho": 150, "wep": "glaive"}, "prereq": "q_nobet2"},
 	{"id": "q_deneme","giver": "ehnar",   "name": "DENEME KANITI",       "desc": "Sahalardaki eski deneme totemleri hâlâ sayıyor. İkisini tamamla — ikisinin de elitleri düşsün.", "obj": {"type": "totem", "n": 2}, "rew": {"cho": 170, "item": "i_koro"}, "prereq": "q_elit"},
+	{"id": "q_damar", "giver": "saphire", "name": "DAMAR AVCISI",          "desc": "Sahalarda altın choralim damarları beliriyor — yanında durup kır, parçacıklar senin. Üçünü kır.", "obj": {"type": "vein", "n": 3}, "rew": {"cho": 220}, "prereq": "q_frag"},
 	{"id": "q_son",   "giver": "zirkon",  "name": "ARŞİVİN SONU",        "desc": "Defterin son sayfası boş kalmasın. On görev teslim et — arşivin mührü senin olsun.", "obj": {"type": "quests", "n": 10}, "rew": {"cho": 400, "wep": "meteor"}, "prereq": "q_final"},
 	{"id": "q_siparis","giver": "saphire","name": "MÜŞTERİ SİPARİŞİ",    "desc": "Bir müşteri Boşluk Halkası istiyor — bulursan stoğa değil, doğrudan bana getir. Teslimde parça senden çıkar.", "obj": {"type": "item", "id": "i_bosluk", "n": 1}, "rew": {"cho": 320, "item": "i_ruzgar"}, "prereq": "q_lanet"},
 	{"id": "q_kayit", "giver": "zirkon",  "name": "VERİ AVCISI",          "desc": "Sahalarda hâlâ kütük parçaları saçılı. Beş veri kütüğü topla — arşiv senden borçlu kalacak.", "obj": {"type": "kayit", "n": 5}, "rew": {"cho": 180, "item": "i_merdiven"}, "prereq": "q_final"},
@@ -143,7 +144,7 @@ static func has_business(nid: String) -> bool:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein"]:
 		done.append_array(tick(type))
 	for q in DEFS:
 		if state(q.id) != "act" or str(q.obj.get("type", "")) != "boss":
@@ -287,6 +288,7 @@ static func obj_text(q: Dictionary) -> String:
 		"score":  return "%d skor" % need
 		"frag":   return "%d parçacık topla" % need
 		"totem":  return "%d deneme totemi tamamla" % need
+		"vein":   return "%d choralim damarı kır" % need
 		"quests": return "%d görev teslim et" % need
 		"item":   return "%s getir" % str(Items.DEFS.get(str(o.get("id", "")), {}).get("name", str(o.get("id", ""))))
 		"kayit":  return "%d veri kütüğü bul" % need

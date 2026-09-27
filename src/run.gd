@@ -101,7 +101,7 @@ func start_run() -> void:
 			nd = Wmap.node("b0")
 	node_id = nid
 	node_name = str(nd.get("name", ""))
-	node_mods = nd.get("mods", {})
+	node_mods = (nd.get("mods", {}) as Dictionary).duplicate()
 	frag_node = float(node_mods.get("frag", 1.0))
 	biome = clampi(int(nd.get("biome", 0)), 0, Room.BIOME_NAME.size() - 1)
 	hyper = bool(G.meta.data.get("hyper", false))
