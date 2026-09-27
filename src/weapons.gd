@@ -216,6 +216,21 @@ const DEFS := {
 		"b": {"dmg": 16.0, "cd": 0.8, "r": 170.0, "slow": 1.0},
 		"hidden": true,
 	},
+	"mortar": {
+		"name": "KRİSTAL MANCINIK", "icon": "ico_frag", "col": "8be9ff",
+		"desc": "Düşmanların üstüne kristal yağdırır — patlama yerinde parçacık bırakır",
+		"b": {"dmg": 22.0, "cd": 2.2, "n": 2.0, "r": 62.0, "tel": 0.6, "frag": 3.0},
+		"inc": {"dmg": 6.0, "n": 0.25, "r": 3.0, "cd": -0.05},
+		"feats": {6: {"n": 1.0}},
+		"evo": "avarice", "into": "mortar_x",
+		"req": {"kills": 2500},
+	},
+	"mortar_x": {
+		"name": "HAKEDİŞ ÇARKI", "icon": "ico_frag", "col": "c9f1ff",
+		"desc": "Kristal sağanağı — her patlama bol parçacık döker",
+		"b": {"dmg": 56.0, "cd": 1.6, "n": 6.0, "r": 88.0, "tel": 0.55, "frag": 8.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -511,6 +526,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"drone", "drone_x": _drone(st, p, wid)
 		"sentry", "sentry_x": _sentry(st, p, wid)
 		"aura", "aura_x": _aura(st, p)
+		"mortar", "mortar_x": _mortar(st, p, w)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
@@ -841,11 +857,30 @@ static func _meteor(st: Dictionary, p: Player, w: Dictionary) -> void:
 			at = e.pos
 		_strike_tele(at, r, dmg, tel, p, str(w.id))
 
-static func _strike_tele(at: Vector2, r: float, dmg: float, tel: float, p: Player, wid: String) -> void:
+static func _mortar(st: Dictionary, p: Player, w: Dictionary) -> void:
+	var n := maxi(1, roundi(float(st.n)))
+	var r := float(st.r) * p.area_mult
+	var tel := float(st.get("tel", 0.6))
+	var dmg := float(st.dmg) * p.dmg_mult
+	var frag := roundi(float(st.get("frag", 3.0)))
+	var pool := G.enemies.duplicate()
+	for i in n:
+		var at := Vector2.ZERO
+		if pool.is_empty():
+			at = p.pos + Vector2(G.rf(-260, 260), G.rf(-200, 200))
+		else:
+			var e: Enemy = pool[G.ri(0, pool.size() - 1)]
+			pool.erase(e)
+			if not is_instance_valid(e) or e.dead:
+				continue
+			at = e.pos
+		_strike_tele(at, r, dmg, tel, p, str(w.id), Color(0.55, 0.9, 1.0, 0.5), frag)
+
+static func _strike_tele(at: Vector2, r: float, dmg: float, tel: float, p: Player, wid: String, col := Color(1.0, 0.45, 0.2, 0.5), frag := 0) -> void:
 	var ring := Sprite2D.new()
 	ring.texture = Px.S("ring")
 	ring.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	ring.modulate = Color(1.0, 0.45, 0.2, 0.5)
+	ring.modulate = col
 	ring.scale = Vector2.ONE * (r * 2.0 / 96.0)
 	ring.position = at
 	ring.z_index = -1990
@@ -865,8 +900,10 @@ static func _strike_tele(at: Vector2, r: float, dmg: float, tel: float, p: Playe
 				var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.EXPLOSION, "from": at, "knock": 9.0, "stagger": 0.4, "source": p, "crit": crit, "wpn": wid}
 				e.take_hit(h)
 				p.on_dealt_damage(e, h)
-		G.fx.burst(at, Color(1, 0.5, 0.2), 16, 240.0, 6.0, 0.5)
-		G.fx.shake(0.08, 0.1))
+		G.fx.burst(at, Color(col.r, col.g, col.b).lerp(Color.WHITE, 0.15), 16, 240.0, 6.0, 0.5)
+		G.fx.shake(0.08, 0.1)
+		if frag > 0 and is_instance_valid(G.run):
+			G.run.drop_fragments(at, frag))
 	G.audio.play("shoot", 0.5, 0.4)
 
 static func _tick_orbit(w: Dictionary, p: Player, d: float) -> void:
