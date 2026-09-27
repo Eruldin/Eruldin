@@ -17,6 +17,7 @@ var depth := 0
 var hyper := false          # AŞILAMA modu — David'in saha panelinden açılır
 var curse := 0             # KARANLIK SÖZLEŞME yığını — düşmanları sertleştirir
 var dark := false          # KARANLIK mutator — şifa düşmez, ödeme ×1.25
+var route_mark := false    # Lena'nın keşif güzergâhı — saha ekstra sandık + kalıntı serer
 var reward_mult := 1.0     # choralim payout multiplier (hyper ×1.5, dark ×1.25)
 var fragments := 0        # impure choralim gathered this run → purified on death
 var boon_ids: Array = []
@@ -189,6 +190,11 @@ func _enter_arena() -> void:
 		G.player.set_meta("heal_luck", true)
 		G.player.heal(25.0)
 		G.ui.toast("MINA'NIN YEMEĞİ — karnın tok, küreler bol düşecek")
+	if bool(G.meta.data.get("lena_route", false)):
+		G.meta.data["lena_route"] = false
+		G.meta.save()
+		route_mark = true
+		G.ui.toast("LENA'NIN ROTASI — saha zengin serildi")
 	if bool(G.meta.data.get("hired", false)):
 		G.meta.data["hired"] = false
 		G.meta.save()
