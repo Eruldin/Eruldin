@@ -210,6 +210,7 @@ func achievements() -> Array:
 		{"name": "SÖZLEŞME USTASI", "desc": "Ehnar'da 8 sözleşme tuttur", "done": int(data.get("contracts_done", 0)) >= 8, "rew": 200},
 		{"name": "MASA KIRANI", "desc": "Tegan'da 6 bahis tuttur", "done": int(data.get("bets_won", 0)) >= 6, "rew": 180},
 		{"name": "BEŞ GÖVDE", "desc": "beş farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 5, "rew": 400},
+		{"name": "ALTI GÖVDE", "desc": "altı farklı şasiyle zafer kazan", "done": (data.get("hero_wins", {}) as Dictionary).size() >= 6, "rew": 500},
 		{"name": "MİMAR", "desc": "kampın altı binasını da kur", "done": (data.get("camp_builds", {}) as Dictionary).size() >= 6, "rew": 350},
 	]
 
@@ -233,6 +234,7 @@ const TITLES := [
 	{"id": "kalp",    "name": "KALP DURDURAN",    "src": "ÇUKURUN EFENDİSİ"},
 	{"id": "kumar",   "name": "KUMARBAZ",         "src": "MASA KIRANI"},
 	{"id": "govde",   "name": "ÇOK GÖVDELİ",      "src": "BEŞ GÖVDE"},
+	{"id": "damarguc","name": "DAMARGÜÇ",         "src": "ALTI GÖVDE"},
 	{"id": "mimar",   "name": "KAMP MİMARI",      "src": "MİMAR"},
 ]
 

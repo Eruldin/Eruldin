@@ -158,6 +158,7 @@ const FRAMES := {
 	},
 	"c_h9": {},
 	"c_k7": {},
+	"c_dg": {},
 	"husk": {}, "sentinel": {}, "spitter": {}, "turret": {}, "drone": {},
 	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {}, "c_herald": {}, "c_akrep": {}, "c_balcik": {}, "c_gozetmen": {}, "c_copcu": {}, "c_dinamitci": {}, "c_kuzgun": {}, "c_sivri": {}, "c_koc": {}, "c_gol": {},
 	"rex": {}, "host": {}, "nahum": {}, "tuman": {}, "kirin": {}, "const": {},
@@ -175,4 +176,5 @@ static func frames() -> Dictionary:
 		d[k] = _bs("g_" + k)
 	d["c_h9"] = _hero("g_h9")
 	d["c_k7"] = _hero("g_k7")
+	d["c_dg"] = _hero("g_dg")
 	return d

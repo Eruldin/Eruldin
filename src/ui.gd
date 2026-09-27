@@ -450,7 +450,7 @@ func _tick_hud() -> void:
 	for i in _dash_row.get_child_count():
 		_dash_row.get_child(i).modulate = Px.C("00E5FF") if i < p.dash_charges else Color(0.15, 0.2, 0.28)
 	if is_instance_valid(_skill_lbl):
-		var scol: Color = {"elyb": Px.C("9db4c8"), "via": Px.C("00E5FF")}.get(str(G.meta.data.get("hero", "ely")), Px.C("c26bff"))
+		var scol: Color = {"elyb": Px.C("9db4c8"), "via": Px.C("00E5FF"), "dg": Px.C("4dd0e1")}.get(str(G.meta.data.get("hero", "ely")), Px.C("c26bff"))
 		_skill_lbl.add_theme_color_override("font_color", scol if p.skill_cd <= 0 else Color(0.3, 0.3, 0.35))
 		_skill_lbl.text = "Q" if p.skill_cd <= 0 else str(int(ceil(p.skill_cd)))
 	if is_instance_valid(_iksir_lbl):
@@ -3127,6 +3127,9 @@ const HEROES := {
 	"k7": {"name": "K-7 KALKAN", "por": "por_k7", "col": "7fa8c9",
 		"desc": "Savunma şasisi. Başlangıç: Nöbet Kulesi. +45 can · +1.5 zırh · −%12 hasar · −%10 hız. Q: SIĞINAK — 2.4sn dokunulmazlık + sürüyü geri iten nabız.",
 		"req_kills": 12000},
+	"dg": {"name": "G-1 DAMARGÜÇ", "por": "por_damar", "col": "4dd0e1",
+		"desc": "Kristal kuşatma şasisi — Damar Kalbi'nin kalıntılarından dövüldü. Başlangıç: Volt Zinciri. +60 can · +2 zırh · −%8 hasar · −%14 hız. Q: DAMAR NABZI — geniş kristal şok dalgası.",
+		"req_boss": "damar"},
 }
 
 func hero_panel() -> void:
@@ -3145,7 +3148,7 @@ func hero_panel() -> void:
 	for key in HEROES:
 		var s: Dictionary = HEROES[key]
 		var active: bool = key == cur_id
-		var locked := int(G.meta.data.get("kills", 0)) < int(s.get("req_kills", 0))
+		var locked := int(G.meta.data.get("kills", 0)) < int(s.get("req_kills", 0)) or (s.has("req_boss") and not (G.meta.data.get("bosses", {}) as Dictionary).has(str(s.req_boss)))
 		var card := PanelContainer.new()
 		card.add_theme_stylebox_override("panel", _style_panel(Color(0.07, 0.06, 0.09, 0.95), Px.C(s.col) if not locked else Color(0.3, 0.3, 0.35), 3 if active else 2, 4))
 		var cv := VBoxContainer.new()
@@ -3171,7 +3174,8 @@ func hero_panel() -> void:
 		ds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		cv.add_child(ds)
 		if locked:
-			var lk := _lbl("KİLİTLİ — toplam %d kesim" % int(s.req_kills), Vector2.ZERO, 10, Px.C("ff6e40"))
+			var ltxt := "KİLİTLİ — Damar Kalbi'ni düşür" if s.has("req_boss") else ("KİLİTLİ — toplam %d kesim" % int(s.req_kills))
+			var lk := _lbl(ltxt, Vector2.ZERO, 10, Px.C("ff6e40"))
 			lk.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			cv.add_child(lk)
 		row.add_child(card)
@@ -3183,8 +3187,11 @@ func hero_panel() -> void:
 	v.add_child(h)
 
 func _pick_hero(key: String) -> void:
-	var req := int((HEROES[key] as Dictionary).get("req_kills", 0))
+	var sh: Dictionary = HEROES[key]
+	var req := int(sh.get("req_kills", 0))
 	if int(G.meta.data.get("kills", 0)) < req:
+		return
+	if sh.has("req_boss") and not (G.meta.data.get("bosses", {}) as Dictionary).has(str(sh.req_boss)):
 		return
 	G.meta.data["hero"] = key
 	G.meta.save()

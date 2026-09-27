@@ -447,6 +447,8 @@ func _on_boss_dead(b) -> void:
 			G.room.spawn_loot(miid, b.pos + Vector2(0, -50))
 		G.ui.toast("%s düştü — sandıklar yere saçıldı" % b.actor_name)
 		G.audio.jingle("boss")
+		if int(b.bkind) == Boss.BKind.DAMAR and str(G.meta.data.get("hero", "ely")) != "dg":
+			G.ui.toast("kalp kalıntıları dövüldü — yeni şasi: G-1 DAMARGÜÇ (kampta Ely-B)")
 		if b.has_meta("rush_boss"):
 			_rush_idx += 1
 			if _rush_idx >= _rush_order.size():

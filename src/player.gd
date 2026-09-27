@@ -378,6 +378,20 @@ func _use_skill() -> void:
 					e.take_hit({"dmg": 12.0 * dmg_mult, "type": G.DamageType.MELEE, "from": pos, "knock": 22.0, "stagger": 0.6, "source": self})
 			G.fx.float_text(pos + Vector2(0, -44), "SIĞINAK", Px.C("7fa8c9"), 1.0)
 			G.audio.play("parryOk", 0.8)
+		"dg":
+			G.fx.tele_ring(pos, 280.0, 0.5, Color(0.3, 0.85, 0.9, 0.5))
+			G.fx.flash(Px.C("4dd0e1"), 0.15)
+			G.fx.shake(0.35, 0.3)
+			G.fx.hitstop(0.08)
+			invuln = maxf(invuln, 1.0)
+			for e in G.enemies.duplicate():
+				if not is_instance_valid(e) or e.dead:
+					continue
+				if pos.distance_to(e.pos) < 280.0:
+					e.take_hit({"dmg": 55.0 * dmg_mult, "type": G.DamageType.MELEE, "from": pos, "knock": 26.0, "stagger": 0.7, "source": self})
+			G.fx.burst(pos + Vector2(0, -10), Px.C("4dd0e1"), 24, 200.0, 6.0, 0.5)
+			G.fx.float_text(pos + Vector2(0, -44), "DAMAR NABZI", Px.C("4dd0e1"), 1.0)
+			G.audio.play("explode", 0.9, 0.5)
 		_:
 			G.fx.tele_ring(pos, 240.0, 0.4, Color(0.76, 0.42, 1.0, 0.45))
 			G.fx.flash(Px.C("c26bff"), 0.15)
@@ -429,12 +443,20 @@ func _apply_hero() -> void:
 			dmg_mult -= 0.12
 			speed *= 0.90
 			skill_max = 9.0
+		"dg":
+			actor_name = "G-1 Damargüç"
+			max_hp = maxi(40, max_hp + 60)
+			hp = max_hp
+			armor += 2.0
+			dmg_mult -= 0.08
+			speed *= 0.86
+			skill_max = 11.0
 
 func _hero_set() -> String:
-	return {"elyb": "c_elyb", "via": "c_viawar", "h9": "c_h9", "k7": "c_k7"}.get(str(G.meta.data.get("hero", "ely")), "ely")
+	return {"elyb": "c_elyb", "via": "c_viawar", "h9": "c_h9", "k7": "c_k7", "dg": "c_dg"}.get(str(G.meta.data.get("hero", "ely")), "ely")
 
 func _hero_start() -> String:
-	return {"elyb": "plasma", "via": "dagger", "h9": "mortar", "k7": "sentry"}.get(str(G.meta.data.get("hero", "ely")), "blade")
+	return {"elyb": "plasma", "via": "dagger", "h9": "mortar", "k7": "sentry", "dg": "volt"}.get(str(G.meta.data.get("hero", "ely")), "blade")
 
 func _apply_stance() -> void:
 	st_arc = 1.0; st_dmg = 1.0; st_spd = 1.0; st_parry = 0.0; st_reach = 0.0
