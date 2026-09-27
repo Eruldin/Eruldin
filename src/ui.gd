@@ -1944,6 +1944,15 @@ func records_panel() -> void:
 		hcol.add_child(hl)
 	if hist.is_empty():
 		hcol.add_child(_lbl("— kayıt yok —", Vector2.ZERO, 10, Color(0.4, 0.4, 0.5)))
+	hcol.add_child(_lbl("— FETİHLER —", Vector2.ZERO, 12, Px.C("c9a227")))
+	var wn: Array = G.meta.data.get("won_nodes", [])
+	if wn.is_empty():
+		hcol.add_child(_lbl("— fetih yok —", Vector2.ZERO, 10, Color(0.4, 0.4, 0.5)))
+	for nid in wn:
+		var nnd := Wmap.node(str(nid))
+		hcol.add_child(_lbl("◆ %s" % str(nnd.get("name", nid)), Vector2.ZERO, 10, Color(0.85, 0.78, 0.55)))
+	if not wn.is_empty():
+		hcol.add_child(_lbl("zafer başına haraç: +%d◆" % [wn.size() * 12], Vector2.ZERO, 9, Color(0.55, 0.5, 0.4)))
 	cols.add_child(hcol)
 	v.add_child(cols)
 	# görev defteri — kabul edilen / biten / teslim edilenler

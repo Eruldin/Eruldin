@@ -65,6 +65,7 @@ var data := {
 	"eggs": 0,             # toplanan altın nüve (kalıcı +%0.5 hasar/adet)
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"history": [],         # son 5 koşu: {n,k,t,w,s}
+	"won_nodes": [],       # zaferle fethedilmiş wmap node'ları — haraç öder
 	"kind_kills": {},      # tür-bazlı toplam kesimler (Zirkon kayıtları)
 	"best_streak_all": 0,  # tüm zamanların en uzun serisi
 	"best_score": 0,       # en yüksek koşu skoru

@@ -441,10 +441,17 @@ func victory() -> void:
 	stats["node_id"] = node_id
 	stats["node_name"] = node_name
 	_write_last_run(true)
-	var gained := int(fragments * G.meta.frag_mult() * reward_mult)
+	var wn: Array = G.meta.data.get("won_nodes", [])
+	if not wn.has(node_id):
+		wn.append(node_id)
+		G.meta.data["won_nodes"] = wn
+	var tribute := wn.size() * 12
+	var gained := int(fragments * G.meta.frag_mult() * reward_mult) + tribute
 	G.meta.add_choralim(gained)
 	stats.gained = gained
 	fragments = 0
+	if tribute > 0:
+		G.ui.toast("FETİH HARACI  +%d◆" % tribute)
 	G.meta.data["victories"] += 1
 	G.meta.data["ng"] = int(G.meta.data.get("ng", 0)) + 1
 	stats["ng"] = int(G.meta.data.get("ng", 0))
