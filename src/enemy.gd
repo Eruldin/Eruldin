@@ -1106,6 +1106,11 @@ func die(h: Dictionary) -> void:
 						G.room.spawn_loot(G.pick(lids2), pos + Vector2(-44, 10))
 						G.ui.toast("KOPUZ'un mirası — EFSANEVİ PARÇA düştü")
 			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
+			if affix != "":
+				var ak: Dictionary = G.run.stats.get("affix_kills", {})
+				ak[affix] = int(ak.get(affix, 0)) + 1
+				G.run.stats["affix_kills"] = ak
+				Quests.tick("affix", affix)
 			Quests.tick("elites")
 			G.fx.flash(Px.C("ffd75f"), 0.13)
 			G.fx.shake(0.16, 0.25)

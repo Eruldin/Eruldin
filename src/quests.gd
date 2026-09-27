@@ -157,6 +157,7 @@ const DEFS := [
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
 	{"id": "q_ziyafet","giver": "mina",   "name": "KURTULUŞ ZİYAFETİ",    "desc": "Büyük sofra büyük malzeme ister. Otuz küre daha — karşılığında damlayı veririm, seni geri getirir.", "obj": {"type": "sifa", "n": 30}, "rew": {"cho": 320, "item": "i_neva"}, "prereq": "q_sofra"},
 	{"id": "q_emici", "giver": "vane",    "name": "KESE AVCISI",          "desc": "Enkazda parçacık emen bir sülük türü çıktı — temas ettiğinin kesesini boşaltıyor. On tanesini kes, keselerini bana getir; içlerindeki taşlar benim.", "obj": {"type": "kind", "k": "Parçacık Emicisi", "n": 10}, "rew": {"cho": 220, "rep": 2}},
+	{"id": "q_yankises","giver": "vane",  "name": "YANKI SESLERİ",        "desc": "Elitlerden bazıları etrafına yankı halkası basıyor — içine gireni savuruyor. Altı YANKICI eliti kes; halka bobinlerini zırhının teli yaparım.", "obj": {"type": "affix", "k": "yanki", "n": 6}, "rew": {"cho": 280, "rep": 3}, "prereq": "q_emici"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -346,7 +347,7 @@ static func daily_check() -> void:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer", "koz", "crits", "seri", "parry"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer", "koz", "crits", "seri", "parry", "affix"]:
 		done.append_array(tick(type))
 	daily_check()
 	for q in DEFS:
@@ -362,6 +363,15 @@ static func tick_all() -> void:
 			continue
 		var kk: Dictionary = G.run.stats.get("kind_kills", {})
 		var cur := int(kk.get(str(q.obj.k), 0))
+		_q()[q.id]["prog"] = cur
+		if cur >= int(q.obj.get("n", 1)):
+			_q()[q.id]["st"] = "done"
+			done.append(q)
+	for q in DEFS:
+		if state(q.id) != "act" or str(q.obj.get("type", "")) != "affix":
+			continue
+		var ak: Dictionary = G.run.stats.get("affix_kills", {})
+		var cur := int(ak.get(str(q.obj.k), 0))
 		_q()[q.id]["prog"] = cur
 		if cur >= int(q.obj.get("n", 1)):
 			_q()[q.id]["st"] = "done"
@@ -419,6 +429,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"nodmg":   cur = int(G.run.stats.get("best_nodmg", 0))
 			"crits":   cur = int(G.run.stats.get("crits", 0))
 			"parry":   cur = int(G.run.stats.get("parries", 0))
+			"affix":   cur = int(G.run.stats.get("affix_kills", {}).get(arg, 0))
 			"seri":    cur = int(G.run.stats.get("best_streak", 0))
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
@@ -569,6 +580,7 @@ static func obj_text(q: Dictionary) -> String:
 		"kuyu":    return "%d kez ses kuyusuyla uğraş" % need
 		"parry":   return "tek koşuda %d kez parry yap" % need
 		"seri":    return "tek koşuda %d'lik kesim serisi yap" % need
+		"affix":   return "%d %s lanetli elit kes" % [need, str(o.get("k", "?")).to_upper()]
 	return "?"
 
 static func _claimed_count() -> int:
