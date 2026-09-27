@@ -229,7 +229,14 @@ func _place_hazards_arena() -> void:
 			1:
 				add_hazard(p, 46.0, 16.0, -1.0, Color(1, 0.4, 0.1, 0.3))
 			2:
-				add_slowzone(p, 52.0, -1.0)
+				if i % 2 == 0:
+					add_slowzone(p, 52.0, -1.0)
+				else:
+					# Sol Primus ark sizintisi — zincir yildirim
+					var t2 := G.fx.tele_circle(p, 70.0, 9999.0, Color(0.4, 0.8, 1.0, 0.22))
+					t2.sr.modulate.a = 0.12
+					G.fx.mk_light(self, p, Px.C("6fd8ff"), 0.4, 1.5)
+					hazards.append({"pos": p, "r": 70.0, "dps": 0.0, "kind": "ark", "t": rng.randf_range(2.0, 4.0), "tele": t2})
 			5:
 				# Kül Ovası: lav fışkırtıcı — turuncu telegraph'lı püskürme
 				var t5 := G.fx.tele_circle(p, 52.0, 9999.0, Color(1.0, 0.45, 0.1, 0.25))

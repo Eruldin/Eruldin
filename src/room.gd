@@ -453,7 +453,14 @@ func _place_hazards(depth: int) -> void:
 			1:
 				add_hazard(p, 46.0, 16.0, -1.0, Color(1, 0.4, 0.1, 0.3))    # lava pool
 			2:
-				add_slowzone(p, 52.0, -1.0)                                # radiation field
+				if i % 2 == 0:
+					add_slowzone(p, 52.0, -1.0)                                # radiation field
+				else:
+					# ark sizintisi: enkaz kablolari telegraph'li zincir yildirim atar — iki tarafi vurur
+					var t2 := G.fx.tele_circle(p, 70.0, 9999.0, Color(0.4, 0.8, 1.0, 0.22))
+					t2.sr.modulate.a = 0.12
+					G.fx.mk_light(self, p, Px.C("6fd8ff"), 0.4, 1.5)
+					hazards.append({"pos": p, "r": 70.0, "dps": 0.0, "kind": "ark", "t": rng.randf_range(2.0, 4.0), "tele": t2})
 			4:
 				if i == 0:
 					add_slowzone(p, 60.0, -1.0)                            # batak çamuru — çeken balçık
@@ -1241,6 +1248,36 @@ func _tick_hazards(d: float) -> void:
 				G.audio.play("boon", 1.2, 0.2)
 			elif is_instance_valid(h.get("tele", {}).get("sr")) and h.tele.sr.modulate.a > 0.12:
 				h.tele.sr.modulate.a = maxf(0.12, h.tele.sr.modulate.a - d * 0.4)
+		elif h.kind == "ark":
+			# Sol Primus ark sizintisi: nabiz attikca alandan suruye zincirleme yildirim atlar
+			h.t -= d
+			if h.t <= 0.0:
+				h.t = rng.randf_range(3.2, 4.8)
+				if is_instance_valid(h.tele.sr):
+					h.tele.sr.modulate.a = 0.42
+				var prev: Vector2 = h.pos
+				var hit_ids := {}
+				for hop in 4:
+					var best: Enemy = null
+					var bd := 1e9
+					for e in G.enemies:
+						if not is_instance_valid(e) or e.dead or hit_ids.has(e.get_instance_id()):
+							continue
+						var ed: float = e.pos.distance_to(prev)
+						if (hop == 0 and ed < float(h.r)) or (hop > 0 and ed < 240.0 and ed < bd):
+							best = e
+							bd = ed
+					if best == null:
+						break
+					hit_ids[best.get_instance_id()] = true
+					_ark_bolt(prev, best.pos)
+					best.take_hit({"dmg": 30.0 * (1.0 + biome * 0.15), "type": G.DamageType.HAZARD, "from": prev, "source": self, "ark": true})
+					prev = best.pos
+				if dist < h.r:
+					G.player.take_hit({"dmg": 14.0, "type": G.DamageType.HAZARD, "from": h.pos, "source": self})
+				G.audio.play("zap", 1.3, 0.4)
+			elif is_instance_valid(h.get("tele", {}).get("sr")) and h.tele.sr.modulate.a > 0.12:
+				h.tele.sr.modulate.a = maxf(0.12, h.tele.sr.modulate.a - d * 0.4)
 		elif h.kind == "surgun":
 			# gezici kum hortumu: alanı süpürür, içindekini döndürerek iter
 			# t>0 ise fırtına hortumu — süresi dolunca tele'i temizleyip düşer
@@ -1290,6 +1327,23 @@ func _tick_hazards(d: float) -> void:
 				if is_instance_valid(s.node):
 					s.node.queue_free()
 				slows.remove_at(i)
+
+# ark sizintisi zincir cizgisi: bir karenin onda biri kadar yanip soner
+func _ark_bolt(a: Vector2, b: Vector2) -> void:
+	var ln := Line2D.new()
+	var pts := PackedVector2Array()
+	pts.append(a)
+	for j in range(1, 4):
+		pts.append(a.lerp(b, float(j) / 4.0) + Vector2(rng.randf_range(-14.0, 14.0), rng.randf_range(-14.0, 14.0)))
+	pts.append(b)
+	ln.points = pts
+	ln.width = 3.0
+	ln.default_color = Px.C("9fe4ff")
+	ln.z_index = 90
+	add_child(ln)
+	var tw := create_tween()
+	tw.tween_property(ln, "modulate:a", 0.0, 0.22)
+	tw.tween_callback(ln.queue_free)
 
 func _tick_pickups(d: float) -> void:
 	if G.player == null:
