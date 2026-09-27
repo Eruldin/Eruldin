@@ -2321,15 +2321,51 @@ func records_panel() -> void:
 	for r in rows:
 		var l := _lbl(r, Vector2.ZERO, 14, Color(0.85, 0.85, 0.92))
 		v.add_child(l)
-	var sep := _lbl("— DÜŞMÜŞ EFENDELER —", Vector2.ZERO, 12, Px.C("c9a227"))
+	var sep := _lbl("— EFENDİ GALERİSİ —", Vector2.ZERO, 12, Px.C("c9a227"))
 	v.add_child(sep)
 	var dn: Array = G.meta.data.get("bosses", [])
-	for i in 4:
-		var bid: String = Run.BOSS_IDS[i]
-		var done: bool = dn.has(bid)
-		var l := _lbl("%s  %s" % ["◆" if done else "◇", "%s — %s" % [Room.BIOME_NAME[i], Run.BOSS_NAMES[i]]],
-			Vector2.ZERO, 13, Color(0.95, 0.85, 0.4) if done else Color(0.5, 0.5, 0.6))
-		v.add_child(l)
+	# bid → portre seti, isim, bölge; "final" Kirin+Constantin'i, "twins" Nahum+Tuman'ı temsil eder
+	var gallery := [
+		{"id": "rex",   "por": ["rex"],           "name": "REX — AVCI FORMU",      "zone": "Endüsterra"},
+		{"id": "host",  "por": ["host"],          "name": "PROTERIAN KONAKÇI",     "zone": "Simithar"},
+		{"id": "twins", "por": ["nahum", "tuman"],"name": "NAHUM & TUMAN",         "zone": "Sol Primus"},
+		{"id": "final", "por": ["kirin", "const"],"name": "KIRIN & CONSTANTIN",    "zone": "Aeterna"},
+		{"id": "dev",   "por": ["dev"],           "name": "BATAKLIK DEVİ",         "zone": "Bataklık"},
+		{"id": "kor",   "por": ["kor"],           "name": "KOR YÜCELTEN",          "zone": "Kül Ovası"},
+		{"id": "anasi", "por": ["anasi"],         "name": "KUM ANASI",             "zone": "Kızıl Çöl"},
+		{"id": "damar", "por": ["damar"],         "name": "DAMAR KALBI",           "zone": "Kristal Çukur"},
+		{"id": "buz",   "por": ["buz"],           "name": "BUZ ANASI",             "zone": "Donmuş Çatlak"},
+		{"id": "nur",   "por": ["nur"],           "name": "NUR — UFUK'UN IŞIĞI",   "zone": "Beyaz Ufuk"},
+	]
+	var ggrid := GridContainer.new()
+	ggrid.columns = 5
+	ggrid.add_theme_constant_override("h_separation", 8)
+	ggrid.add_theme_constant_override("v_separation", 6)
+	var gc := CenterContainer.new()
+	gc.add_child(ggrid)
+	v.add_child(gc)
+	for g in gallery:
+		var done: bool = dn.has(str(g.id))
+		var cell := VBoxContainer.new()
+		cell.add_theme_constant_override("separation", 1)
+		var prow := CenterContainer.new()
+		for pk in g.por:
+			var tr := TextureRect.new()
+			tr.texture = Px.S2("por_" + str(pk))
+			tr.custom_minimum_size = Vector2(34 if (g.por as Array).size() > 1 else 44, 44)
+			tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			tr.modulate = Color(1, 1, 1, 1) if done else Color(0.16, 0.16, 0.2, 0.85)
+			prow.add_child(tr)
+		cell.add_child(prow)
+		var nl := _lbl(str(g.name), Vector2.ZERO, 8, Color(0.92, 0.8, 0.45) if done else Color(0.4, 0.4, 0.48))
+		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cell.add_child(nl)
+		var zl := _lbl(str(g.zone), Vector2.ZERO, 8, Color(0.5, 0.55, 0.65) if done else Color(0.34, 0.34, 0.42))
+		zl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cell.add_child(zl)
+		ggrid.add_child(cell)
 	var tk: Dictionary = d.get("kind_kills", {})
 	var cols := HBoxContainer.new()
 	cols.alignment = BoxContainer.ALIGNMENT_CENTER
