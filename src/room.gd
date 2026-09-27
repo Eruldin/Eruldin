@@ -1515,6 +1515,22 @@ func _collect(pk: Node) -> void:
 			for i in 3:
 				spawn_heal(pk.position + Vector2(G.rf(-50, 50), G.rf(-36, 36)))
 			G.run.drop_fragments(pk.position, G.ri(15, 25))
+		"sunak":
+			# koro sunagi: can verirsin, kader kartlari acilir — kan yetmezse tapinak sessiz kalir
+			if G.player == null or G.player.dead:
+				return
+			var scost := maxf(10.0, G.player.hp * 0.15)
+			if G.player.hp <= scost + 1.0:
+				G.ui.toast("KORO SUNAĞI sessiz — kanın yetmiyor")
+				return
+			G.player.hp -= scost
+			G.player.set_flash()
+			G.fx.burst(pk.position, Px.C("b39ddb"), 22, 200.0, 5.0, 0.55)
+			G.fx.light_flash(pk.position, Px.C("b39ddb"), 2.0, 2.6, 0.35)
+			G.audio.play("roar", 1.4, 0.35)
+			G.ui.toast("KORO SUNAĞI — kan ödendi, kader konuşuyor")
+			Quests.tick("sunak")
+			G.ui.boon_choice()
 		"chest":
 			G.run.open_chest()
 		"loot":
@@ -1608,6 +1624,9 @@ func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 		"totem":
 			pk.texture = Px.S2("icn_skull") if Px.S2("icn_skull") != null else Px.S("dot")
 			col = "ff6d3d"
+		"sunak":
+			pk.texture = Px.S2("icn_skull") if Px.S2("icn_skull") != null else Px.S("dot")
+			col = "b39ddb"
 		"fener":
 			pk.texture = Px.S2("icn_crown") if Px.S2("icn_crown") != null else Px.S("dot")
 			col = "ff3355"

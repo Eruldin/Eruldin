@@ -107,6 +107,7 @@ const DEFS := [
 	{"id": "q_yuk",   "giver": "zirkon",  "name": "YÜK USTASI",         "desc": "Aşırı yük motoru ısınmadan öğrenilmez — deftere 15 yakma kaydı düş, kayışını takayım.", "obj": {"type": "over", "n": 15}, "rew": {"cho": 240, "item": "i_sarj"}, "prereq": "q_soy"},
 	{"id": "q_avlu",  "giver": "ehnar",   "name": "AVLU SINAVI",        "desc": "Efendi Avlusu'nda altı efendi arka arkaya nöbet tutar — zincirin tamamını tek koşuda kes, penceyi takas ederim.", "obj": {"type": "won_node", "id": "avlis", "n": 1}, "rew": {"cho": 280, "item": "i_efendipence"}, "prereq": "q_kor"},
 	{"id": "q_kutuk", "giver": "neva",    "name": "SEKİZ KÜTÜK",        "desc": "Saha eski defterini dağıttı — sekiz kütük var, hepsi sende toplanırsa sessiz çizmeyi söylerim.", "obj": {"type": "kayit", "n": 8}, "rew": {"cho": 200, "item": "i_kozcizme"}, "prereq": "q_vatika"},
+	{"id": "q_sunak", "giver": "neva",    "name": "KAN VERGİSİ",          "desc": "Sahalarda mor sunaklar beliriyor — koro kanla konuşur. Üç sunağa kanını ver; sunakların damarını sana yüzük yapayım.", "obj": {"type": "sunak", "n": 3}, "rew": {"cho": 260, "item": "i_sunak"}, "prereq": "q_kutuk"},
 	{"id": "q_koz",   "giver": "neva",    "name": "KADER KOLEKSİYONU",   "desc": "Kader kartları şarkının notaları — her biri başka bir geleceği dener. Yirmi farklı kozu koşularda yak; koleksiyon defterime eklensin.", "obj": {"type": "koz", "n": 20}, "rew": {"cho": 320, "rep": 3}, "prereq": "q_kutuk"}, 
 	{"id": "q_nuve",  "giver": "ahusk",   "name": "DAMARIN ÇEYİZİ",    "desc": "Damar kıran iyi beslenir — on damar kır, nüve halkasını takarım.", "obj": {"type": "vein", "n": 10}, "rew": {"cho": 220, "item": "i_nuve"}, "prereq": "q_balcik"},
 	{"id": "q_govde","giver": "david",   "name": "HER GÖVDE BİR DERS",  "desc": "Ely'nin kasası tek başına kovanı yormaz — her şasi ayrı ders. Üç farklı gövdeyle zafer kazan; hangi şasiyle dönersen dön, seni bekleyen şeyi çizim yapayım.", "obj": {"type": "heros", "n": 3}, "rew": {"cho": 300, "item": "i_ikiz"}, "prereq": "q_gez"},
@@ -509,6 +510,7 @@ static func obj_text(q: Dictionary) -> String:
 		"firtina": return "%d kesimi kum fırtınasında yap" % need
 		"zehir":  return "%d kesimi gaz havuzunda yap" % need
 		"nodmg":  return "%d sn boyunca vurulma" % need
+		"sunak":  return "%d koro sunağına kan ver" % need
 		"baskin": return "%d baskın altında zafer" % need
 	return "?"
 
