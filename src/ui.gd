@@ -2107,6 +2107,9 @@ const WAYLAY := {
 	"konservi": {"name": "KORO KONSERVİ", "col": "e8d060",
 		"sub": "Yol kenarında yarı gömülü bir Koro aktarıcısı hâlâ baskın nabzını yayınlıyor — içindeki diyapazon hâlâ ayarlı. Sızdırılmış frekansı bozarsan işaret başka düğüme kayar; kulak verirsen ritim zihnine yazılır.",
 		"opts": ["FREKANSI BOZ — baskın işareti başka düğüme kayar", "RİTMİ DİNLE — +%15 şansla sahaya in"]},
+	"ayin":   {"name": "KORO AYİNİ", "col": "b39ddb",
+		"sub": "Yol kenarında bir Koro sunağı hâlâ ısınıyor — nabzı kan istiyor, ödemeyi kutsanmayla veriyor. Sunak dilini bilenler kanını verir; pratik olanlar taşını söker.",
+		"opts": ["KAN VER — girişte yara al, ama kutsanmış lütufla sahaya in", "SÖK — sunak taşı eşya olarak çantaya; kovan kokuyu alır"]},
 	"duel":   {"name": "KORO DÜELLOSU", "col": "ffd700",
 		"sub": "Yolu altın zırhlı bir koro şampiyonu kesiyor — tek başına, mızrağı yere saplı. Seni resmi düelloya çağırıyor; kabul edersen kapıda seni bekler, frag bereketi kabarır.",
 		"opts": ["KABUL ET — düello: şampiyon kapıda bekler, frag ×1.5", "GERİ ÇEKİL — şampiyon yolu açar, onur kalır"]},
@@ -2213,6 +2216,16 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				toast("zincir kırıldı — yolcu zulasını verdi, sürü harekete geçti")
 			else:
 				toast("yolcu arkanda kaldı — yolun sessiz")
+		"ayin":
+			if idx == 0:
+				G.run.pending_dmg = 25.0
+				G.run.take_boon(G.pick(Boons.all()))
+				Quests.tick("ayin")
+				toast("kan sunağa aktı — kutsanma girişte bedel bulur")
+			else:
+				G.run.pending_ambush = true
+				Items.drop_to_run(Items.roll(G.run.luck))
+				toast("sunak taşı çantada — kovan kan kokusunu aldı")
 		"duel":
 			if idx == 0:
 				G.run.pending_duel = true
