@@ -61,8 +61,8 @@ const DEFS := {
 	"i_kemer_ef":  {"name": "Efendi Tokası",   "slot": "kemer",   "r": 2, "icon": "icn_crown",      "mods": {"skill": -0.12, "armor": 0.6}},
 }
 
-const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700"]
-const RARITY_NAME := ["ORTAK", "NADİR", "EFSANE"]
+const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700", "ff4fd8"]
+const RARITY_NAME := ["ORTAK", "NADİR", "EFSANE", "DESTANSI"]
 
 # drop table weights per rarity; nadir/efsane need luck to matter
 static func roll(luck: float) -> String:
@@ -80,9 +80,9 @@ static func roll(luck: float) -> String:
 		if int(DEFS[id].r) == rar and not _in_stash(id):
 			pool.append(id)
 	if pool.is_empty():
-		# already own everything at that rarity — fall back to any unowned
+		# already own everything at that rarity — fall back to any unowned drop-tier item
 		for id in DEFS:
-			if not _in_stash(id):
+			if not _in_stash(id) and int(DEFS[id].r) < 3:
 				pool.append(id)
 	if pool.is_empty():
 		return ""
@@ -215,7 +215,7 @@ static func forge_price(id: String) -> int:
 	var d: Dictionary = DEFS.get(id, {})
 	if d.is_empty() or item_lvl(id) >= 3:
 		return 0
-	return int([70, 130, 240][int(d.r)] * (item_lvl(id) + 1))
+	return int([70, 130, 240, 420][int(d.r)] * (item_lvl(id) + 1))
 
 static func forge(id: String) -> int:
 	var p := forge_price(id)
@@ -233,7 +233,7 @@ static func sell_price(id: String) -> int:
 	var d: Dictionary = DEFS.get(id, {})
 	if d.is_empty():
 		return 0
-	return [20, 50, 110][int(d.r)]
+	return [20, 50, 110, 190][int(d.r)]
 
 static func sell(id: String) -> int:
 	var st: Array = G.meta.data.get("stash", [])
@@ -258,7 +258,7 @@ static func shop_stock() -> Array:
 	if int(G.meta.data.get("shop_gen", -1)) != gen:
 		var pool: Array = []
 		for id in DEFS:
-			if not _in_stash(id):
+			if not _in_stash(id) and int(DEFS[id].r) < 3:  # r3 = görev/boss ganimeti, tezgâha çıkmaz
 				pool.append(id)
 		pool.shuffle()
 		stock = pool.slice(0, mini(SHOP_N, pool.size()))
