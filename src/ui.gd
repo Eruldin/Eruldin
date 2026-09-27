@@ -2834,6 +2834,26 @@ func orun_panel() -> void:
 			G.ui.toast("muhafız kiralandı — sonraki koşuda yanında")
 			_close_overlay()
 			orun_panel())
+	# sakin güzergâh: Orun'un kestirmeleri — sonraki 3 seyahat yol olayısız
+	var rprice := Quests.rep_price(35)
+	var calm := int(G.meta.data.get("calm_routes", 0))
+	var btn3 := Button.new()
+	btn3.text = "SAKİN GÜZERGÂH AKTİF — %d seyahat kaldı" % calm if calm > 0 else "SAKİN GÜZERGÂH — ◆%d (sonraki 3 seyahat yol olayısız)" % rprice
+	btn3.disabled = calm > 0 or G.meta.data.choralim < rprice
+	btn3.custom_minimum_size = Vector2(430, 30)
+	btn3.add_theme_font_override("font", ui_font())
+	var bc3 := CenterContainer.new()
+	bc3.add_child(btn3)
+	v.add_child(bc3)
+	btn3.pressed.connect(func():
+		if G.meta.data.choralim >= rprice and int(G.meta.data.get("calm_routes", 0)) == 0:
+			G.meta.data["choralim"] -= rprice
+			G.meta.data["calm_routes"] = 3
+			G.meta.save()
+			G.audio.jingle("boon")
+			G.ui.toast("kestirme rotalar çizildi — 3 seyahat sakin")
+			_close_overlay()
+			orun_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
