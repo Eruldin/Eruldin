@@ -93,6 +93,10 @@ static func spawn(p_kind: int, p_pos: Vector2, p_elite: bool, hp_scale: float, d
 		G.meta.save()
 		if is_instance_valid(G.ui):
 			G.ui.toast("KAYIT: %s — yeni tür deftere işlendi" % KIND_NAME.get(p_kind, "?"))
+	# elit/şampiyon belirişi: yerde yanan halka + ışık — kalabalığın içinden okunur
+	if p_elite:
+		G.fx.tele_circle(p_pos, 46.0, 0.55, Color(1.0, 0.62, 0.15, 0.30))
+		G.fx.light_flash(p_pos + Vector2(0, -14), Px.C("ffb74d"), 1.3, 2.2, 0.22)
 	return e
 
 func _setup_stats(hs: float, ds: float) -> void:
