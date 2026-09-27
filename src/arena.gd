@@ -39,6 +39,11 @@ func build_arena(biome_idx: int) -> void:
 		var wp := Vector2(rng.randf_range(BOUNDS.position.x + 160, BOUNDS.end.x - 160), rng.randf_range(BOUNDS.position.y + 160, BOUNDS.end.y - 160))
 		if wp.distance_to(Vector2.ZERO) > 300.0:
 			spawn_special("sarap", wp)
+	# koro sunağı: kan ödemeli lütuf tapınağı — %55 sahada bir tane
+	if rng.randf() < 0.55:
+		var sp2 := Vector2(rng.randf_range(BOUNDS.position.x + 200, BOUNDS.end.x - 200), rng.randf_range(BOUNDS.position.y + 200, BOUNDS.end.y - 200))
+		if sp2.distance_to(Vector2.ZERO) > 380.0:
+			spawn_special("sunak", sp2)
 	# sinyal feneri: isteğe bağlı ikiz şampiyon savaşı — boss-rush node'unda yok
 	if G.run == null or int(G.run.node_mods.get("rush", 0)) == 0:
 		var fp := Vector2(rng.randf_range(BOUNDS.position.x + 180, BOUNDS.end.x - 180), rng.randf_range(BOUNDS.position.y + 180, BOUNDS.end.y - 180))
@@ -249,6 +254,19 @@ func _place_hazards_arena() -> void:
 					t8.sr.modulate.a = 0.12
 					G.fx.mk_light(self, p, Px.C("9fd8ff"), 0.4, 1.5)
 					hazards.append({"pos": p, "r": 54.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(3, 7), "tele": t8, "erupt": 0.0, "col": "9fd8ff"})
+			4:
+				if i % 2 == 0:
+					add_slowzone(p, 60.0, -1.0)   # çeken balçık
+				else:
+					# zehir fıskiyesi: iki tarafı da yakan gaz havuzu
+					add_hazard(p, 50.0, 10.0, -1.0, Color(0.55, 0.9, 0.3, 0.22))
+					hazards[hazards.size() - 1]["kind"] = "toxic"
+			3:
+				# Aeterna çan alanı — içindeki sürü nabızla hızlanır
+				var t3 := G.fx.tele_circle(p, 74.0, 9999.0, Color(0.76, 0.63, 0.16, 0.2))
+				t3.sr.modulate.a = 0.10
+				G.fx.mk_light(self, p, Px.C("c9a227"), 0.35, 1.4)
+				hazards.append({"pos": p, "r": 74.0, "dps": 0.0, "kind": "coro", "t": rng.randf_range(1.5, 3.5), "tele": t3})
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))
 
