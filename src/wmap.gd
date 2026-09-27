@@ -41,6 +41,8 @@ const NODES := [
 	 	{"tex": "cine_0_2", "title": "DÜŞÜK KRATER", "sub": "Alfa-05 burada düştü. Kraterin dibinde henüz çürümemiş bir zırh parçası duruyor — kovan bile ona dokunmamış."},
 	 	{"tex": "por_rhasa", "title": "RHASA", "sub": "Onun parçasını taşıyorsun artık. Kraterin kenarında bir şey parlıyor — al ve git, koku burada da sürer."},
 	 ]},
+	{"id": "tasocagi","name": "ÇATLAK OCAK",       "icon": "icn_mine",    "pos": Vector2(560, 70),  "col": "ffab91", "kind": "arena", "biome": 1, "unlock": "node", "desc": "Çatlakların altında ocak — elit kaynağı, kovan kesintisiz.", "lore": "Simithar'ın ilk ocağı; damarın çatlağı hâlâ yanıyor. Elitler çatlağın nabzını nöbet tutar gibi koruyor.", "mods": {"elite_t": 0.5, "spawn": 1.1, "dmg": 1.1, "loot": 1.3, "frag": 1.1}},
+	{"id": "sondurme","name": "SÖNDÜRÜLMÜŞ FIRIN",  "icon": "ico_frag",    "pos": Vector2(1120, 640), "col": "b0bec5", "kind": "story", "unlock": "boss twins","desc": "İmparatorluğun son fırını — gövdesi soğuk, içi hâlâ dolu.", "lore": "Efendiler burada dövüldü. Fırın söndü ama korları — içlerinde kilitli bir Hisar Kalkanı, kovanın eli değmemiş halde.", "rew": {"cho": 140, "item": "i_hisar"}},
 ]
 
 # günlük protokol: tarihe göre deterministik saha mutasyonu (roguelite daily run)
@@ -71,6 +73,8 @@ const EDGES := [
 	["kuyu", "kulovasi"], ["mezarlik", "kulovasi"],
 	["kulovasi", "avlis"],
 	["vatika", "yemin"], ["kayalik", "yemin"],
+	["yol", "tasocagi"], ["tasocagi", "yuvalar"],
+	["avlis", "sondurme"], ["kulovasi", "sondurme"],
 ]
 
 static func node(id: String) -> Dictionary:

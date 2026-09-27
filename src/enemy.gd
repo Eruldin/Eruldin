@@ -147,7 +147,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu"][randi() % 12]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi"][randi() % 13]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -181,6 +181,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "IŞINLANAN " + actor_name
 			"koruyucu":
 				actor_name = "KORUYUCU " + actor_name
+			"yansi":
+				actor_name = "YANSITICI " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -227,7 +229,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -548,6 +550,12 @@ func take_hit(h: Dictionary) -> void:
 	super.take_hit(h)
 	if _st == St.RISE:
 		_rise_t = minf(_rise_t, 0.15)
+	# YANSITICI: hasarın %12'si saldırana geri sıçrar
+	if affix == "yansi" and h.get("source") == G.player and is_instance_valid(G.player):
+		var rd := float(h.get("dmg", 0.0)) * 0.12
+		if rd > 0.5 and not dead:
+			G.player.take_hit({"dmg": rd, "type": G.DamageType.SHOCK, "from": pos, "source": self})
+			G.fx.burst(pos + Vector2(0, -18), Px.C("ff8a65"), 4, 80.0, 2.4, 0.2)
 
 func die(h: Dictionary) -> void:
 	if dead:

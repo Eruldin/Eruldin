@@ -58,6 +58,7 @@ const DEFS := [
 	{"id": "q_anil",  "giver": "david",   "name": "SON İZLER",            "desc": "Müfretemin son izi Kül Ovası'nda bitti. Altı sahayı da gör — haritanın tamamı yankılansın, eski defter kapansın.", "obj": {"type": "biomes", "n": 6}, "rew": {"cho": 300, "cine": [{"tex": "por_david", "title": "DAVID", "sub": "Hepsini gördün. Müfretemin izi artık haritada değil — hatırada."}, {"tex": "cine_5_0", "title": "SON İZ", "sub": "Kül Ovası'nın kenarında yarım bir izcilik nişanı: S-7. Geri getiren tek parçacık oydu."}]}, "prereq": "q_kul"},
 	{"id": "q_tekel", "giver": "saphire", "name": "TEKEL BARIŞI",        "desc": "Açgöz bobinleri hâlâ işliyor — tek koşuda 1800 parçacık biriktir, bobinin kalibrasyon hakkı senin.", "obj": {"type": "frag", "n": 1800}, "rew": {"cho": 260}, "prereq": "q_damar"},
 	{"id": "q_fener", "giver": "ehnar",  "name": "YANKI AVCISI",         "desc": "Sahalardaki sinyal fenerleri yankı şampiyonları uyandırıyor. Üç feneri kır — deneme alanı temizlensin.", "obj": {"type": "fener", "n": 3}, "rew": {"cho": 280, "item": "i_cengel"}, "prereq": "q_deneme"},
+	{"id": "q_ocak",  "giver": "ehnar",   "name": "OCAĞIN KAPISI",       "desc": "Kuzeyde çatlak bir ocak var — elitler nabzını koruyor. Tek koşuda 12 elit kes — kapıyı göstereyim.", "obj": {"type": "elites", "n": 12}, "rew": {"cho": 160, "node": "tasocagi"}, "prereq": "q_nobet"},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
