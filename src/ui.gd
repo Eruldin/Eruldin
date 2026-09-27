@@ -3197,8 +3197,10 @@ func arcana_choice() -> void:
 	for aid in pool.slice(0, draw_n):
 		var a: Dictionary = Boons.ARCANAS[aid]
 		cards.append({"kind": "arcana", "id": aid, "name": str(a["name"]), "icon": "icn_crown", "col": str(a["col"]), "desc": str(a["desc"]), "top": "KOZ", "w": 1.0})
+	if is_instance_valid(G.meta) and G.meta.has_build("tahta") and not G.run.koz_rerolled:
+		cards.append({"kind": "kozreroll", "name": "KADERİ YENİLE", "icon": "icn_dash", "col": "e8d060", "desc": "kartları yeniden dağıt — Kader Tahtası koşuda bir kez izin verir", "top": "YENİLE", "w": 1.0})
 	_pause(true)
-	_show_cards("boon", "KOZ KARTI — koşu boyu süren kader  [1-%d]" % draw_n, Px.C("c9a227"), cards)
+	_show_cards("boon", "KOZ KARTI — koşu boyu süren kader  [1-%d]" % cards.size(), Px.C("c9a227"), cards)
 
 # final boss ganimeti — zaferden önce 3 kartlık seçim; callback zinciri victory'ye gider
 func boss_loot(after: Callable) -> void:
@@ -3350,6 +3352,10 @@ func _pick_card(o: Dictionary) -> void:
 	if str(o.get("kind", "")) == "reroll":
 		G.run.draft_reroll = false
 		_open_draft()
+		return
+	if str(o.get("kind", "")) == "kozreroll":
+		G.run.koz_rerolled = true
+		arcana_choice()
 		return
 	if str(o.get("kind", "")) == "evo":
 		G.run.apply_evo({"from": o.get("from", ""), "into": o.get("id", "")})
