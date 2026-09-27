@@ -136,7 +136,7 @@ func _impact() -> void:
 		if both_sides:
 			for e in G.enemies.duplicate():
 				if e is Enemy and not e.dead and global_position.distance_to(e.pos) < aoe:
-					e.take_hit({"dmg": dmg * 1.4, "type": dmg_type, "from": global_position, "knock": 12.0, "source": null})
+					e.take_hit({"dmg": dmg * 1.4, "type": dmg_type, "from": global_position, "knock": 12.0, "source": null, "keg": true})
 		G.fx.burst(global_position, col, 22, 200.0, 6.0, 0.45)
 		G.fx.shake(0.12, 0.15)
 		G.audio.play("explode", 1.0, 0.5)

@@ -71,6 +71,7 @@ var data := {
 	"node_rec": {},        # node başına rekor: {s: skor, w: zafer, d: yenilgi}
 	"camp_tier": 0,        # kamp büyüme aşaması — talep edilen görev sayısına göre
 	"over_uses": 0,        # toplam AŞIRI YÜK (F) kullanımı
+	"keg_kills": 0,        # dinamitçi fıçısıyla ölen sürü kesimleri
 	"baskin_wins": 0,      # koro baskını altında kazanılan zaferler
 	"contracts_done": 0,  # Ehnar'da tutan sözleşme sayısı
 	"title": "",           # takılı unvan (TITLES id) — koşu sonu ekranlarında görünür
@@ -173,6 +174,7 @@ func achievements() -> Array:
 		{"name": "ALTIN KIRICI", "desc": "toplam 10 şampiyon elit kes", "done": int(data.get("champs", 0)) >= 10, "rew": 400},
 		{"name": "DARE KIRAN", "desc": "Yemin Daresini fethet (şifa küresiz zafer)", "done": (data.get("won_nodes", []) as Array).has("yemin"), "rew": 250},
 		{"name": "PROTOKOLÜ KIRAN", "desc": "Aeterna Spire'ı düşür — gerçek sonu gör", "done": bool(data.get("ended", false)), "rew": 500},
+		{"name": "KOVAN ATEŞİ", "desc": "dinamitçi fıçısıyla 30 sürü kesimi yaptır", "done": int(data.get("keg_kills", 0)) >= 30, "rew": 200},
 		{"name": "BASKIN AVCISI", "desc": "koro baskını altında 3 zafer kazan", "done": int(data.get("baskin_wins", 0)) >= 3, "rew": 220},
 		{"name": "SÖZLEŞME USTASI", "desc": "Ehnar'da 8 sözleşme tuttur", "done": int(data.get("contracts_done", 0)) >= 8, "rew": 200},
 	]

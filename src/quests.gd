@@ -67,6 +67,7 @@ const DEFS := [
 	{"id": "q_goz",   "giver": "lena",    "name": "GÖZETİM ALTINDA",      "desc": "Aeterna'nın süzülen gözleri rotaları kilitliyor — uzaktan vuruyorlar, yaklaşmak iş. Sekizini düşür, merceğimi sana takayım.", "obj": {"type": "kind", "k": "Gözetmen", "n": 8}, "rew": {"cho": 220, "item": "i_gozcu"}, "prereq": "q_koro"},
 	{"id": "q_copcu","giver": "saphire", "name": "ÇÖPÇÜ AVI",           "desc": "Enkazdaki çöpçü kurtlar dökülen kristalleri yutuyor — benim payımı da mideye indiriyorlar. On ikisini kes, dişlerinden dizi yapayım.", "obj": {"type": "kind", "k": "Çöpçü Kurt", "n": 12}, "rew": {"cho": 200, "item": "i_kurtdis"}, "prereq": "q_lena"},
 	{"id": "q_barut","giver": "david",   "name": "BARUT TOZU",          "desc": "Simithar'ın tayfleri fıçı taşıyor — biri patlarsa konvoy bölünür. On tanesini kes, fitilini yüzük yapayım.", "obj": {"type": "kind", "k": "Dinamitçi Tayf", "n": 10}, "rew": {"cho": 200, "item": "i_fitil"}, "prereq": "q_gez"},
+	{"id": "q_kendiatesi","giver": "david","name": "KOVANIN ATEŞİ",       "desc": "Barutçunun fıçısı kör — sürüsüne de sarar. On beş kesimi fıçıya saydır; maden başlığımı veririm.", "obj": {"type": "keg", "n": 15}, "rew": {"cho": 220, "item": "i_barut"}, "prereq": "q_barut"},
 	{"id": "q_igne",  "giver": "saphire", "name": "İĞNE AVCISI",          "desc": "Kumun altında gezen akrepler kervanları ikiye bölüyor. On beşini kes — iğne keselerini kını yaparım, hançer tadında işler.", "obj": {"type": "kind", "k": "Kum Akrebi", "n": 15}, "rew": {"cho": 200, "item": "i_igne"}, "prereq": "q_kum"},
 	{"id": "q_batik", "giver": "saphire", "name": "BATIĞIN YÜKÜ",         "desc": "Benim eski kervanım kuma gömüldü — ambarları hâlâ dolu. Tek koşuda 1200 parçacık topla, batığın güverte kapısının yerini vereyim.", "obj": {"type": "frag", "n": 1200}, "rew": {"cho": 240, "node": "batik"}, "prereq": "q_igne"},
 	{"id": "q_kralice", "giver": "saphire", "name": "ÇÖLÜN HÜKÜMRARI",   "desc": "Batığın dibinde bir kraliçe yuva yaptı — benim kervanımı ona yedirdi. Kum Anası'nı düşür; iğnesini sana yüzük yaparım.", "obj": {"type": "boss", "k": "anasi"}, "rew": {"cho": 220, "item": "i_anasi_igne"}, "prereq": "q_batik"},
@@ -114,6 +115,8 @@ static func state(id: String) -> String:
 			cur = 1 if (G.meta.data.get("won_nodes", []) as Array).has(str(q.obj.get("id", ""))) else 0
 		elif t == "over":
 			cur = int(G.meta.data.get("over_uses", 0))
+		elif t == "keg":
+			cur = int(G.meta.data.get("keg_kills", 0))
 		if cur >= 0:
 			_q()[id]["prog"] = maxi(prog(id), cur)
 		if cur >= int(q.obj.get("n", 1)):
@@ -339,6 +342,7 @@ static func obj_text(q: Dictionary) -> String:
 		"champ":  return "%d şampiyon elit kes" % need
 		"won_node": return "%s fethi" % str(Wmap.node(str(o.get("id", ""))).get("name", str(o.get("id", ""))))
 		"over":   return "%d aşırı yük kullan" % need
+		"keg":    return "%d kesimi fıçıya saydır" % need
 	return "?"
 
 static func _claimed_count() -> int:
