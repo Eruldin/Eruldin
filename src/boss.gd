@@ -4,7 +4,7 @@ extends Enemy
 # Boss controller — own phase/attack state machine on top of Actor.
 # Bosses are spawned by Room; linked twins share a `link` reference.
 
-enum BKind { REX, HOST, NAHUM, TUMAN, KIRIN, CONST, ANASI, DEV, KOR, DAMAR }
+enum BKind { REX, HOST, NAHUM, TUMAN, KIRIN, CONST, ANASI, DEV, KOR, DAMAR, BUZ }
 
 var bkind: int = BKind.REX
 var link: Boss = null
@@ -22,14 +22,16 @@ const NAMES := {
 	BKind.NAHUM: "NAHUM", BKind.TUMAN: "TUMAN",
 	BKind.KIRIN: "MEDIKAE KIRIN", BKind.CONST: "ŞANSİYE CONSTANTIN",
 	BKind.ANASI: "KUM ANASI", BKind.DEV: "BATAKLIK DEVİ",
-	BKind.KOR: "KOR YÜCELTEN", BKind.DAMAR: "DAMAR KALBI"
+	BKind.KOR: "KOR YÜCELTEN", BKind.DAMAR: "DAMAR KALBI",
+	BKind.BUZ: "BUZ ANASI"
 }
 const TITLES := {
 	BKind.REX: "Alfa-05 · Düşmüş Kardeş", BKind.HOST: "Sektör 4-Gama'nın Kabusu",
 	BKind.NAHUM: "Zihin Kontrollü Şövalye", BKind.TUMAN: "Zihin Kontrollü Şövalye",
 	BKind.KIRIN: "Baş Cerrah", BKind.CONST: "Aeterna'nın Efendisi",
 	BKind.ANASI: "Kızıl Çöl'ün Kraliçesi", BKind.DEV: "Çürük Bataklık'ın Kalbi",
-	BKind.KOR: "Kül Ovası'nın Son Efendisi", BKind.DAMAR: "Kristal Çukur'un Nabzı"
+	BKind.KOR: "Kül Ovası'nın Son Efendisi", BKind.DAMAR: "Kristal Çukur'un Nabzı",
+	BKind.BUZ: "Donmuş Çatlak'ın Hanımı"
 }
 const BARKS := {
 	BKind.REX: "Alfa-04... transistörün sustu mu? Benimki hâlâ ŞARKI SÖYLÜYOR.",
@@ -41,13 +43,14 @@ const BARKS := {
 	BKind.ANASI: "Kum yutmuş bir şövalye... yavrum sana bayılacak.",
 	BKind.DEV: "Bataklık kimseyi geri vermez. Sen de kalacaksın.",
 	BKind.KOR: "İmparatorluk yandı — ben külünden doğdum. Sen de ona katılacaksın.",
-	BKind.DAMAR: "Damara dokundun, şövalye. Şimdi damar sana dokunacak."
+	BKind.DAMAR: "Damara dokundun, şövalye. Şimdi damar sana dokunacak.",
+	BKind.BUZ: "Buz beni getirene dek bekledi. Seni de bekleyecek."
 }
 const SPR := {
 	BKind.REX: "rex", BKind.HOST: "host", BKind.NAHUM: "nahum",
 	BKind.TUMAN: "tuman", BKind.KIRIN: "kirin", BKind.CONST: "const",
 	BKind.ANASI: "anasi", BKind.DEV: "dev", BKind.KOR: "kor",
-	BKind.DAMAR: "damar"
+	BKind.DAMAR: "damar", BKind.BUZ: "buz"
 }
 const PHASE_BARKS := {
 	BKind.REX: "REX: ŞARKI YÜKSELİYOR — DAHA HIZLI.",
@@ -60,6 +63,7 @@ const PHASE_BARKS := {
 	BKind.DEV: "DEV: çamur ayağa kalkıyor — bataklık aç.",
 	BKind.KOR: "KOR: ova ikinci kez yanıyor — bu kez seninle.",
 	BKind.DAMAR: "DAMAR: nabız hızlanıyor — çukur seninle birlikte atıyor.",
+	BKind.BUZ: "BUZ ANASI: çatlak kapanıyor — don.",
 }
 # faz-2'de portreli hikaye kartı — boss'un yıkımı içeriden görünür
 const P2_LINES := {
@@ -73,6 +77,7 @@ const P2_LINES := {
 	BKind.DEV: "Bin yıldır buradaydım — sen bir gün bile dayanamazsın.",
 	BKind.KOR: "Kül unutmaz, şövalye. Beni ancak kül anlar.",
 	BKind.DAMAR: "Bütün kuyu tek kalp — ve kalp şimdi öfkeyle atıyor.",
+	BKind.BUZ: "Çatlak şimdi kapanıyor — altında ikimiz de kalacağız.",
 }
 
 # ölüm anı kartı: ikiz boss'larda ancak ikincisi düşünce çalınır
@@ -87,6 +92,7 @@ const DEATH_LINES := {
 	BKind.DEV: "Dev çöktü — bataklık ilk kez birini geri verdi.",
 	BKind.KOR: "Taç düştü, kül dağıldı. Ova yüz yıl sonra ilk kez soğudu.",
 	BKind.DAMAR: "Kalp sustu. Çukurun damarları yüz yıllığına karardı.",
+	BKind.BUZ: "Hanım eridi — çatlağın altında ilk kez sessizlik var.",
 }
 
 static func spawn_boss(p_kind: int, p_pos: Vector2, parent: Node, hp_scale := 1.0) -> Boss:
@@ -149,6 +155,11 @@ func _boss_stats(hs: float) -> void:
 			windup_t = 0.7; recover_t = 0.8; attack_cd = 1.6
 			knock_resist = 55
 			kind = EKind.DAMARGOL
+		BKind.BUZ:
+			max_hp = 620; speed = 76; touch_dmg = 19; radius = 23; hit_radius = 29
+			windup_t = 0.6; recover_t = 0.7; attack_cd = 1.5
+			knock_resist = 50
+			kind = EKind.BUZRUH
 	max_hp *= hs
 	hp = max_hp
 	actor_name = NAMES[bkind]
@@ -162,8 +173,8 @@ func _make_body() -> void:
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(body)
 	_load_frames(SPR[bkind], 4.0)
-	Px.fit(body, 118.0 if bkind == BKind.DAMAR else (112.0 if bkind == BKind.DEV else (108.0 if bkind == BKind.REX or bkind == BKind.HOST or bkind == BKind.ANASI else 94.0)))
-	var lc := Px.C("ff2222") if bkind == BKind.REX else (Px.C("00E676") if bkind == BKind.HOST or bkind == BKind.TUMAN else (Px.C("e8a050") if bkind == BKind.ANASI else (Px.C("4ad06a") if bkind == BKind.DEV else (Px.C("ff7722") if bkind == BKind.KOR else (Px.C("4dd0e1") if bkind == BKind.DAMAR else Px.C("c9a227"))))))
+	Px.fit(body, 118.0 if bkind == BKind.DAMAR else (112.0 if bkind == BKind.DEV or bkind == BKind.BUZ else (108.0 if bkind == BKind.REX or bkind == BKind.HOST or bkind == BKind.ANASI else 94.0)))
+	var lc := Px.C("ff2222") if bkind == BKind.REX else (Px.C("00E676") if bkind == BKind.HOST or bkind == BKind.TUMAN else (Px.C("e8a050") if bkind == BKind.ANASI else (Px.C("4ad06a") if bkind == BKind.DEV else (Px.C("ff7722") if bkind == BKind.KOR else (Px.C("4dd0e1") if bkind == BKind.DAMAR else (Px.C("9fd8ff") if bkind == BKind.BUZ else Px.C("c9a227")))))))
 	_light = G.fx.mk_light(self, Vector2(0, -30), lc, 0.5, 2.0)
 	G.fx.burst(pos + Vector2(0, -10), Px.C("8B0000"), 24, 160.0, 5.0, 0.7)
 
@@ -264,6 +275,7 @@ func _pick_attack() -> void:
 		BKind.DEV: _dev_attack()
 		BKind.KOR: _kor_attack()
 		BKind.DAMAR: _damar_attack()
+		BKind.BUZ: _buz_attack()
 
 func _on_phase2() -> void:
 	G.audio.play("roar", 1.0, 0.8)
@@ -825,6 +837,76 @@ func _damar_shatter() -> void:
 	for i in 16:
 		var dir := Vector2.RIGHT.rotated(TAU * i / 16.0)
 		_shoot_dir(dir, 220.0, 11.0, Px.C("4dd0e1"), 9.0)
+	G.run.drop_fragments(pos + Vector2(G.rf(-40, 40), G.rf(-40, 40)), G.ri(4, 7))
+	_busy = false
+
+# BUZ ANASI — donmuş çatlağın hanımı: kalıcı buz serer, ruh çağırır, faz-2'de kristal sağanak
+func _buz_attack() -> void:
+	var roll := G.rf(0, 1)
+	var adds := 0
+	for e in G.enemies:
+		if is_instance_valid(e) and not e.dead and e != self and not (e is Boss):
+			adds += 1
+	if phase == 2 and roll < 0.26:
+		_atk_t = 2.3
+		_buz_shatter()
+	elif roll < 0.34 and adds < 4:
+		_atk_t = 2.5
+		_buz_birth()
+	elif dist_to_player() < 170.0 or roll < 0.62:
+		_atk_t = 1.8 if phase == 1 else 1.3
+		_buz_slam()
+	else:
+		_atk_t = 2.0
+		_buz_erupt()
+
+func _buz_slam() -> void:
+	var dir := (G.player.pos - pos).normalized()
+	var t := G.fx.tele_wedge(pos, rad_to_deg(dir.angle()), 340.0, 0.65)
+	await _wait(0.65)
+	G.fx.kill_tele(t)
+	G.audio.play("explode", 1.3, 0.75)
+	G.fx.shake(0.3, 0.4)
+	for i in 12:
+		if _abort(): return
+		pos = G.room.clamp_pos(pos + dir * 26.0, radius)
+		G.fx.burst(pos + Vector2(0, -4), Px.C("9fd8ff"), 4, 110.0, 3.5, 0.3)
+		if dist_to_player() < radius + G.player.hit_radius + 8:
+			G.player.take_hit({"dmg": touch_dmg * 1.25, "type": G.DamageType.MELEE, "from": pos, "knock": 12.0, "source": self})
+		await _wait(0.016)
+	_busy = false
+
+func _buz_erupt() -> void:
+	# telegraflı don patlamaları — tehlike yerine altında kaygan buz kalıyor
+	for i in 4:
+		var target := G.player.pos + Vector2(G.rf(-130, 130), G.rf(-110, 110))
+		var t := G.fx.tele_circle(target, 52.0, 0.8, Color(0.6, 0.86, 1.0, 0.3))
+		await _wait(0.4)
+		G.fx.kill_tele(t)
+		G.fx.burst(target, Px.C("9fd8ff"), 14, 170.0, 5.5, 0.5)
+		G.audio.play("shoot", 1.5, 0.5)
+		G.room.add_slowzone(target, 52.0, 7.0, Color(0.55, 0.85, 1.0, 0.3))
+	_busy = false
+
+func _buz_birth() -> void:
+	G.audio.play("roar", 1.3, 0.45)
+	G.fx.burst(pos + Vector2(0, -14), Px.C("9fd8ff"), 24, 150.0, 5.0, 0.6)
+	for i in 2:
+		var off := Vector2(G.rf(-110, 110), G.rf(-90, 90))
+		var e := Enemy.spawn(EKind.BUZRUH, G.room.clamp_pos(pos + off, 14.0), false, G.run.hp_scale() * 0.7, G.run.dmg_scale(), self)
+		e.set_meta("add", true)
+	await _wait(0.5)
+	_busy = false
+
+func _buz_shatter() -> void:
+	var t := G.fx.tele_ring(pos, 90.0, 0.9, Color(0.6, 0.86, 1.0, 0.5))
+	await _wait(0.9)
+	G.fx.kill_tele(t)
+	G.audio.play("explode", 0.8)
+	G.fx.shake(0.4, 0.45)
+	for i in 18:
+		var dir := Vector2.RIGHT.rotated(TAU * i / 18.0)
+		_shoot_dir(dir, 230.0, 11.0, Px.C("9fd8ff"), 9.0)
 	G.run.drop_fragments(pos + Vector2(G.rf(-40, 40), G.rf(-40, 40)), G.ri(4, 7))
 	_busy = false
 
