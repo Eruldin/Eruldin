@@ -164,6 +164,14 @@ func start_run() -> void:
 		reward_mult *= 1.0 + 0.3 * sefer
 		stats["sefer"] = sefer
 		G.ui.toast("SEFER %d — zincir uzuyor: sürü katlandı, ganimet bereketi büyüdü" % sefer)
+	# günün ilk koşusu: her gerçek günün ilk koşusuna bereket primi — kamp güne çalışla açılır
+	var today := Time.get_date_string_from_system()
+	if str(G.meta.data.get("first_day", "")) != today:
+		G.meta.data["first_day"] = today
+		G.meta.save()
+		reward_mult *= 1.5
+		stats["ilk_kosu"] = 1
+		G.ui.toast("GÜNÜN İLK KOŞUSU — choralim ödemesi ×1.5")
 	if bool(node_mods.get("noheal", false)):
 		G.ui.toast("YEMİN DARESİ — şifa küresi düşmez, tek yaşamla sınan")
 	alive = true
