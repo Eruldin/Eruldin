@@ -85,8 +85,18 @@ var data := {
 	"mina_meal": false,    # Mina'nın yemeği — sonraki koşuda şifa küresi şansı ×2
 	"rescued_lena": false, # sahada kafesten kurtarılan Kartograf Lena — kampa katılır
 	"lena_route": false,   # Lena'nın keşif güzergâhı — sonraki koşuda saha zengin
-	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
+	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0, "full": false},
 }
+
+var _defaults: Dictionary
+
+func _init() -> void:
+	_defaults = data.duplicate(true)
+
+# VERİYİ SIFIRLA — pause ayarlarından çift-onaylı tam reset
+func reset_all() -> void:
+	data = _defaults.duplicate(true)
+	save()
 
 static func _key(u: int) -> String:
 	return ["hp","dmg","dash","revive","frag","shield","spd","mag","luck"][u]

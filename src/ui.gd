@@ -3021,12 +3021,19 @@ func _apply_settings() -> void:
 	var st: Dictionary = G.meta.data.get("settings", {})
 	if is_instance_valid(_crt):
 		_crt.visible = bool(st.get("crt", true))
+	if DisplayServer.get_name() != "headless":
+		var want_full := bool(st.get("full", false))
+		var cur := DisplayServer.window_get_mode()
+		if want_full and cur != DisplayServer.WINDOW_MODE_FULLSCREEN:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		elif not want_full and cur == DisplayServer.WINDOW_MODE_FULLSCREEN:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 
 func pause_panel() -> void:
 	_pause(true)
 	var v := _show_panel("pause", "DURAKLATILDI", Color(0.6, 0.6, 0.75))
 	var st: Dictionary = G.meta.data.settings
-	for opt in [["shake", "Ekran sarsıntısı"], ["crt", "CRT taraması"], ["mus", "Müzik"], ["sfx", "Efekt sesi"]]:
+	for opt in [["shake", "Ekran sarsıntısı"], ["crt", "CRT taraması"], ["mus", "Müzik"], ["sfx", "Efekt sesi"], ["full", "Tam ekran"]]:
 		var key: String = opt[0]
 		var row := HBoxContainer.new()
 		row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -3040,14 +3047,14 @@ func pause_panel() -> void:
 		if is_slider:
 			btn.text = "%d%%" % roundi(float(st.get(key, 1.0)) * 100)
 		else:
-			btn.text = "AÇIK" if bool(st.get(key, true)) else "KAPALI"
+			btn.text = "AÇIK" if bool(st.get(key, key != "full")) else "KAPALI"
 		row.add_child(btn)
 		btn.pressed.connect(func():
 			if is_slider:
 				st[key] = wrapf(float(st.get(key, 1.0)) - 0.25, 0.0, 1.26)
 				btn.text = "%d%%" % roundi(float(st[key]) * 100)
 			else:
-				st[key] = not bool(st.get(key, true))
+				st[key] = not bool(st.get(key, key != "full"))
 				btn.text = "AÇIK" if bool(st[key]) else "KAPALI"
 			G.meta.save()
 			_apply_settings()
@@ -3092,6 +3099,28 @@ func pause_panel() -> void:
 		G.meta.data["tut"] = false
 		G.meta.save()
 		toast("ipuçları sıfırlandı — sonraki koşuda gösterilecek"))
+	# tehlikeli bölge — kayıt sıfırlama (çift onay)
+	var rb := Button.new()
+	rb.text = "VERİYİ SIFIRLA"
+	rb.custom_minimum_size = Vector2(240, 24)
+	rb.add_theme_font_override("font", ui_font())
+	rb.add_theme_color_override("font_color", Color(1, 0.45, 0.45))
+	v.add_child(rb)
+	var armed := false
+	rb.pressed.connect(func():
+		if not armed:
+			armed = true
+			rb.text = "EMİN MİSİN? tüm ilerleme silinir — tekrar bas"
+			G.audio.play("ui", 0.8, 0.6)
+			return
+		G.meta.reset_all()
+		_apply_settings()
+		toast("kayıt silindi — protokol yeniden başlıyor")
+		if G.state == G.State.ROOM:
+			_close_overlay()
+			G.run.abandon_to_hub()
+		else:
+			_close_overlay())
 	var h := _lbl("[ESC / E / tık] devam et", Vector2.ZERO, 11, Color(0.5, 0.5, 0.62))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
