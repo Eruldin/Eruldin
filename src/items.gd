@@ -81,6 +81,8 @@ const DEFS := {
 	"i_praetoryuz":{"name": "Praetor Yüzüğü",  "slot": "yuzuk2",  "r": 4, "icon": "icn_dagger",     "mods": {"crit": 0.08, "critmult": 0.40}},
 	"i_hanimzil": {"name": "Hanım'ın Zili",   "slot": "kolye",   "r": 4, "icon": "icn_crown",      "mods": {"xp": 0.15, "ls": 0.03, "hp": 20}},
 	"i_vahdettir":{"name": "Vahdet Tırnağı",  "slot": "eldiven", "r": 4, "icon": "icn_sword",      "mods": {"dmg": 0.15, "spd": -0.03}},
+	"i_ufukcizme":{"name": "Ufuk Çizmeleri",  "slot": "cizme",  "r": 4, "icon": "icn_dash",       "mods": {"spd": 0.12, "dash_regen": 0.25}},
+	"i_kalpgoz": {"name": "Kalp Gözü",        "slot": "bas",    "r": 4, "icon": "icn_crown",      "mods": {"crit": 0.10, "mag": 60.0, "xp": 0.10}},
 	"i_devkalp": {"name": "Batak Kalbi",     "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 40, "armor": 0.8}},
 	"i_kortac":  {"name": "Kor Tacı",        "slot": "bas",     "r": 3, "icon": "icn_crown",      "mods": {"dmg": 0.08, "skill": -0.10}},
 	"i_balcikkalp": {"name": "Balçık Kalbi", "slot": "kolye",   "r": 3, "icon": "icn_kovan",      "mods": {"hp": 30, "ls": 0.02}},
