@@ -242,7 +242,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak"][randi() % 17]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev"][randi() % 18]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -290,6 +290,10 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "KRİSTALLİ " + actor_name
 			"hortlak":
 				actor_name = "HORTLAK " + actor_name
+			"dev":
+				max_hp *= 1.8; touch_dmg *= 1.25; proj_dmg *= 1.25; speed *= 0.72
+				radius *= 1.55; hit_radius *= 1.5
+				actor_name = "DEV " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -329,7 +333,7 @@ func _make_body() -> void:
 		if not Px._ext_frames(bk).is_empty():
 			kn = bk
 	_load_frames(kn, 5.0)
-	Px.fit(body, 118.0 if elite else (112.0 if kind == EKind.DAMARGOL else (108.0 if kind == EKind.KONAKCI or kind == EKind.BALCIK else 86.0)))
+	Px.fit(body, (150.0 if affix == "dev" else 118.0) if elite else (112.0 if kind == EKind.DAMARGOL else (108.0 if kind == EKind.KONAKCI or kind == EKind.BALCIK else 86.0)))
 	if kind == EKind.CARRIER and not elite:
 		base_color = Color(1.0, 0.85, 0.45)
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("ffb74d"), 0.4, 1.4)
@@ -338,7 +342,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae", "dev": "ffab40"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()

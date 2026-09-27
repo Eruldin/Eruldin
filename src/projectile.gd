@@ -18,6 +18,8 @@ var piercing := false
 var aoe := 0.0              # >0: lobbed shot, explodes in an area on impact/expiry
 var life0 := 0.0            # lobbed shots: initial life, drives the fake arc
 var boomerang := false      # returns to the player at half-life, piercing all the way
+var bounces := 0            # ricochet shots: retargets to a fresh enemy on hit
+var _hitset: Array = []     # ricochet: enemies already struck by this shot
 var both_sides := false     # dinamitçi fıçısı: AoE patlamada sürü de vurulur
 var wpn := ""               # weapon id that fired it — feeds the per-weapon damage tally
 var _boom_flip := false
@@ -93,7 +95,7 @@ func _process(_d: float) -> void:
 
 	if team == G.Team.PLAYER:
 		for e in G.enemies.duplicate():
-			if not is_instance_valid(e) or e.dead:
+			if not is_instance_valid(e) or e.dead or _hitset.has(e):
 				continue
 			if global_position.distance_to(e.pos) < radius + e.hit_radius:
 				var crit := G.chance(G.player.crit_ch)
@@ -110,7 +112,26 @@ func _process(_d: float) -> void:
 				if crit:
 					G.audio.play("crit", G.rf(1.0, 1.15), 0.35)
 					G.fx.burst(e.pos + Vector2(0, -10), Px.C("ffd75f"), 5, 170.0, 3.0, 0.22)
-				if not piercing:
+				if not piercing and bounces > 0:
+					_hitset.append(e)
+					bounces -= 1
+					var best: Actor = null
+					var bd := 300.0
+					for e2 in G.enemies:
+						if is_instance_valid(e2) and not e2.dead and e2 != e and not _hitset.has(e2):
+							var dd: float = e.pos.distance_to(e2.pos)
+							if dd < bd:
+								bd = dd
+								best = e2
+					if best == null:
+						_impact()
+					else:
+						vel = vel.length() * (best.pos - e.pos).normalized()
+						life = maxf(life, 0.7)
+						G.fx.burst(global_position, col.lightened(0.2), 5, 110.0, 3.0, 0.2)
+						G.audio.play("hit", 1.7, 0.3)
+					return
+				elif not piercing:
 					_impact()
 					return
 	else:
