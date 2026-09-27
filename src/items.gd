@@ -50,6 +50,7 @@ const DEFS := {
 	"i_cengel":   {"name": "Av Çengeli",       "slot": "eldiven", "r": 2, "icon": "icn_sword",      "mods": {"dmg": 0.08, "ls": 0.015}},
 	"i_pusula":   {"name": "Kuzey Pusulası",   "slot": "kolye",   "r": 2, "icon": "icn_dash",       "mods": {"xp": 0.10, "mag": 50.0}},
 	"i_nabiz":    {"name": "Nabız Söndürücü",  "slot": "kolye",   "r": 2, "icon": "icn_zap",        "mods": {"skill": -0.16}},
+	"i_igne":     {"name": "İğne Kını",        "slot": "kemer",   "r": 2, "icon": "icn_dagger",     "mods": {"crit": 0.08, "dmg": 0.08}},
 	"i_vurgu":    {"name": "Vurgu Halkası",    "slot": "yuzuk",   "r": 1, "icon": "icn_dagger",     "mods": {"skill": -0.09, "dmg": 0.03}},
 	# kemer slotu — 8. ekipman yuvası
 	"i_kemer_kum": {"name": "Kum Kemeri",      "slot": "kemer",   "r": 0, "icon": "icn_dash",       "mods": {"spd": 0.04, "mag": 25.0}},

@@ -712,7 +712,7 @@ func die(h: Dictionary) -> void:
 				G.meta.data["reapers"] = int(G.meta.data.get("reapers", 0)) + 1
 				G.meta.save()
 			if G.chance(0.12):
-				G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard"]), pos)
+				G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard", "iksir"]), pos)
 			# altın nüve: nadir kalıcı güç düşüşü (VS golden egg)
 			if G.chance(0.03):
 				G.room.spawn_special("egg", pos)
@@ -767,7 +767,7 @@ func die(h: Dictionary) -> void:
 		G.run.drop_fragments(pos, 1)
 	# hamal taşıyıcı yükünü düşürür — rastgele saha kalıntısı
 	if kind == EKind.CARRIER and is_instance_valid(G.room):
-		G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard"]), pos)
+		G.room.spawn_special(G.pick(["vacuum", "bomb", "freeze", "boost", "guard", "iksir"]), pos)
 		G.fx.float_text(pos + Vector2(0, -40), "YÜK DÜŞTÜ", Px.C("ffb74d"), 0.9)
 	if is_instance_valid(G.room):
 		G.room.on_enemy_dead(self)

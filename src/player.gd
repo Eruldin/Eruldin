@@ -41,6 +41,8 @@ var skill_max := 9.0
 var _haste_t := 0.0
 var _haste_mult := 1.0
 var _skill_held := false
+var _iksir_held := false
+var iksir_n := 0          # choralim iksiri stoğu — R ile içilir, koşular arasında kalır
 var _parry_t := 0.0
 var _parry_cd := 0.0
 var _combo := 0
@@ -288,6 +290,14 @@ func _tick_skill(d: float) -> void:
 	if q_now and not _skill_held and skill_cd <= 0 and _dash_t <= 0 and G.state == G.State.ROOM:
 		_use_skill()
 	_skill_held = q_now
+	var r_now := Input.is_key_pressed(KEY_R)
+	if r_now and not _iksir_held and iksir_n > 0 and not dead and hp < max_hp - 1.0 and G.state == G.State.ROOM:
+		iksir_n -= 1
+		heal(max_hp * 0.45)
+		G.fx.burst(pos, Px.C("8affc9"), 14, 140.0, 3.0, 0.5)
+		G.audio.play("heal", 1.2, 0.55)
+		G.ui.toast("choralim iksiri — can yenilendi")
+	_iksir_held = r_now
 
 # şasi yeteneği: ely → NOVA (AoE), elyb → SİPER (zırh fazı), via → ATILIM (dash refill + hız)
 func _use_skill() -> void:

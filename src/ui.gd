@@ -111,6 +111,7 @@ var _ch_back: ColorRect
 var _ch_bar: ColorRect
 var _dash_row: HBoxContainer
 var _skill_lbl: Label
+var _iksir_lbl: Label
 var _frag_lbl: Label
 var _boon_row: HBoxContainer
 var _room_lbl: Label
@@ -241,6 +242,8 @@ func _build_hud() -> void:
 	# Q aktif yetenek pimi — hazır olunca yanar
 	_skill_lbl = _lbl("Q", Vector2(90, 676), 14, Px.C("ffd75f"))
 	_hud.add_child(_skill_lbl)
+	_iksir_lbl = _lbl("", Vector2(112, 678), 12, Px.C("8affc9"))
+	_hud.add_child(_iksir_lbl)
 
 	_frag_lbl = _lbl("◆ 0", Vector2(1140, 648), 16, Px.C("c26bff"))
 	_hud.add_child(_frag_lbl)
@@ -302,7 +305,7 @@ func _build_hud() -> void:
 	_quest_lbl = _lbl("", Vector2(20, 152), 11, Color(0.82, 0.78, 0.55))
 	_hud.add_child(_quest_lbl)
 
-	_hint_lbl = _lbl("WASD hareket · SPACE dash · E etkileşim · ESC duraklat — silahlar kendiliğinden ateş eder", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
+	_hint_lbl = _lbl("WASD hareket · SPACE dash · Q yetenek · R iksir · E etkileşim · ESC duraklat", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
 	_hud.add_child(_hint_lbl)
 
 	# boon tooltip
@@ -438,6 +441,8 @@ func _tick_hud() -> void:
 		var scol: Color = {"elyb": Px.C("9db4c8"), "via": Px.C("00E5FF")}.get(str(G.meta.data.get("hero", "ely")), Px.C("c26bff"))
 		_skill_lbl.add_theme_color_override("font_color", scol if p.skill_cd <= 0 else Color(0.3, 0.3, 0.35))
 		_skill_lbl.text = "Q" if p.skill_cd <= 0 else str(int(ceil(p.skill_cd)))
+	if is_instance_valid(_iksir_lbl):
+		_iksir_lbl.text = ("R ×%d" % p.iksir_n) if p.iksir_n > 0 else ""
 	_frag_lbl.text = "◆ %d  (+%d)" % [G.meta.data.choralim, int(G.run.fragments * G.meta.frag_mult())]
 	_xp_bar.size.x = 1280.0 * clampf(p.xp / maxf(p.xp_next, 1.0), 0.0, 1.0)
 	# choralim pulse (#6a3fd1 -> #2c9be8) per the art bible
@@ -1772,6 +1777,28 @@ func shop_panel() -> void:
 				_close_overlay()
 				shop_panel())
 		grid.add_child(cell)
+	# sabit raf: choralim iksiri — R ile içilir, koşular arasında kalır
+	var irow := HBoxContainer.new()
+	irow.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(irow)
+	var ib := Button.new()
+	var iprice := 40
+	ib.text = "CHORALİM İKSİRİ ◆%d  (R — elde %d/3)" % [iprice, G.player.iksir_n if is_instance_valid(G.player) else 0]
+	ib.add_theme_font_override("font", ui_font())
+	ib.custom_minimum_size = Vector2(300, 24)
+	ib.disabled = int(G.meta.data.get("choralim", 0)) < iprice or (is_instance_valid(G.player) and G.player.iksir_n >= 3)
+	if ib.disabled:
+		ib.modulate = Color(0.5, 0.5, 0.55)
+	irow.add_child(ib)
+	ib.pressed.connect(func():
+		if int(G.meta.data.get("choralim", 0)) >= iprice and is_instance_valid(G.player) and G.player.iksir_n < 3:
+			G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - iprice
+			G.meta.save()
+			G.player.iksir_n += 1
+			G.audio.jingle("boon")
+			toast("iksir alındı — R ile içilir (elde %d/3)" % G.player.iksir_n)
+			_close_overlay()
+			shop_panel())
 	var back2 := Button.new()
 	back2.text = "← TEÇHİZAT"
 	back2.add_theme_font_override("font", ui_font())
