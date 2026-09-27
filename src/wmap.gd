@@ -28,6 +28,7 @@ const NODES := [
 	{"id": "mabed",  "name": "KIRILMIŞ MABED",     "icon": "icn_crown",   "pos": Vector2(420, 560), "col": "ffd75f", "kind": "arena", "biome": 0, "unlock": "node", "desc": "Yıkık tapınak — ganimet çift kat, elitler nöbette.", "lore": "Viator'ın eski dua yeri. Sunak kırık ama kutsamalar hâlâ taşın içinde — kovan da bunu biliyor.", "mods": {"loot": 2.2, "elite_t": 0.6, "spawn": 0.8, "frag": 1.2}},
 	{"id": "mezarlik","name": "DÜŞMÜŞLER MEZARI",  "icon": "icn_skull",   "pos": Vector2(950, 150), "col": "90a4ae", "kind": "arena", "biome": 3, "unlock": "node", "desc": "Efendilerin eski çöplüğü — elit kaynağı, sert kovan.", "lore": "Protokolün reddettiği gövdeler buraya atıldı. Şimdi hepsi kalkmış, mezarlarında nöbet tutuyor.", "mods": {"hp": 1.25, "elite_t": 0.5, "dmg": 1.15, "frag": 1.35}},
 	{"id": "batak",  "name": "ÇÜRÜK BATAKLIK",    "icon": "ico_boon",    "pos": Vector2(1120, 430), "col": "66bb6a", "kind": "arena", "biome": 4, "unlock": "node", "desc": "İmparatorluğun unuttuğu bataklık — çeken balçık, mantarlı karanlık, bol ganimet.", "lore": "Protokol buraya hiç bakmadı; bataklık da kimseyi geri vermedi. Suların altında efendilerin artıkları, üstünde küsen sürüler.", "mods": {"hp": 1.05, "spawn": 1.15, "frag": 1.3, "loot": 1.6, "dusk": true}},
+	{"id": "muhkasa","name": "MUHAFIZ KASASI",    "icon": "ico_loot",    "pos": Vector2(610, 130),  "col": "ffd75f", "kind": "hazine","biome": 0, "unlock": "node", "desc": "Karakolun kuzeyinde gömülü praetorian kasası — efendi yok; mühür 6 dakika sonra açılır, içi muhafız teçhizatı.", "lore": "Kırık Karakol'un komutanının son emri: 'kasa benimle gömülsün'. Karakol düştü ama kasa gömüldüğü yerde duruyor — mühür hâlâ praetorian eli tanıyor; seninkini de sayar.", "mods": {"loot": 2.4, "frag": 1.9, "hp": 0.95, "spawn": 1.05, "elite_t": 0.75}},
 	# kind "story": savaşsız tek seferlik hikaye durağı — sinematik + ödül, sonra tükenir
 	{"id": "kayalik","name": "YANKI KAYASI",        "icon": "icn_skull",   "pos": Vector2(300, 520), "col": "8fd4ff", "kind": "story", "unlock": "open",    "desc": "Kampın güneyinde koro taşı — bir kez dinlenir.", "rew": {"cho": 60},
 	 "cards": [
@@ -143,6 +144,7 @@ const EDGES := [
 	["batak", "batikfener"], ["damar", "batikfener"],
 	["cukur", "damarkasa"], ["damar", "damarkasa"], ["kaos", "damarkasa"],
 	["kamp", "karakol"], ["karakol", "b0"],
+	["karakol", "muhkasa"], ["b0", "muhkasa"],
 	["mezarlik", "sinyal"], ["b2", "sinyal"],
 	["sinyal", "prova"], ["b2", "prova"],
 ]
