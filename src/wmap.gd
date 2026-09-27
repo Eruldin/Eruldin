@@ -86,6 +86,10 @@ static func node(id: String) -> Dictionary:
 static func _unlocked() -> Array:
 	return G.meta.data.get("unlocked", [])
 
+# canlı harita: kampa dönüşte işaretlenen baskın düğümü ("" = yok)
+static func hot_node() -> String:
+	return str(G.meta.data.get("hot_node", ""))
+
 # is this node reachable? "open" / "node" (quest-unlocked) / "boss <id>"
 static func can_enter(id: String) -> bool:
 	var n := node(id)

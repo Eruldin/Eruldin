@@ -1231,6 +1231,10 @@ func worldmap_panel() -> void:
 		var nl := _lbl(ntxt, Vector2.ZERO, 9, (Px.C("00E676") if vnm.has(nid) else Color.WHITE) if can else Color(0.5, 0.5, 0.55))
 		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		bb.add_child(nl)
+		if nid == Wmap.hot_node() and can:
+			var htag := _lbl("▲ BASKIN", Vector2.ZERO, 8, Px.C("ff5533"))
+			htag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			bb.add_child(htag)
 		if is_cur:
 			var tag := _lbl("▼ HEDEF", Vector2.ZERO, 8, Px.C("ffd700"))
 			tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1242,6 +1246,8 @@ func worldmap_panel() -> void:
 				_wmap_pick(nid, info, sel))
 		btn.mouse_entered.connect(func():
 			var line := "%s — %s%s" % [str(n.name), str(n.desc), "" if can else "   [%s]" % Wmap.unlock_text(nid)]
+			if nid == Wmap.hot_node() and can:
+				line += "   ▲ KORO BASKINI — sürü yoğun, ganimet bereketli"
 			var recd: Dictionary = (G.meta.data.get("node_rec", {}) as Dictionary).get(nid, {})
 			if not recd.is_empty():
 				line += "   [rekor %d · zafer %d · yenilgi %d]" % [int(recd.get("s", 0)), int(recd.get("w", 0)), int(recd.get("d", 0))]
