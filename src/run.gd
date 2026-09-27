@@ -64,6 +64,13 @@ func hub() -> void:
 	_contract_tick()
 	G.ui.hub_ui(true)
 	_intro_story()
+	# canlı dünya: kampa her dönüşte bir erişilebilir arena KORO BASKINI işaretlenir
+	var cands: Array = []
+	for _n in Wmap.NODES:
+		if str(_n.get("kind", "")) == "arena" and Wmap.can_enter(str(_n.id)):
+			cands.append(str(_n.id))
+	G.meta.data["hot_node"] = str(G.pick(cands)) if not cands.is_empty() else ""
+	G.meta.save()
 
 # ilk kampa inişte tek seferlik açılış sinematiği (seen_story ile korunur)
 func _intro_story() -> void:
@@ -121,6 +128,16 @@ func start_run() -> void:
 		reward_mult *= float(daily.get("rew", 1.0))
 		frag_node = float(node_mods.get("frag", 1.0))
 		stats["daily"] = str(daily.name)
+	# koro baskını: işaretli düğüm tek seferlik yoğun sürü + bereket sunar
+	if str(G.meta.data.get("hot_node", "")) == nid:
+		for mk in {"spawn": 1.25, "frag": 1.5, "elite_t": 0.8, "loot": 1.3}:
+			node_mods[mk] = float(node_mods.get(mk, 1.0)) * {"spawn": 1.25, "frag": 1.5, "elite_t": 0.8, "loot": 1.3}[mk]
+		frag_node = float(node_mods.get("frag", 1.0))
+		reward_mult *= 1.25
+		G.meta.data["hot_node"] = ""
+		G.meta.save()
+		stats["baskin"] = 1
+		G.ui.toast("KORO BASKINI — bu düğümde sürü yoğun akıyor, ganimet bereketli")
 	if bool(node_mods.get("noheal", false)):
 		G.ui.toast("YEMİN DARESİ — şifa küresi düşmez, tek yaşamla sınan")
 	alive = true
