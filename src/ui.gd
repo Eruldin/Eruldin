@@ -2107,6 +2107,9 @@ const WAYLAY := {
 	"konservi": {"name": "KORO KONSERVİ", "col": "e8d060",
 		"sub": "Yol kenarında yarı gömülü bir Koro aktarıcısı hâlâ baskın nabzını yayınlıyor — içindeki diyapazon hâlâ ayarlı. Sızdırılmış frekansı bozarsan işaret başka düğüme kayar; kulak verirsen ritim zihnine yazılır.",
 		"opts": ["FREKANSI BOZ — baskın işareti başka düğüme kayar", "RİTMİ DİNLE — +%15 şansla sahaya in"]},
+	"duel":   {"name": "KORO DÜELLOSU", "col": "ffd700",
+		"sub": "Yolu altın zırhlı bir koro şampiyonu kesiyor — tek başına, mızrağı yere saplı. Seni resmi düelloya çağırıyor; kabul edersen kapıda seni bekler, frag bereketi kabarır.",
+		"opts": ["KABUL ET — düello: şampiyon kapıda bekler, frag ×1.5", "GERİ ÇEKİL — şampiyon yolu açar, onur kalır"]},
 	"muhafiz": {"name": "ESKİ MUHAFIZ", "col": "8fd4ff",
 		"sub": "Yolun taşında tanıdık bir sırt çantası — kafesten kurtardığın yoldaşlardan biri erzak taşıyor. Kampın sınırına kadar sana eşlik eder.",
 		"opts": ["PAYLAŞ — yoldaşın zulasını sana açar", "SELAMLA — ◈20 ve iyi yolculuklar"]},
@@ -2210,6 +2213,13 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				toast("zincir kırıldı — yolcu zulasını verdi, sürü harekete geçti")
 			else:
 				toast("yolcu arkanda kaldı — yolun sessiz")
+		"duel":
+			if idx == 0:
+				G.run.pending_duel = true
+				G.run.frag_node *= 1.5
+				toast("DÜELLO — şampiyon kapıda, frag bereketi kabardı")
+			else:
+				toast("düellodan çekildin — şampiyon yolu açtı")
 		"muhafiz":
 			if idx == 0:
 				match _waylay_npc:

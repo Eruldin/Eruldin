@@ -124,6 +124,7 @@ const DEFS := [
 	{"id": "q_duvar", "giver": "ehnar",   "name": "ESKİ MUHAFIZIN YEMİNİ","desc": "Kalkan kasasını duydum — K-7, benim devriyemin duvar serisiydi. O gövdeyle bir zafer getir; yemin plakasını zırhına işlerim.", "obj": {"type": "hero_won", "id": "k7", "n": 1}, "rew": {"cho": 260, "item": "i_duvar"}},
 	{"id": "q_nodmg", "giver": "ehnar",   "name": "HASARSIZ",            "desc": "Şövalyenin asıl sınavı kılıç değil disiplin — sürü seni hiç değmeden yirmi beş saniye ayakta kal. Pelerini o zaman hak edersin.", "obj": {"type": "nodmg", "n": 25}, "rew": {"cho": 300, "item": "i_hayalet"}, "prereq": "q_duvar"},
 	{"id": "q_orta",  "giver": "ehnar",   "name": "ORTA YEMİN",           "desc": "Her sahanın yarısında bir orta efendi uyanır — altın zırhlı, sahanın en ağırı. Beşini devir; nişanını miğferine takayım.", "obj": {"type": "orta", "n": 5}, "rew": {"cho": 320, "item": "i_efendin"}, "prereq": "q_nodmg"},
+	{"id": "q_duel",  "giver": "ehnar",   "name": "ŞAMPİYON NARASI",      "desc": "Yollarda altın muhafızlar düello çağırır — çoğu savaşçı duymazdan gelir. Üç düello kazan; mızrağının yankısını bileğine sararım.", "obj": {"type": "duel", "n": 3}, "rew": {"cho": 340, "item": "i_duel"}, "prereq": "q_orta"},
 	{"id": "q_karne", "giver": "mina",    "name": "İKSİR KARNESİ",        "desc": "Şifa içecek şişe değil, disiplin ister. Altı iksir iç — karneni ocak defterine işlerim.", "obj": {"type": "iksir", "n": 6}, "rew": {"cho": 140, "item": "i_kemer_par"}, "prereq": "q_sofra"},
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
 	{"id": "q_ziyafet","giver": "mina",   "name": "KURTULUŞ ZİYAFETİ",    "desc": "Büyük sofra büyük malzeme ister. Otuz küre daha — karşılığında damlayı veririm, seni geri getirir.", "obj": {"type": "sifa", "n": 30}, "rew": {"cho": 320, "item": "i_neva"}, "prereq": "q_sofra"},
@@ -513,6 +514,7 @@ static func obj_text(q: Dictionary) -> String:
 		"nodmg":  return "%d sn boyunca vurulma" % need
 		"sunak":  return "%d koro sunağına kan ver" % need
 		"orta":   return "%d orta efendi devir" % need
+		"duel":   return "%d koro düellosu kazan" % need
 		"baskin": return "%d baskın altında zafer" % need
 	return "?"
 
