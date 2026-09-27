@@ -343,7 +343,10 @@ func DOOR_POS() -> Array:
 
 func _place_hazards(depth: int) -> void:
 	var count := 1 + (1 if biome >= 1 else 0) + (1 if depth >= 2 else 0)
-	for i in count:
+	var i := 0
+	var tries := 0
+	while i < count and tries < 14:
+		tries += 1
 		var p := Vector2(rng.randf_range(-380, 380), rng.randf_range(-180, 180))
 		if p.distance_to(spawn_point()) < 200 or p.distance_to(Vector2.ZERO) < 120:
 			continue
@@ -367,13 +370,20 @@ func _place_hazards(depth: int) -> void:
 				G.fx.mk_light(self, p, Px.C("ff7722"), 0.4, 1.5)
 				hazards.append({"pos": p, "r": 52.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(2, 6), "tele": t5, "erupt": 0.0, "col": "ff7722"})
 			6:
-				# Kızıl Çöl: kum girdabı — amber telegraph'lı hortum patlaması
-				var t6 := G.fx.tele_circle(p, 56, 9999.0, Color(1.0, 0.68, 0.3, 0.25))
-				t6.sr.modulate.a = 0.12
-				G.fx.mk_light(self, p, Px.C("ffaa55"), 0.4, 1.5)
-				hazards.append({"pos": p, "r": 56.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(2, 6), "tele": t6, "erupt": 0.0, "col": "ffaa55"})
+				if i == 0:
+					# ilk nokta sabit: amber telegraph'lı hortum patlaması
+					var t6 := G.fx.tele_circle(p, 56, 9999.0, Color(1.0, 0.68, 0.3, 0.25))
+					t6.sr.modulate.a = 0.12
+					G.fx.mk_light(self, p, Px.C("ffaa55"), 0.4, 1.5)
+					hazards.append({"pos": p, "r": 56.0, "dps": 0.0, "kind": "vent", "t": rng.randf_range(2, 6), "tele": t6, "erupt": 0.0, "col": "ffaa55"})
+				else:
+					# gerisi gezici: sürüklenen kum hortumu — alanı dolaşır, içindeyken iter
+					var tt := G.fx.tele_circle(p, 62, 9999.0, Color(1.0, 0.7, 0.35, 0.22))
+					tt.sr.modulate.a = 0.16
+					hazards.append({"pos": p, "r": 62.0, "dps": 8.0, "kind": "surgun", "t": -1.0, "tele": tt, "vel": Vector2.from_angle(rng.randf() * TAU) * 36.0, "sway": rng.randf() * TAU})
 			_:
 				add_hazard(p, 48.0, 14.0, -1.0, Color(0.5, 0.2, 0.8, 0.3))   # void pool
+		i += 1
 
 func add_hazard(p: Vector2, r: float, dps: float, dur: float, col: Color) -> void:
 	var s := Sprite2D.new()
@@ -994,6 +1004,29 @@ func _tick_hazards(d: float) -> void:
 					G.audio.play("explode", 1.6, 0.3)
 				elif is_instance_valid(h.tele.sr):
 					h.tele.sr.modulate.a = 0.5  # warning flare
+		elif h.kind == "surgun":
+			# gezici kum hortumu: alanı süpürür, içindekini döndürerek iter
+			h.sway = float(h.get("sway", 0.0)) + d
+			var v: Vector2 = h.get("vel", Vector2.ZERO)
+			v = v.rotated(sin(float(h.sway) * 0.7) * d * 1.5)
+			h.pos += v * d
+			var b: Rect2 = BOUNDS.grow(-h.r)
+			if h.pos.x < b.position.x or h.pos.x > b.end.x:
+				v.x = -v.x
+				h.pos.x = clampf(h.pos.x, b.position.x, b.end.x)
+			if h.pos.y < b.position.y or h.pos.y > b.end.y:
+				v.y = -v.y
+				h.pos.y = clampf(h.pos.y, b.position.y, b.end.y)
+			h.vel = v
+			if is_instance_valid(h.tele.sr):
+				h.tele.sr.global_position = h.pos
+				h.tele.sr.rotation += d * 1.4
+				h.tele.sr2.global_position = h.pos
+				h.tele.sr2.rotation -= d * 0.9
+			if dist < h.r:
+				G.player.take_hit({"dmg": h.dps * d, "type": G.DamageType.HAZARD, "from": h.pos, "source": self})
+				var away: Vector2 = (G.player.pos - h.pos).normalized()
+				G.player.pos += (away.rotated(PI * 0.5) * 70.0 + away * 30.0) * d
 		elif h.dps > 0 and dist < h.r:
 			G.player.take_hit({"dmg": h.dps * d, "type": G.DamageType.HAZARD, "from": h.pos, "source": self})
 	for i in range(slows.size() - 1, -1, -1):
