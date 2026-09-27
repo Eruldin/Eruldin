@@ -288,7 +288,7 @@ func _comp(m: float) -> int:
 			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK, Enemy.EKind.SIVRI, Enemy.EKind.SIVRI])   # bataklık: konakçılar + kistler + balçıklar + sivri bulutları
 			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ]) # kül ovası: ateşi seven sert öncüler
 			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.AKREP, Enemy.EKind.AKREP, Enemy.EKind.DRONE, Enemy.EKind.KOCBASI])   # kızıl çöl: koşucular + gömülü akrepler + koçbaşları
-			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET])   # kristal çukur: gözler + kistler + sabit nöbetçiler
+			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.DAMARGOL, Enemy.EKind.DAMARGOL, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET])   # kristal çukur: gözler + kistler + damar golemleri + nöbetçiler
 	return G.pick(pool)
 
 func _hp_scale() -> float:

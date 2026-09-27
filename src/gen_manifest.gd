@@ -158,7 +158,7 @@ const FRAMES := {
 	"c_h9": {},
 	"c_k7": {},
 	"husk": {}, "sentinel": {}, "spitter": {}, "turret": {}, "drone": {},
-	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {}, "c_herald": {}, "c_akrep": {}, "c_balcik": {}, "c_gozetmen": {}, "c_copcu": {}, "c_dinamitci": {}, "c_kuzgun": {}, "c_sivri": {}, "c_koc": {},
+	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {}, "c_herald": {}, "c_akrep": {}, "c_balcik": {}, "c_gozetmen": {}, "c_copcu": {}, "c_dinamitci": {}, "c_kuzgun": {}, "c_sivri": {}, "c_koc": {}, "c_gol": {},
 	"rex": {}, "host": {}, "nahum": {}, "tuman": {}, "kirin": {}, "const": {},
 	"anasi": {}, "dev": {}, "kor": {},
 }
@@ -167,7 +167,7 @@ static func frames() -> Dictionary:
 	var d := FRAMES.duplicate()
 	for k in ["husk", "sentinel", "spitter", "turret", "drone"]:
 		d[k] = _en("g_" + k)
-	for k in ["c_varl", "c_cereb", "c_konakci", "c_alfa", "c_herald", "c_akrep", "c_balcik", "c_gozetmen", "c_copcu", "c_dinamitci", "c_kuzgun", "c_sivri", "c_koc"]:
+	for k in ["c_varl", "c_cereb", "c_konakci", "c_alfa", "c_herald", "c_akrep", "c_balcik", "c_gozetmen", "c_copcu", "c_dinamitci", "c_kuzgun", "c_sivri", "c_koc", "c_gol"]:
 		d[k] = _en("g_" + k.trim_prefix("c_"))
 	d["c_carrier"] = _en("g_carrier")
 	for k in ["rex", "host", "nahum", "tuman", "kirin", "const", "anasi", "dev", "kor"]:
