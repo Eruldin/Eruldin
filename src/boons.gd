@@ -106,6 +106,8 @@ const ARCANAS := {
 	"geri":    {"name": "GERİ KAZANIM",      "desc": "Her taslak seçimi +8 parçacık döker — ama -%8 deneyim", "col": "39ff14"},
 	"mahzen":  {"name": "MAHZEN MÜHRÜ",      "desc": "Hazine kasaları 1 dakika erken açılır — ama sürü +%10 kalabalık", "col": "ffd75f"},
 	"metron":  {"name": "METRONOM",          "desc": "+%12 saldırı hızı — ama şasi yeteneği %15 daha yavaş dolar", "col": "8fd4ff"},
+	"ritu":    {"name": "KESİM RİTÜELİ",      "desc": "Katliam serisi penceresi %60 uzar — ama -%6 hareket hızı", "col": "ff7043"},
+	"siper":   {"name": "SİPER NEFESİ",       "desc": "Parry penceresi %40 genişler — ama parry %15 daha yavaş döner", "col": "80d8ff"},
 }
 
 static func apply_arcana(id: String, p: Player) -> void:
@@ -218,6 +220,12 @@ static func apply_arcana(id: String, p: Player) -> void:
 		"metron":
 			p.atk_speed *= 1.12
 			p.skill_max *= 1.15
+		"ritu":
+			G.run.streak_window = 1.6
+			p.speed *= 0.94
+		"siper":
+			p.parry_window *= 1.4
+			p.parry_cd *= 1.15
 
 static func parry_bonus() -> float:
 	return 0.05 if G.run != null and G.run.boon_ids.has("bulwark") else 0.0
