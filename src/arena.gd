@@ -44,6 +44,16 @@ func build_arena(biome_idx: int) -> void:
 		var sp2 := Vector2(rng.randf_range(BOUNDS.position.x + 200, BOUNDS.end.x - 200), rng.randf_range(BOUNDS.position.y + 200, BOUNDS.end.y - 200))
 		if sp2.distance_to(Vector2.ZERO) > 380.0:
 			spawn_special("sunak", sp2)
+	# koro düellosu: yol olayında kabul edilen şampiyon kapıda bekler
+	if G.run != null and G.run.pending_duel:
+		G.run.pending_duel = false
+		var dp := clamp_pos(Vector2(rng.randf_range(BOUNDS.position.x + 260, BOUNDS.end.x - 260), rng.randf_range(BOUNDS.position.y + 260, BOUNDS.end.y - 260)), 60.0)
+		if dp.distance_to(Vector2.ZERO) > 300.0:
+			var de := Enemy.spawn(Enemy.EKind.SENTINEL, dp, true, G.director._hp_scale() * 1.3, G.director._dmg_scale() * 1.1, self)
+			if de != null:
+				de.promote_champ()
+				de.set_meta("duel", true)
+				G.ui.toast("DÜELLO — yolun şampiyonu seni bekliyor")
 	# sinyal feneri: isteğe bağlı ikiz şampiyon savaşı — boss-rush node'unda yok
 	if G.run == null or int(G.run.node_mods.get("rush", 0)) == 0:
 		var fp := Vector2(rng.randf_range(BOUNDS.position.x + 180, BOUNDS.end.x - 180), rng.randf_range(BOUNDS.position.y + 180, BOUNDS.end.y - 180))

@@ -44,6 +44,7 @@ var _skip_waylay := false   # TEKRAR DENE: aynı node'a dönerken yol olayı atl
 var _keep_sefer := false    # sefer zinciri: respawn_to_hub sefer sayacını silmez
 var pending_dmg := 0.0     # YOL OLAYI harabe: girişte alınan enkaz hasarı
 var pending_heal := 0.0    # YOL OLAYI sığınak: girişte dinlenme canı
+var pending_duel := false   # YOL OLAYI düello: kapıda altın şampiyon bekler
 var force_waylay := ""     # probe/debug: yol olayını zorla
 var _first_visit := false   # bu koşu düğüme ilk iniş mi (lore kartı için)
 var daily := {}             # günlük protokol mutasyonu (Wmap.daily)
@@ -199,6 +200,7 @@ func start_run() -> void:
 	pending_ambush = false
 	pending_dmg = 0.0
 	pending_heal = 0.0
+	pending_duel = false
 	stats = {"kills": 0, "rooms": 0}
 	G.meta.data["runs"] += 1
 	# saha keşfi: görevler için distinct biome sayısı birikir
@@ -221,7 +223,7 @@ func start_run() -> void:
 		_skip_waylay = false
 		wk = ""
 	elif wk == "" and randf() < waylay_chance:
-		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi"]
+		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi", "duel"]
 		# kurtarılan yoldaşlar yolda karşına çıkabilir
 		if bool(G.meta.data.get("rescued_mina", false)) or bool(G.meta.data.get("rescued_lena", false)) or bool(G.meta.data.get("rescued_orun", false)):
 			wk_list.append("muhafiz")

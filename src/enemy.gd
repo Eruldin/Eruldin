@@ -993,6 +993,8 @@ func die(h: Dictionary) -> void:
 				G.meta.data["champs"] = int(G.meta.data.get("champs", 0)) + 1
 				if has_meta("midboss"):
 					Quests.tick("orta")
+				if has_meta("duel"):
+					Quests.tick("duel")
 				G.fx.shake(0.3, 0.45)
 			G.run.stats["elite_kills"] = int(G.run.stats.get("elite_kills", 0)) + 1
 			Quests.tick("elites")

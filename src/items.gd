@@ -66,6 +66,7 @@ const DEFS := {
 	"i_hayalet":  {"name": "Hayalet Pelerini","slot": "govde",   "r": 3, "icon": "icn_dash",       "mods": {"spd": 0.08, "armor": 1.5, "ls": 0.02}},
 	"i_sunak":    {"name": "Sunak Damarı",    "slot": "yuzuk2",  "r": 2, "icon": "icn_skull",      "mods": {"ls": 0.03, "dmg": 0.04}},
 	"i_efendin":  {"name": "Efendi Nişanı",   "slot": "kolye",   "r": 3, "icon": "icn_crown",      "mods": {"dmg": 0.06, "armor": 1.0}},
+	"i_duel":     {"name": "Düello Yankısı",  "slot": "kemer",   "r": 3, "icon": "icn_dagger",     "mods": {"dmg": 0.05, "crit": 0.06}},
 	"i_zar":      {"name": "Tegan'ın Zarı",    "slot": "kolye",   "r": 2, "icon": "ico_frag",       "mods": {"frag": 0.08, "crit": 0.04}},
 	"i_barut":    {"name": "Barut Başlığı",    "slot": "bas",     "r": 1, "icon": "icn_mine",      "mods": {"dmg": 0.04, "hp": 12}},
 	"i_vurgu":    {"name": "Vurgu Halkası",    "slot": "yuzuk",   "r": 1, "icon": "icn_dagger",     "mods": {"skill": -0.09, "dmg": 0.03}},
