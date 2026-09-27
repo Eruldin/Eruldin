@@ -2569,6 +2569,23 @@ func records_panel() -> void:
 		kl.custom_minimum_size = Vector2(190, 0)
 		klore.add_child(kl)
 	cols.add_child(klore)
+	# ELİT LANETLERİ — görülmüş affix'lerin kayıt defteri
+	var acol := VBoxContainer.new()
+	acol.add_theme_constant_override("separation", 3)
+	acol.add_child(_lbl("— ELİT LANETLERİ —", Vector2.ZERO, 12, Px.C("b39ddb")))
+	var aseen: Array = G.meta.data.get("affix_seen", [])
+	var ANAMES := {"armored": "ZIRHLI", "volatile": "PATLAYICI", "swift": "HIZLI", "sparked": "ŞİMŞEKLİ",
+		"caller": "ÇAĞIRICI", "vampir": "VAMPİR", "mender": "ŞİFALI", "split": "BÖLÜCÜ",
+		"surucu": "SÜRÜCÜ", "iz": "İZ SÜREN", "warp": "IŞINLANAN", "koruyucu": "KORUYUCU",
+		"yansi": "YANSITICI", "muhur": "MÜHÜRLÜ", "bile": "BİLEYLİ", "kristal": "KRİSTALLİ",
+		"hortlak": "HORTLAK", "dev": "DEV", "cazibe": "CAZİBELİ", "ambarli": "AMBARLI",
+		"kacak": "KAÇAK", "fanatik": "FANATİK", "bozucu": "BOZUCU", "soguk": "AYAZLI"}
+	for aid in ANAMES:
+		var has := aseen.has(aid)
+		acol.add_child(_lbl("%s  %s" % ["◆" if has else "◇", str(ANAMES[aid]) if has else "? ? ?"], Vector2.ZERO, 10,
+			Color(0.8, 0.65, 0.95) if has else Color(0.38, 0.38, 0.48)))
+	acol.add_child(_lbl("%d/%d lanet görüldü" % [aseen.size(), ANAMES.size()], Vector2.ZERO, 9, Color(0.5, 0.5, 0.6)))
+	cols.add_child(acol)
 	# KOŞU GEÇMİŞİ — son 5 koşunun özeti
 	var hcol := VBoxContainer.new()
 	hcol.add_theme_constant_override("separation", 5)
