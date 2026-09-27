@@ -267,6 +267,10 @@ func start_run() -> void:
 	if _skip_waylay:
 		_skip_waylay = false
 		wk = ""
+	elif wk == "" and int(G.meta.data.get("calm_routes", 0)) > 0:
+		# Orun'un sakin güzergâhı — bu seyahat olaysız geçer
+		G.meta.data["calm_routes"] = int(G.meta.data.get("calm_routes", 0)) - 1
+		G.meta.save()
 	elif wk == "" and randf() < waylay_chance:
 		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi", "duel", "ayin", "surungen", "multeci", "mezarci", "kuyu", "ilahi"]
 		# kurtarılan yoldaşlar yolda karşına çıkabilir
