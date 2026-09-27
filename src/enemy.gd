@@ -507,7 +507,7 @@ func _seek(d: float) -> void:
 			dir = -dir
 		elif dist < keep_max:
 			dir = dir.rotated(PI / 2 * sin(Time.get_ticks_msec() * 0.0008))
-	var spd := speed * (1.28 if lead_t > 0.0 else 1.0) * (2.3 if _burrowed else 1.0) * (2.2 if _dive_t > 0.0 else 1.0)
+	var spd := speed * (1.28 if lead_t > 0.0 else 1.0) * (2.3 if _burrowed else 1.0) * (2.2 if _dive_t > 0.0 else 1.0) * (0.5 if chill_t > 0.0 else 1.0)
 	if spd > 0:
 		pos += dir.normalized() * spd * d
 		if is_instance_valid(G.room):

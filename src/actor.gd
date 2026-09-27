@@ -20,6 +20,7 @@ var body: Sprite2D
 var base_color := Color.WHITE
 var poison_t := 0.0
 var poison_dps := 0.0
+var chill_t := 0.0        # >0: chilled — hareket/sürü hızı düşer
 var on_death: Callable
 signal died(actor)
 
@@ -119,6 +120,10 @@ func tick(d: float) -> void:
 			body.modulate = base_color
 	if stagger > 0: stagger -= d
 	if invuln > 0: invuln -= d
+	if chill_t > 0:
+		chill_t -= d
+		if chill_t <= 0 and is_instance_valid(body):
+			body.modulate = base_color
 	if poison_t > 0:
 		poison_t -= d
 		hp -= poison_dps * d

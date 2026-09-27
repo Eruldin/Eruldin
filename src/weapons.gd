@@ -266,6 +266,23 @@ const DEFS := {
 		"b": {"dmg": 13.0, "cd": 0.55, "r": 72.0, "dur": 6.5},
 		"hidden": true,
 	},
+	# alan kontrolü arketipi: ayak dibine çöken dondurucu sis — içindeki sürü
+	# chill_t ile %50 yavaşlar ve küçük çürüme hasarı alır (kite desteği)
+	"sis": {
+		"name": "SİS AĞZI", "icon": "icn_upg_shield", "col": "9fd8ff",
+		"desc": "Yerde çöken dondurucu sis — içindeki sürü yavaşlar ve çürür",
+		"b": {"dmg": 3.0, "cd": 3.4, "r": 88.0, "dur": 3.4},
+		"inc": {"dmg": 1.1, "r": 6.0, "dur": 0.25, "cd": -0.05},
+		"feats": {5: {"r": 20.0}},
+		"evo": "dup", "into": "sis_x",
+		"req": {"kills": 2200},
+	},
+	"sis_x": {
+		"name": "KIRAĞI HÜCRESİ", "icon": "icn_upg_shield", "col": "cfeaff",
+		"desc": "Geniş donma hücresi — içinde duran sürü donakalır",
+		"b": {"dmg": 9.0, "cd": 2.8, "r": 130.0, "dur": 4.6},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -573,6 +590,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"mortar", "mortar_x": _mortar(st, p, w)
 		"volt", "volt_x": _volt(st, p)
 		"trail", "trail_x": _trail(st, p, w)
+		"sis", "sis_x": _sis(st, p, w)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
@@ -879,6 +897,25 @@ static func _trail(st: Dictionary, p: Player, w: Dictionary) -> void:
 	w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0, "wpn": str(w.id), "type": int(G.DamageType.EXPLOSION)})
 	G.audio.play("shoot", 0.5, 0.25)
 
+# sis ağzı: oyuncunun durduğu yere çöken soğuk havuz — "chill" işaretli havuz
+# _tick_pools'ta içindeki sürüye chill_t uygular (yavaşlatma + hafif çürüme)
+static func _sis(st: Dictionary, p: Player, w: Dictionary) -> void:
+	var at := p.pos
+	var node := Sprite2D.new()
+	node.texture = Px.S("circle")
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var r := float(st.r) * p.area_mult
+	node.scale = Vector2.ONE * (r * 2.0) / 72.0
+	node.modulate = Color(0.55, 0.8, 1.0, 0.26)
+	node.position = at
+	node.z_index = -1500
+	if is_instance_valid(G.room):
+		G.room.add_child(node)
+	else:
+		G.game.world.add_child(node)
+	w.pools.append({"pos": at, "r": r, "dps": float(st.dmg) * p.dmg_mult, "t": float(st.dur), "node": node, "acc": 0.0, "wpn": str(w.id), "type": int(G.DamageType.POISON), "chill": true})
+	G.audio.play("shoot", 0.4, 0.3)
+
 static func _dagger(st: Dictionary, p: Player) -> void:
 	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)
 	var tgt := _nearest(p.pos, 500.0)
@@ -1103,4 +1140,8 @@ static func _tick_pools(w: Dictionary, p: Player, d: float) -> void:
 					var h := {"dmg": tick_dmg, "type": int(pl.get("type", G.DamageType.POISON)), "from": pl.pos, "knock": 0.0, "source": p, "wpn": str(pl.get("wpn", ""))}
 					e.take_hit(h)
 					p.on_dealt_damage(e, h)
+					if bool(pl.get("chill", false)):
+						e.chill_t = maxf(e.chill_t, 0.7)
+						if is_instance_valid(e.body):
+							e.body.modulate = Color(0.68, 0.88, 1.12)
 	w.pools = pools
