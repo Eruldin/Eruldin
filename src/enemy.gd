@@ -258,6 +258,9 @@ func _setup_stats(hs: float, ds: float) -> void:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
 		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak", "dev", "cazibe", "ambarli", "kacak"][randi() % 21]
+		# KAÇAK GÜZERGÂHI kozu: elitlerin yarısı kaçak çıkar
+		if is_instance_valid(G.run) and G.run.kacak_plus and G.chance(0.5):
+			affix = "kacak"
 		match affix:
 			"armored":
 				armor += 5.0
