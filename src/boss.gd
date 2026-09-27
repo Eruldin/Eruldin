@@ -4,7 +4,7 @@ extends Enemy
 # Boss controller — own phase/attack state machine on top of Actor.
 # Bosses are spawned by Room; linked twins share a `link` reference.
 
-enum BKind { REX, HOST, NAHUM, TUMAN, KIRIN, CONST, ANASI, DEV }
+enum BKind { REX, HOST, NAHUM, TUMAN, KIRIN, CONST, ANASI, DEV, KOR }
 
 var bkind: int = BKind.REX
 var link: Boss = null
@@ -21,13 +21,15 @@ const NAMES := {
 	BKind.REX: "REX — AVCI FORMU", BKind.HOST: "PROTERIAN KONAKÇI",
 	BKind.NAHUM: "NAHUM", BKind.TUMAN: "TUMAN",
 	BKind.KIRIN: "MEDIKAE KIRIN", BKind.CONST: "ŞANSİYE CONSTANTIN",
-	BKind.ANASI: "KUM ANASI", BKind.DEV: "BATAKLIK DEVİ"
+	BKind.ANASI: "KUM ANASI", BKind.DEV: "BATAKLIK DEVİ",
+	BKind.KOR: "KOR YÜCELTEN"
 }
 const TITLES := {
 	BKind.REX: "Alfa-05 · Düşmüş Kardeş", BKind.HOST: "Sektör 4-Gama'nın Kabusu",
 	BKind.NAHUM: "Zihin Kontrollü Şövalye", BKind.TUMAN: "Zihin Kontrollü Şövalye",
 	BKind.KIRIN: "Baş Cerrah", BKind.CONST: "Aeterna'nın Efendisi",
-	BKind.ANASI: "Kızıl Çöl'ün Kraliçesi", BKind.DEV: "Çürük Bataklık'ın Kalbi"
+	BKind.ANASI: "Kızıl Çöl'ün Kraliçesi", BKind.DEV: "Çürük Bataklık'ın Kalbi",
+	BKind.KOR: "Kül Ovası'nın Son Efendisi"
 }
 const BARKS := {
 	BKind.REX: "Alfa-04... transistörün sustu mu? Benimki hâlâ ŞARKI SÖYLÜYOR.",
@@ -37,12 +39,13 @@ const BARKS := {
 	BKind.KIRIN: "Ah, Alfa-04. Masada daha zarif görünüyordun.",
 	BKind.CONST: "İmparatorluk içeriden çürür, şövalye. Sen de öyle yaptın.",
 	BKind.ANASI: "Kum yutmuş bir şövalye... yavrum sana bayılacak.",
-	BKind.DEV: "Bataklık kimseyi geri vermez. Sen de kalacaksın."
+	BKind.DEV: "Bataklık kimseyi geri vermez. Sen de kalacaksın.",
+	BKind.KOR: "İmparatorluk yandı — ben külünden doğdum. Sen de ona katılacaksın."
 }
 const SPR := {
 	BKind.REX: "rex", BKind.HOST: "host", BKind.NAHUM: "nahum",
 	BKind.TUMAN: "tuman", BKind.KIRIN: "kirin", BKind.CONST: "const",
-	BKind.ANASI: "anasi", BKind.DEV: "dev"
+	BKind.ANASI: "anasi", BKind.DEV: "dev", BKind.KOR: "kor"
 }
 const PHASE_BARKS := {
 	BKind.REX: "REX: ŞARKI YÜKSELİYOR — DAHA HIZLI.",
@@ -53,6 +56,7 @@ const PHASE_BARKS := {
 	BKind.CONST: "CONSTANTIN: kalkan dengesiz.",
 	BKind.ANASI: "KUM ANASI: kum ayağa kalkıyor.",
 	BKind.DEV: "DEV: çamur ayağa kalkıyor — bataklık aç.",
+	BKind.KOR: "KOR: ova ikinci kez yanıyor — bu kez seninle.",
 }
 # faz-2'de portreli hikaye kartı — boss'un yıkımı içeriden görünür
 const P2_LINES := {
@@ -64,6 +68,7 @@ const P2_LINES := {
 	BKind.CONST: "Aeterna'yı izledin mi? Krallıklar işte böyle düşer.",
 	BKind.ANASI: "Yavrularım... ziyafet zamanı. Ananız açlıktan ölüyor.",
 	BKind.DEV: "Bin yıldır buradaydım — sen bir gün bile dayanamazsın.",
+	BKind.KOR: "Kül unutmaz, şövalye. Beni ancak kül anlar.",
 }
 
 # ölüm anı kartı: ikiz boss'larda ancak ikincisi düşünce çalınır
@@ -76,6 +81,7 @@ const DEATH_LINES := {
 	BKind.CONST: "Constantin düştü — protokolün son çanı sustu.",
 	BKind.ANASI: "Kum Anası kırıldı. Kızıl Çöl'ün kumu ilk kez sessiz.",
 	BKind.DEV: "Dev çöktü — bataklık ilk kez birini geri verdi.",
+	BKind.KOR: "Taç düştü, kül dağıldı. Ova yüz yıl sonra ilk kez soğudu.",
 }
 
 static func spawn_boss(p_kind: int, p_pos: Vector2, parent: Node, hp_scale := 1.0) -> Boss:
@@ -128,6 +134,11 @@ func _boss_stats(hs: float) -> void:
 			windup_t = 0.7; recover_t = 0.8; attack_cd = 1.7
 			knock_resist = 60
 			kind = EKind.KONAKCI
+		BKind.KOR:
+			max_hp = 480; speed = 88; touch_dmg = 14; radius = 18; hit_radius = 24
+			windup_t = 0.6; recover_t = 0.65; attack_cd = 1.4
+			knock_resist = 30
+			kind = EKind.SENTINEL
 	max_hp *= hs
 	hp = max_hp
 	actor_name = NAMES[bkind]
@@ -142,7 +153,7 @@ func _make_body() -> void:
 	add_child(body)
 	_load_frames(SPR[bkind], 4.0)
 	Px.fit(body, 112.0 if bkind == BKind.DEV else (108.0 if bkind == BKind.REX or bkind == BKind.HOST or bkind == BKind.ANASI else 94.0))
-	var lc := Px.C("ff2222") if bkind == BKind.REX else (Px.C("00E676") if bkind == BKind.HOST or bkind == BKind.TUMAN else (Px.C("e8a050") if bkind == BKind.ANASI else (Px.C("4ad06a") if bkind == BKind.DEV else Px.C("c9a227"))))
+	var lc := Px.C("ff2222") if bkind == BKind.REX else (Px.C("00E676") if bkind == BKind.HOST or bkind == BKind.TUMAN else (Px.C("e8a050") if bkind == BKind.ANASI else (Px.C("4ad06a") if bkind == BKind.DEV else (Px.C("ff7722") if bkind == BKind.KOR else Px.C("c9a227")))))
 	_light = G.fx.mk_light(self, Vector2(0, -30), lc, 0.5, 2.0)
 	G.fx.burst(pos + Vector2(0, -10), Px.C("8B0000"), 24, 160.0, 5.0, 0.7)
 
@@ -226,6 +237,7 @@ func _want_range() -> float:
 		BKind.CONST: return 240.0
 		BKind.ANASI: return 72.0
 		BKind.DEV: return 78.0
+		BKind.KOR: return 200.0
 	return 100.0
 
 func _pick_attack() -> void:
@@ -239,6 +251,7 @@ func _pick_attack() -> void:
 		BKind.CONST: _const_attack()
 		BKind.ANASI: _anasi_attack()
 		BKind.DEV: _dev_attack()
+		BKind.KOR: _kor_attack()
 
 func _on_phase2() -> void:
 	G.audio.play("roar", 1.0, 0.8)
@@ -669,6 +682,69 @@ func _dev_quake() -> void:
 	for i in 3:
 		var hp := pos + Vector2(G.rf(-160, 160), G.rf(-160, 160))
 		G.room.add_hazard(hp, 36.0, 7.0, 5.0, Color(0.25, 0.9, 0.3, 0.3))
+	_busy = false
+
+# ---------- KOR (kül efendisi — menzilli caster) ----------
+func _kor_attack() -> void:
+	var roll := G.rf(0, 1)
+	var adds := 0
+	for e in G.enemies:
+		if is_instance_valid(e) and not e.dead and e != self and not (e is Boss):
+			adds += 1
+	if phase == 2 and roll < 0.24:
+		_atk_t = 2.3
+		_kor_nova()
+	elif roll < 0.3 and adds < 3:
+		_atk_t = 2.5
+		_kor_summon()
+	elif roll < 0.68:
+		_atk_t = 2.0 if phase == 1 else 1.5
+		_kor_meteor()
+	else:
+		_atk_t = 1.7
+		_kor_lance()
+
+func _kor_meteor() -> void:
+	for i in 5:
+		var target := G.player.pos + Vector2(G.rf(-110, 110), G.rf(-90, 90))
+		var t := G.fx.tele_circle(target, 46.0, 0.85, Color(1, 0.4, 0.1, 0.3))
+		await _wait(0.42)
+		G.fx.kill_tele(t)
+		G.fx.burst(target, Px.C("ff7722"), 18, 180.0, 6.0, 0.55)
+		G.fx.shake(0.15, 0.2)
+		G.audio.play("explode", 1.3, 0.5)
+		G.room.add_hazard(target, 46.0, 8.0, 3.5, Color(1, 0.45, 0.1, 0.3))
+	_busy = false
+
+func _kor_lance() -> void:
+	await _wait(0.25)
+	for i in 3:
+		var dir := (G.player.pos - pos).normalized().rotated(deg_to_rad(i * 18.0 - 18.0))
+		_shoot_dir(dir, 320.0, 10.0, Px.C("ff7722"), 8.0)
+		await _wait(0.09)
+	G.audio.play("shoot", 1.1, 0.7)
+	_busy = false
+
+func _kor_summon() -> void:
+	G.audio.play("roar", 1.1, 0.55)
+	G.fx.burst(pos + Vector2(0, -14), Px.C("ff7722"), 24, 150.0, 5.0, 0.6)
+	for i in 2:
+		var off := Vector2(G.rf(-100, 100), G.rf(-80, 80))
+		var e := Enemy.spawn(EKind.MUHFIZ, G.room.clamp_pos(pos + off, 14.0), false, G.run.hp_scale() * 0.7, G.run.dmg_scale(), self)
+		e.set_meta("add", true)
+	await _wait(0.5)
+	_busy = false
+
+func _kor_nova() -> void:
+	var t := G.fx.tele_ring(pos, 80.0, 0.9, Color(1, 0.45, 0.1, 0.5))
+	await _wait(0.9)
+	G.fx.kill_tele(t)
+	G.audio.play("explode", 0.8)
+	G.fx.shake(0.35, 0.4)
+	for i in 18:
+		var dir := Vector2.RIGHT.rotated(TAU * i / 18.0)
+		_shoot_dir(dir, 230.0, 12.0, Px.C("ff7722"), 9.0)
+	G.room.add_hazard(pos, 55.0, 9.0, 4.0, Color(1, 0.45, 0.1, 0.32))
 	_busy = false
 
 # ---------- shared ----------
