@@ -98,6 +98,7 @@ const DEFS := [
 	{"id": "q_kayit", "giver": "neva",    "name": "SEKİZ KÜTÜK",        "desc": "Saha eski defterini dağıttı — sekiz kütük var, hepsi sende toplanırsa sessiz çizmeyi söylerim.", "obj": {"type": "kayit", "n": 8}, "rew": {"cho": 200, "item": "i_kozcizme"}, "prereq": "q_vatika"},
 	{"id": "q_nuve",  "giver": "ahusk",   "name": "DAMARIN ÇEYİZİ",    "desc": "Damar kıran iyi beslenir — on damar kır, nüve halkasını takarım.", "obj": {"type": "vein", "n": 10}, "rew": {"cho": 220, "item": "i_nuve"}, "prereq": "q_balcik"},
 	{"id": "q_govde","giver": "david",   "name": "HER GÖVDE BİR DERS",  "desc": "Ely'nin kasası tek başına kovanı yormaz — her şasi ayrı ders. Üç farklı gövdeyle zafer kazan; hangi şasiyle dönersen dön, seni bekleyen şeyi çizim yapayım.", "obj": {"type": "heros", "n": 3}, "rew": {"cho": 300, "item": "i_ikiz"}, "prereq": "q_gez"},
+	{"id": "q_sefer", "giver": "david",   "name": "SEFER KOMUTANI",      "desc": "Zafer tek düğümle bitmez — zaferin sıcağında bir sonraki düğüme yürümek seferdir. Üç ayaklık bir zincir kur; müfrete geleneği senin adınla yazılır.", "obj": {"type": "sefer", "n": 3}, "rew": {"cho": 340, "rep": 4}, "prereq": "q_anil"},
 	{"id": "q_anit",  "giver": "ehnar",   "name": "ANIT NÖBETİ",         "desc": "Kül tepesinde bir anıt var — kovan oraya saygı duruşuna geliyor. Tek koşuda 500 kesim yaparsan girişi gösteririm.", "obj": {"type": "kills", "n": 500}, "rew": {"cho": 200, "node": "koranit"}, "prereq": "q_kul"},
 	{"id": "q_pence", "giver": "saphire", "name": "KOR PENCELER",        "desc": "Külde yürüyen askerler var — pençeleri hâlâ kor gibi yanıyor. On iki Kor Pençe kes; külünden bir kolye döveyim.", "obj": {"type": "kind", "k": "Kor Pençe", "n": 12}, "rew": {"cho": 200, "item": "i_korkul"}, "prereq": "q_anit"},
 	{"id": "q_kor",   "giver": "ehnar",   "name": "KÜLLERİN EFENDİSİ",  "desc": "Kül Ovası'nda son efendi oturuyor — imparatorluğunun tahtı hâlâ yanıyor. Kor Yücelten'i düşür; tacını sana miğfer yaparım.", "obj": {"type": "boss", "k": "kor"}, "rew": {"cho": 240, "item": "i_kortac"}, "prereq": "q_kul"},
@@ -284,7 +285,7 @@ static func daily_check() -> void:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer"]:
 		done.append_array(tick(type))
 	daily_check()
 	for q in DEFS:
@@ -351,6 +352,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"quests":  cur = _claimed_count()
 			"item":    cur = _item_count(str(o.get("id", "")))
 			"champ":   cur = int(G.run.stats.get("champ_kills", 0))
+			"sefer":   cur = int(G.run.stats.get("sefer", 0))
 			"kayit":   cur = (G.meta.data.get("lore", []) as Array).size()
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
@@ -473,6 +475,7 @@ static func obj_text(q: Dictionary) -> String:
 		"kayit":  return "%d veri kütüğü bul" % need
 		"champ":  return "%d şampiyon elit kes" % need
 		"won_node": return "%s fethi" % str(Wmap.node(str(o.get("id", ""))).get("name", str(o.get("id", ""))))
+		"sefer":  return "%d ayaklık sefer zinciri" % need
 		"over":   return "%d aşırı yük kullan" % need
 		"keg":    return "%d kesimi fıçıya saydır" % need
 		"geo":    return "%d damar jeotu kır" % need

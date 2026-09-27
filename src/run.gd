@@ -451,6 +451,11 @@ func _write_last_run(win: bool) -> void:
 		G.meta.data["best_score"] = score
 		stats["new_record"] = true
 		G.meta.save()
+	# sefer zinciri rekoru — koşu sonunda sayaç değeri durur
+	if int(stats.get("sefer", 0)) > int(G.meta.data.get("sefer_best", 0)):
+		G.meta.data["sefer_best"] = int(stats.get("sefer", 0))
+		stats["sefer_record"] = true
+		G.meta.save()
 	Quests.tick_all()
 	# silah ustalığı — wdmg_* koşu hasarları meta'ya birikir; 25K katı başına kalıcı +%4
 	var wm: Dictionary = G.meta.data.get("wep_mastery", {})
