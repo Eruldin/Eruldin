@@ -154,6 +154,10 @@ static func _unlocked() -> Array:
 static func hot_node() -> String:
 	return str(G.meta.data.get("hot_node", ""))
 
+# ikinci canlı işaret: sessiz verim düğümü — baskınsız frag/loot bereketi
+static func yield_node() -> String:
+	return str(G.meta.data.get("yield_node", ""))
+
 # is this node reachable? "open" / "node" (quest-unlocked) / "boss <id>"
 static func can_enter(id: String) -> bool:
 	var n := node(id)
