@@ -300,6 +300,23 @@ const DEFS := {
 		"b": {"dmg": 36.0, "cd": 1.0, "reach": 265.0, "arc": 58.0},
 		"hidden": true,
 	},
+	# ağır çekic arketipi: hedef noktaya telegraph + gecikmeli alan darbesi —
+	# yavaş ama sürüyü kırar; evo sürümü vurduğu yerde parçacık damarı açar
+	"cekic": {
+		"name": "KRİSTAL ÇEKİÇ", "icon": "icn_mine", "col": "4dd0e1",
+		"desc": "İşaretli noktaya gecikmeli ağır darbe — geniş alan, ağır savurma",
+		"b": {"dmg": 26.0, "cd": 2.8, "r": 74.0, "reach": 130.0, "knock": 18.0},
+		"inc": {"dmg": 6.5, "r": 4.0, "cd": -0.08},
+		"feats": {5: {"r": 16.0}, 8: {"dmg": 14.0}},
+		"evo": "plating", "into": "cekic_x",
+		"req": {"bosses": 4},
+	},
+	"cekic_x": {
+		"name": "DAMAR KIRICI", "icon": "icn_mine", "col": "80ffd4",
+		"desc": "Kuşatma çekici — vurduğu yerde damar kırılır, parçacık saçar",
+		"b": {"dmg": 54.0, "cd": 2.3, "r": 115.0, "reach": 150.0, "knock": 24.0, "frag": 3.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -609,6 +626,41 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"trail", "trail_x": _trail(st, p, w)
 		"sis", "sis_x": _sis(st, p, w)
 		"kirbac", "kirbac_x": _whip(st, p, w, wid)
+		"cekic", "cekic_x": _cekic(st, p)
+
+# çekic arketipi: işaretli noktaya gecikmeli ağır darbe — telegraph halkası
+# görünür, çekiç inince alan içindeki herkes dağılır; evo sürümü damar kırıp
+# parçacık saçar (çukur temalı madenci silahı)
+static func _cekic(st: Dictionary, p: Player) -> void:
+	var tgt := _nearest(p.pos, 460.0)
+	var dir := p.aim_dir
+	if tgt != null:
+		dir = (tgt.pos - p.pos).normalized()
+	elif p.move_dir.length_squared() > 0.01:
+		dir = p.move_dir.normalized()
+	var at := p.pos + dir * float(st.reach) * p.area_mult
+	var r := float(st.r) * p.area_mult
+	G.fx.tele_circle(at, r, 0.55, Color(0.3, 0.85, 0.9, 0.4))
+	var p2 := p
+	var st2 := st
+	p.get_tree().create_timer(0.55, false).timeout.connect(func():
+		if not is_instance_valid(p2) or p2.dead:
+			return
+		var dmg := float(st2.dmg) * p2.dmg_mult
+		for e in G.enemies.duplicate():
+			if not is_instance_valid(e) or e.dead:
+				continue
+			if at.distance_to(e.pos) < r + e.hit_radius:
+				var crit := G.chance(p2.crit_ch)
+				var h := {"dmg": dmg * (p2.crit_mult if crit else 1.0), "type": G.DamageType.MELEE, "from": at, "knock": float(st2.knock), "stagger": 0.6, "source": p2, "crit": crit, "wpn": _fwpn}
+				e.take_hit(h)
+				p2.on_dealt_damage(e, h)
+		G.fx.burst(at, Px.C("4dd0e1"), 18, 180.0, 5.0, 0.4)
+		G.fx.shake(0.25, 0.3)
+		G.audio.play("explode", 0.8, 0.5)
+		var fr := int(st2.get("frag", 0.0))
+		if fr > 0 and is_instance_valid(G.run):
+			G.run.drop_fragments(at, fr))
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
