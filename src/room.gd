@@ -803,19 +803,23 @@ func _tick_motes(d: float) -> void:
 		if s.position.y < -H * 0.5 - 40: s.position.y = H * 0.5 + 40
 		if s.position.y > H * 0.5 + 40: s.position.y = -H * 0.5 - 40
 
-# Kizil Col: ara ara kum firtinasi eser — tum sahayi tek yone iter,
-# moteler siddetlenir. Ruzgari okuyup pozisyon korumak gerekir.
+# Kizil Col: ara ara kum firtinasi eser — tum sahayi tek yone iter.
+# Donmus Catlak: ayni ritimde DONMUS BORA iner — daha zayif iter ama
+# boranin altindaki suru chill alir (yaris yariya yavaslar); pencereyi
+# kesim icin kullanmak bolgenin taktiigidir.
 func _tick_storm(d: float) -> void:
-	if is_hub or biome != 6:
+	if is_hub or (biome != 6 and biome != 8):
 		return
 	if storm_t > 0.0:
 		storm_t -= d
-		var push := storm_dir * 46.0 * d
+		var push := storm_dir * (46.0 if biome == 6 else 30.0) * d
 		if G.player != null and not G.player.dead:
 			G.player.pos += push
 		for e in G.enemies:
 			if is_instance_valid(e) and not e.dead:
 				e.pos += push * 1.25
+				if biome == 8:
+					e.chill_t = maxf(e.chill_t, 0.5)
 		for m in motes:
 			m.s.position += storm_dir * 200.0 * d
 		if storm_t <= 0.0:
@@ -825,7 +829,10 @@ func _tick_storm(d: float) -> void:
 	if storm_cd <= 0.0:
 		storm_t = 7.0
 		storm_dir = Vector2.RIGHT.rotated(rng.randf_range(-0.45, 0.45) + (PI if rng.randf() < 0.5 else 0.0))
-		G.ui.toast("KUM FIRTINASI — ruzgara karsi koy")
+		if biome == 8:
+			G.ui.toast("DONMUS BORA — suru donakalir")
+		else:
+			G.ui.toast("KUM FIRTINASI — ruzgara karsi koy")
 		G.audio.play("dash", 0.5, 0.8)
 
 # HoT-style side objective: stand by the resonance cluster to charge it;

@@ -938,7 +938,10 @@ func die(h: Dictionary) -> void:
 		G.run.on_kill(elite)
 		Quests.tick("kind", kn)
 		if is_instance_valid(G.room) and float(G.room.storm_t) > 0.0:
-			Quests.tick("firtina")   # kum firtinasi sirasinda kesim
+			if G.room.biome == 8:
+				Quests.tick("bora")      # donmus bora altinda kesim
+			else:
+				Quests.tick("firtina")   # kum firtinasi sirasinda kesim
 		# zehir tuzagi: gaz havuzunun icinde dusenler sayilir
 		if is_instance_valid(G.room):
 			for hz in G.room.hazards:
