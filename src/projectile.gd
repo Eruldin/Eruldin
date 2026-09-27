@@ -18,6 +18,7 @@ var piercing := false
 var aoe := 0.0              # >0: lobbed shot, explodes in an area on impact/expiry
 var life0 := 0.0            # lobbed shots: initial life, drives the fake arc
 var boomerang := false      # returns to the player at half-life, piercing all the way
+var both_sides := false     # dinamitçi fıçısı: AoE patlamada sürü de vurulur
 var wpn := ""               # weapon id that fired it — feeds the per-weapon damage tally
 var _boom_flip := false
 var col := Color.WHITE
@@ -132,6 +133,10 @@ func _impact() -> void:
 		var p := G.player
 		if p != null and not p.dead and global_position.distance_to(p.pos) < aoe + p.hit_radius:
 			p.take_hit({"dmg": dmg, "type": dmg_type, "from": global_position, "knock": knock + 4.0, "stagger": stag, "source": source})
+		if both_sides:
+			for e in G.enemies.duplicate():
+				if e is Enemy and not e.dead and global_position.distance_to(e.pos) < aoe:
+					e.take_hit({"dmg": dmg * 1.4, "type": dmg_type, "from": global_position, "knock": 12.0, "source": null})
 		G.fx.burst(global_position, col, 22, 200.0, 6.0, 0.45)
 		G.fx.shake(0.12, 0.15)
 		G.audio.play("explode", 1.0, 0.5)

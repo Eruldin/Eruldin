@@ -275,7 +275,7 @@ func _comp(m: float) -> int:
 	# Wreckage swarms with husks/varls, Aeterna fields its elite dead
 	if m >= 2.0:
 		match biome:
-			1: pool.append_array([Enemy.EKind.SPITTER, Enemy.EKind.DRONE])
+			1: pool.append_array([Enemy.EKind.SPITTER, Enemy.EKind.DRONE, Enemy.EKind.DINAMITCI, Enemy.EKind.DINAMITCI])   # maden: barutçu tayfler
 			2: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.HUSK, Enemy.EKind.COPCU, Enemy.EKind.COPCU])   # enkaz: kristal yutan çöpçüler
 			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA, Enemy.EKind.GOZETMEN])   # kule: keskin nişancı gözetmenler
 			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK])   # bataklık: konakçılar + kistler + yenilenen balçıklar
