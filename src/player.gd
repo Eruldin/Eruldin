@@ -122,6 +122,7 @@ func init() -> void:
 	skill_cd = 0.0
 	_haste_t = 0.0
 	_haste_mult = 1.0
+	chill_t = 0.0
 	_apply_hero()
 	super.init()
 	_apply_stance()
@@ -217,7 +218,7 @@ func _move(d: float) -> void:
 	if _dash_t > 0:
 		pos += _dash_dir * 560.0 * d
 		return
-	var sp := speed * _attack_slow * (G.room.slow_at(pos) if is_instance_valid(G.room) else 1.0) * (1.05 if stealth_t > 0 else 1.0) * (_haste_mult if _haste_t > 0 else 1.0)
+	var sp := speed * _attack_slow * (G.room.slow_at(pos) if is_instance_valid(G.room) else 1.0) * (1.05 if stealth_t > 0 else 1.0) * (_haste_mult if _haste_t > 0 else 1.0) * (0.72 if chill_t > 0.0 else 1.0)
 	# Seri Ritim lütfu: katliam serisi x30 üstünde hız patlaması
 	if has_meta("streak_spd") and G.run != null and int(G.run.streak) >= 30:
 		sp *= 1.30
@@ -687,6 +688,11 @@ func take_hit(h: Dictionary) -> void:
 		G.fx.float_text(pos + Vector2(0, -48), "BOZULDU!", Px.C("ce93d8"), 0.95)
 		G.fx.burst(pos + Vector2(0, -14), Px.C("ce93d8"), 12, 140.0, 3.5, 0.3)
 		G.audio.play("hurt", 0.7)
+	# AYAZLI elit: vuruşu dondurur — kısa süreli hareket yavaşlaması
+	if src is Actor and str(src.get("affix")) == "soguk":
+		chill_t = maxf(chill_t, 1.6)
+		G.fx.float_text(pos + Vector2(0, -62), "DONAKALDIN!", Px.C("bfe8ff"), 0.9)
+		G.fx.burst(pos + Vector2(0, -10), Px.C("bfe8ff"), 10, 120.0, 3.0, 0.3)
 	set_flash()
 	_anim = ""
 	_set_anim("hurt", 6.0)
