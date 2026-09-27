@@ -226,6 +226,7 @@ func achievements() -> Array:
 		{"name": "JEOT USTASI", "desc": "5 damar jeotu kır", "done": int(data.get("geodes", 0)) >= 5, "rew": 180},
 		{"name": "BASKIN AVCISI", "desc": "koro baskını altında 3 zafer kazan", "done": int(data.get("baskin_wins", 0)) >= 3, "rew": 220},
 		{"name": "KAFES KIRAN", "desc": "üç kafesi de kır — Mina, Lena ve Orun kampta", "done": bool(data.get("rescued_mina", false)) and bool(data.get("rescued_lena", false)) and bool(data.get("rescued_orun", false)), "rew": 280},
+		{"name": "DÖRT MÜHÜR", "desc": "dört mühürlü kasayı da yağmala", "done": ["kervansaray", "madenkasa", "korkasa", "buzkasa"].all(func(id: String) -> bool: return (data.get("won_nodes", []) as Array).has(id)), "rew": 350},
 		{"name": "SÖZLEŞME USTASI", "desc": "Ehnar'da 8 sözleşme tuttur", "done": int(data.get("contracts_done", 0)) >= 8, "rew": 200},
 		{"name": "KAMPIN SESİ", "desc": "kamp itibarın KAHRAMAN kademesine ulaşsın (40 puan)", "done": int(data.get("rep", 0)) >= 40, "rew": 250},
 		{"name": "MASA KIRANI", "desc": "Tegan'da 6 bahis tuttur", "done": int(data.get("bets_won", 0)) >= 6, "rew": 180},
@@ -266,6 +267,7 @@ const TITLES := [
 	{"id": "efkol",   "name": "EFENDİ AVISI",     "src": "EFENDİ KOLEKSİYONCUSU"},
 	{"id": "esya",    "name": "ANTİKACI",         "src": "EŞYA KOLEKSİYONCUSU"},
 	{"id": "kafes",   "name": "KAFES KIRAN",       "src": "KAFES KIRAN"},
+	{"id": "dortkasa","name": "HAZİNE YÜRÜYEN",    "src": "DÖRT MÜHÜR"},
 ]
 
 func title_open(tid: String) -> bool:
