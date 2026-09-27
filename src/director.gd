@@ -265,6 +265,9 @@ func _comp(m: float) -> int:
 	# hamal taşıyıcı: nadir yük düşürücü — 4:30'dan sonra havuza sızar
 	if m >= 4.5:
 		pool.append(Enemy.EKind.CARRIER)
+	# koro sözcüsü: 5:30'dan sonra destek caster'ı — çanı sürüyü hızlandırır
+	if m >= 5.5:
+		pool.append(Enemy.EKind.HERALD)
 	# each sector leans on its own brood: Simithar rains fire (spitters/drones),
 	# Wreckage swarms with husks/varls, Aeterna fields its elite dead
 	if m >= 2.0:

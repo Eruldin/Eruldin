@@ -4,11 +4,11 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD }
 
 # tür-bazlı ölüm patlaması rengi — kesimden kimin öldüğü görsel okunur
-const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff"}
-const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı"}
+const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060"}
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
@@ -16,7 +16,7 @@ enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 const KIND_SET := {
 	EKind.VARL: "c_varl", EKind.CEREB: "c_cereb",
 	EKind.KONAKCI: "c_konakci", EKind.ALFA: "c_alfa", EKind.CARRIER: "c_carrier",
-	EKind.MUHFIZ: "c_alfa",
+	EKind.MUHFIZ: "c_alfa", EKind.HERALD: "c_herald",
 }
 
 # tür lore'u — Zirkon'un kayıtlarında kesim sayısının altında gösterilir
@@ -32,6 +32,7 @@ const KIND_LORE := {
 	EKind.ALFA: "Kovanın öncü şövalyesi — ilk çizgiyi o kurar, son çizgide o durur.",
 	EKind.CARRIER: "Hamal — sırtındaki çuvalda ganimet taşır; öldür, payını al.",
 	EKind.MUHFIZ: "Eski alayın kalkanı — önden vurulmaz, yandan çözülür.",
+	EKind.HERALD: "Koro'nun ses taşıyıcısı — çanı çaldıkça sürü hızlanır; önce onu kes.",
 }
 
 var kind: int = EKind.HUSK
@@ -45,6 +46,7 @@ var _lead_pulse := 0.0  # sürücü elit: hız aurası sayacı
 var lead_t := 0.0       # bu düşmanın üstündeki kalan sürücü buffı
 var _trail_t := 0.0     # iz süren elit: kor izi bırakma sayacı
 var _warp_t := 0.0      # ışınlanan elit: teleport sayacı
+var _herald_t := 3.0    # koro sözcüsü: çan aurası sayacı
 var _sum_n := 0     # bu elitin saldığı döl sayısı
 var speed := 100.0
 var touch_dmg := 10.0
@@ -144,6 +146,11 @@ func _setup_stats(hs: float, ds: float) -> void:
 			windup_t = 0.65; recover_t = 0.85; attack_cd = 1.5; touch_r = 46
 			actor_name = "Kalkan Muhafızı"
 			knock_resist = 85.0
+		EKind.HERALD:
+			max_hp = 70; speed = 74; touch_dmg = 6; radius = 15; hit_radius = 17
+			windup_t = 0.6; recover_t = 1.0; attack_cd = 3.0; keep_min = 230; keep_max = 360
+			proj_spd = 190; proj_dmg = 12; burst_n = 1
+			actor_name = "Koro Sözcüsü"
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
@@ -331,6 +338,19 @@ func _process(_d: float) -> void:
 					ln += 1
 			if ln >= 3:
 				G.fx.tele_ring(pos, 220.0, 0.45, Color(0.75, 0.8, 0.2, 0.35))
+	# koro sözcüsü: çan aurası — yakın sürüye hız yükler, arka hattan tollar
+	if kind == EKind.HERALD and _st == St.SEEK:
+		_herald_t -= d
+		if _herald_t <= 0.0:
+			_herald_t = 5.5
+			var bn := 0
+			for e in G.enemies:
+				if e != self and is_instance_valid(e) and not e.dead and pos.distance_to(e.pos) < 250.0:
+					e.lead_t = maxf(e.lead_t, 2.4)
+					bn += 1
+			if bn >= 2:
+				G.fx.tele_ring(pos, 250.0, 0.5, Color(1.0, 0.85, 0.35, 0.35))
+				G.audio.play("boon", 0.7, 0.3)
 	# iz süren elit: ardında kısa ömürlü kor birikintileri bırakır — pozisyon baskısı
 	if affix == "iz" and _st == St.SEEK:
 		_trail_t -= d
@@ -391,7 +411,7 @@ func _seek(d: float) -> void:
 		match kind:
 			EKind.TURRET:
 				if dist < 400.0: _begin_windup()
-			EKind.SPITTER, EKind.CEREB:
+			EKind.SPITTER, EKind.CEREB, EKind.HERALD:
 				if dist < keep_max + 40.0: _begin_windup()
 			EKind.DRONE:
 				if dist < 55.0: _begin_windup()
@@ -463,6 +483,8 @@ func _do_strike() -> void:
 			_shoot_at(G.player.pos, proj_spd, proj_dmg, Px.C("39ff14"), 9.0)
 		EKind.CEREB:
 			_lob(G.player.pos)
+		EKind.HERALD:
+			_shoot_at(G.player.pos, proj_spd, proj_dmg, Px.C("e8d060"), 9.0)
 		EKind.TURRET:
 			_burst_co()
 		EKind.DRONE:
