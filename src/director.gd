@@ -407,7 +407,23 @@ func _surge(m: float) -> void:
 		shapes.append("alay")
 	if m >= 5.5:
 		shapes.append("nakliye")
+	if m >= 6.0:
+		shapes.append("kiskac")
 	match shapes[randi() % shapes.size()]:
+		"kiskac":
+			# koro kıskacı — iki karşı duvardan aynı anda akan varl dalgası
+			G.ui.toast("KORO KISKACI — iki yandan geliyorlar!")
+			var ang4 := G.rf(0.0, TAU)
+			var axis := Vector2.from_angle(ang4)
+			var perp4 := axis.orthogonal()
+			for side in [-1.0, 1.0]:
+				var base4: Vector2 = G.player.pos + axis * side * 780.0
+				for i in n / 2:
+					var p4: Vector2 = base4 + perp4 * G.rf(-380.0, 380.0)
+					p4 = G.room.clamp_pos(p4, 20.0)
+					var e4 := Enemy.spawn(Enemy.EKind.VARL, p4, false, _hp_scale() * 0.75, _dmg_scale(), G.room)
+					if e4 != null:
+						e4.speed *= 1.3
 		"nakliye":
 			# koro nakliyesi — muhafız kordonuyla sahayı boydan boya geçen hamal
 			# konvoyu; hamallar çıkışa varmadan düşürülmezse ganimet kaçar
