@@ -183,6 +183,12 @@ func _enter_arena() -> void:
 		G.meta.save()
 		G.player.xp_mult *= 1.15
 		G.ui.toast("NEVA'NIN ŞARKISI — bu koşuda +%15 XP")
+	if bool(G.meta.data.get("mina_meal", false)):
+		G.meta.data["mina_meal"] = false
+		G.meta.save()
+		G.player.set_meta("heal_luck", true)
+		G.player.heal(25.0)
+		G.ui.toast("MINA'NIN YEMEĞİ — karnın tok, küreler bol düşecek")
 	if bool(G.meta.data.get("hired", false)):
 		G.meta.data["hired"] = false
 		G.meta.save()

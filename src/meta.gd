@@ -76,6 +76,8 @@ var data := {
 	"shop_stock": [],      # Saphire'in tezgâh stoku — koşu başına yenilenir
 	"shop_gen": -1,        # stok üretimindeki koşu sayacı
 	"neva_song": false,    # Neva'nın şarkısı — sonraki koşuda +%15 XP
+	"rescued_mina": false, # sahada kafesten kurtarılan Aşçı Mina — kampa katılır
+	"mina_meal": false,    # Mina'nın yemeği — sonraki koşuda şifa küresi şansı ×2
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
 }
 
