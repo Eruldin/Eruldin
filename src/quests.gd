@@ -128,6 +128,7 @@ const DEFS := [
 	{"id": "q_orun3", "giver": "orun",   "name": "YOL YOLDAŞI",           "desc": "Kafesten çıkanlar yollarda erzak taşır — kulakları bende ama elleri sende. Üç yoldaş karşılaşması geçir; onların sana bıraktıklarını say, haber ağının kıymetini gör.", "obj": {"type": "cameo", "n": 3}, "rew": {"cho": 280, "rep": 3}, "prereq": "q_orun2"}, 
 	{"id": "q_orun4", "giver": "orun",   "name": "FIRTINANIN GÖZÜ",        "desc": "Çölde kum fırtınası düşerken koronun gözü kör olur — o yedi saniye avlanma vaktidir. Fırtına eserken yirmi beş kesim yap; sana rüzgâr okumanın tılsımını vereyim.", "obj": {"type": "firtina", "n": 25}, "rew": {"cho": 300, "item": "i_firtina", "rep": 3}, "prereq": "q_orun3"}, 
 	{"id": "q_orun5", "giver": "orun",   "name": "BORANIN KULAĞI",          "desc": "Kulaklarım kumu okudu; şimdi buzu öğrenecek — donmuş borada sürü donakalırken yirmi kesim yap. Sana ihbarcı pelerinimi vereyim, buz sesinden korursun.", "obj": {"type": "bora", "n": 20}, "rew": {"cho": 320, "item": "i_pelerin", "rep": 3}, "prereq": "q_orun4"}, 
+	{"id": "q_orun6", "giver": "orun",   "name": "KUYU YANKISI",            "desc": "Yollarda taş çemberli kuyular var — koro onlardan dinler. Dört kez kuyuya kulak ver ya da parçacık at; yankının nasıl cevap verdiğini öğren, taşını al.", "obj": {"type": "kuyu", "n": 4}, "rew": {"cho": 300, "item": "i_yanki", "rep": 3}, "prereq": "q_orun5"}, 
 	{"id": "q_bahis2", "giver": "tegan",  "name": "SİMSARIN SON BAHİSİ", "desc": "Büyük masa büyük bahis ister — ama teklifi herkese açmam. Tek koşuda 6000 skor: tüm kasa senin.", "obj": {"type": "score", "n": 6000}, "rew": {"cho": 400, "item": "i_cengel"}, "req_rep": 6},
 	{"id": "q_anit",  "giver": "ehnar",   "name": "ANIT NÖBETİ",         "desc": "Kül tepesinde bir anıt var — kovan oraya saygı duruşuna geliyor. Tek koşuda 500 kesim yaparsan girişi gösteririm.", "obj": {"type": "kills", "n": 500}, "rew": {"cho": 200, "node": "koranit"}, "prereq": "q_kul"},
 	{"id": "q_pence", "giver": "saphire", "name": "KOR PENCELER",        "desc": "Külde yürüyen askerler var — pençeleri hâlâ kor gibi yanıyor. On iki Kor Pençe kes; külünden bir kolye döveyim.", "obj": {"type": "kind", "k": "Kor Pençe", "n": 12}, "rew": {"cho": 200, "item": "i_korkul"}, "prereq": "q_anit"},
@@ -547,6 +548,7 @@ static func obj_text(q: Dictionary) -> String:
 		"kaos":    return "%d kez kaos damarını zaferle sindir" % need
 		"crits":   return "tek koşuda %d kritik vuruş yap" % need
 		"kacak":   return "%d kaçak elit yakala" % need
+		"kuyu":    return "%d kez ses kuyusuyla uğraş" % need
 	return "?"
 
 static func _claimed_count() -> int:
