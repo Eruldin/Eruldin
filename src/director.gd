@@ -301,7 +301,7 @@ func _comp(m: float) -> int:
 			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK, Enemy.EKind.SIVRI, Enemy.EKind.SIVRI])   # bataklık: konakçılar + kistler + balçıklar + sivri bulutları
 			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ]) # kül ovası: ateşi seven sert öncüler
 			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.AKREP, Enemy.EKind.AKREP, Enemy.EKind.DRONE, Enemy.EKind.KOCBASI])   # kızıl çöl: koşucular + gömülü akrepler + koçbaşları
-			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.DAMARGOL, Enemy.EKind.DAMARGOL, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET])   # kristal çukur: gözler + kistler + damar golemleri + nöbetçiler
+			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.DAMARGOL, Enemy.EKind.DAMARGOL, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI])   # kristal çukur: gözler + kistler + damar golemleri + fısıltı sürüleri
 	return G.pick(pool)
 
 func _hp_scale() -> float:
@@ -321,7 +321,7 @@ func _spawn(kind: int, elite: bool) -> Enemy:
 	if e != null and G.run.hyper:
 		e.speed *= 1.08
 	# sivri bulutu tek doğmaz — bulut halinde akar
-	if e != null and kind == Enemy.EKind.SIVRI and not elite:
+	if e != null and (kind == Enemy.EKind.SIVRI or kind == Enemy.EKind.FISILTI) and not elite:
 		for i in 3:
 			Enemy.spawn(kind, p + Vector2(G.rf(-46, 46), G.rf(-46, 46)), false, _hp_scale(), _dmg_scale(), G.room)
 	return e

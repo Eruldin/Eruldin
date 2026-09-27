@@ -16,6 +16,7 @@ var _mono_done := false
 var _mono_check := false
 var _geo_done := false
 var _geo_ck := false
+var _fis_done := false
 var _tome_done := false
 var _tome_ck := false
 var _tome_boons := 0
@@ -276,6 +277,13 @@ func _process(_d: float) -> void:
 			if _geo_done and not _geo_ck and not G.room.geo_active:
 				_geo_ck = true
 				print("[probe] geode resolved ok")
+			# damar fısıltısı: çukurun sürü türü — spawn + davranış doğrulaması
+			if not _fis_done and t >= 125.0 and G.room.biome == 7:
+				_fis_done = true
+				var fe := Enemy.spawn(Enemy.EKind.FISILTI, G.player.pos + Vector2(200, 0), false, 1.0, 1.0, G.room)
+				print("[probe] fisilti spawned: %s" % str(is_instance_valid(fe)))
+				if is_instance_valid(fe):
+					print("[probe] fisilti kind=%s name=%s hp=%.0f" % [fe.kind, fe.actor_name, fe.max_hp])
 			if not _tome_done and t >= 112.0 and G.player != null:
 				_tome_done = true
 				_tome_boons = G.run.boon_ids.size()
