@@ -64,6 +64,10 @@ var pickups_node: Node2D
 var mono: Dictionary = {}      # rezonans kümesi: {pos,t,need,node,ring} — yakınında durarak şarj edilir
 var mono_pos := Vector2.ZERO   # kenar işareti okur
 var mono_active := false
+var geo: Dictionary = {}       # damar jeotu: {pos,t,need,node,ring} — çukurda kırılan kristal yumru
+var geo_pos := Vector2.ZERO
+var geo_active := false
+var _geo_g1 := false           # yarı kanalda bir kez bekçi çağırır
 var merchant: Dictionary = {}  # gezgin tüccar: {node,tag} — tek alışverişlik koşu içi dükkân
 var merchant_pos := Vector2.ZERO
 var merchant_active := false
@@ -678,6 +682,7 @@ func _process(d: float) -> void:
 	_tick_hazards(d)
 	_tick_pickups(d)
 	_tick_monolith(d)
+	_tick_geode(d)
 	_tick_trial()
 	_tick_fener()
 	_tick_merchant(d)
@@ -788,6 +793,70 @@ func _tick_monolith(d: float) -> void:
 			G.fx.flash(Px.C("7B1FA2"), 0.35)
 			G.audio.jingle("boss")
 			G.ui.toast("küme çözüldü — çift sandık")
+
+# DAMAR JEOTU: çukurda beliren çatlak kristal yumru — yanında durup
+# kanal verince kırılır ve parçacık saçar; ama yarı yolda ve kırılımda
+# damar golemleri üstüne çöker (risk/ödül)
+func spawn_geode(p: Vector2) -> void:
+	if geo_active:
+		return
+	geo_active = true
+	geo_pos = p
+	_geo_g1 = false
+	var node := Sprite2D.new()
+	node.texture = Px.S("crystal")
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	node.modulate = Px.C("4dd0e1")
+	node.scale = Vector2.ONE * 2.4
+	node.position = p
+	node.z_index = int(p.y)
+	add_child(node)
+	var ring := Sprite2D.new()
+	ring.texture = Px.S("ring")
+	ring.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	ring.modulate = Color(0.3, 0.85, 0.9, 0.35)
+	ring.scale = Vector2.ONE * (150.0 * 2.0 / 96.0)
+	ring.position = p
+	ring.z_index = -2000
+	add_child(ring)
+	G.fx.mk_light(node, Vector2(0, -12), Px.C("4dd0e1"), 1.0, 2.6)
+	geo = {"pos": p, "t": 0.0, "need": 10.0, "node": node, "ring": ring}
+	G.audio.jingle("boon")
+	G.ui.toast("DAMAR JEOTU açıldı — çatlak parlıyor; kırmak için yanında dur")
+
+func _tick_geode(d: float) -> void:
+	if not geo_active or G.player == null or G.player.dead:
+		return
+	var p: Vector2 = geo.pos
+	if G.player.pos.distance_to(p) < 150.0:
+		geo.t = float(geo.t) + d
+		geo.node.scale = Vector2.ONE * (2.4 + 0.5 * (float(geo.t) / float(geo.need)))
+		geo.node.modulate = Px.C("4dd0e1").lerp(Color(1, 1, 1), 0.35 * (float(geo.t) / float(geo.need)))
+		geo.ring.modulate.a = 0.2 + 0.6 * (float(geo.t) / float(geo.need))
+		if not _geo_g1 and float(geo.t) >= float(geo.need) * 0.5:
+			_geo_g1 = true
+			G.ui.toast("jeot bağırıyor — damarın bekçileri duydu")
+			G.audio.play("door", 0.8, 0.4)
+			for i in 2:
+				var sp := p + Vector2(G.rf(-130, 130), G.rf(-130, 130))
+				var e := Enemy.spawn(Enemy.EKind.DAMARGOL, clamp_pos(sp, 30.0), false, G.director._hp_scale(), G.director._dmg_scale(), self)
+				e.set_meta("add", true)
+		if float(geo.t) >= float(geo.need):
+			geo_active = false
+			geo_pos = Vector2.ZERO
+			geo.node.queue_free()
+			geo.ring.queue_free()
+			geo = {}
+			G.run.drop_fragments(p, 70)
+			G.fx.burst(p + Vector2(0, -16), Px.C("4dd0e1"), 36, 300.0, 7.0, 0.7)
+			G.fx.flash(Px.C("4dd0e1"), 0.4)
+			G.fx.shake(0.4, 0.35)
+			G.audio.jingle("boss")
+			for i in 2:
+				var sp := p + Vector2(G.rf(-150, 150), G.rf(-150, 150))
+				var e := Enemy.spawn(Enemy.EKind.DAMARGOL, clamp_pos(sp, 30.0), true, G.director._hp_scale() * 1.05, G.director._dmg_scale(), self)
+				e.set_meta("add", true)
+			G.ui.toast("jeot kırıldı — damar saçıldı; bekçiler öfkeli")
 
 # Gezgin Tüccar: koşu ortasında beliren tek-alışverişlik dükkân. Yanına
 # yürümek paneli açar; satın alınca kovar, almadan çıkarsan geri dönebilirsin.

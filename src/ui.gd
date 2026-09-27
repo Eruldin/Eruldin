@@ -557,6 +557,8 @@ func _edge_targets() -> Array:
 			out.append({"p": G.room.merchant_pos, "icon": "ico_loot", "col": "ffd700", "s": 24.0})
 		if G.room.stray_active:
 			out.append({"p": G.room.stray_pos, "icon": "ico_boon", "col": "8fd4ff", "s": 22.0})
+		if G.room.geo_active:
+			out.append({"p": G.room.geo_pos, "icon": "icn_mine", "col": "4dd0e1", "s": 26.0})
 		for vv in G.room.veins:
 			var vs: Sprite2D = vv.get("node")
 			if is_instance_valid(vs):

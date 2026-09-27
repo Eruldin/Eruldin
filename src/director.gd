@@ -59,6 +59,7 @@ var _won := false
 var _final_alive := 0     # final-boss count still standing (pairs need both down)
 var _merch_fired := false # gezgin tüccar — koşuda bir kez
 var _stray_fired := false  # kayıp şasi — koşuda bir kez
+var _geo_fired := false    # damar jeotu — çukur koşusunda bir kez
 var _harvest_t := 30.0    # endless-mode reaper cadence
 var _quest_t := 0.0       # 1sn'lik görev tick'i
 var _koz2_fired := false  # 7. dakikada ikinci KOZ taslağı (VS arcana chest)
@@ -189,6 +190,18 @@ func _tick_events(d: float) -> void:
 		if sp == Vector2.ZERO:
 			sp = G.room.clamp_pos(G.player.pos + Vector2(380, 0), 40.0)
 		G.room.spawn_stray(sp)
+	# damar jeotu: ~8:50'de çukur koşularında — kırılabilir kristal yumru
+	if not _geo_fired and m >= 8.8 and is_instance_valid(G.room) and G.room.biome == 7 and G.player != null and not G.player.dead:
+		_geo_fired = true
+		var gp := Vector2.ZERO
+		for i in 8:
+			var cand := G.player.pos + Vector2(G.rf(-540, 540), G.rf(-360, 360))
+			if G.room.inside(cand, 90.0) and cand.distance_to(G.player.pos) > 300.0:
+				gp = cand
+				break
+		if gp == Vector2.ZERO:
+			gp = G.room.clamp_pos(G.player.pos + Vector2(360, 0), 40.0)
+		G.room.spawn_geode(gp)
 	# HoT ability tome: saha kalıntısı — üstüne basan bedava lütuf taslağı açar
 	_tome_t -= d
 	if _tome_t <= 0.0 and is_instance_valid(G.room):

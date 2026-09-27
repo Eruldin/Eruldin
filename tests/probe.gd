@@ -14,6 +14,8 @@ var _roster_done := false
 var _edge_done := false
 var _mono_done := false
 var _mono_check := false
+var _geo_done := false
+var _geo_ck := false
 var _tome_done := false
 var _tome_ck := false
 var _tome_boons := 0
@@ -265,6 +267,15 @@ func _process(_d: float) -> void:
 			if _mono_done and not _mono_check and not G.room.mono_active:
 				_mono_check = true
 				print("[probe] monolith resolved ok")
+			# damar jeotu kapsaması: dibinde doğur, kısa kanal — bekçi çağrısı + kırılım
+			if not _geo_done and t >= 120.0 and G.player != null and G.room.biome == 7:
+				_geo_done = true
+				G.room.spawn_geode(G.player.pos + Vector2(20, 0))
+				G.room.geo["need"] = 2.0
+				print("[probe] geode spawned")
+			if _geo_done and not _geo_ck and not G.room.geo_active:
+				_geo_ck = true
+				print("[probe] geode resolved ok")
 			if not _tome_done and t >= 112.0 and G.player != null:
 				_tome_done = true
 				_tome_boons = G.run.boon_ids.size()
