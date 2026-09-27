@@ -4,7 +4,7 @@ extends Enemy
 # Boss controller — own phase/attack state machine on top of Actor.
 # Bosses are spawned by Room; linked twins share a `link` reference.
 
-enum BKind { REX, HOST, NAHUM, TUMAN, KIRIN, CONST, ANASI, DEV, KOR, DAMAR, BUZ }
+enum BKind { REX, HOST, NAHUM, TUMAN, KIRIN, CONST, ANASI, DEV, KOR, DAMAR, BUZ, NUR }
 
 var bkind: int = BKind.REX
 var link: Boss = null
@@ -23,7 +23,7 @@ const NAMES := {
 	BKind.KIRIN: "MEDIKAE KIRIN", BKind.CONST: "ŞANSİYE CONSTANTIN",
 	BKind.ANASI: "KUM ANASI", BKind.DEV: "BATAKLIK DEVİ",
 	BKind.KOR: "KOR YÜCELTEN", BKind.DAMAR: "DAMAR KALBI",
-	BKind.BUZ: "BUZ ANASI"
+	BKind.BUZ: "BUZ ANASI", BKind.NUR: "NUR — UFUK'UN IŞIĞI"
 }
 const TITLES := {
 	BKind.REX: "Alfa-05 · Düşmüş Kardeş", BKind.HOST: "Sektör 4-Gama'nın Kabusu",
@@ -31,7 +31,7 @@ const TITLES := {
 	BKind.KIRIN: "Baş Cerrah", BKind.CONST: "Aeterna'nın Efendisi",
 	BKind.ANASI: "Kızıl Çöl'ün Kraliçesi", BKind.DEV: "Çürük Bataklık'ın Kalbi",
 	BKind.KOR: "Kül Ovası'nın Son Efendisi", BKind.DAMAR: "Kristal Çukur'un Nabzı",
-	BKind.BUZ: "Donmuş Çatlak'ın Hanımı"
+	BKind.BUZ: "Donmuş Çatlak'ın Hanımı", BKind.NUR: "Beyaz Ufuk'un Son Feneri"
 }
 const BARKS := {
 	BKind.REX: "Alfa-04... transistörün sustu mu? Benimki hâlâ ŞARKI SÖYLÜYOR.",
@@ -44,13 +44,14 @@ const BARKS := {
 	BKind.DEV: "Bataklık kimseyi geri vermez. Sen de kalacaksın.",
 	BKind.KOR: "İmparatorluk yandı — ben külünden doğdum. Sen de ona katılacaksın.",
 	BKind.DAMAR: "Damara dokundun, şövalye. Şimdi damar sana dokunacak.",
-	BKind.BUZ: "Buz beni getirene dek bekledi. Seni de bekleyecek."
+	BKind.BUZ: "Buz beni getirene dek bekledi. Seni de bekleyecek.",
+	BKind.NUR: "Işık hiçbir şeyi geri vermez, şövalye — seni de vermeyecek."
 }
 const SPR := {
 	BKind.REX: "rex", BKind.HOST: "host", BKind.NAHUM: "nahum",
 	BKind.TUMAN: "tuman", BKind.KIRIN: "kirin", BKind.CONST: "const",
 	BKind.ANASI: "anasi", BKind.DEV: "dev", BKind.KOR: "kor",
-	BKind.DAMAR: "damar", BKind.BUZ: "buz"
+	BKind.DAMAR: "damar", BKind.BUZ: "buz", BKind.NUR: "nur"
 }
 const PHASE_BARKS := {
 	BKind.REX: "REX: ŞARKI YÜKSELİYOR — DAHA HIZLI.",
@@ -64,6 +65,7 @@ const PHASE_BARKS := {
 	BKind.KOR: "KOR: ova ikinci kez yanıyor — bu kez seninle.",
 	BKind.DAMAR: "DAMAR: nabız hızlanıyor — çukur seninle birlikte atıyor.",
 	BKind.BUZ: "BUZ ANASI: çatlak kapanıyor — don.",
+	BKind.NUR: "NUR: şafak kırılıyor — perde kalkıyor.",
 }
 # faz-2'de portreli hikaye kartı — boss'un yıkımı içeriden görünür
 const P2_LINES := {
@@ -78,6 +80,7 @@ const P2_LINES := {
 	BKind.KOR: "Kül unutmaz, şövalye. Beni ancak kül anlar.",
 	BKind.DAMAR: "Bütün kuyu tek kalp — ve kalp şimdi öfkeyle atıyor.",
 	BKind.BUZ: "Çatlak şimdi kapanıyor — altında ikimiz de kalacağız.",
+	BKind.NUR: "Ufkun ardında sabah yok — sadece şarkı. Gel, dinle.",
 }
 
 # ölüm anı kartı: ikiz boss'larda ancak ikincisi düşünce çalınır
@@ -93,6 +96,7 @@ const DEATH_LINES := {
 	BKind.KOR: "Taç düştü, kül dağıldı. Ova yüz yıl sonra ilk kez soğudu.",
 	BKind.DAMAR: "Kalp sustu. Çukurun damarları yüz yıllığına karardı.",
 	BKind.BUZ: "Hanım eridi — çatlağın altında ilk kez sessizlik var.",
+	BKind.NUR: "Fener söndü — kuzeyin ucu ilk kez gerçekten karanlık.",
 }
 
 static func spawn_boss(p_kind: int, p_pos: Vector2, parent: Node, hp_scale := 1.0) -> Boss:
@@ -160,6 +164,11 @@ func _boss_stats(hs: float) -> void:
 			windup_t = 0.6; recover_t = 0.7; attack_cd = 1.5
 			knock_resist = 50
 			kind = EKind.BUZRUH
+		BKind.NUR:
+			max_hp = 700; speed = 112; touch_dmg = 21; radius = 22; hit_radius = 28
+			windup_t = 0.55; recover_t = 0.6; attack_cd = 1.35
+			knock_resist = 45
+			kind = EKind.TAYF
 	max_hp *= hs
 	hp = max_hp
 	actor_name = NAMES[bkind]
@@ -260,6 +269,7 @@ func _want_range() -> float:
 		BKind.DEV: return 78.0
 		BKind.KOR: return 200.0
 		BKind.DAMAR: return 150.0
+		BKind.NUR: return 200.0
 	return 100.0
 
 func _pick_attack() -> void:
@@ -276,6 +286,7 @@ func _pick_attack() -> void:
 		BKind.KOR: _kor_attack()
 		BKind.DAMAR: _damar_attack()
 		BKind.BUZ: _buz_attack()
+		BKind.NUR: _nur_attack()
 
 func _on_phase2() -> void:
 	G.audio.play("roar", 1.0, 0.8)
@@ -908,6 +919,84 @@ func _buz_shatter() -> void:
 		var dir := Vector2.RIGHT.rotated(TAU * i / 18.0)
 		_shoot_dir(dir, 230.0, 11.0, Px.C("9fd8ff"), 9.0)
 	G.run.drop_fragments(pos + Vector2(G.rf(-40, 40), G.rf(-40, 40)), G.ri(4, 7))
+	_busy = false
+
+# NUR — beyaz ufuk'un feneri: tayf gibi ışıkla yer değiştirir, aurora hüzmeleri
+# saçar, faz-2'de tayf sürüsü çağırır
+func _nur_attack() -> void:
+	var roll := G.rf(0, 1)
+	var adds := 0
+	for e in G.enemies:
+		if is_instance_valid(e) and not e.dead and e != self and not (e is Boss):
+			adds += 1
+	if phase == 2 and roll < 0.24:
+		_atk_t = 2.3
+		_nur_dawn()
+	elif phase == 2 and roll < 0.4 and adds < 3:
+		_atk_t = 2.5
+		_nur_birth()
+	elif roll < 0.5:
+		_atk_t = 1.7 if phase == 1 else 1.3
+		_nur_blink()
+	else:
+		_atk_t = 2.0 if phase == 1 else 1.5
+		_nur_veil()
+
+func _nur_blink() -> void:
+	# ışıkla yer değiştirme: dağılır, oyuncunun arkasında belirir, pençe savurur
+	G.fx.burst(pos + Vector2(0, -14), Px.C("7fe8d8"), 20, 140.0, 5.0, 0.5)
+	G.audio.play("dash", 1.5, 0.5)
+	if is_instance_valid(body):
+		body.modulate = Color(0.7, 1.0, 0.95, 0.25)
+	await _wait(0.4)
+	if _abort(): return
+	var behind := G.player.pos - (G.player.pos - pos).normalized() * 46.0
+	pos = G.room.clamp_pos(behind, radius)
+	G.fx.burst(pos + Vector2(0, -14), Px.C("a8dcff"), 22, 160.0, 5.5, 0.5)
+	if is_instance_valid(body):
+		body.modulate = Color(1, 1, 1, 1)
+	var dir := (G.player.pos - pos).normalized()
+	var t := G.fx.tele_wedge(pos, rad_to_deg(dir.angle()), 96.0, 0.32)
+	await _wait(0.32)
+	G.fx.kill_tele(t)
+	if dist_to_player() < 110.0:
+		G.player.take_hit({"dmg": touch_dmg * 1.3, "type": G.DamageType.MELEE, "from": pos, "knock": 10.0, "source": self})
+	_busy = false
+
+func _nur_veil() -> void:
+	# aurora yelpazesi — iki dönüşlü ışık hüzmesi
+	for w in 2:
+		var base := TAU * (w * 0.5 + randf() * 0.25)
+		for i in 7:
+			var dir := Vector2.RIGHT.rotated(base + TAU * i / 7.0)
+			_shoot_dir(dir, 210.0, 10.0, Px.C("7fe8d8"), 8.0)
+		G.audio.play("shoot", 1.5, 0.5)
+		await _wait(0.3)
+		if _abort(): return
+	_busy = false
+
+func _nur_birth() -> void:
+	G.audio.play("roar", 1.5, 0.4)
+	G.fx.burst(pos + Vector2(0, -14), Px.C("7fe8d8"), 26, 150.0, 5.0, 0.6)
+	for i in 2:
+		var off := Vector2(G.rf(-110, 110), G.rf(-90, 90))
+		var e := Enemy.spawn(EKind.TAYF, G.room.clamp_pos(pos + off, 14.0), false, G.run.hp_scale() * 0.7, G.run.dmg_scale(), self)
+		e.set_meta("add", true)
+	await _wait(0.5)
+	_busy = false
+
+func _nur_dawn() -> void:
+	# faz-2 nova: geniş telegraph'lı halka, sonra 16 yönlü şafak sağanağı
+	var t := G.fx.tele_ring(pos, 92.0, 0.9, Color(0.5, 0.9, 0.85, 0.5))
+	await _wait(0.9)
+	G.fx.kill_tele(t)
+	G.audio.play("explode", 0.7)
+	G.fx.shake(0.45, 0.5)
+	G.fx.light_flash(pos + Vector2(0, -16), Px.C("7fe8d8"), 1.8, 3.4, 0.5)
+	for i in 16:
+		var dir := Vector2.RIGHT.rotated(TAU * i / 16.0)
+		_shoot_dir(dir, 240.0, 12.0, Px.C("7fe8d8"), 9.0)
+	G.run.drop_fragments(pos + Vector2(G.rf(-40, 40), G.rf(-40, 40)), G.ri(5, 8))
 	_busy = false
 
 # ---------- shared ----------

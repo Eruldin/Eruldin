@@ -248,6 +248,8 @@ func _tick_events(d: float) -> void:
 	if not _rush() and not _final and t >= FINAL_T:
 		_final = true
 		var kinds: Array = FINAL_KIND[clampi(biome, 0, FINAL_KIND.size() - 1)]
+		if is_instance_valid(G.run) and G.run.node_id == "beyazufuk":
+			kinds = [Boss.BKind.NUR]   # Beyaz Ufuk'un kendi efendisi — Buz Anası değil, fener
 		var first: Boss = null
 		for i in kinds.size():
 			var off := Vector2((i - float(kinds.size() - 1) * 0.5) * 140.0, 0)
@@ -445,6 +447,7 @@ func _on_boss_dead(b) -> void:
 			Boss.BKind.KOR: bid = "kor"
 			Boss.BKind.DAMAR: bid = "damar"
 			Boss.BKind.BUZ: bid = "buz"
+			Boss.BKind.NUR: bid = "nur"
 		G.meta.boss_down(bid)
 		Quests.tick("boss", bid)
 	if is_instance_valid(G.room):

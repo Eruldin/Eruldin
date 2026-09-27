@@ -85,6 +85,7 @@ const DEFS := {
 	"i_kemer_ef":  {"name": "Efendi Tokası",   "slot": "kemer",   "r": 2, "icon": "icn_crown",      "mods": {"skill": -0.12, "armor": 0.6}},
 	"i_duvar":     {"name": "Yemin Plakası",   "slot": "govde",   "r": 3, "icon": "icn_upg_shield", "mods": {"hp": 45, "armor": 1.0, "spd": -0.03}},
 	"i_tayfperde": {"name": "Tayf Pelerini",   "slot": "govde",   "r": 3, "icon": "icn_dash",       "mods": {"spd": 0.06, "dash_regen": 0.18, "skill": -0.06}},
+	"i_nurfener": {"name": "Ufuk Feneri",     "slot": "kolye",   "r": 3, "icon": "icn_crown",      "mods": {"skill": -0.12, "xp": 0.12, "ls": 0.02, "frag": 0.1}},
 }
 
 const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700", "ff4fd8"]
