@@ -2635,6 +2635,8 @@ func _open_draft() -> void:
 # koşu açılışında KOZ taslağı (VS arcana) — bir kart, koşu boyu etki
 func arcana_choice() -> void:
 	var pool := Boons.ARCANAS.keys()
+	pool.erase(G.run.arcana)
+	pool.erase(G.run.arcana2)
 	pool.shuffle()
 	var cards: Array = []
 	for aid in pool.slice(0, 3):
@@ -2759,11 +2761,15 @@ func _pick_card(o: Dictionary) -> void:
 		G.run.apply_evo({"from": o.get("from", ""), "into": o.get("id", "")})
 		return
 	if str(o.get("kind", "")) == "arcana":
-		G.run.arcana = str(o.get("id", ""))
-		Boons.apply_arcana(G.run.arcana, G.player)
+		var aid := str(o.get("id", ""))
+		if G.run.arcana == "":
+			G.run.arcana = aid
+		else:
+			G.run.arcana2 = aid
+		Boons.apply_arcana(aid, G.player)
 		var seen: Array = G.meta.data.get("arcanas_seen", [])
-		if not seen.has(G.run.arcana):
-			seen.append(G.run.arcana)
+		if not seen.has(aid):
+			seen.append(aid)
 			G.meta.data["arcanas_seen"] = seen
 			G.meta.save()
 		G.audio.jingle("boon")
@@ -3235,7 +3241,11 @@ func pause_panel() -> void:
 	if G.state == G.State.ROOM:
 		var p := G.player
 		if is_instance_valid(p):
-			var stl := _lbl("hasar ×%0.2f · hız %0.2f · krit %%%d·×%0.1f · zırh %d · çalma %%%d · KOZ: %s" % [p.dmg_mult, p.speed / 205.0, roundi(p.crit_ch * 100), p.crit_mult, roundi(p.armor), roundi(p.lifesteal * 100), str(Boons.ARCANAS.get(G.run.arcana, {}).get("name", "—"))], Vector2.ZERO, 11, Color(0.55, 0.65, 0.8))
+			var kozn: Array = []
+			for a in [G.run.arcana, G.run.arcana2]:
+				if a != "":
+					kozn.append(str(Boons.ARCANAS.get(a, {}).get("name", "?")))
+			var stl := _lbl("hasar ×%0.2f · hız %0.2f · krit %%%d·×%0.1f · zırh %d · çalma %%%d · KOZ: %s" % [p.dmg_mult, p.speed / 205.0, roundi(p.crit_ch * 100), p.crit_mult, roundi(p.armor), roundi(p.lifesteal * 100), " + ".join(kozn) if not kozn.is_empty() else "—"], Vector2.ZERO, 11, Color(0.55, 0.65, 0.8))
 			stl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			v.add_child(stl)
 			var eq: Dictionary = G.meta.data.get("equip", {})
