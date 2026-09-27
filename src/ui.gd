@@ -1507,7 +1507,91 @@ func quest_panel(nid: String) -> void:
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
 
-func _quest_row(q: Dictionary, btn_text: String, bcol: Color, cb: Callable) -> Control:
+# BG2 journal — J ile her yerden: teslim/aktif/teklif görevleri + günlük ihaleler
+func journal_panel() -> void:
+	_pause(true)
+	var v := _show_panel("journal", "G Ü N L Ü K", Px.C("ffd75f"))
+	var rl := _lbl("kamp itibarı: %s (%d) — ödeme ×%0.2f · fiyat −%%%d" % [Quests.rep_name(), Quests.rep(), Quests.rep_mult(), int(round((1.0 - Quests.rep_discount()) * 100.0))], Vector2.ZERO, 12, Px.C("c9a227"))
+	rl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(rl)
+	var sc := ScrollContainer.new()
+	sc.custom_minimum_size = Vector2(820, 430)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 8)
+	vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(vb)
+	v.add_child(sc)
+	var secs := [["TESLİM BEKLİYOR", "done"], ["AKTİF GÖREVLER", "act"], ["TEKLİFLER", "open"]]
+	var any := false
+	for s in secs:
+		var rows: Array = []
+		for q in Quests.DEFS:
+			var st := Quests.state(q.id)
+			if s[1] == "open":
+				if st != "":
+					continue
+				var pre := str(q.get("prereq", ""))
+				if pre != "" and Quests.state(pre) != "claimed":
+					continue
+				rows.append(q)
+			elif st == s[1]:
+				rows.append(q)
+		if rows.is_empty():
+			continue
+		any = true
+		var sl := _lbl("— %s —" % s[0], Vector2.ZERO, 12, Px.C("8fd4ff"))
+		sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vb.add_child(sl)
+		for q in rows:
+			var giver := " · %s" % str(NPC.NAMES.get(str(q.get("giver", "")), "?"))
+			match s[1]:
+				"done":
+					vb.add_child(_quest_row(q, "TESLİM AL", Px.C("ffd75f"), func():
+						var rew := Quests.claim(str(q.id))
+						G.audio.jingle("victory")
+						toast("ödül: %s" % Quests.rew_text(rew))
+						_close_overlay()
+						if str(rew.get("node", "")) != "":
+							Wmap.unlock_cine(str(rew.node))
+						elif rew.get("cine") is Array and not (rew["cine"] as Array).is_empty():
+							cine_seq(rew["cine"], func(): journal_panel())
+							if not overlay_open():
+								journal_panel()
+						else:
+							journal_panel(), giver))
+				"act":
+					vb.add_child(_quest_row(q, Quests.prog_text(q), Color(0.6, 0.6, 0.7), Callable(), giver))
+				"open":
+					vb.add_child(_quest_row(q, "KABUL ET", Px.C("00E676"), func():
+						Quests.accept(str(q.id))
+						G.audio.jingle("boon")
+						_close_overlay()
+						journal_panel(), giver))
+	if not any:
+		var nl := _lbl("günlük boş — kamp sakinleriyle konuş", Vector2.ZERO, 13, Color(0.6, 0.6, 0.7))
+		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vb.add_child(nl)
+	var hd := _lbl("— GÜNLÜK İHALELER —", Vector2.ZERO, 12, Px.C("ffd700"))
+	hd.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(hd)
+	for b in Quests.daily():
+		var done_b := bool(b.get("done", false))
+		var bl := _lbl("%s  —  %s" % [str(b.get("desc", "")), "✓ ÖDENDİ" if done_b else "◆ %d" % int(b.get("cho", 0))], Vector2.ZERO, 11, Color(0.55, 0.85, 0.55) if done_b else Color(0.82, 0.76, 0.6))
+		bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(bl)
+	var done_n := 0
+	for q in Quests.DEFS:
+		if Quests.state(q.id) == "claimed":
+			done_n += 1
+	var fl := _lbl("biten görev: %d / %d" % [done_n, Quests.DEFS.size()], Vector2.ZERO, 11, Color(0.5, 0.5, 0.62))
+	fl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(fl)
+	var h2 := _lbl("[J / E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h2)
+
+func _quest_row(q: Dictionary, btn_text: String, bcol: Color, cb: Callable, extra := "") -> Control:
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", _style_panel(Color(0.05, 0.03, 0.08, 0.9), bcol.darkened(0.25), 1, 3))
 	var h := HBoxContainer.new()
@@ -1526,7 +1610,7 @@ func _quest_row(q: Dictionary, btn_text: String, bcol: Color, cb: Callable) -> C
 	h.add_child(mid)
 	var t := _lbl("%s  —  %s" % [str(q.name), Quests.obj_text(q)], Vector2.ZERO, 13, Color(0.92, 0.92, 0.96))
 	mid.add_child(t)
-	var d := _lbl("%s   ·   ödül: %s" % [str(q.desc), Quests.rew_text(q.get("rew", {}))], Vector2.ZERO, 11, Color(0.65, 0.65, 0.75))
+	var d := _lbl("%s   ·   ödül: %s%s" % [str(q.desc), Quests.rew_text(q.get("rew", {})), extra], Vector2.ZERO, 11, Color(0.65, 0.65, 0.75))
 	mid.add_child(d)
 	if cb.is_valid():
 		var b := Button.new()
@@ -2863,6 +2947,9 @@ func _pick_card(o: Dictionary) -> void:
 func _unhandled_key_input(ev: InputEvent) -> void:
 	if not (ev is InputEventKey and ev.pressed and not ev.echo):
 		return
+	if ev.keycode == KEY_J and not overlay_open() and G.state in [G.State.ROOM, G.State.HUB]:
+		journal_panel()
+		return
 	if overlay_open() and str(_overlay.get_meta("kind", "")) in ["boon", "draft", "chest", "biomesel"]:
 		var opts: Array = _overlay.get_meta("opts", [])
 		var idx := int(ev.keycode) - int(KEY_1)
@@ -3391,7 +3478,7 @@ func pause_panel() -> void:
 		qb.pressed.connect(func():
 			_close_overlay()
 			G.run.abandon_to_hub())
-	var kl := _lbl("WASD hareket · SPACE kaçış · silahlar otomatik ateş eder", Vector2.ZERO, 10, Color(0.5, 0.55, 0.68))
+	var kl := _lbl("WASD hareket · SPACE kaçış · J günlük · silahlar otomatik ateş eder", Vector2.ZERO, 10, Color(0.5, 0.55, 0.68))
 	kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(kl)
 	var tb := Button.new()
