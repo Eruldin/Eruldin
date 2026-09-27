@@ -56,7 +56,9 @@ var _plasma_charge := -1.0   # <0 = not charging
 var _attack_slow := 1.0
 var revived := false
 var revives_extra := 0   # lütuf kaynaklı ek dirilmeler
-var boost_t := 0.0       # yükleme kalıntısı: >0 iken saldırılar %35 hızlı
+var boost_t := 0.0       # yükleme kalıntısı/aşırı yük: >0 iken saldırılar %35 hızlı
+var _over_used := 0      # bu koşuda F aşırı yükü kaç kez basıldı (bedel artar)
+var _over_held := false
 var _swing_hit_done := false
 var charge_rate := 1.0       # plasma charge speed (Rex overcharge boon)
 var _charge_full := false
@@ -302,6 +304,16 @@ func _tick_skill(d: float) -> void:
 		G.ui.toast("choralim iksiri — can yenilendi")
 		Quests.tick("iksir")
 	_iksir_held = r_now
+	# F aşırı yük: koşu parçacığını yak, 8sn boyunca silahlar +%35 hızlı
+	var f_now := Input.is_key_pressed(KEY_F)
+	if f_now and not _over_held and boost_t <= 0 and G.state == G.State.ROOM and G.run.fragments >= _over_cost():
+		G.run.fragments -= _over_cost()
+		_over_used += 1
+		boost_t = 8.0
+		G.fx.burst(pos, Px.C("ffd75f"), 18, 160.0, 3.0, 0.5)
+		G.fx.float_text(pos + Vector2(0, -44), "AŞIRI YÜK", Px.C("ffd75f"), 1.0)
+		G.audio.play("boon", 1.1, 0.6)
+	_over_held = f_now
 	var t_now := Input.is_key_pressed(KEY_T)
 	if t_now and not _sarap_held and sarap_n > 0 and not dead and G.state == G.State.ROOM:
 		sarap_n -= 1
@@ -353,6 +365,9 @@ func _use_skill() -> void:
 			G.audio.play("explode", 0.9, 0.6)
 
 # şasi farkları oynanışı değiştirir: elyb ağır topçu, via hızlı keskin
+func _over_cost() -> int:
+	return 120 + 90 * _over_used
+
 func _apply_hero() -> void:
 	var hk := str(G.meta.data.get("hero", "ely"))
 	actor_name = "Ely"
@@ -622,7 +637,7 @@ func reset_for_run() -> void:
 	lifesteal = 0.0; heal_on_kill = 0.0; dash_regen_mult = 1.0
 	b_gravity_well = false; b_homing = false; b_poison = false
 	b_emp = false; b_parry_shock = false; b_stealth_dash = false
-	stealth_t = 0.0; revived = false; revives_extra = 0; boost_t = 0.0
+	stealth_t = 0.0; revived = false; revives_extra = 0; boost_t = 0.0; _over_used = 0; _over_held = false
 	charge_rate = 1.0; _charge_full = false
 	# survivors reset: starter blade, empty passives, level 1
 	for w in weapons:
