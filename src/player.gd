@@ -451,6 +451,20 @@ func _apply_hero() -> void:
 			dmg_mult -= 0.08
 			speed *= 0.86
 			skill_max = 11.0
+	# şasi perkleri — ELY-B panelinde choralim ile alınan kalıcı modlar
+	var pk: Dictionary = Items.perk_stats(hk)
+	max_hp += float(pk.get("hp", 0.0))
+	armor += float(pk.get("armor", 0.0))
+	dmg_mult += float(pk.get("dmg", 0.0))
+	speed *= 1.0 + float(pk.get("spd", 0.0))
+	crit_ch += float(pk.get("crit", 0.0))
+	magnet_r += float(pk.get("mag", 0.0))
+	xp_mult += float(pk.get("xp", 0.0))
+	frag_mult += float(pk.get("frag", 0.0))
+	skill_max = maxf(4.0, skill_max * (1.0 + float(pk.get("skill", 0.0))))
+	if float(pk.get("hp", 0.0)) != 0.0:
+		hp = max_hp
+	hp = mini(hp, max_hp)
 
 func _hero_set() -> String:
 	return {"elyb": "c_elyb", "via": "c_viawar", "h9": "c_h9", "k7": "c_k7", "dg": "c_dg"}.get(str(G.meta.data.get("hero", "ely")), "ely")
