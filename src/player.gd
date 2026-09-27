@@ -115,6 +115,7 @@ func init() -> void:
 	dash_charges = dash_max
 	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)
 	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
+	xp_mult += G.meta.upg(Meta.U.XP) * 0.08
 	knock_resist = 2.0
 	skill_cd = 0.0
 	_haste_t = 0.0
@@ -749,6 +750,7 @@ func reset_for_run() -> void:
 	dash_max = 1 + G.meta.upg(Meta.U.DASH)
 	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)
 	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
+	xp_mult += G.meta.upg(Meta.U.XP) * 0.08
 	# ekipman modları — 7 slot HoT zırh/tılsım sistemi (items.gd)
 	var eq: Dictionary = Items.equip_stats()
 	max_hp += float(eq.get("hp", 0.0))

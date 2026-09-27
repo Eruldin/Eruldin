@@ -497,10 +497,12 @@ func _write_last_run(win: bool) -> void:
 	G.meta.data["wep_mastery"] = wm
 	if _mast_up and is_instance_valid(G.ui):
 		G.ui.toast("USTALIK ARTTI — bir silahın kalıcı +%4 hasar kazandı")
+	var lvl := G.player.level if is_instance_valid(G.player) else 1
+	G.meta.data["best_level"] = maxi(int(G.meta.data.get("best_level", 0)), lvl)
 	G.meta.data["last_run"] = {
 		"kills": int(stats.get("kills", 0)),
 		"time": int(time),
-		"level": G.player.level if is_instance_valid(G.player) else 1,
+		"level": lvl,
 		"win": win,
 		"elites": int(stats.get("elite_kills", 0)),
 		"frag": fragments,
