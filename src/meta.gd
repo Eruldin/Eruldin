@@ -242,6 +242,7 @@ func achievements() -> Array:
 		{"name": "VARYANT AVCISI", "desc": "mizaçlı efendilerden beşini düşür", "done": int(data.get("boss_variants", 0)) >= 5, "rew": 280},
 		{"name": "ŞÖVALYE ZIRHI", "desc": "Ehnar'ın dört parçasını birden kuşan — şövalye setini tamamla", "done": Items.set_active("sovalye"), "rew": 350},
 		{"name": "EFSANEVİ KOLEKSİYONU", "desc": "altı EFSANEVİ parçadan dördünü şampiyonlardan kopar", "done": (data.get("items_seen", []) as Array).filter(func(i: String) -> bool: return int(Items.DEFS.get(i, {}).get("r", 0)) == 4).size() >= 4, "rew": 450},
+		{"name": "KAOS TERCÜMANI", "desc": "kaos damarını üç kez zaferle sindir — her sızıntı başka mutasyon", "done": int(data.get("kaos_wins", 0)) >= 3, "rew": 300},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
@@ -280,6 +281,7 @@ const TITLES := [
 	{"id": "esya",    "name": "ANTİKACI",         "src": "EŞYA KOLEKSİYONCUSU"},
 	{"id": "kafes",   "name": "KAFES KIRAN",       "src": "KAFES KIRAN"},
 	{"id": "dortkasa","name": "HAZİNE YÜRÜYEN",    "src": "DÖRT MÜHÜR"},
+	{"id": "kaos",    "name": "KAOS YOLCUSU",      "src": "KAOS TERCÜMANI"},
 ]
 
 func title_open(tid: String) -> bool:
