@@ -5,11 +5,11 @@ extends RefCounted
 # the permanent stash (meta) on run end — win or lose. Equip at camp via
 # Saphire's EŞYA panel; equipped stat mods apply at run start.
 #
-# slots: bas govde eldiven cizme kolye yuzuk1 yuzuk2  (7 slots, HoT parity)
-const SLOTS := ["bas", "govde", "eldiven", "cizme", "kolye", "yuzuk1", "yuzuk2"]
+# slots: bas govde eldiven cizme kolye yuzuk1 yuzuk2 kemer  (8 slots)
+const SLOTS := ["bas", "govde", "eldiven", "cizme", "kolye", "yuzuk1", "yuzuk2", "kemer"]
 const SLOT_NAME := {
 	"bas": "BAŞLIK", "govde": "GÖVDE", "eldiven": "ELDİVEN", "cizme": "ÇİZME",
-	"kolye": "KOLYE", "yuzuk1": "YÜZÜK I", "yuzuk2": "YÜZÜK II",
+	"kolye": "KOLYE", "yuzuk1": "YÜZÜK I", "yuzuk2": "YÜZÜK II", "kemer": "KEMER",
 }
 
 # mods keys applied in Player.reset_for_run / stats():
@@ -51,6 +51,10 @@ const DEFS := {
 	"i_pusula":   {"name": "Kuzey Pusulası",   "slot": "kolye",   "r": 2, "icon": "icn_dash",       "mods": {"xp": 0.10, "mag": 50.0}},
 	"i_nabiz":    {"name": "Nabız Söndürücü",  "slot": "kolye",   "r": 2, "icon": "icn_zap",        "mods": {"skill": -0.16}},
 	"i_vurgu":    {"name": "Vurgu Halkası",    "slot": "yuzuk",   "r": 1, "icon": "icn_dagger",     "mods": {"skill": -0.09, "dmg": 0.03}},
+	# kemer slotu — 8. ekipman yuvası
+	"i_kemer_kum": {"name": "Kum Kemeri",      "slot": "kemer",   "r": 0, "icon": "icn_dash",       "mods": {"spd": 0.04, "mag": 25.0}},
+	"i_kemer_par": {"name": "Parazit Kemeri",  "slot": "kemer",   "r": 1, "icon": "icn_kovan",      "mods": {"hp": 18, "ls": 0.015}},
+	"i_kemer_ef":  {"name": "Efendi Tokası",   "slot": "kemer",   "r": 2, "icon": "icn_crown",      "mods": {"skill": -0.12, "armor": 0.6}},
 }
 
 const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700"]
