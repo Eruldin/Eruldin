@@ -288,12 +288,38 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 		_announce(done_now)
 	return done_now
 
+# kamp itibarı — BG2 tarzı: görevler kampın gözündeki yerini yükseltir;
+# kademe (tier) koşu ödemesine küçük bir çarpan olarak döner
+const REP_TIERS := [0, 8, 20, 40, 65]
+const REP_NAMES := ["YABANCI", "TANINAN", "GÜVENİLİR", "KAHRAMAN", "EFSANE"]
+
+static func rep() -> int:
+	return int(G.meta.data.get("rep", 0))
+
+static func rep_tier() -> int:
+	var r := rep()
+	var t := 0
+	for i in REP_TIERS.size():
+		if r >= REP_TIERS[i]:
+			t = i
+	return t
+
+static func rep_name() -> String:
+	return REP_NAMES[rep_tier()]
+
+static func rep_mult() -> float:
+	return 1.0 + 0.05 * rep_tier()
+
 static func claim(id: String) -> Dictionary:
 	if state(id) != "done":
 		return {}
 	var q := def(id)
 	_q()[id]["st"] = "claimed"
 	var rew: Dictionary = q.get("rew", {})
+	var t0 := rep_tier()
+	G.meta.data["rep"] = rep() + int(rew.get("rep", 1))
+	if rep_tier() > t0 and is_instance_valid(G.ui):
+		G.ui.toast("kamp itibarın yükseldi: %s  (ödeme +%d%%)" % [rep_name(), int(rep_tier() * 5)])
 	if int(rew.get("cho", 0)) > 0:
 		G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) + int(rew.cho)
 	if str(rew.get("item", "")) != "":
@@ -340,6 +366,7 @@ static func rew_text(rew: Dictionary) -> String:
 		parts.append("silah: %s" % str(Weapons.DEFS.get(str(rew.wep), {}).get("name", rew.wep)))
 	if rew.get("cine") is Array and not (rew["cine"] as Array).is_empty():
 		parts.append("anı kaydı")
+	parts.append("itibar +%d" % int(rew.get("rep", 1)))
 	return " + ".join(parts)
 
 static func obj_text(q: Dictionary) -> String:

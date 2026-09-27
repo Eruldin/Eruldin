@@ -5,7 +5,7 @@ extends CanvasLayer
 class _MiniMap:
 	extends Control
 	func _draw() -> void:
-		if G.state != G.State.ROOM or not is_instance_valid(G.room) or not is_instance_valid(G.cam):
+		if G.state != G.State.ROOM or not is_instance_valid(G.room) or not is_instance_valid(G.cam) or not bool(G.meta.data.settings.get("mmap", true)):
 			return
 		var B: Rect2 = G.room.BOUNDS
 		var sc := minf((size.x - 10.0) / B.size.x, (size.y - 10.0) / B.size.y)
@@ -2050,6 +2050,7 @@ func records_panel() -> void:
 	var rows := [
 		"koşu: %d   zafer: %d   düşüş: %d" % [int(d.get("runs", 0)), int(d.get("victories", 0)), int(d.get("deaths", 0))],
 		"toplam kesim: %d   ·   en derin: %d" % [int(d.get("kills", 0)), int(d.get("best_depth", 0))],
+		"itibar: %s   (◆ ödeme ×%0.2f — %d puan)" % [Quests.rep_name(), Quests.rep_mult(), int(d.get("rep", 0))],
 		"choralim rezervi: ◆ %d" % int(d.get("choralim", 0)),
 		"en yüksek skor: %d" % int(d.get("best_score", 0)),
 		"en uzun seri: x%d" % int(d.get("best_streak_all", 0)),
@@ -3278,7 +3279,7 @@ func pause_panel() -> void:
 	_pause(true)
 	var v := _show_panel("pause", "DURAKLATILDI", Color(0.6, 0.6, 0.75))
 	var st: Dictionary = G.meta.data.settings
-	for opt in [["shake", "Ekran sarsıntısı"], ["crt", "CRT taraması"], ["mus", "Müzik"], ["sfx", "Efekt sesi"], ["full", "Tam ekran"]]:
+	for opt in [["shake", "Ekran sarsıntısı"], ["crt", "CRT taraması"], ["mus", "Müzik"], ["sfx", "Efekt sesi"], ["full", "Tam ekran"], ["mmap", "Mini harita"]]:
 		var key: String = opt[0]
 		var row := HBoxContainer.new()
 		row.alignment = BoxContainer.ALIGNMENT_CENTER
