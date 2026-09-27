@@ -500,6 +500,10 @@ func _edge_targets() -> Array:
 			out.append({"p": G.room.merchant_pos, "icon": "ico_loot", "col": "ffd700", "s": 24.0})
 		if G.room.stray_active:
 			out.append({"p": G.room.stray_pos, "icon": "ico_boon", "col": "8fd4ff", "s": 22.0})
+		for vv in G.room.veins:
+			var vs: Sprite2D = vv.get("node")
+			if is_instance_valid(vs):
+				out.append({"p": vv["pos"], "icon": "ico_frag", "col": "ffd75f", "s": 22.0})
 	return out
 
 func _tick_edge() -> void:
