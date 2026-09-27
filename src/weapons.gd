@@ -231,6 +231,24 @@ const DEFS := {
 		"b": {"dmg": 56.0, "cd": 1.6, "n": 6.0, "r": 88.0, "tel": 0.55, "frag": 8.0},
 		"hidden": true,
 	},
+	# zincir ark arketipi: öndeki ilk hedeften başlar, düşmanlar arasında sıçrar,
+	# her sıçramada hasar sönümlenir (bolt'un rastgele gök vuruşundan farklı —
+	# ön cepheye odaklı, kalabalıkta değerlenir)
+	"volt": {
+		"name": "VOLT ZİNCİRİ", "icon": "icn_kovan", "col": "7fe0ff",
+		"desc": "Öndeki düşmana akım zinciri — düşmanlar arasında sıçrar",
+		"b": {"dmg": 15.0, "cd": 1.35, "n": 3.0, "hop": 190.0, "falloff": 0.85},
+		"inc": {"dmg": 4.0, "n": 0.35, "hop": 5.0, "cd": -0.04},
+		"feats": {5: {"n": 1.0}, 8: {"falloff": -0.12}},
+		"evo": "lens", "into": "volt_x",
+		"req": {"kills": 3000},
+	},
+	"volt_x": {
+		"name": "ŞEBEKE", "icon": "icn_kovan", "col": "b7f4ff",
+		"desc": "Ön cepheyi dolaşan elektrik ağı",
+		"b": {"dmg": 42.0, "cd": 0.95, "n": 8.0, "hop": 240.0, "falloff": 0.92},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -436,7 +454,7 @@ static func draft_opts(p: Player, luck: float) -> Array:
 static func _lvl_desc(wid: String, lvl: int) -> String:
 	var a := stats(wid, lvl - 1)
 	var b := stats(wid, lvl)
-	var labels := {"dmg": "hasar", "cd": "bekleme", "reach": "menzil", "arc": "kavis", "n": "adet", "r": "yarıçap", "spd": "hız", "spin": "dönüş", "dur": "süre", "chain": "zincir", "knock": "savurma"}
+	var labels := {"dmg": "hasar", "cd": "bekleme", "reach": "menzil", "arc": "kavis", "n": "adet", "r": "yarıçap", "spd": "hız", "spin": "dönüş", "dur": "süre", "chain": "zincir", "knock": "savurma", "hop": "sıçrama"}
 	var parts: Array = []
 	for k in labels:
 		if absf(float(b.get(k, 0.0)) - float(a.get(k, 0.0))) > 0.01:
@@ -536,6 +554,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"sentry", "sentry_x": _sentry(st, p, wid)
 		"aura", "aura_x": _aura(st, p)
 		"mortar", "mortar_x": _mortar(st, p, w)
+		"volt", "volt_x": _volt(st, p)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
@@ -674,6 +693,74 @@ static func _strike(e: Enemy, dmg: float, p: Player, chain: int) -> void:
 				bd = dd
 				nxt = o
 		cur = nxt
+
+# volt zinciri: ilk hedef ön yarı düzlemde aranır (aim yönü), sonra zincir
+# en yakın henüz vurulmamış düşmana sıçrar; hasar her adımda falloff ile sönümlenir
+static func _volt(st: Dictionary, p: Player) -> void:
+	var reach := 340.0 * p.area_mult
+	var aim := p.move_dir if p.move_dir.length_squared() > 0.01 else p.aim_dir
+	var first: Enemy = null
+	var bd := reach
+	for e in G.enemies:
+		if not is_instance_valid(e) or e.dead:
+			continue
+		var dd := p.pos.distance_to(e.pos)
+		if dd < bd and aim.dot((e.pos - p.pos).normalized()) > 0.15:
+			bd = dd
+			first = e
+	if first == null:
+		first = _nearest(p.pos, reach * 0.7)
+	if first == null:
+		G.fx.burst(p.pos + Vector2(0, -30), Px.C("7fe0ff"), 5, 110.0, 3.0, 0.22)
+		return
+	var hops := maxi(1, roundi(float(st.n)))
+	var fall := float(st.get("falloff", 0.85))
+	var dmg := float(st.dmg) * p.dmg_mult
+	var cur: Enemy = first
+	var prev := p.pos + Vector2(0, -20)
+	var seen := {}
+	var hop_r := float(st.get("hop", 190.0)) * p.area_mult
+	while cur != null and hops > 0:
+		seen[cur] = true
+		_zap_seg(prev, cur.pos + Vector2(0, -14))
+		var crit := G.chance(p.crit_ch)
+		var h := {"dmg": dmg * (p.crit_mult if crit else 1.0), "type": G.DamageType.SHOCK, "from": prev, "knock": 3.0, "stagger": 0.25, "source": p, "crit": crit, "wpn": _fwpn}
+		cur.take_hit(h)
+		p.on_dealt_damage(cur, h)
+		G.fx.light_flash(cur.pos + Vector2(0, -18), Px.C("7fe0ff"), 1.5, 1.7, 0.14)
+		dmg *= fall
+		hops -= 1
+		prev = cur.pos
+		var nxt: Enemy = null
+		var bd2 := hop_r
+		for o in G.enemies:
+			if not is_instance_valid(o) or o.dead or seen.has(o):
+				continue
+			var dd := prev.distance_to(o.pos)
+			if dd < bd2:
+				bd2 = dd
+				nxt = o
+		cur = nxt
+	G.audio.play("zap", G.rf(1.0, 1.3), 0.45)
+
+# kırıklı yıldırım segmenti — Line2D, birkaç karede söner
+static func _zap_seg(a: Vector2, b: Vector2) -> void:
+	var l := Line2D.new()
+	l.width = 2.5
+	l.default_color = Color(0.55, 0.9, 1.0, 0.9)
+	l.z_index = 70
+	var pts := [a]
+	var segs := 3
+	for i in range(1, segs):
+		var t := float(i) / float(segs)
+		var mid := a.lerp(b, t) + Vector2(G.rf(-9, 9), G.rf(-9, 9))
+		pts.append(mid)
+	pts.append(b)
+	l.points = PackedVector2Array(pts)
+	G.game.world.add_child(l)
+	var tw := l.create_tween()
+	tw.tween_property(l, "modulate:a", 0.0, 0.16)
+	tw.tween_callback(l.queue_free)
 
 static func _nova(st: Dictionary, p: Player) -> void:
 	var r := float(st.r) * p.area_mult
