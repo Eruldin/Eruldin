@@ -54,6 +54,7 @@ const NODES := [
 		]}},
 	]},
 	{"id": "tasocagi","name": "ÇATLAK OCAK",       "icon": "icn_mine",    "pos": Vector2(560, 70),  "col": "ffab91", "kind": "arena", "biome": 1, "unlock": "node", "desc": "Çatlakların altında ocak — elit kaynağı, kovan kesintisiz.", "lore": "Simithar'ın ilk ocağı; damarın çatlağı hâlâ yanıyor. Elitler çatlağın nabzını nöbet tutar gibi koruyor.", "mods": {"elite_t": 0.5, "spawn": 1.1, "dmg": 1.1, "loot": 1.3, "frag": 1.1}},
+	{"id": "kayipvardiya","name": "KAYIP VARDİYA", "icon": "icn_mine",    "pos": Vector2(640, 155), "col": "ffcc80", "kind": "arena", "biome": 1, "unlock": "node", "desc": "Simithar'ın son vardiya galerisi — sürü kesintisiz iner, damarlar hâlâ dolu.", "lore": "Vardiya defterinin son imzası: 'kapağı biz kapattık — damar artık kovanın, galeri artık karanlığın.' Aşağıda hâlâ makine sesi var; kimse söndürmedi.", "mods": {"spawn": 1.3, "frag": 1.45, "elite_t": 0.7, "loot": 1.25, "hp": 1.15, "dusk": true}},
 	{"id": "kum",     "name": "KIZIL ÇÖL",        "icon": "ico_run",     "pos": Vector2(70, 300),  "col": "e8a050", "kind": "arena", "biome": 6, "unlock": "node", "desc": "Kızıl kum denizi — çölayan varl sürüleri, kum fırtınaları, seyrek ama sert kovan.", "lore": "İmparatorluk haritalarında burası boş bırakılmış — 'kızıl' denip geçilmiş. Kumun altında choralim kaktüsleri çiçek açıyor; varller izlerini rüzgâra gömer.", "mods": {"spawn": 0.9, "hp": 1.2, "dmg": 1.1, "frag": 1.5, "loot": 1.2}},
 	{"id": "sondurme","name": "SÖNDÜRÜLMÜŞ FIRIN",  "icon": "ico_frag",    "pos": Vector2(1120, 640), "col": "b0bec5", "kind": "story", "unlock": "boss twins","desc": "İmparatorluğun son fırını — gövdesi soğuk, içi hâlâ dolu.", "lore": "Efendiler burada dövüldü. Fırın söndü ama korları — içlerinde kilitli bir Hisar Kalkanı, kovanın eli değmemiş halde.", "choices": [
 		{"label": "FIRINI KURTAR — kalkanı al", "sub": "Hisar Kalkanı korlarda bekliyor — ama fırını açmak külü havalandırır: sonraki koşunda sürü biraz daha yoğun.", "rew": {"cho": 140, "item": "i_hisar", "omen": {"spawn": 1.12, "frag": 1.15}, "cine": [{"tex": "cine_5_0", "title": "FIRIN AÇILDI", "sub": "Korların arasından bir kalkan çıkardın — hâlâ dövülmüş metal sıcaklığında. Küller kabardı, sonra duruldu."}]}},
@@ -140,6 +141,7 @@ const EDGES := [
 	["kulovasi", "avlis"],
 	["vatika", "yemin"], ["kayalik", "yemin"],
 	["yol", "tasocagi"], ["tasocagi", "yuvalar"],
+	["tasocagi", "kayipvardiya"], ["b1", "kayipvardiya"], ["yol", "kayipvardiya"],
 	["avlis", "sondurme"], ["kulovasi", "sondurme"],
 	["b0", "kum"], ["pazar", "kum"], ["kum", "fisilti"],
 	["kum", "vaha"], ["vaha", "fisilti"], ["vaha", "batik"],
