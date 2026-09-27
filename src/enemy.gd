@@ -102,6 +102,8 @@ var _cd_t := 0.0
 var _strike_dir := Vector2.ZERO
 var _tele := {}
 var _has_tok := false          # holds an attack-director token
+var _revived := false          # hortlak elit: diriliş hakkı harcandı
+var _revive_pending := false   # hortlak elit: diriliş sayacı dönüyor
 var _orbit := 1.0              # strafe direction while waiting for a token
 
 static func spawn(p_kind: int, p_pos: Vector2, p_elite: bool, hp_scale: float, dmg_scale: float, parent: Node) -> Enemy:
@@ -233,7 +235,7 @@ func _setup_stats(hs: float, ds: float) -> void:
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name
-		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal"][randi() % 16]
+		affix = ["armored", "volatile", "swift", "sparked", "caller", "vampir", "mender", "split", "surucu", "iz", "warp", "koruyucu", "yansi", "muhur", "bile", "kristal", "hortlak"][randi() % 17]
 		match affix:
 			"armored":
 				armor += 5.0
@@ -279,6 +281,8 @@ func _setup_stats(hs: float, ds: float) -> void:
 				actor_name = "MÜHÜRLÜ " + actor_name
 			"kristal":
 				actor_name = "KRİSTALLİ " + actor_name
+			"hortlak":
+				actor_name = "HORTLAK " + actor_name
 	max_hp *= hs
 	touch_dmg *= ds
 	proj_dmg *= ds
@@ -327,7 +331,7 @@ func _make_body() -> void:
 		G.fx.mk_light(self, Vector2(0, -18), Px.C("80d8ff"), 0.35, 1.2)
 	if elite:
 		base_color = Color(0.9, 0.65, 1.0)
-		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4"}.get(affix, "7B1FA2")
+		var lc: String = {"armored": "8ea0b5", "volatile": "ff5533", "swift": "00E5FF", "sparked": "ffe066", "caller": "4dd0e1", "vampir": "d32f2f", "mender": "69f0ae", "split": "ff9e4d", "surucu": "c0ca33", "iz": "ff7043", "warp": "b388ff", "koruyucu": "80cbc4", "yansi": "ff8a65", "muhur": "7fdbff", "bile": "e1f5fe", "kristal": "80ffd4", "hortlak": "90a4ae"}.get(affix, "7B1FA2")
 		G.fx.mk_light(self, Vector2(0, -18), Px.C(lc), 0.5, 1.6)
 		if affix == "koruyucu":
 			var aura := Sprite2D.new()
@@ -406,6 +410,12 @@ func _process(_d: float) -> void:
 			if _rise_t <= 0:
 				_st = St.SEEK
 				body.modulate = base_color
+				if _revive_pending:
+					_revive_pending = false
+					hp = max_hp * 0.4
+					G.fx.burst(pos, Px.C("90a4ae"), 18, 160.0, 4.0, 0.5)
+					G.fx.float_text(pos + Vector2(0, -44), "HORTLAK", Px.C("90a4ae"), 0.9)
+					G.audio.play("roar", 0.7, 0.4)
 		St.SEEK: _seek(d)
 		St.WINDUP: _windup(d)
 		St.STRIKE: _strike(d)
@@ -813,6 +823,20 @@ func take_hit(h: Dictionary) -> void:
 
 func die(h: Dictionary) -> void:
 	if dead:
+		return
+	# HORTLAK elit: ilk ölümde çöker, 1.6sn sonra %40 canla dirilir — yükselirken vurulursa kalıcı ölür
+	if affix == "hortlak" and not _revived and is_instance_valid(G.room):
+		_revived = true
+		_revive_pending = true
+		affix = ""
+		hp = 0.0
+		_release_tok()
+		G.fx.kill_tele(_tele)
+		_st = St.RISE
+		_rise_t = 1.6
+		G.fx.tele_circle(pos, 58.0, 1.6, Color(0.45, 0.55, 0.7, 0.3))
+		G.fx.float_text(pos + Vector2(0, -44), "hortlak diriliyor", Px.C("90a4ae"), 0.9)
+		G.audio.play("ui", 0.5, 0.4)
 		return
 	_release_tok()
 	G.fx.kill_tele(_tele)
