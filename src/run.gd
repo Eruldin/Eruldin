@@ -525,7 +525,7 @@ func _write_last_run(win: bool) -> void:
 	if not bet.is_empty():
 		G.meta.data["bet"] = {}
 		var bt := str(bet.get("type", ""))
-		var ok := win if bt == "win" else int(time) >= int(bet.get("need", 0))
+		var ok := win if bt == "win" else (int(stats.get("kills", 0)) >= int(bet.get("need", 0)) if bt == "kills" else int(time) >= int(bet.get("need", 0)))
 		if ok:
 			var pay := int(bet.get("pay", 0))
 			G.meta.add_choralim(pay)
