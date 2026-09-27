@@ -175,7 +175,7 @@ func start_run() -> void:
 		_skip_waylay = false
 		wk = ""
 	elif wk == "" and randf() < 0.35:
-		wk = G.pick(["pusu", "kervan", "harabe", "gezgin", "siginak"])
+		wk = G.pick(["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak"])
 	if wk != "":
 		G.ui.travel_event(wk, node_name)
 	else:

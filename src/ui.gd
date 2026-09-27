@@ -1884,6 +1884,9 @@ const WAYLAY := {
 	"siginak": {"name": "GÖÇEBE SIĞINAĞI", "col": "66bb6a",
 		"sub": "Yolun kıyısında terk edilmiş bir göçebe barınağı — emberleri hâlâ sıcak, rafları dolu. Viator burada dinlenir; yağmacılar da.",
 		"opts": ["KONAKLA — +30 can ve +%10 şansla sahaya in", "SÖK — rasgele eşya, ama kovan alarmı çalar (kuşatılmış giriş)"]},
+	"tutsak": {"name": "ZİNCİRLİ YOLCU", "col": "ffab91",
+		"sub": "Bir gezgin kaya dibine zincirlenmiş — konakçı devriyeleri onu yem olarak bırakmış, etrafta nöbetçi sinyalleri dönüyor. Zinciri kırarsan sürü üstüne çöker; sessizce geçersen kimse fark etmez.",
+		"opts": ["KURTAR — kuşatılmış giriş, ama zulasındaki eşyayı sana bırakır", "GEÇ — nöbetçileri uyandırma"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -1966,6 +1969,14 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				G.run.pending_ambush = true
 				Items.drop_to_run(Items.roll(G.run.luck))
 				toast("sığınak söküldü — eşya alındı, kovan uyandı")
+		"tutsak":
+			if idx == 0:
+				G.run.pending_ambush = true
+				G.run.luck += 0.15
+				Items.drop_to_run(Items.roll(G.run.luck))
+				toast("zincir kırıldı — yolcu zulasını verdi, sürü harekete geçti")
+			else:
+				toast("yolcu arkanda kaldı — yolun sessiz")
 	G.audio.jingle("boon")
 	_close_overlay()
 	G.run._enter_arena()
