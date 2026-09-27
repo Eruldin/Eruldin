@@ -99,6 +99,7 @@ const DEFS := [
 	{"id": "q_balcik","giver": "ahusk",   "name": "ÇAMURUN İÇİNDEKİ",   "desc": "Balçıktan yürüyenler kervan yolunu kesiyor — bırakırsan yarası kapanıyor. On tanesini çökert, kalbini sana tılsım yapayım.", "obj": {"type": "kind", "k": "Balçık Adam", "n": 10}, "rew": {"cho": 200, "item": "i_balcikkalp"}, "prereq": "q_sarnic"},
 	{"id": "q_sivri", "giver": "ahusk",   "name": "BULUT KESİCİ",       "desc": "Bulut kervanların üstüne çöküyor — kırk sivri kes, kanlarından aşı çıkarayım. Kim bilir, kalbi de kızarsa durma.", "obj": {"type": "kind", "k": "Sivri Bulutu", "n": 40}, "rew": {"cho": 200, "item": "i_sivriasi"}, "prereq": "q_balcik"},
 	{"id": "q_fener2","giver": "ahusk",   "name": "FENER IŞIĞI",        "desc": "Bataklığın içinde eğik bir fener hâlâ şarkı söylüyor — eski yolların kılavuzu. Balçıktan yürüyenler kuleyi kuşattı; on ikisini durdur, fenerin yolunu sana göstereyim.", "obj": {"type": "kind", "k": "Balçık Adam", "n": 12}, "rew": {"cho": 200, "node": "batikfener"}, "prereq": "q_sivri"},
+	{"id": "q_zehir", "giver": "ahusk",   "name": "ZEHİR TUZAĞI",        "desc": "Bataklığın yeşil fışkiyeleri sadece senin ciğerini yakmaz — koronun da işine gelir. Gaz havuzunun içinde yirmi düşman çökert; zehir bezini sana yaparım.", "obj": {"type": "zehir", "n": 20}, "rew": {"cho": 240, "item": "i_zehir"}, "prereq": "q_fener2"},
 	{"id": "q_dokuz", "giver": "zirkon",  "name": "SON DEFTER",        "desc": "Defterde sekiz efendi sayfası var — hepsi düşerse protokolün savaş kısmı biter. Son kapanışta praetorian gövde zırhını veririm.", "obj": {"type": "bosses", "n": 8}, "rew": {"cho": 300, "item": "i_praetorian"}, "prereq": "q_final"},
 	{"id": "q_soy",  "giver": "zirkon",  "name": "TÜM SOY",            "desc": "Kaydın eksik — kovanın her soyundan birini görmeden defter kapanmaz. Yirmi bir türü de gözle; kemer takasını yapayım.", "obj": {"type": "kinds", "n": 21}, "rew": {"cho": 260, "item": "i_soykemer"}, "prereq": "q_dokuz"},
 	{"id": "q_kuzgun","giver": "saphire", "name": "KUZGUN TÜYÜ",       "desc": "Tarlalarda yeni bir şey dalıyor — tüyleri işlenirse iyi satılır. 12 Tarla Kuzgunu kes, tüyünü kolye yaparım.", "obj": {"type": "kind", "k": "Tarla Kuzgunu", "n": 12}, "rew": {"cho": 180, "item": "i_tuy"}, "prereq": "q_copcu"},
@@ -504,6 +505,7 @@ static func obj_text(q: Dictionary) -> String:
 		"hazine": return "%d hazine düğümü yağmala" % need
 		"cameo":  return "%d yoldaş karşılaşması geçir" % need
 		"firtina": return "%d kesimi kum fırtınasında yap" % need
+		"zehir":  return "%d kesimi gaz havuzunda yap" % need
 		"baskin": return "%d baskın altında zafer" % need
 	return "?"
 

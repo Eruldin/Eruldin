@@ -455,7 +455,12 @@ func _place_hazards(depth: int) -> void:
 			2:
 				add_slowzone(p, 52.0, -1.0)                                # radiation field
 			4:
-				add_slowzone(p, 60.0, -1.0)                                # batak çamuru — çeken balçık
+				if i == 0:
+					add_slowzone(p, 60.0, -1.0)                            # batak çamuru — çeken balçık
+				else:
+					# zehir fiskiyesi: iki tarafi da yakan yesil gaz havuzu — suruyu icine cek
+					add_hazard(p, 50.0, 10.0, -1.0, Color(0.55, 0.9, 0.3, 0.22))
+					hazards[hazards.size() - 1]["kind"] = "toxic"
 			5:
 				# Kül Ovası: lav fışkırtıcı — turuncu telegraph'lı püskürme
 				var t5 := G.fx.tele_circle(p, 52, 9999.0, Color(1.0, 0.45, 0.1, 0.25))
@@ -1268,6 +1273,13 @@ func _tick_hazards(d: float) -> void:
 				G.player.take_hit({"dmg": h.dps * d, "type": G.DamageType.HAZARD, "from": h.pos, "source": self})
 				var away: Vector2 = (G.player.pos - h.pos).normalized()
 				G.player.pos += (away.rotated(PI * 0.5) * 70.0 + away * 30.0) * d
+		elif h.kind == "toxic":
+			# iki tarafli gaz: oyuncuya hafif, suruye agir — cekerek kullanilir
+			if dist < h.r:
+				G.player.take_hit({"dmg": h.dps * d, "type": G.DamageType.HAZARD, "from": h.pos, "source": self})
+			for e in G.enemies:
+				if is_instance_valid(e) and not e.dead and e.pos.distance_to(h.pos) < h.r:
+					e.take_hit({"dmg": h.dps * 1.7 * d, "type": G.DamageType.HAZARD, "from": h.pos, "source": self})
 		elif h.dps > 0 and dist < h.r:
 			G.player.take_hit({"dmg": h.dps * d, "type": G.DamageType.HAZARD, "from": h.pos, "source": self})
 	for i in range(slows.size() - 1, -1, -1):
