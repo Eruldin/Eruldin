@@ -162,6 +162,7 @@ static func ui_font() -> Font:
 	return _font
 
 var root: Control
+var _waylay_npc := ""   # ESKİ MUHAFIZ yol olayında görünen kurtarılmış NPC
 var _hud: Control
 var _hp_bar: ColorRect
 var _hp_hi: ColorRect
@@ -2106,6 +2107,9 @@ const WAYLAY := {
 	"konservi": {"name": "KORO KONSERVİ", "col": "e8d060",
 		"sub": "Yol kenarında yarı gömülü bir Koro aktarıcısı hâlâ baskın nabzını yayınlıyor — içindeki diyapazon hâlâ ayarlı. Sızdırılmış frekansı bozarsan işaret başka düğüme kayar; kulak verirsen ritim zihnine yazılır.",
 		"opts": ["FREKANSI BOZ — baskın işareti başka düğüme kayar", "RİTMİ DİNLE — +%15 şansla sahaya in"]},
+	"muhafiz": {"name": "ESKİ MUHAFIZ", "col": "8fd4ff",
+		"sub": "Yolun taşında tanıdık bir sırt çantası — kafesten kurtardığın yoldaşlardan biri erzak taşıyor. Kampın sınırına kadar sana eşlik eder.",
+		"opts": ["PAYLAŞ — yoldaşın zulasını sana açar", "SELAMLA — ◈20 ve iyi yolculuklar"]},
 }
 
 func travel_event(wkind: String, dest: String) -> void:
@@ -2115,7 +2119,17 @@ func travel_event(wkind: String, dest: String) -> void:
 	var nm := _lbl(str(d.name), Vector2.ZERO, 16, Px.C(str(d.col)))
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(nm)
-	var sub := _lbl(str(d.sub), Vector2.ZERO, 13, Color(0.85, 0.85, 0.92))
+	_waylay_npc = ""
+	var sub_text := str(d.sub)
+	if wkind == "muhafiz":
+		var resc: Array = []
+		for rn in ["mina", "lena", "orun"]:
+			if bool(G.meta.data.get("rescued_" + rn, false)):
+				resc.append(rn)
+		if not resc.is_empty():
+			_waylay_npc = str(G.pick(resc))
+			sub_text = "Yolun taşında %s duruyor — kafesten çıktığından beri kendi erzakını taşıyor. Seni gördü, sırt çantasının ağzını açtı: 'Kamp yolu ayrı; bu sana bölüşür.'" % str(NPC.NAMES.get(_waylay_npc, _waylay_npc))
+	var sub := _lbl(sub_text, Vector2.ZERO, 13, Color(0.85, 0.85, 0.92))
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sub.custom_minimum_size = Vector2(560, 0)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2196,6 +2210,24 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 				toast("zincir kırıldı — yolcu zulasını verdi, sürü harekete geçti")
 			else:
 				toast("yolcu arkanda kaldı — yolun sessiz")
+		"muhafiz":
+			if idx == 0:
+				match _waylay_npc:
+					"mina":
+						G.run.pending_heal = 45.0
+						toast("Mina'nın çorbası — sahaya tok iniyorsun")
+					"lena":
+						G.run.luck += 0.2
+						G.run.fragments += 40
+						toast("Lena'nın kısayolu — şans ve parçacık")
+					"orun":
+						var hot := str(G.meta.data.get("hot_node", ""))
+						G.run.frag_node *= 1.15
+						toast("Orun fısıldıyor — baskın %s'de, frag bereketi arttı" % str(Wmap.node(hot).get("name", "bilinmiyor")))
+			else:
+				G.run.fragments += 20
+				toast("yoldaş selamladı — ◈+20")
+			Quests.tick("cameo")
 		"konservi":
 			if idx == 0:
 				# sızdırılmış frekans: baskın işareti erişilebilir başka bir düğüme kayar
