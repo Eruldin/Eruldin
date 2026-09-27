@@ -1052,7 +1052,11 @@ func _merge_gems() -> void:
 func _collect(pk: Node) -> void:
 	match str(pk.get_meta("kind", "frag")):
 		"xp":
-			G.player.add_xp(float(pk.get_meta("val")))
+			var xv := float(pk.get_meta("val"))
+			G.player.add_xp(xv)
+			G.fx.burst(pk.position, Px.C("7fd4ff"), 4, 100.0, 2.5, 0.22)
+			if xv >= 25.0:
+				G.fx.float_text(pk.position + Vector2(0, -18), "+%d" % roundi(xv), Px.C("7fd4ff"), 0.85)
 			G.audio.play("pickup", G.rf(1.2, 1.4), 0.35)
 		"heal":
 			G.player.heal(24.0)
