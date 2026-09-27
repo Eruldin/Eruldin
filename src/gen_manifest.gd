@@ -25,6 +25,7 @@ const SPRITES := {
 	"por_anasi": "art/por_anasi.png",
 	"por_dev": "art/por_dev.png",
 	"por_kor": "art/por_kor.png",
+	"por_h9": "art/por_h9.png",
 	"prop_mahkum2": "art/prop_mahkum2.png",
 	# sahne vistalari (uretilmis): backdrop katmanlari + arena ufku
 	"bg_0": "art/gen/g_bg_0.png", "bg_1": "art/gen/g_bg_1.png",
@@ -149,6 +150,7 @@ const FRAMES := {
 		"hurt": ["art/gen/g_viawar_7.png"],
 		"die": ["art/gen/g_viawar_7.png"],
 	},
+	"c_h9": {},
 	"husk": {}, "sentinel": {}, "spitter": {}, "turret": {}, "drone": {},
 	"c_varl": {}, "c_cereb": {}, "c_konakci": {}, "c_alfa": {}, "c_carrier": {}, "c_herald": {}, "c_akrep": {}, "c_balcik": {}, "c_gozetmen": {}, "c_copcu": {}, "c_dinamitci": {},
 	"rex": {}, "host": {}, "nahum": {}, "tuman": {}, "kirin": {}, "const": {},
@@ -164,4 +166,5 @@ static func frames() -> Dictionary:
 	d["c_carrier"] = _en("g_carrier")
 	for k in ["rex", "host", "nahum", "tuman", "kirin", "const", "anasi", "dev", "kor"]:
 		d[k] = _bs("g_" + k)
+	d["c_h9"] = _hero("g_h9")
 	return d
