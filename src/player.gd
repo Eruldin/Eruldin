@@ -162,9 +162,11 @@ func _process(_d: float) -> void:
 	_move(d)
 	_tick_anim(d)
 	_pick_anim()
-	# Saphire regen + Rex static field
-	if has_meta("regen") and G.state == G.State.ROOM:
-		heal(get_meta("regen") * d)
+	# Saphire regen + Rex static field + Oto Onarım yükseltmesi
+	if G.state == G.State.ROOM:
+		var rg: float = (float(get_meta("regen")) if has_meta("regen") else 0.0) + G.meta.upg(Meta.U.REGEN) * 0.4
+		if rg > 0.0:
+			heal(rg * d)
 	if has_meta("static") and G.state == G.State.ROOM:
 		_static_t -= d
 		if _static_t <= 0:
