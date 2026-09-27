@@ -132,6 +132,7 @@ const DEFS := [
 	{"id": "q_nodmg", "giver": "ehnar",   "name": "HASARSIZ",            "desc": "Şövalyenin asıl sınavı kılıç değil disiplin — sürü seni hiç değmeden yirmi beş saniye ayakta kal. Pelerini o zaman hak edersin.", "obj": {"type": "nodmg", "n": 25}, "rew": {"cho": 300, "item": "i_hayalet"}, "prereq": "q_duvar"},
 	{"id": "q_orta",  "giver": "ehnar",   "name": "ORTA YEMİN",           "desc": "Her sahanın yarısında bir orta efendi uyanır — altın zırhlı, sahanın en ağırı. Beşini devir; nişanını miğferine takayım.", "obj": {"type": "orta", "n": 5}, "rew": {"cho": 320, "item": "i_efendin"}, "prereq": "q_nodmg"},
 	{"id": "q_duel",  "giver": "ehnar",   "name": "ŞAMPİYON NARASI",      "desc": "Yollarda altın muhafızlar düello çağırır — çoğu savaşçı duymazdan gelir. Üç düello kazan; mızrağının yankısını bileğine sararım.", "obj": {"type": "duel", "n": 3}, "rew": {"cho": 340, "item": "i_duel"}, "prereq": "q_orta"},
+	{"id": "q_devriye","giver": "ehnar",   "name": "KOL KESİCİ",            "desc": "Koro artık devriye kolları halinde geziyor — kolu durdurmanın tek yolu başındaki muhafızı düşürmek. Dört devriye başı kes; aparatını kemerine takayım.", "obj": {"type": "devriye", "n": 4}, "rew": {"cho": 360, "item": "i_devriye", "rep": 2}, "prereq": "q_duel"},
 	{"id": "q_karne", "giver": "mina",    "name": "İKSİR KARNESİ",        "desc": "Şifa içecek şişe değil, disiplin ister. Altı iksir iç — karneni ocak defterine işlerim.", "obj": {"type": "iksir", "n": 6}, "rew": {"cho": 140, "item": "i_kemer_par"}, "prereq": "q_sofra"},
 	{"id": "q_nolur",  "giver": "mina",    "name": "NOLUR NOLMAZ",            "desc": "Sofra kurulmadan önce aşçı karnını doyurur — sen de koşuya çıkmadan damlalığını doldur. On iksir daha iç; ocak önlüğümü sana diktireyim.", "obj": {"type": "iksir", "n": 10}, "rew": {"cho": 240, "item": "i_onluk", "rep": 2}, "prereq": "q_karne"},
 	{"id": "q_sofra", "giver": "mina",    "name": "SOFRANIN BEREKETİ",    "desc": "Sahada düşen her şifa küresi ocak için malzeme — on beşini topla, senin için saklarım.", "obj": {"type": "sifa", "n": 15}, "rew": {"cho": 160, "item": "i_cevher"}},
@@ -528,6 +529,7 @@ static func obj_text(q: Dictionary) -> String:
 		"bora":   return "%d kesimi donmuş borada yap" % need
 		"ayin":   return "%d ayinde kanını ver" % need
 		"baskin": return "%d baskın altında zafer" % need
+		"devriye": return "%d devriye başı kes" % need
 	return "?"
 
 static func _claimed_count() -> int:
