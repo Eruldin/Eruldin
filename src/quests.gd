@@ -105,7 +105,8 @@ const DEFS := [
 	{"id": "q_boynuz","giver": "saphire", "name": "BOYNUZ TAKASI",      "desc": "Çoraklıkta boynuzlu bir şey insanları devirmiş — koçbaşı sürüsü çizgisine dikkat et. Sekiz Kocboynuz kes, boynuzundan pence yapayım.", "obj": {"type": "kind", "k": "Kocboynuz", "n": 8}, "rew": {"cho": 200, "item": "i_boynuz"}, "prereq": "q_kuzgun"},
 	{"id": "q_yuk",   "giver": "zirkon",  "name": "YÜK USTASI",         "desc": "Aşırı yük motoru ısınmadan öğrenilmez — deftere 15 yakma kaydı düş, kayışını takayım.", "obj": {"type": "over", "n": 15}, "rew": {"cho": 240, "item": "i_sarj"}, "prereq": "q_soy"},
 	{"id": "q_avlu",  "giver": "ehnar",   "name": "AVLU SINAVI",        "desc": "Efendi Avlusu'nda altı efendi arka arkaya nöbet tutar — zincirin tamamını tek koşuda kes, penceyi takas ederim.", "obj": {"type": "won_node", "id": "avlis", "n": 1}, "rew": {"cho": 280, "item": "i_efendipence"}, "prereq": "q_kor"},
-	{"id": "q_kayit", "giver": "neva",    "name": "SEKİZ KÜTÜK",        "desc": "Saha eski defterini dağıttı — sekiz kütük var, hepsi sende toplanırsa sessiz çizmeyi söylerim.", "obj": {"type": "kayit", "n": 8}, "rew": {"cho": 200, "item": "i_kozcizme"}, "prereq": "q_vatika"},
+	{"id": "q_kutuk", "giver": "neva",    "name": "SEKİZ KÜTÜK",        "desc": "Saha eski defterini dağıttı — sekiz kütük var, hepsi sende toplanırsa sessiz çizmeyi söylerim.", "obj": {"type": "kayit", "n": 8}, "rew": {"cho": 200, "item": "i_kozcizme"}, "prereq": "q_vatika"},
+	{"id": "q_koz",   "giver": "neva",    "name": "KADER KOLEKSİYONU",   "desc": "Kader kartları şarkının notaları — her biri başka bir geleceği dener. Yirmi farklı kozu koşularda yak; koleksiyon defterime eklensin.", "obj": {"type": "koz", "n": 20}, "rew": {"cho": 320, "rep": 3}, "prereq": "q_kutuk"}, 
 	{"id": "q_nuve",  "giver": "ahusk",   "name": "DAMARIN ÇEYİZİ",    "desc": "Damar kıran iyi beslenir — on damar kır, nüve halkasını takarım.", "obj": {"type": "vein", "n": 10}, "rew": {"cho": 220, "item": "i_nuve"}, "prereq": "q_balcik"},
 	{"id": "q_govde","giver": "david",   "name": "HER GÖVDE BİR DERS",  "desc": "Ely'nin kasası tek başına kovanı yormaz — her şasi ayrı ders. Üç farklı gövdeyle zafer kazan; hangi şasiyle dönersen dön, seni bekleyen şeyi çizim yapayım.", "obj": {"type": "heros", "n": 3}, "rew": {"cho": 300, "item": "i_ikiz"}, "prereq": "q_gez"},
 	{"id": "q_sefer", "giver": "david",   "name": "SEFER KOMUTANI",      "desc": "Zafer tek düğümle bitmez — zaferin sıcağında bir sonraki düğüme yürümek seferdir. Üç ayaklık bir zincir kur; müfrete geleneği senin adınla yazılır.", "obj": {"type": "sefer", "n": 3}, "rew": {"cho": 340, "rep": 4}, "prereq": "q_anil"},
@@ -303,7 +304,7 @@ static func daily_check() -> void:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes", "sefer", "koz"]:
 		done.append_array(tick(type))
 	daily_check()
 	for q in DEFS:
@@ -372,6 +373,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"champ":   cur = int(G.run.stats.get("champ_kills", 0))
 			"sefer":   cur = int(G.run.stats.get("sefer", 0))
 			"kayit":   cur = (G.meta.data.get("lore", []) as Array).size()
+			"koz":     cur = (G.meta.data.get("arcanas_seen", []) as Array).size()
 			_:         cur = prog(q.id) + n
 		_q()[q.id]["prog"] = maxi(prog(q.id), cur)
 		if cur >= need:
@@ -491,6 +493,7 @@ static func obj_text(q: Dictionary) -> String:
 		"quests": return "%d görev teslim et" % need
 		"item":   return "%s getir" % str(Items.DEFS.get(str(o.get("id", "")), {}).get("name", str(o.get("id", ""))))
 		"kayit":  return "%d veri kütüğü bul" % need
+		"koz":    return "%d farklı koz kartı kullan" % need
 		"champ":  return "%d şampiyon elit kes" % need
 		"won_node": return "%s fethi" % str(Wmap.node(str(o.get("id", ""))).get("name", str(o.get("id", ""))))
 		"sefer":  return "%d ayaklık sefer zinciri" % need
