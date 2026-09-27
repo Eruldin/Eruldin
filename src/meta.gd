@@ -78,6 +78,8 @@ var data := {
 	"neva_song": false,    # Neva'nın şarkısı — sonraki koşuda +%15 XP
 	"rescued_mina": false, # sahada kafesten kurtarılan Aşçı Mina — kampa katılır
 	"mina_meal": false,    # Mina'nın yemeği — sonraki koşuda şifa küresi şansı ×2
+	"rescued_lena": false, # sahada kafesten kurtarılan Kartograf Lena — kampa katılır
+	"lena_route": false,   # Lena'nın keşif güzergâhı — sonraki koşuda saha zengin
 	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0},
 }
 

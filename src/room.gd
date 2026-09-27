@@ -153,6 +153,8 @@ func build_hub() -> void:
 	# kurtarılmış yolcu: sahada kafesi kırılan Mina kampta mutfağını kurar
 	if bool(G.meta.data.get("rescued_mina", false)):
 		NPC.make("mina", Vector2(-300, 200), self)
+	if bool(G.meta.data.get("rescued_lena", false)):
+		NPC.make("lena", Vector2(300, 210), self)
 	# efendi kupaları: düşürülen her boss kamp ateşinin kuzeyinde kafatası bırakır
 	var tb := 0
 	for bid in (G.meta.data.get("bosses", []) as Array):
@@ -1167,6 +1169,20 @@ func _collect(pk: Node) -> void:
 			for i in 3:
 				spawn_heal(pk.position + Vector2(G.rf(-50, 50), G.rf(-36, 36)))
 			G.run.drop_fragments(pk.position, G.ri(15, 25))
+		"mahkum2":
+			# ikinci kafes: Kartograf Lena — kampa katılır
+			if bool(G.meta.data.get("rescued_lena", false)):
+				return
+			G.meta.data["rescued_lena"] = true
+			G.meta.save()
+			G.fx.burst(pk.position + Vector2(0, -20), Px.C("7fb3c9"), 22, 200.0, 5.0, 0.6)
+			G.fx.float_text(pk.position + Vector2(0, -50), "KURTARILDI", Px.C("ffd700"), 1.2)
+			G.fx.flash(Px.C("7fb3c9"), 0.2)
+			G.audio.jingle("boss")
+			G.ui.toast("bir yolcu serbest kaldı — Kartograf Lena kampa katılacak")
+			for i in 3:
+				spawn_heal(pk.position + Vector2(G.rf(-50, 50), G.rf(-36, 36)))
+			G.run.drop_fragments(pk.position, G.ri(15, 25))
 		"chest":
 			G.run.open_chest()
 		"loot":
@@ -1256,8 +1272,11 @@ func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 		"mahkum":
 			pk.texture = Px.S2("prop_mahkum") if Px.S2("prop_mahkum") != null else Px.S("dot")
 			col = "d4a017"
+		"mahkum2":
+			pk.texture = Px.S2("prop_mahkum2") if Px.S2("prop_mahkum2") != null else Px.S("dot")
+			col = "7fb3c9"
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	pk.scale = Vector2.ONE * (0.95 if kind == "cursed" else (0.9 if kind == "mahkum" else 0.8))
+	pk.scale = Vector2.ONE * (0.95 if kind == "cursed" else (0.9 if kind in ["mahkum", "mahkum2"] else 0.8))
 	pk.modulate = Px.C(col)
 	pk.position = p
 	pk.z_index = int(p.y)

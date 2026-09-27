@@ -56,6 +56,11 @@ const LINES := {
 		"Savaşçı karnı doymadan kılıç sallamaz. Otur — kazan sıcak, kaşık temiz.",
 		"Kamptaki herkes acı çeker; sadece aç olan bana gelir. Sen de geleceksin — hep gelirler.",
 	],
+	"lena": [
+		"Kafeste pusulamı kemirerek saydım günleri — kovan beni harita çizsin diye tutuyordu.",
+		"Her düğümün kokusu, her rotanın bedeli var. Ben bilirim — ben ödedim.",
+		"Harita çizilebilir ama kader işaretlenmez, Praetorian. Yine de bir güzergâh borçluyum sana.",
+	],
 }
 
 const DEATH_LINES := [
@@ -83,6 +88,7 @@ const NPC_COL := {
 	"ahusk": "6aa8a0",   # göçebe — soluk çelik
 	"elyb": "9db4c8",    # B-serisi şasi — çelik mavisi
 	"mina": "e8a04c",    # aşçı — soba alevi amber
+	"lena": "7fb3c9",    # kartograf — tozlu çelik mavisi
 }
 
 static var _font: Font
@@ -504,6 +510,8 @@ func _edge_targets() -> Array:
 				out.append({"p": pk.position, "icon": "icn_crown", "col": "ff3355", "s": 24.0})
 			elif k == "mahkum":
 				out.append({"p": pk.position, "icon": "icn_skull", "col": "d4a017", "s": 22.0})
+			elif k == "mahkum2":
+				out.append({"p": pk.position, "icon": "icn_skull", "col": "7fb3c9", "s": 22.0})
 		if G.room.mono_active:
 			out.append({"p": G.room.mono_pos, "icon": "ico_boon", "col": "c26bff", "s": 26.0})
 		if G.room.merchant_active:
@@ -938,6 +946,8 @@ func dialogue(nid: String) -> void:
 		hint.text = "[E / tık] şasi seçimi"
 	elif nid == "mina":
 		hint.text = "[E / tık] mutfak"
+	elif nid == "lena":
+		hint.text = "[E / tık] rota"
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
@@ -996,6 +1006,9 @@ func _advance_overlay() -> void:
 			elif nid == "mina":
 				_close_overlay()
 				kitchen_panel()
+			elif nid == "lena":
+				_close_overlay()
+				routes_panel()
 			elif nid == "saphire":
 				_close_overlay()
 				inventory_panel()
@@ -1010,7 +1023,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray", "kitchen":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray", "kitchen", "routes":
 			_close_overlay()
 		"cine":
 			var c := _overlay
@@ -1124,6 +1137,7 @@ func _service_panel_for(nid: String) -> void:
 		"ehnar":   contract_panel()
 		"ahusk":   blessing_panel()
 		"mina":    kitchen_panel()
+		"lena":    routes_panel()
 		"neva":    song_panel()
 		"saphire": inventory_panel()
 		"elyb":    hero_panel()
@@ -2058,6 +2072,47 @@ func kitchen_panel() -> void:
 			G.audio.jingle("boon")
 			_close_overlay()
 			kitchen_panel())
+	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(h)
+
+# Kartograf Lena: kurtarılmış kaşif — tek koşuluk 'keşif güzergâhı' satar
+func routes_panel() -> void:
+	_pause(true)
+	var v := _show_panel("routes", "KARTOGRAF LENA — rota işaretleri", Px.C("7fb3c9"))
+	var por := TextureRect.new()
+	por.texture = Px.S2("por_lena")
+	por.custom_minimum_size = Vector2(72, 72)
+	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pc := CenterContainer.new()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pc.add_child(por)
+	v.add_child(pc)
+	var has := bool(G.meta.data.get("lena_route", false))
+	var l := _lbl("keşif güzergâhı — sonraki koşunun sahasına ekstra sandık + 4 kalıntı serilir", Vector2.ZERO, 13, Color(0.85, 0.8, 0.7))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(l)
+	var money := _lbl("Saf Choralim: ◆ %d" % G.meta.data.choralim, Vector2.ZERO, 12, Px.C("c26bff"))
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(money)
+	var btn := Button.new()
+	btn.text = "✓ ROTA İŞARETLENDİ — sahaya in" if has else "◆ 40 — GÜZERGÂH AL"
+	btn.disabled = has or G.meta.data.choralim < 40
+	btn.custom_minimum_size = Vector2(200, 30)
+	btn.add_theme_font_override("font", ui_font())
+	var bc := CenterContainer.new()
+	bc.add_child(btn)
+	v.add_child(bc)
+	btn.pressed.connect(func():
+		if not has and G.meta.data.choralim >= 40:
+			G.meta.data["choralim"] -= 40
+			G.meta.data["lena_route"] = true
+			G.meta.save()
+			G.audio.jingle("boon")
+			_close_overlay()
+			routes_panel())
 	var h := _lbl("[E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)

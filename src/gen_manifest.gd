@@ -20,6 +20,9 @@ const SPRITES := {
 	"npc2_mina": "art/c_mina_idle_0.png", "npcb_mina": "art/c_mina_idle_1.png",
 	"por_mina": "art/por_mina.png",
 	"prop_mahkum": "art/prop_mahkum.png",
+	"npc2_lena": "art/c_lena_idle_0.png", "npcb_lena": "art/c_lena_idle_1.png",
+	"por_lena": "art/por_lena.png",
+	"prop_mahkum2": "art/prop_mahkum2.png",
 	# sahne vistalari (uretilmis): backdrop katmanlari + arena ufku
 	"bg_0": "art/gen/g_bg_0.png", "bg_1": "art/gen/g_bg_1.png",
 	"bg_2": "art/gen/g_bg_2.png", "bg_3": "art/gen/g_bg_3.png",
