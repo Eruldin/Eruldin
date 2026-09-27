@@ -743,6 +743,8 @@ func reset_for_run() -> void:
 	dmg_mult += G.meta.upg(Meta.U.DMG) * 0.08
 	# altın nüveler: kalıcı koşu-başı hasar artışı (VS golden egg)
 	dmg_mult += float(G.meta.data.get("eggs", 0)) * 0.005
+	# efendi koleksiyonu: düşürülen her farklı efendi kalıcı +%1 hasar (meta grind)
+	dmg_mult += float((G.meta.data.get("bosses", []) as Array).size()) * 0.01
 	dash_max = 1 + G.meta.upg(Meta.U.DASH)
 	speed = 205.0 * (1.0 + G.meta.upg(Meta.U.SPD) * 0.06)
 	magnet_r = 95.0 + G.meta.upg(Meta.U.MAG) * 45.0
