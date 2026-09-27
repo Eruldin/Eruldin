@@ -59,6 +59,7 @@ const DEFS := [
 	{"id": "q_tekel", "giver": "saphire", "name": "TEKEL BARIŞI",        "desc": "Açgöz bobinleri hâlâ işliyor — tek koşuda 1800 parçacık biriktir, bobinin kalibrasyon hakkı senin.", "obj": {"type": "frag", "n": 1800}, "rew": {"cho": 260}, "prereq": "q_damar"},
 	{"id": "q_fener", "giver": "ehnar",  "name": "YANKI AVCISI",         "desc": "Sahalardaki sinyal fenerleri yankı şampiyonları uyandırıyor. Üç feneri kır — deneme alanı temizlensin.", "obj": {"type": "fener", "n": 3}, "rew": {"cho": 280, "item": "i_cengel"}, "prereq": "q_deneme"},
 	{"id": "q_ocak",  "giver": "ehnar",   "name": "OCAĞIN KAPISI",       "desc": "Kuzeyde çatlak bir ocak var — elitler nabzını koruyor. Tek koşuda 12 elit kes — kapıyı göstereyim.", "obj": {"type": "elites", "n": 12}, "rew": {"cho": 160, "node": "tasocagi"}, "prereq": "q_nobet"},
+	{"id": "q_lena",  "giver": "lena",    "name": "LENA'NIN HARİTASI",    "desc": "Kafes beni haritadan attı; haritayı geri çizelim. Üç farklı düğümde zafer getir — pusulamı sana bırakırım.", "obj": {"type": "nodes", "n": 3}, "rew": {"cho": 200, "item": "i_pusula"}},
 ]
 
 # states in meta.data["quests"]: qid -> {"st": "act"|"done"|"claimed", "prog": int}
@@ -79,6 +80,8 @@ static func state(id: String) -> String:
 			cur = _item_count(str(q.obj.get("id", "")))
 		elif t == "kayit":
 			cur = (G.meta.data.get("lore", []) as Array).size()
+		elif t == "nodes":
+			cur = (G.meta.data.get("won_nodes", []) as Array).size()
 		if cur >= 0:
 			_q()[id]["prog"] = maxi(prog(id), cur)
 		if cur >= int(q.obj.get("n", 1)):
@@ -149,7 +152,7 @@ static func has_business(nid: String) -> bool:
 # koşu sonunda kalan tüm objektif tiplerini son durumla değerlendir
 static func tick_all() -> void:
 	var done: Array = []
-	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein"]:
+	for type in ["kills", "time", "elites", "evos", "loot", "biomes", "win", "score", "frag", "quests", "item", "kayit", "champ", "vein", "nodes"]:
 		done.append_array(tick(type))
 	for q in DEFS:
 		if state(q.id) != "act" or str(q.obj.get("type", "")) != "boss":
@@ -209,6 +212,7 @@ static func tick(type: String, arg := "", n := 1) -> Array:
 			"loot":    cur = (G.run.stats.get("loot", []) as Array).size()
 			"win":     cur = 1 if bool(G.run.stats.get("won", false)) else 0
 			"biomes":  cur = (G.meta.data.get("visited", []) as Array).size()
+			"nodes":   cur = (G.meta.data.get("won_nodes", []) as Array).size()
 			"score":   cur = int(G.run.stats.get("score", 0))
 			"frag":    cur = int(G.run.fragments)
 			"quests":  cur = _claimed_count()

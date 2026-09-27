@@ -48,6 +48,7 @@ const DEFS := {
 	"i_hisar":    {"name": "Hisar Kalkanı",    "slot": "govde",   "r": 1, "icon": "icn_upg_shield", "mods": {"armor": 2.0, "spd": -0.02}},
 	"i_cevher":   {"name": "Cevher Yüzüğü",    "slot": "yuzuk",   "r": 0, "icon": "ico_frag",       "mods": {"frag": 0.08, "xp": 0.04}},
 	"i_cengel":   {"name": "Av Çengeli",       "slot": "eldiven", "r": 2, "icon": "icn_sword",      "mods": {"dmg": 0.08, "ls": 0.015}},
+	"i_pusula":   {"name": "Kuzey Pusulası",   "slot": "kolye",   "r": 2, "icon": "icn_dash",       "mods": {"xp": 0.10, "mag": 50.0}},
 }
 
 const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700"]
