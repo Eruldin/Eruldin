@@ -317,6 +317,22 @@ const DEFS := {
 		"b": {"dmg": 54.0, "cd": 2.3, "r": 115.0, "reach": 150.0, "knock": 24.0, "frag": 3.0},
 		"hidden": true,
 	},
+	# seken arketipi: bilye düşmandan düşmana sıçrar — sırt sırta sürülerde parlar,
+	# tek hedefe karşı zayıf; evo sürümü sekme sayısı ve adedi katlar
+	"seken": {
+		"name": "SIRÇA MERMİ", "icon": "icn_dash", "col": "a5f2f3",
+		"desc": "Düşmanlar arasında seken çelik bilye",
+		"b": {"dmg": 14.0, "cd": 1.6, "n": 1.0, "spd": 480.0, "bnc": 3.0},
+		"inc": {"dmg": 3.5, "bnc": 0.34, "cd": -0.05},
+		"feats": {5: {"n": 1.0}},
+		"evo": "warp", "into": "seken_x",
+	},
+	"seken_x": {
+		"name": "AYNA ODASI", "icon": "icn_crown", "col": "e0f7fa",
+		"desc": "Durmadan seken bilye sağanağı",
+		"b": {"dmg": 38.0, "cd": 1.15, "n": 4.0, "spd": 560.0, "bnc": 8.0},
+		"hidden": true,
+	},
 }
 
 const PDEFS := {
@@ -627,6 +643,7 @@ static func _fire(wid: String, st: Dictionary, p: Player, w: Dictionary) -> void
 		"sis", "sis_x": _sis(st, p, w)
 		"kirbac", "kirbac_x": _whip(st, p, w, wid)
 		"cekic", "cekic_x": _cekic(st, p)
+		"seken", "seken_x": _seken(st, p)
 
 # çekic arketipi: işaretli noktaya gecikmeli ağır darbe — telegraph halkası
 # görünür, çekiç inince alan içindeki herkes dağılır; evo sürümü damar kırıp
@@ -661,6 +678,25 @@ static func _cekic(st: Dictionary, p: Player) -> void:
 		var fr := int(st2.get("frag", 0.0))
 		if fr > 0 and is_instance_valid(G.run):
 			G.run.drop_fragments(at, fr))
+
+# seken arketipi: vurduğu düşmandan en yakın sağlam hedefe seken bilye —
+# projectile.gd'deki bounces/_hitset çiftiyle çalışır; yön ilk hedefe kilitlenir
+static func _seken(st: Dictionary, p: Player) -> void:
+	var tgt := _nearest(p.pos, 520.0)
+	var base_dir := (tgt.pos - p.pos).normalized() if tgt != null else (p.move_dir if p.move_dir.length_squared() > 0.01 else p.aim_dir)
+	var n := maxi(1, roundi(float(st.n)) + p.bonus_proj)
+	for i in n:
+		var dir := Vector2.from_angle(base_dir.angle() + (i - (n - 1) * 0.5) * 0.16)
+		var pr := Projectile.new()
+		G.game.world.add_child(pr)
+		pr.setup(G.Team.PLAYER, p.pos + dir * 20.0, dir * float(st.spd) * p.proj_spd,
+			float(st.dmg) * p.dmg_mult, 7.0, Px.C("a5f2f3"), "spark")
+		pr.wpn = _fwpn
+		pr.bounces = maxi(0, roundi(float(st.get("bnc", 3.0))))
+		pr.knock = 2.5
+		pr.stag = 0.15
+	G.audio.play("shoot", 1.5, 0.55)
+	G.fx.directional(p.pos + Vector2(0, -12), base_dir, Px.C("a5f2f3"), 5, 210.0, 3.0, 0.2)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak
 # yaşar; silah turu sadece sayı ve statları senkronlar, ateş kendi hızında işler
