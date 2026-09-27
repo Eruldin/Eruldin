@@ -2160,6 +2160,9 @@ const WAYLAY := {
 	"surungen": {"name": "KAYIP SÜRÜNGEN", "col": "8dc63f",
 		"sub": "Yolun kenarında korkudan büzülmüş bir sürüngen — senden kaçmıyor, kampın kokusunu almış. Ağıl varsa onu yuvasına götürebilirsin; yoksa salıvermek de bir lütuftur.",
 		"opts": ["KUCAKLA — ağıl varsa hayvan olur, yoksa ◈20 bırakır", "SERBEST BIRAK — sahaya tok in (+14 can)"]},
+	"mezarci": {"name": "MEZAR SOYUCU", "col": "9e9d24",
+		"sub": "Sırtında çuvallarla bir mezar soycusu yolu kesiyor — çuvalın ağzından kemik ve parıltı sızıyor. 'Yarısını bilirim, yarısını mezar bilir. Çek bir çuval, kaderin ne derse o.'",
+		"opts": ["ÇUVAL ÇEK — ◆50, çoğu ganimet, bazıları boş", "GEÇ — ölülerin malı sana göre değil"]},
 	"multeci": {"name": "MÜLTECİ KAŞİFESİ", "col": "bcaaa4",
 		"sub": "Kampa dönmeye çalışan bir aile yolu kesiyor — babanın omzunda kırık bir parıltı taşı, çocuğun elinde kroki bir harita. Parçacık istiyorlar; kampı gerçekten bulup bulmayacaklarını kimse bilmiyor.",
 		"opts": ["◆30 VER — aile kampa ulaşır, itibarın artar", "GEÇ — yolunu aç, selametle"]},
@@ -2200,6 +2203,9 @@ func travel_event(wkind: String, dest: String) -> void:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		if wkind == "gezgin" and i == 0 and int(G.meta.data.get("choralim", 0)) < 120:
+			ob.disabled = true
+			ob.modulate = Color(0.45, 0.45, 0.5)
+		if wkind == "mezarci" and i == 0 and int(G.meta.data.get("choralim", 0)) < 50:
 			ob.disabled = true
 			ob.modulate = Color(0.45, 0.45, 0.5)
 		if wkind == "multeci" and i == 0 and int(G.meta.data.get("choralim", 0)) < 30:
@@ -2313,6 +2319,22 @@ func _waylay_pick(wkind: String, idx: int) -> void:
 			else:
 				G.run.pending_heal = 14.0
 				toast("sürüngen serbest — sahaya tok iniyorsun")
+		"mezarci":
+			if idx == 0:
+				if int(G.meta.data.get("choralim", 0)) >= 50:
+					G.meta.data["choralim"] = int(G.meta.data.get("choralim", 0)) - 50
+					G.meta.save()
+					if randf() < 0.55:
+						Items.drop_to_run(Items.roll(G.run.luck + 0.15))
+						G.run.fragments += 40
+						toast("çuval dolu çıktı — eşya + ◈40")
+					else:
+						toast("boş çuval — mezar bu sefer ağzını kapadı")
+						G.run.stats["mezarci_bos"] = int(G.run.stats.get("mezarci_bos", 0)) + 1
+						G.meta.data["mezar_bos"] = int(G.meta.data.get("mezar_bos", 0)) + 1
+						G.meta.save()
+			else:
+				toast("mezar soycusu çuvallarını omuzlayıp gitti")
 		"multeci":
 			if idx == 0:
 				if int(G.meta.data.get("choralim", 0)) >= 30:

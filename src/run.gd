@@ -251,7 +251,7 @@ func start_run() -> void:
 		_skip_waylay = false
 		wk = ""
 	elif wk == "" and randf() < waylay_chance:
-		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi", "duel", "ayin", "surungen", "multeci"]
+		var wk_list := ["pusu", "kervan", "harabe", "gezgin", "siginak", "tutsak", "konservi", "duel", "ayin", "surungen", "multeci", "mezarci"]
 		# kurtarılan yoldaşlar yolda karşına çıkabilir
 		if bool(G.meta.data.get("rescued_mina", false)) or bool(G.meta.data.get("rescued_lena", false)) or bool(G.meta.data.get("rescued_orun", false)):
 			wk_list.append("muhafiz")
