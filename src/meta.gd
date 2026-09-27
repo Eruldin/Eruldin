@@ -179,6 +179,7 @@ func achievements() -> Array:
 		{"name": "KOVAN ATEŞİ", "desc": "dinamitçi fıçısıyla 30 sürü kesimi yaptır", "done": int(data.get("keg_kills", 0)) >= 30, "rew": 200},
 		{"name": "BASKIN AVCISI", "desc": "koro baskını altında 3 zafer kazan", "done": int(data.get("baskin_wins", 0)) >= 3, "rew": 220},
 		{"name": "SÖZLEŞME USTASI", "desc": "Ehnar'da 8 sözleşme tuttur", "done": int(data.get("contracts_done", 0)) >= 8, "rew": 200},
+		{"name": "MASA KIRANI", "desc": "Tegan'da 6 bahis tuttur", "done": int(data.get("bets_won", 0)) >= 6, "rew": 180},
 	]
 
 # unvanlar — başarımların açtığı lakaplar; src = kilidi açan başarımın adı
@@ -197,6 +198,7 @@ const TITLES := [
 	{"id": "kralice", "name": "ÇÖL TİRANI",      "src": "ÇÖLÜN HÜKÜMRARI"},
 	{"id": "dev",     "name": "BATAKLIK NÖBETÇİSİ","src": "BATAKLIĞIN EFENDİSİ"},
 	{"id": "kor",     "name": "KOR KIRAN",        "src": "KÜLLERİN EFENDİSİ"},
+	{"id": "kumar",   "name": "KUMARBAZ",         "src": "MASA KIRANI"},
 ]
 
 func title_open(tid: String) -> bool:
