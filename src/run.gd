@@ -453,6 +453,12 @@ func _write_last_run(win: bool) -> void:
 	rec["d"] = int(rec.get("d", 0)) + (0 if win else 1)
 	nr[node_id] = rec
 	G.meta.data["node_rec"] = nr
+	# şasi zaferleri — her gövdeyle kazanılan zaferler meta'ya birikir
+	if win:
+		var hw: Dictionary = G.meta.data.get("hero_wins", {})
+		var hid := str(G.meta.data.get("hero", "ely"))
+		hw[hid] = int(hw.get(hid, 0)) + 1
+		G.meta.data["hero_wins"] = hw
 	# tür-bazlı kesimler meta'ya birikir — Zirkon'un kayıtlarında listelenir
 	var kk: Dictionary = stats.get("kind_kills", {})
 	if not kk.is_empty():
