@@ -30,6 +30,10 @@ var draft_reroll := false   # one card reroll available per level-up draft
 var draft_banish := false   # one card banish available per level-up draft
 var banished: Array = []    # ids kovulanlar — bu koşuda draft'a girmez
 var arcana := ""           # koşu başında seçilen KOZ kartı (VS arcana)
+var arcana2 := ""          # 7. dakikada seçilen ikinci KOZ
+
+func has_arcana(a: String) -> bool:
+	return arcana == a or arcana2 == a
 var elite_fever := false   # SARI HAT: elitler %20 sık doğar
 var slow_all := false      # GÖLGE ADIM: sürü %10 yavaşlar
 var pending_ambush := false  # YOL OLAYI pusu: arenaya kuşatılmış girilir
@@ -147,6 +151,7 @@ func start_run() -> void:
 	pending_drafts = 0
 	banished.clear()
 	arcana = ""
+	arcana2 = ""
 	elite_fever = false
 	slow_all = false
 	curse = 0
@@ -296,7 +301,7 @@ func on_kill(_elite: bool) -> void:
 	Quests.tick("kills")
 
 func open_chest() -> void:
-	if arcana == "kasa":
+	if has_arcana("kasa"):
 		fragments += 25
 		G.fx.float_text(G.player.pos + Vector2(0, -30), "+25", Px.C("c9a227"), 0.8)
 	var evos := Weapons.evo_ready(G.player)

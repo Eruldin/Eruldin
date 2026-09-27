@@ -60,6 +60,7 @@ var _merch_fired := false # gezgin tüccar — koşuda bir kez
 var _stray_fired := false  # kayıp şasi — koşuda bir kez
 var _harvest_t := 30.0    # endless-mode reaper cadence
 var _quest_t := 0.0       # 1sn'lik görev tick'i
+var _koz2_fired := false  # 7. dakikada ikinci KOZ taslağı (VS arcana chest)
 
 func _process(d: float) -> void:
 	if not running or G.state != G.State.ROOM or G.player == null or G.player.dead:
@@ -74,6 +75,10 @@ func _process(d: float) -> void:
 	if _quest_t >= 1.0:
 		_quest_t = 0.0
 		Quests.tick("time")
+	# ikinci kader kartı — 7:00'de (elinde ilk kart varsa)
+	if not _koz2_fired and t >= 420.0 and G.run.arcana != "" and G.run.arcana2 == "" and is_instance_valid(G.ui) and not G.ui.overlay_open():
+		_koz2_fired = true
+		G.ui.arcana_choice()
 	if t >= WIN_T and not _won:
 		_won = true
 		G.ui.banner("KOVAN DAĞILIYOR", "dayanma süresi doldu")
