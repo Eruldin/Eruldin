@@ -66,6 +66,7 @@ var data := {
 	"last_run": {},        # son koşu özeti: {kills,time,level,win}
 	"history": [],         # son 5 koşu: {n,k,t,w,s}
 	"won_nodes": [],       # zaferle fethedilmiş wmap node'ları — haraç öder
+	"wep_mastery": {},     # silah başına kümülatif hasar — 25K/50K/75K'de kalıcı +%4
 	"node_rec": {},        # node başına rekor: {s: skor, w: zafer, d: yenilgi}
 	"title": "",           # takılı unvan (TITLES id) — koşu sonu ekranlarında görünür
 	"kind_kills": {},      # tür-bazlı toplam kesimler (Zirkon kayıtları)

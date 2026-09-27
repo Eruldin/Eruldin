@@ -264,7 +264,16 @@ static func stats(wid: String, lvl: int) -> Dictionary:
 		if lvl >= int(f):
 			for k2 in d.feats[f]:
 				out[k2] = out.get(k2, 0.0) + d.feats[f][k2]
+	var mt := mastery_tier(wid)
+	if mt > 0 and out.has("dmg"):
+		out["dmg"] = float(out.dmg) * (1.0 + 0.04 * mt)
 	return out
+
+# kalıcı silah ustalığı: meta'daki kümülatif hasar her 25K'da bir kat (maks 3)
+static func mastery_tier(wid: String) -> int:
+	if not is_instance_valid(G.meta):
+		return 0
+	return mini(3, int(float(G.meta.data.get("wep_mastery", {}).get(wid, 0.0)) / 25000.0))
 
 static func has_w(p: Player, wid: String) -> bool:
 	for w in p.weapons:

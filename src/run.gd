@@ -388,6 +388,20 @@ func _write_last_run(win: bool) -> void:
 		stats["new_record"] = true
 		G.meta.save()
 	Quests.tick_all()
+	# silah ustalığı — wdmg_* koşu hasarları meta'ya birikir; 25K katı başına kalıcı +%4
+	var wm: Dictionary = G.meta.data.get("wep_mastery", {})
+	var _mast_up := false
+	for k in stats.keys():
+		var ks := str(k)
+		if ks.begins_with("wdmg_"):
+			var wid := ks.substr(5)
+			var before := mini(3, int(float(wm.get(wid, 0.0)) / 25000.0))
+			wm[wid] = float(wm.get(wid, 0.0)) + float(stats[k])
+			if mini(3, int(float(wm[wid]) / 25000.0)) > before:
+				_mast_up = true
+	G.meta.data["wep_mastery"] = wm
+	if _mast_up and is_instance_valid(G.ui):
+		G.ui.toast("USTALIK ARTTI — bir silahın kalıcı +%4 hasar kazandı")
 	G.meta.data["last_run"] = {
 		"kills": int(stats.get("kills", 0)),
 		"time": int(time),
