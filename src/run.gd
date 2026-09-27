@@ -383,6 +383,14 @@ func _write_last_run(win: bool) -> void:
 	while hist.size() > 5:
 		hist.pop_front()
 	G.meta.data["history"] = hist
+	# düğüm başına rekor: en iyi skor + zafer/yenilgi sayacı — haritada hover'da okunur
+	var nr: Dictionary = G.meta.data.get("node_rec", {})
+	var rec: Dictionary = nr.get(node_id, {"s": 0, "w": 0, "d": 0})
+	rec["s"] = maxi(int(rec.get("s", 0)), score)
+	rec["w"] = int(rec.get("w", 0)) + (1 if win else 0)
+	rec["d"] = int(rec.get("d", 0)) + (0 if win else 1)
+	nr[node_id] = rec
+	G.meta.data["node_rec"] = nr
 	# tür-bazlı kesimler meta'ya birikir — Zirkon'un kayıtlarında listelenir
 	var kk: Dictionary = stats.get("kind_kills", {})
 	if not kk.is_empty():
