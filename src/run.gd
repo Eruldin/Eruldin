@@ -192,6 +192,25 @@ func start_run() -> void:
 		reward_mult *= 1.0 + 0.15 * yara
 		stats["yara"] = yara
 		G.ui.toast("SAHA YARASI ×%d — koro savunması pekişti, ganimet arttı" % yara)
+	# kaos damarı: düğüm her koşuda başka bir mutasyonla sızar — risk ve ganimet birlikte
+	if bool(node_mods.get("kaos", false)):
+		var roll: Dictionary = G.pick([
+			{"name": "SERTLEŞEN KOVAN",    "mods": {"hp": 1.4, "dmg": 1.25}, "rew": 1.6},
+			{"name": "ELİT SAĞANAĞI",      "mods": {"elite_t": 0.55}, "rew": 1.4},
+			{"name": "PARÇACIK BEREKETİ",  "mods": {"frag": 2.0, "spawn": 1.25}, "rew": 1.3},
+			{"name": "KARANLIK SIZINTI",   "mods": {"noheal": true, "loot": 1.8}, "rew": 1.5},
+			{"name": "HIZ NABZI",          "mods": {"spawn": 1.4, "elite_t": 0.85}, "rew": 1.35},
+		])
+		for mk in (roll.get("mods", {}) as Dictionary):
+			var mv = roll["mods"][mk]
+			if mv is bool:
+				node_mods[mk] = mv
+			else:
+				node_mods[mk] = float(node_mods.get(mk, 1.0)) * float(mv)
+		frag_node = float(node_mods.get("frag", 1.0))
+		reward_mult *= float(roll.get("rew", 1.0))
+		stats["kaos"] = str(roll.name)
+		G.ui.toast("KAOS DAMARI sızdı — bu koşunun mutasyonu: %s" % str(roll.name))
 	if bool(node_mods.get("noheal", false)):
 		G.ui.toast("YEMİN DARESİ — şifa küresi düşmez, tek yaşamla sınan")
 	alive = true
