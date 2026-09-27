@@ -402,10 +402,28 @@ func _ambush() -> void:
 func _surge(m: float) -> void:
 	G.audio.play("roar", 0.7, 0.5)
 	var n := mini(34, 16 + int(m * 2.0))
-	var shapes := ["ring", "wall", "hunt", "twins"]
+	var shapes := ["ring", "wall", "hunt", "twins", "devriye"]
 	if m >= 4.5:
 		shapes.append("alay")
 	match shapes[randi() % shapes.size()]:
+		"devriye":
+			# koro devriyesi — kenardan oyuncuya yürüyen kol; başı elit, ödülü bol
+			G.ui.toast("KORO DEVRİYESİ — kol geçiyor")
+			var ang2 := G.rf(0.0, TAU)
+			var entry := G.room.clamp_pos(G.player.pos + Vector2.from_angle(ang2) * 860.0, 30.0)
+			var dir2 := (G.player.pos - entry).normalized()
+			var head := Enemy.spawn(Enemy.EKind.ALFA, entry, true, _hp_scale(), _dmg_scale(), G.room)
+			if head != null:
+				head.set_meta("patrol", true)
+				head.actor_name = "DEVRİYE BAŞI"
+				if randf() < 0.5:
+					head.affix = "surucu"
+			var cols := int(maxi(10, int(float(n) * 0.6)))
+			for i in cols:
+				var p2 := entry - dir2 * float(i) * 30.0 + dir2.orthogonal() * G.rf(-26.0, 26.0)
+				p2 = G.room.clamp_pos(p2, 20.0)
+				var sk2 := Enemy.EKind.VARL if i % 6 == 0 else Enemy.EKind.HUSK
+				Enemy.spawn(sk2, p2, false, _hp_scale() * 0.7, _dmg_scale(), G.room)
 		"alay":
 			G.ui.toast("KORO ALAYI — sözcüler önde!")
 			var hn := 1 if m < 7.0 else 2
