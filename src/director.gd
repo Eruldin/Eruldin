@@ -508,7 +508,13 @@ func _on_boss_dead(b) -> void:
 				if not _won:
 					_won = true
 					G.ui.banner("ZİNCİR KIRILDI", "altı efendi tek koşuda düştü")
-					G.run.victory()
+					# zincirin sonu da efendi ganimetiyle kapanır
+					if is_instance_valid(G.ui):
+						G.ui.boss_loot(func():
+							if is_instance_valid(G.run):
+								G.run.victory())
+					else:
+						G.run.victory()
 			else:
 				_rush_next = t + 16.0
 				G.ui.toast("EFENDİ %d/6 düştü — sıradaki yaklaşıyor" % _rush_idx)
