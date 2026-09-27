@@ -361,7 +361,7 @@ func _biome_sub(b: int) -> String:
 			"Çürük Bataklık — imparatorluğun unuttuğu çamur, burada hiçbir şey temiz çürümez.",
 			"Kül Ovası — praetorian yangınının hâlâ sıcak külleri.",
 			"Kızıl Çöl — imparatorluğun haritasında boş bırakılan kum denizi.",
-			"Kristal Çukur — choralim damarlarının ham haliyle yüzeye çıktığı kuyu."][mini(b, 7)]
+			"Kristal Çukur — choralim damarlarının ham haliyle yüzeye çıktığı kuyu; dibinde bir kalp atıyor."][mini(b, 7)]
 
 func _boss_intro_sub(b: int) -> String:
 	return ["Alfa-05 · Düşmüş Kardeş — transistörü hâlâ şarkı söylüyor.",
@@ -371,7 +371,7 @@ func _boss_intro_sub(b: int) -> String:
 			"Bataklık Devi — çamurun biriktirdiği son taş.",
 			"Kor Yücelten — külün içinden çıkan praetorian.",
 			"Kum Anası — fırtınanın yuva kurduğu kraliçe.",
-			"Çukurun Bekçisi — kristal damarın dibindeki nöbetçi."][mini(b, 7)]
+			"Damar Kalbi — kuyunun dibinde atan kristal nabız."][mini(b, 7)]
 
 func _elite_room() -> bool:
 	return depth == 1 and G.chance(0.35)

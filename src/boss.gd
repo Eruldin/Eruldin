@@ -4,7 +4,7 @@ extends Enemy
 # Boss controller — own phase/attack state machine on top of Actor.
 # Bosses are spawned by Room; linked twins share a `link` reference.
 
-enum BKind { REX, HOST, NAHUM, TUMAN, KIRIN, CONST, ANASI, DEV, KOR }
+enum BKind { REX, HOST, NAHUM, TUMAN, KIRIN, CONST, ANASI, DEV, KOR, DAMAR }
 
 var bkind: int = BKind.REX
 var link: Boss = null
@@ -22,14 +22,14 @@ const NAMES := {
 	BKind.NAHUM: "NAHUM", BKind.TUMAN: "TUMAN",
 	BKind.KIRIN: "MEDIKAE KIRIN", BKind.CONST: "ŞANSİYE CONSTANTIN",
 	BKind.ANASI: "KUM ANASI", BKind.DEV: "BATAKLIK DEVİ",
-	BKind.KOR: "KOR YÜCELTEN"
+	BKind.KOR: "KOR YÜCELTEN", BKind.DAMAR: "DAMAR KALBI"
 }
 const TITLES := {
 	BKind.REX: "Alfa-05 · Düşmüş Kardeş", BKind.HOST: "Sektör 4-Gama'nın Kabusu",
 	BKind.NAHUM: "Zihin Kontrollü Şövalye", BKind.TUMAN: "Zihin Kontrollü Şövalye",
 	BKind.KIRIN: "Baş Cerrah", BKind.CONST: "Aeterna'nın Efendisi",
 	BKind.ANASI: "Kızıl Çöl'ün Kraliçesi", BKind.DEV: "Çürük Bataklık'ın Kalbi",
-	BKind.KOR: "Kül Ovası'nın Son Efendisi"
+	BKind.KOR: "Kül Ovası'nın Son Efendisi", BKind.DAMAR: "Kristal Çukur'un Nabzı"
 }
 const BARKS := {
 	BKind.REX: "Alfa-04... transistörün sustu mu? Benimki hâlâ ŞARKI SÖYLÜYOR.",
@@ -40,12 +40,14 @@ const BARKS := {
 	BKind.CONST: "İmparatorluk içeriden çürür, şövalye. Sen de öyle yaptın.",
 	BKind.ANASI: "Kum yutmuş bir şövalye... yavrum sana bayılacak.",
 	BKind.DEV: "Bataklık kimseyi geri vermez. Sen de kalacaksın.",
-	BKind.KOR: "İmparatorluk yandı — ben külünden doğdum. Sen de ona katılacaksın."
+	BKind.KOR: "İmparatorluk yandı — ben külünden doğdum. Sen de ona katılacaksın.",
+	BKind.DAMAR: "Damara dokundun, şövalye. Şimdi damar sana dokunacak."
 }
 const SPR := {
 	BKind.REX: "rex", BKind.HOST: "host", BKind.NAHUM: "nahum",
 	BKind.TUMAN: "tuman", BKind.KIRIN: "kirin", BKind.CONST: "const",
-	BKind.ANASI: "anasi", BKind.DEV: "dev", BKind.KOR: "kor"
+	BKind.ANASI: "anasi", BKind.DEV: "dev", BKind.KOR: "kor",
+	BKind.DAMAR: "damar"
 }
 const PHASE_BARKS := {
 	BKind.REX: "REX: ŞARKI YÜKSELİYOR — DAHA HIZLI.",
@@ -57,6 +59,7 @@ const PHASE_BARKS := {
 	BKind.ANASI: "KUM ANASI: kum ayağa kalkıyor.",
 	BKind.DEV: "DEV: çamur ayağa kalkıyor — bataklık aç.",
 	BKind.KOR: "KOR: ova ikinci kez yanıyor — bu kez seninle.",
+	BKind.DAMAR: "DAMAR: nabız hızlanıyor — çukur seninle birlikte atıyor.",
 }
 # faz-2'de portreli hikaye kartı — boss'un yıkımı içeriden görünür
 const P2_LINES := {
@@ -69,6 +72,7 @@ const P2_LINES := {
 	BKind.ANASI: "Yavrularım... ziyafet zamanı. Ananız açlıktan ölüyor.",
 	BKind.DEV: "Bin yıldır buradaydım — sen bir gün bile dayanamazsın.",
 	BKind.KOR: "Kül unutmaz, şövalye. Beni ancak kül anlar.",
+	BKind.DAMAR: "Bütün kuyu tek kalp — ve kalp şimdi öfkeyle atıyor.",
 }
 
 # ölüm anı kartı: ikiz boss'larda ancak ikincisi düşünce çalınır
@@ -82,6 +86,7 @@ const DEATH_LINES := {
 	BKind.ANASI: "Kum Anası kırıldı. Kızıl Çöl'ün kumu ilk kez sessiz.",
 	BKind.DEV: "Dev çöktü — bataklık ilk kez birini geri verdi.",
 	BKind.KOR: "Taç düştü, kül dağıldı. Ova yüz yıl sonra ilk kez soğudu.",
+	BKind.DAMAR: "Kalp sustu. Çukurun damarları yüz yıllığına karardı.",
 }
 
 static func spawn_boss(p_kind: int, p_pos: Vector2, parent: Node, hp_scale := 1.0) -> Boss:
@@ -139,6 +144,11 @@ func _boss_stats(hs: float) -> void:
 			windup_t = 0.6; recover_t = 0.65; attack_cd = 1.4
 			knock_resist = 30
 			kind = EKind.SENTINEL
+		BKind.DAMAR:
+			max_hp = 640; speed = 62; touch_dmg = 18; radius = 24; hit_radius = 30
+			windup_t = 0.7; recover_t = 0.8; attack_cd = 1.6
+			knock_resist = 55
+			kind = EKind.DAMARGOL
 	max_hp *= hs
 	hp = max_hp
 	actor_name = NAMES[bkind]
@@ -152,8 +162,8 @@ func _make_body() -> void:
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(body)
 	_load_frames(SPR[bkind], 4.0)
-	Px.fit(body, 112.0 if bkind == BKind.DEV else (108.0 if bkind == BKind.REX or bkind == BKind.HOST or bkind == BKind.ANASI else 94.0))
-	var lc := Px.C("ff2222") if bkind == BKind.REX else (Px.C("00E676") if bkind == BKind.HOST or bkind == BKind.TUMAN else (Px.C("e8a050") if bkind == BKind.ANASI else (Px.C("4ad06a") if bkind == BKind.DEV else (Px.C("ff7722") if bkind == BKind.KOR else Px.C("c9a227")))))
+	Px.fit(body, 118.0 if bkind == BKind.DAMAR else (112.0 if bkind == BKind.DEV else (108.0 if bkind == BKind.REX or bkind == BKind.HOST or bkind == BKind.ANASI else 94.0)))
+	var lc := Px.C("ff2222") if bkind == BKind.REX else (Px.C("00E676") if bkind == BKind.HOST or bkind == BKind.TUMAN else (Px.C("e8a050") if bkind == BKind.ANASI else (Px.C("4ad06a") if bkind == BKind.DEV else (Px.C("ff7722") if bkind == BKind.KOR else (Px.C("4dd0e1") if bkind == BKind.DAMAR else Px.C("c9a227"))))))
 	_light = G.fx.mk_light(self, Vector2(0, -30), lc, 0.5, 2.0)
 	G.fx.burst(pos + Vector2(0, -10), Px.C("8B0000"), 24, 160.0, 5.0, 0.7)
 
@@ -238,6 +248,7 @@ func _want_range() -> float:
 		BKind.ANASI: return 72.0
 		BKind.DEV: return 78.0
 		BKind.KOR: return 200.0
+		BKind.DAMAR: return 150.0
 	return 100.0
 
 func _pick_attack() -> void:
@@ -252,6 +263,7 @@ func _pick_attack() -> void:
 		BKind.ANASI: _anasi_attack()
 		BKind.DEV: _dev_attack()
 		BKind.KOR: _kor_attack()
+		BKind.DAMAR: _damar_attack()
 
 func _on_phase2() -> void:
 	G.audio.play("roar", 1.0, 0.8)
@@ -745,6 +757,75 @@ func _kor_nova() -> void:
 		var dir := Vector2.RIGHT.rotated(TAU * i / 18.0)
 		_shoot_dir(dir, 230.0, 12.0, Px.C("ff7722"), 9.0)
 	G.room.add_hazard(pos, 55.0, 9.0, 4.0, Color(1, 0.45, 0.1, 0.32))
+	_busy = false
+
+# ---------- DAMAR (çukurun kristal kalbi — yarı-menzilli) ----------
+func _damar_attack() -> void:
+	var roll := G.rf(0, 1)
+	var adds := 0
+	for e in G.enemies:
+		if is_instance_valid(e) and not e.dead and e != self and not (e is Boss):
+			adds += 1
+	if phase == 2 and roll < 0.24:
+		_atk_t = 2.4
+		_damar_shatter()
+	elif roll < 0.3 and adds < 3:
+		_atk_t = 2.6
+		_damar_birth()
+	elif dist_to_player() < 160.0 or roll < 0.6:
+		_atk_t = 1.9 if phase == 1 else 1.4
+		_damar_slam()
+	else:
+		_atk_t = 2.1
+		_damar_erupt()
+
+func _damar_slam() -> void:
+	var dir := (G.player.pos - pos).normalized()
+	var t := G.fx.tele_wedge(pos, rad_to_deg(dir.angle()), 340.0, 0.65)
+	await _wait(0.65)
+	G.fx.kill_tele(t)
+	G.audio.play("explode", 1.1, 0.8)
+	G.fx.shake(0.3, 0.4)
+	for i in 14:
+		if _abort(): return
+		pos = G.room.clamp_pos(pos + dir * 24.0, radius)
+		G.fx.burst(pos + Vector2(0, -4), Px.C("4dd0e1"), 4, 100.0, 3.5, 0.3)
+		if dist_to_player() < radius + G.player.hit_radius + 8:
+			G.player.take_hit({"dmg": touch_dmg * 1.25, "type": G.DamageType.MELEE, "from": pos, "knock": 12.0, "source": self})
+		await _wait(0.016)
+	_busy = false
+
+func _damar_erupt() -> void:
+	for i in 4:
+		var target := G.player.pos + Vector2(G.rf(-120, 120), G.rf(-100, 100))
+		var t := G.fx.tele_circle(target, 48.0, 0.8, Color(0.3, 0.85, 0.9, 0.3))
+		await _wait(0.4)
+		G.fx.kill_tele(t)
+		G.fx.burst(target, Px.C("4dd0e1"), 16, 160.0, 5.5, 0.5)
+		G.audio.play("shoot", 1.4, 0.55)
+		G.room.add_hazard(target, 48.0, 7.5, 4.0, Color(0.3, 0.85, 0.9, 0.32))
+	_busy = false
+
+func _damar_birth() -> void:
+	G.audio.play("roar", 1.2, 0.5)
+	G.fx.burst(pos + Vector2(0, -14), Px.C("4dd0e1"), 26, 150.0, 5.0, 0.6)
+	for i in 2:
+		var off := Vector2(G.rf(-100, 100), G.rf(-80, 80))
+		var e := Enemy.spawn(EKind.DAMARGOL, G.room.clamp_pos(pos + off, 14.0), false, G.run.hp_scale() * 0.7, G.run.dmg_scale(), self)
+		e.set_meta("add", true)
+	await _wait(0.5)
+	_busy = false
+
+func _damar_shatter() -> void:
+	var t := G.fx.tele_ring(pos, 85.0, 0.9, Color(0.3, 0.85, 0.9, 0.5))
+	await _wait(0.9)
+	G.fx.kill_tele(t)
+	G.audio.play("explode", 0.7)
+	G.fx.shake(0.4, 0.45)
+	for i in 16:
+		var dir := Vector2.RIGHT.rotated(TAU * i / 16.0)
+		_shoot_dir(dir, 220.0, 11.0, Px.C("4dd0e1"), 9.0)
+	G.run.drop_fragments(pos + Vector2(G.rf(-40, 40), G.rf(-40, 40)), G.ri(4, 7))
 	_busy = false
 
 # ---------- shared ----------
