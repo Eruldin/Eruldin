@@ -341,7 +341,7 @@ func _tick_skill(d: float) -> void:
 
 # şasi yeteneği: ely → NOVA (AoE), elyb → SİPER (zırh fazı), via → ATILIM (dash refill + hız)
 func _use_skill() -> void:
-	skill_cd = skill_max
+	skill_cd = skill_max * (1.0 - 0.07 * G.meta.upg(Meta.U.QCD))
 	match str(G.meta.data.get("hero", "ely")):
 		"elyb":
 			invuln = maxf(invuln, 1.6)
