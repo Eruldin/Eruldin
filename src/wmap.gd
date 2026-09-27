@@ -94,6 +94,13 @@ const NODES := [
 			{"tex": "cine_2_2", "title": "SALON KAPANDI", "sub": "Kapağı mühürledin. İçeride hâlâ bir metronom sesi var ama artık kimseye ulaşmıyor — sütunlar karanlıkta saymaya devam edecek."},
 		]}},
 	]},
+	{"id": "kutuphane","name": "KORO ARŞİVİ",    "icon": "icn_kovan",   "pos": Vector2(800, 200),  "col": "b39ddb", "kind": "story", "unlock": "node", "desc": "Mezarlığın üstünde kemerli bir salon — Protokol düşen herkesin adını burada tutar; raflar hâlâ dolu.", "lore": "Vezir'in defterinin aslı buradan kopyalandı: arşivci automatonlar her düşeni kayda geçirdi — isim, düştüğü düğüm, son sinyal. Koro arşivi susturamadı; sadece kayıtların sonunu kesmeye yemin etti. Zirkon'un istediği fihrist tam şu rafta.", "choices": [
+		{"label": "FİHRİSTİ KOPYALA — arşiv kampta yaşasın", "sub": "Düşenlerin listesi kampın kaydına geçer; koro not alır ama arşiv artık iki yerde yaşar. Kamp bunu unutmaz.", "rew": {"cho": 80, "rep": 3, "omen": {"loot": 1.25}, "cine": [
+			{"tex": "cine_3_1", "title": "KORO ARŞİVİ", "sub": "Sayfaları kopyaladın — binlerce isim, hepsi 'düştü' diye bitiyor. Son sayfa boş; arşivci henüz senin adını yazmadı."},
+			{"tex": "por_zirkon", "title": "VEZİR ZİRKON", "sub": "Fihristi getirdin — bu isimler artık kampta yaşayacak. Koro'nun silmesini beklediği tek arşiv, artık iki yerde var."},
+		]}},
+		{"label": "ARŞİVİ YAK — kayıtlar Koro'da kalmasın", "sub": "Koro'nun tek çalışan arşivi kül olur — düşenler özgürleşir ama sözcüler yangını görür: sonraki koşunda sürü kalınlaşır, ganimet de bereketlenir.", "rew": {"cho": 170, "omen": {"spawn": 1.15, "frag": 1.3}, "cine": [{"tex": "cine_3_3", "title": "ARŞİV YANDI", "sub": "Raflar tek tek çöktü; kül yaprakları kemerlerin arasında kar gibi savruldu. Yukarıda bir yerde koro, notasını kaybetti."}]}},
+	]},
 	{"id": "kervan", "name": "DONMUŞ KERVAN",      "icon": "ico_loot",    "pos": Vector2(1345, 395), "col": "bfe8ff", "kind": "story", "unlock": "node", "desc": "Çatlağın kuzeyinde donmuş imparatorluk kervanı — yük ve yolcular hâlâ ayakta, hâlâ yürür vaziyette.", "lore": "Kervan defterinin son satırı: 'Hanım şarkı söyledi, atlar durdu, kar üstümüze kapandı. Yükü kimseye vermeyin — damarın içinde taşıdığımız şey buzda kalsın.' İçerideki sandık hâlâ mühürlü; mühür şimdi bizde.", "choices": [
 		{"label": "MÜHRÜ KIR — sandığı aç", "sub": "Sandık choralim dolu — ama defterin uyarısı gerçek: yük açılınca kovan kokuyu alır. Sonraki koşun daha sert geçecek.", "rew": {"cho": 320, "omen": {"hp": 1.12, "dmg": 1.1, "frag": 1.35}, "cine": [{"tex": "cine_8_0", "title": "MÜHÜR KIRILDI", "sub": "Sandık açıldı — içinde choralim dolu fişekler ve bir koro damgasının mührü. Kuzeyde bir şey yerinden kıpırdadı."}]}},
 		{"label": "KERVANI GÖM — yüke dokunma", "sub": "Defterin dediği gibi: bazı yükler buzda kalmalı. Kervanı kar altında göm, itibarın artsın, buzdan bir kalp hatıra kalsın.", "rew": {"cho": 100, "rep": 2, "item": "i_buzkalp", "cine": [{"tex": "cine_8_0", "title": "KERVAN GÖMÜLDÜ", "sub": "On iki deve ve dört arabacı kar altında. Buzda bekleyen yüke kimse dokunmadı — ve kuzey, seni ilk kez selamladı."}]}},
@@ -147,6 +154,7 @@ const EDGES := [
 	["karakol", "muhkasa"], ["b0", "muhkasa"],
 	["mezarlik", "sinyal"], ["b2", "sinyal"],
 	["sinyal", "prova"], ["b2", "prova"],
+	["mezarlik", "kutuphane"], ["sinyal", "kutuphane"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için
