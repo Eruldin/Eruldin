@@ -299,7 +299,7 @@ func _comp(m: float) -> int:
 			2: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.HUSK, Enemy.EKind.COPCU, Enemy.EKind.COPCU])   # enkaz: kristal yutan çöpçüler
 			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA, Enemy.EKind.GOZETMEN])   # kule: keskin nişancı gözetmenler
 			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK, Enemy.EKind.SIVRI, Enemy.EKind.SIVRI])   # bataklık: konakçılar + kistler + balçıklar + sivri bulutları
-			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ]) # kül ovası: ateşi seven sert öncüler
+			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ, Enemy.EKind.KORP, Enemy.EKind.KORP]) # kül ovası: ateşi seven sert öncüler + kor hortlakları
 			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.AKREP, Enemy.EKind.AKREP, Enemy.EKind.DRONE, Enemy.EKind.KOCBASI])   # kızıl çöl: koşucular + gömülü akrepler + koçbaşları
 			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.DAMARGOL, Enemy.EKind.DAMARGOL, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI])   # kristal çukur: gözler + kistler + damar golemleri + fısıltı sürüleri
 	return G.pick(pool)
