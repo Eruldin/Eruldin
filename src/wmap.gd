@@ -83,6 +83,15 @@ const NODES := [
 		{"label": "VAHDEYİ AÇ — pençe zırhını al", "sub": "Nöbetçinin miğferi külün altında sağlam kaldı — ama vahdeyi açmak korları havalandırır: sonraki koşunda kovan daha sert vurur, karşılığında bereket artar.", "rew": {"cho": 150, "item": "i_vahde", "omen": {"dmg": 1.08, "frag": 1.15}, "cine": [{"tex": "cine_5_0", "title": "VAHDE AÇILDI", "sub": "Miğfer külden çıktı — içindeki kor hâlâ turuncu. Nöbetçinin son sayfası sende; kül bir an durup sonra sana döndü."}]}},
 		{"label": "KÜLLERİ ÖRT — nöbeti onurlandır", "sub": "Bazı nöbetler bitmez. Vahdeyi olduğu gibi gömersin; kamp bunu duyar, kül de seni unutmaz.", "rew": {"cho": 90, "rep": 2, "cine": [{"tex": "cine_5_0", "title": "NÖBET SÜRDÜ", "sub": "Külleri örttün, taşı düzledin. Kor Anıtı'nın nabzı bir dakika yavaşladı — sanki biri nöbeti devraldı."}]}},
 	]},
+	{"id": "prova", "name": "PROVA SALONU",      "icon": "icn_kovan",   "pos": Vector2(1160, 120), "col": "c26bff", "kind": "story", "unlock": "node", "desc": "Sinyal Kulesi'nin dibinde yarı gömülü bir salon — duvarlarında notalar değil, çentikler var. Koro'nun ilk prova odası.", "lore": "Sözcüler burada şarkıya değil, emre çalışırdı: her çentik bir sürü hareketi, her sütun bir imparatorluk şehri. Son sütunun başlığı hâlâ okunuyor: 'KAMP'. Sırası gelmemiş tek satır — onu senin kesmen için bıraktılar.", "choices": [
+		{"label": "ÇENTİKLERİ SÖK — salonu sömür", "sub": "Çentik taşları choralim değerinde — ama prova odasını açmak sözcülerin dikkatini çeker: sonraki koşunda elitler sık doğar.", "rew": {"cho": 190, "omen": {"elite_t": 0.85, "loot": 1.2}, "cine": [
+			{"tex": "cine_2_1", "title": "PROVA SALONU", "sub": "Son sütunu duvardan söktün. Çentiklerin arasında sürü hareketlerinin takvimi var — kampın adı 'yaklaşan' diye işaretli."},
+			{"tex": "por_orun", "title": "ORUN", "sub": "O taşları okudun, değil mi? Koro prova ettiği şarkıyı hiç yarıda bırakmez — dikkatli ol, artık seni dinliyorlar."},
+		]}},
+		{"label": "SALONU MÜHÜRLE — prova bitsin", "sub": "Bazı şarkılar söylenmemeli. Kapıyı kilitlersin; kamp bunu duyar, sözcüler de yeni bir salon arar.", "rew": {"cho": 90, "rep": 2, "item": "i_merdiven", "cine": [
+			{"tex": "cine_2_2", "title": "SALON KAPANDI", "sub": "Kapağı mühürledin. İçeride hâlâ bir metronom sesi var ama artık kimseye ulaşmıyor — sütunlar karanlıkta saymaya devam edecek."},
+		]}},
+	]},
 	{"id": "kervan", "name": "DONMUŞ KERVAN",      "icon": "ico_loot",    "pos": Vector2(1345, 395), "col": "bfe8ff", "kind": "story", "unlock": "node", "desc": "Çatlağın kuzeyinde donmuş imparatorluk kervanı — yük ve yolcular hâlâ ayakta, hâlâ yürür vaziyette.", "lore": "Kervan defterinin son satırı: 'Hanım şarkı söyledi, atlar durdu, kar üstümüze kapandı. Yükü kimseye vermeyin — damarın içinde taşıdığımız şey buzda kalsın.' İçerideki sandık hâlâ mühürlü; mühür şimdi bizde.", "choices": [
 		{"label": "MÜHRÜ KIR — sandığı aç", "sub": "Sandık choralim dolu — ama defterin uyarısı gerçek: yük açılınca kovan kokuyu alır. Sonraki koşun daha sert geçecek.", "rew": {"cho": 320, "omen": {"hp": 1.12, "dmg": 1.1, "frag": 1.35}, "cine": [{"tex": "cine_8_0", "title": "MÜHÜR KIRILDI", "sub": "Sandık açıldı — içinde choralim dolu fişekler ve bir koro damgasının mührü. Kuzeyde bir şey yerinden kıpırdadı."}]}},
 		{"label": "KERVANI GÖM — yüke dokunma", "sub": "Defterin dediği gibi: bazı yükler buzda kalmalı. Kervanı kar altında göm, itibarın artsın, buzdan bir kalp hatıra kalsın.", "rew": {"cho": 100, "rep": 2, "item": "i_buzkalp", "cine": [{"tex": "cine_8_0", "title": "KERVAN GÖMÜLDÜ", "sub": "On iki deve ve dört arabacı kar altında. Buzda bekleyen yüke kimse dokunmadı — ve kuzey, seni ilk kez selamladı."}]}},
@@ -133,6 +142,7 @@ const EDGES := [
 	["cukur", "damarkasa"], ["damar", "damarkasa"], ["kaos", "damarkasa"],
 	["kamp", "karakol"], ["karakol", "b0"],
 	["mezarlik", "sinyal"], ["b2", "sinyal"],
+	["sinyal", "prova"], ["b2", "prova"],
 ]
 
 # harita komşuları — sefer zinciri ve rota önerisi için
