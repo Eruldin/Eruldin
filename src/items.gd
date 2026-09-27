@@ -72,6 +72,7 @@ const DEFS := {
 	"i_nuve":     {"name": "Nüve Halkası",    "slot": "yuzuk",   "r": 3, "icon": "ico_frag",       "mods": {"frag": 0.18, "mag": 45.0}},
 	"i_damar":    {"name": "Damar Mührü",     "slot": "yuzuk2",  "r": 3, "icon": "icn_mine",       "mods": {"mag": 60.0, "xp": 0.12}},
 	"i_golkalp":  {"name": "Golem Yumruğu",   "slot": "eldiven", "r": 2, "icon": "icn_sword",      "mods": {"dmg": 0.09, "hp": 8}},
+	"i_kalpparca":{"name": "Kalp Parçası",    "slot": "yuzuk",   "r": 3, "icon": "icn_mine",       "mods": {"dmg": 0.08, "mag": 40.0}},
 	# kemer slotu — 8. ekipman yuvası
 	"i_kemer_kum": {"name": "Kum Kemeri",      "slot": "kemer",   "r": 0, "icon": "icn_dash",       "mods": {"spd": 0.04, "mag": 25.0}},
 	"i_kemer_par": {"name": "Parazit Kemeri",  "slot": "kemer",   "r": 1, "icon": "icn_kovan",      "mods": {"hp": 18, "ls": 0.015}},
