@@ -38,6 +38,8 @@ var _stray_sub := -1
 var _pre_story_cho := 0
 var _hero := ""
 var _skill_done := false
+var _lvl := 0
+var _esc_done := false
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -48,6 +50,8 @@ func _ready() -> void:
 			_node = a.trim_prefix("--node=")
 		elif a.begins_with("--hero="):
 			_hero = a.trim_prefix("--hero=")
+		elif a.begins_with("--lvl="):
+			_lvl = int(a.trim_prefix("--lvl="))
 	print("[probe] armed (node=%s), shots -> %s" % [_node, ProjectSettings.globalize_path("user://probe")])
 
 func _process(_d: float) -> void:
@@ -236,6 +240,11 @@ func _process(_d: float) -> void:
 			if t >= _msg_at:
 				_msg_at = t + 15.0
 				print("[probe] t=%.0f hp=%.0f lvl=%d enemies=%d kills=%d pending=%d" % [t, G.player.hp, G.player.level, G.enemies.size(), int(G.run.stats.get("kills", 0)), G.run.pending_drafts])
+			# seviye evrimi kapsaması: --lvl=N ile evre eşiğini zorla
+			if not _esc_done and _lvl > 0 and t >= 12.0:
+				_esc_done = true
+				G.player.level = _lvl
+				print("[probe] forced level %d -> esc check" % _lvl)
 			# Q şasi yeteneği kapsaması: bir kez ateşle (hero=h9 ise MIKNATIS yolu)
 			if not _skill_done and t >= 20.0:
 				_skill_done = true
@@ -376,3 +385,24 @@ func _shoot() -> void:
 	var img := get_viewport().get_texture().get_image()
 	img.save_png("user://probe/shot_%02d.png" % _shot_n)
 	_shot_n += 1
+	_magenta_scan()
+
+func _magenta_scan() -> void:
+	var seen := {}
+	_scan_node(get_tree().root, seen)
+
+func _scan_node(n: Node, seen: Dictionary) -> void:
+	if n is Sprite2D or n is TextureRect:
+		var tx: Texture2D = n.texture
+		if tx != null and not seen.has(tx.get_rid()):
+			seen[tx.get_rid()] = true
+			var im := tx.get_image()
+			if im != null and im.get_width() == 8 and im.get_height() == 8:
+				var c := im.get_pixel(4, 4)
+				if c.r > 0.8 and c.b > 0.7:
+					var pos := ""
+					if n is CanvasItem:
+						pos = str(n.get_global_position())
+					print("[mag] %s path=%s pos=%s" % [n.name, n.get_path(), pos])
+	for c2 in n.get_children():
+		_scan_node(c2, seen)

@@ -153,12 +153,17 @@ const NPC_COL := {
 
 static var _font: Font
 
+# Bundle font, temaya uygun: art/fonts/ChakraPetch-Bold.ttf (Türkçe glyph var)
 static func ui_font() -> Font:
 	if _font == null:
-		var sf := SystemFont.new()
-		sf.font_names = ["Consolas", "Cascadia Mono", "Courier New"]
-		sf.font_weight = 600
-		_font = sf
+		var p := "res://art/fonts/ChakraPetch-Bold.ttf"
+		if ResourceLoader.exists(p):
+			_font = load(p)
+		else:
+			var sf := SystemFont.new()
+			sf.font_names = ["Consolas", "Cascadia Mono", "Courier New"]
+			sf.font_weight = 600
+			_font = sf
 	return _font
 
 var root: Control
@@ -444,19 +449,29 @@ func _build_boss_bar() -> void:
 	tick.position = Vector2(393 + 247, 44)
 	tick.size = Vector2(1, 12)
 	_boss_wrap.add_child(tick)
-	# portraits
-	_boss_por = TextureRect.new()
-	_boss_por.position = Vector2(330, 30)
-	_boss_por.custom_minimum_size = Vector2(44, 44)
-	_boss_por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_boss_por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# boss portreleri: barın iki ucunda çerçeveli rozet — HUD ikonlarına binmez
+	for px in [Vector2(338, 36), Vector2(892, 36)]:
+		var badge := PanelContainer.new()
+		badge.position = px
+		badge.custom_minimum_size = Vector2(52, 52)
+		badge.add_theme_stylebox_override("panel", _style_panel(Color(0.02, 0.01, 0.04, 0.92), Px.C("8B0000").lerp(Color.WHITE, 0.15), 1, 6))
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_boss_wrap.add_child(badge)
+	_boss_por = _boss_portrait(Vector2(342, 40))
 	_boss_wrap.add_child(_boss_por)
-	_boss_por2 = TextureRect.new()
-	_boss_por2.position = Vector2(906, 30)
-	_boss_por2.custom_minimum_size = Vector2(44, 44)
-	_boss_por2.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_boss_por2.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_boss_por2 = _boss_portrait(Vector2(896, 40))
 	_boss_wrap.add_child(_boss_por2)
+
+# çerçeveli boss rozeti — sabit boyut, büyük por_* dokularını da sınırlar
+func _boss_portrait(p: Vector2) -> TextureRect:
+	var tr := TextureRect.new()
+	tr.position = p
+	tr.size = Vector2(44, 44)
+	tr.custom_minimum_size = Vector2(44, 44)
+	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return tr
 
 func _build_overlays() -> void:
 	_banner_lbl = _lbl("", Vector2(0, 150), 24, Px.C("00E5FF"))
@@ -806,10 +821,12 @@ func boss_taunt(por_key: String, name_s: String, line: String) -> void:
 	tw.tween_property(p, "modulate:a", 1.0, 0.22)
 	tw.tween_interval(2.7)
 	tw.tween_property(p, "modulate:a", 0.0, 0.55)
+	var pwr: WeakRef = weakref(p)
 	tw.tween_callback(func():
-		if is_instance_valid(p):
-			p.queue_free()
-		if _taunt == p:
+		var _p: Control = pwr.get_ref()
+		if _p:
+			_p.queue_free()
+		if _taunt == _p:
 			_taunt = null)
 
 func _toast_keys() -> void:
@@ -851,7 +868,7 @@ func hurt_dir(from_pos: Vector2) -> void:
 	add_child(tri)
 	var tw := create_tween()
 	tw.tween_property(tri, "modulate:a", 0.0, 0.65)
-	tw.tween_callback(tri.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(tri): tri.queue_free())
 
 # ---------------------------------------------------------------- cinematics
 
@@ -960,7 +977,7 @@ func _tick_boss_bar() -> void:
 		if is_instance_valid(b):
 			hp += maxf(0, b.hp)
 			mx += b.max_hp
-	_boss_bar.size.x = 398 * (hp / mx if mx > 0 else 0.0)
+	_boss_bar.size.x = 494 * (hp / mx if mx > 0 else 0.0)
 
 func boss_intro(b: Boss) -> void:
 	banner(b.actor_name, "«%s»" % b.bark)
@@ -1336,7 +1353,7 @@ func worldmap_panel() -> void:
 	for n2 in Wmap.NODES:
 		var bc2: Color = Room.MOTE_COL.get(str(n2.get("biome", "")), Color(0.5, 0.5, 0.6))
 		var bl := TextureRect.new()
-		bl.texture = Px.S2("disc_soft")
+		bl.texture = Px.S("disc_soft")
 		bl.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		bl.custom_minimum_size = Vector2(200, 200)
 		bl.stretch_mode = TextureRect.STRETCH_SCALE

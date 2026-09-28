@@ -934,7 +934,7 @@ static func _zap_seg(a: Vector2, b: Vector2) -> void:
 	G.game.world.add_child(l)
 	var tw := l.create_tween()
 	tw.tween_property(l, "modulate:a", 0.0, 0.16)
-	tw.tween_callback(l.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(l): l.queue_free())
 
 static func _nova(st: Dictionary, p: Player) -> void:
 	var r := float(st.r) * p.area_mult
@@ -950,7 +950,7 @@ static func _nova(st: Dictionary, p: Player) -> void:
 	var tw := s.create_tween()
 	tw.tween_property(s, "scale", Vector2.ONE * target_sc, 0.32)
 	tw.parallel().tween_property(s, "modulate:a", 0.0, 0.32)
-	tw.tween_callback(s.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(s): s.queue_free())
 	var dmg := float(st.dmg) * p.dmg_mult
 	for e in G.enemies.duplicate():
 		if not is_instance_valid(e) or e.dead:
@@ -979,7 +979,7 @@ static func _aura(st: Dictionary, p: Player) -> void:
 	var tw := s.create_tween()
 	tw.tween_property(s, "scale", Vector2.ONE * (r * 2.0) / 96.0, 0.26)
 	tw.parallel().tween_property(s, "modulate:a", 0.0, 0.26)
-	tw.tween_callback(s.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(s): s.queue_free())
 	var dmg := float(st.dmg) * p.dmg_mult
 	var n := 0
 	for e in G.enemies.duplicate():
@@ -1122,7 +1122,7 @@ static func _ray(st: Dictionary, p: Player) -> void:
 	G.game.world.add_child(beam)
 	var tw := beam.create_tween()
 	tw.tween_property(beam, "modulate:a", 0.0, 0.28)
-	tw.tween_callback(beam.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(beam): beam.queue_free())
 	G.audio.play("beam", 1.0, 0.7)
 	G.fx.shake(0.1, 0.06)
 
@@ -1285,7 +1285,7 @@ static func _tick_pools(w: Dictionary, p: Player, d: float) -> void:
 			if is_instance_valid(pl.node):
 				var tw: Tween = pl.node.create_tween()
 				tw.tween_property(pl.node, "modulate:a", 0.0, 0.4)
-				tw.tween_callback(pl.node.queue_free)
+				tw.tween_callback(func(): if is_instance_valid(pl.node): pl.node.queue_free())
 			pools.remove_at(i)
 			continue
 		var pull := float(pl.get("pull", 0.0))

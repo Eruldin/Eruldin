@@ -1223,9 +1223,11 @@ func die(h: Dictionary) -> void:
 		var bd := touch_dmg * 1.2
 		var tw := warn.create_tween()
 		tw.tween_property(warn, "scale", Vector2.ONE * (236.0 / 72.0), 0.55)
+		var wwr: WeakRef = weakref(warn)
 		tw.tween_callback(func():
-			if is_instance_valid(warn):
-				warn.queue_free()
+			var _w: Node2D = wwr.get_ref()
+			if _w:
+				_w.queue_free()
 			if is_instance_valid(G.player) and not G.player.dead and G.player.pos.distance_to(blast_pos) < 118.0:
 				G.player.take_hit({"dmg": bd, "type": G.DamageType.EXPLOSION, "from": blast_pos, "knock": 14.0, "source": null})
 			G.fx.burst(blast_pos, Color(1.0, 0.45, 0.15), 26, 240.0, 6.0, 0.5)

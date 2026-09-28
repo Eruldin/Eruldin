@@ -43,12 +43,46 @@ func _init() -> void:
 		_emit(cells[i], th, "%s_%d.png" % [args[4], i])
 	quit()
 
+# Flood-fill the border-connected background instead of per-pixel hue keying:
+# the generator's "magenta" varies per sheet (pink/violet/blue), so we sample
+# the dominant corner colour and erase only pixels connected to the border —
+# same-hued pixels inside the emblem survive untouched.
 func _key(img: Image) -> void:
-	for y in img.get_height():
-		for x in img.get_width():
-			var c := img.get_pixel(x, y)
-			if c.r > 0.8 and c.b > 0.8 and c.g < 0.35:
-				img.set_pixel(x, y, Color(0, 0, 0, 0))
+	var w := img.get_width()
+	var h := img.get_height()
+	var corners := [
+		img.get_pixel(0, 0), img.get_pixel(w - 1, 0),
+		img.get_pixel(0, h - 1), img.get_pixel(w - 1, h - 1)]
+	var bg: Color = corners[0]
+	if bg.a < 0.5:
+		return  # already keyed
+	# flat-bg sanity: corners must roughly agree (sprite reaching the frame edge
+	# would give mixed corners — then fall back to nothing rather than eat it)
+	var tol := 0.22
+	var mark := {}
+	var stack: Array[Vector2i] = []
+	for x in w:
+		stack.append(Vector2i(x, 0))
+		stack.append(Vector2i(x, h - 1))
+	for y in h:
+		stack.append(Vector2i(0, y))
+		stack.append(Vector2i(w - 1, y))
+	while not stack.is_empty():
+		var p: Vector2i = stack.pop_back()
+		if p.x < 0 or p.y < 0 or p.x >= w or p.y >= h:
+			continue
+		var k := p.y * w + p.x
+		if mark.has(k):
+			continue
+		mark[k] = true
+		var c := img.get_pixel(p.x, p.y)
+		if Vector3(c.r - bg.r, c.g - bg.g, c.b - bg.b).length() > tol:
+			continue
+		img.set_pixel(p.x, p.y, Color(0, 0, 0, 0))
+		stack.append(Vector2i(p.x + 1, p.y))
+		stack.append(Vector2i(p.x - 1, p.y))
+		stack.append(Vector2i(p.x, p.y + 1))
+		stack.append(Vector2i(p.x, p.y - 1))
 
 # erase a caption band: a sparse text line floats below an empty gap near the
 # bottom of the sheet — find the lowest occupied row, then the gap above it,

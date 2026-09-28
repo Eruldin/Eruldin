@@ -67,6 +67,8 @@ var _harvest_t := 30.0    # endless-mode reaper cadence
 var _quest_t := 0.0       # 1sn'lik görev tick'i
 var _koz2_fired := false  # 7. dakikada ikinci KOZ taslağı (VS arcana chest)
 var _haz_t := 50.0        # hazine düğümü: yağma yağmuru sayacı
+const ESC_LV := [15, 25, 30, 35, 40]   # seviye evrimi eşikleri
+var esc := 0              # mevcut evrim evresi (0-5)
 
 func _process(d: float) -> void:
 	if not running or G.state != G.State.ROOM or G.player == null or G.player.dead:
@@ -80,6 +82,7 @@ func _process(d: float) -> void:
 		G.run.stats["best_nodmg"] = _nd
 	# melee attack tokens scale with minutes so hordes stay readable, not fair
 	G.MELEE_TOKENS_MAX = 2 + mini(10, int(t / 75.0))
+	_esc_tick()
 	_tick_spawn(d)
 	_tick_events(d)
 	_quest_t += d
@@ -96,6 +99,23 @@ func _process(d: float) -> void:
 		G.ui.banner("KOVAN DAĞILIYOR", "dayanma süresi doldu")
 		G.run.victory()
 
+# oyuncu seviyesi eşiği geçtikçe evrim evresi artar — saha mora boyanır
+func _esc_tick() -> void:
+	var lv := G.player.level
+	var target := 0
+	for th in ESC_LV:
+		if lv >= th:
+			target += 1
+	if target <= esc:
+		return
+	esc = target
+	G.ui.banner("KOVAN DERİNLEŞİYOR", "EVRE %d — saha evriliyor, sürü sertleşiyor" % esc)
+	G.audio.play("roar", 0.9, 0.5)
+	G.fx.shake(0.4, 0.8)
+	G.fx.flash(Color(0.55, 0.2, 0.95), 0.45)
+	if is_instance_valid(G.room):
+		G.room.apply_corruption(esc)
+
 func _tick_spawn(d: float) -> void:
 	_spawn_t -= d
 	if _spawn_t > 0.0:
@@ -105,9 +125,10 @@ func _tick_spawn(d: float) -> void:
 	var inf: bool = G.run.endless
 	_spawn_t = lerpf(1.6, 0.34, clampf(t / 540.0, 0.0, 1.0)) * (0.72 if hyp else 1.0) * (0.7 if inf else 1.0)
 	_spawn_t /= float(G.run.node_mods.get("spawn", 1.0))
+	_spawn_t /= (1.0 + esc * 0.08)   # evrimleşen sürü daha sık akar
 	if _rush():
 		_spawn_t *= 1.8  # boss-rush: hafif sürü basıncı, odak zincirde
-	var cap := mini(230, int((60 + m * 13.0) * (1.4 if hyp else 1.0) * (1.3 if inf else 1.0)))
+	var cap := mini(190, int((60 + m * 12.0) * (1.35 if hyp else 1.0) * (1.25 if inf else 1.0)))
 	var batch := mini(6, 2 + int(t / 140.0)) + (1 if hyp else 0)
 	while batch > 0 and G.enemies.size() < cap:
 		_spawn(_comp(m), false)
@@ -347,14 +368,25 @@ func _comp(m: float) -> int:
 			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.AKREP, Enemy.EKind.AKREP, Enemy.EKind.DRONE, Enemy.EKind.KOCBASI])   # kızıl çöl: koşucular + gömülü akrepler + koçbaşları
 			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.DAMARGOL, Enemy.EKind.DAMARGOL, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI])   # kristal çukur: gözler + kistler + damar golemleri + fısıltı sürüleri
 			8: pool.append_array([Enemy.EKind.MUHFIZ, Enemy.EKind.KONAKCI, Enemy.EKind.SENTINEL, Enemy.EKind.GOZETMEN, Enemy.EKind.FISILTI, Enemy.EKind.BUZRUH, Enemy.EKind.BUZRUH, Enemy.EKind.TAYF, Enemy.EKind.TAYF])   # donmuş çatlak: ağır sürü + buz serenler + ufuk tayfları
+	# seviye evrimi: evre derinleştikçe biyom-dışı avcılar havuza sızar
+	if esc >= 1:
+		pool.append_array([Enemy.EKind.KUZGUN, Enemy.EKind.CEREB])
+	if esc >= 2:
+		pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.DINAMITCI])
+	if esc >= 3:
+		pool.append_array([Enemy.EKind.MUHFIZ, Enemy.EKind.AKREP])
+	if esc >= 4:
+		pool.append_array([Enemy.EKind.BUZRUH, Enemy.EKind.FISILTI])
+	if esc >= 5:
+		pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.KONAKCI, Enemy.EKind.CEREB])
 	return G.pick(pool)
 
 func _hp_scale() -> float:
 	var m := t / 60.0
-	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30) * (1.15 if G.run.hyper else 1.0) * float(G.run.node_mods.get("hp", 1.0)) * (1.0 + 0.12 * float(G.meta.data.get("ng", 0)))
+	return (1.0 + m * 0.28 + maxf(0.0, m - 8.0) * 0.12) * (1.0 + biome * 0.30) * (1.15 if G.run.hyper else 1.0) * float(G.run.node_mods.get("hp", 1.0)) * (1.0 + 0.12 * float(G.meta.data.get("ng", 0))) * (1.0 + esc * 0.10)
 
 func _dmg_scale() -> float:
-	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15) * (1.2 if G.run.hyper else 1.0) * float(G.run.node_mods.get("dmg", 1.0)) * (1.0 + 0.08 * float(G.meta.data.get("ng", 0)))
+	return (1.0 + (t / 60.0) * 0.11) * (1.0 + biome * 0.15) * (1.2 if G.run.hyper else 1.0) * float(G.run.node_mods.get("dmg", 1.0)) * (1.0 + 0.08 * float(G.meta.data.get("ng", 0))) * (1.0 + esc * 0.06)
 
 func _spawn(kind: int, elite: bool) -> Enemy:
 	if not is_instance_valid(G.room):
@@ -365,6 +397,14 @@ func _spawn(kind: int, elite: bool) -> Enemy:
 	var e := Enemy.spawn(kind, p, elite, _hp_scale(), _dmg_scale(), G.room)
 	if e != null and G.run.hyper:
 		e.speed *= 1.08
+	# evrim evresi 3+: bir kısım sürü "karanmış" doğar — mora boyanır, daha sert
+	if e != null and not elite and esc >= 3 and G.chance(0.16 + esc * 0.03):
+		e.set_meta("karan", true)
+		e.base_color = Color(0.72, 0.5, 1.0)
+		e.max_hp *= 1.15
+		e.hp = e.max_hp
+		e.touch_dmg *= 1.1
+		e.actor_name = "KARANMIŞ " + e.actor_name
 	# sivri bulutu tek doğmaz — bulut halinde akar
 	if e != null and (kind == Enemy.EKind.SIVRI or kind == Enemy.EKind.FISILTI) and not elite:
 		for i in 3:
@@ -668,7 +708,7 @@ func _rain_strike(p: Vector2, cfg: Dictionary) -> void:
 		if is_instance_valid(G.player) and not G.player.dead and G.player.pos.distance_to(pp) < r:
 			G.player.take_hit({"dmg": float(cfg.pdmg) + G.run.depth * 2.0, "type": pt, "from": pp, "knock": 8.0, "source": null})
 		for e in G.enemies.duplicate():
-			if e is Enemy and not e.dead and e.pos.distance_to(pp) < r:
+			if is_instance_valid(e) and e is Enemy and not e.dead and e.pos.distance_to(pp) < r:
 				e.take_hit({"dmg": 70.0 + G.run.depth * 8.0, "type": pt, "from": pp, "knock": 10.0, "source": G.player})
 		G.fx.burst(pp, col, 18, 240.0, 6.0, 0.4)
 		G.fx.boom(pp, col, r)
