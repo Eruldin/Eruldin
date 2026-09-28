@@ -502,6 +502,7 @@ func _boss_portrait(p: Vector2) -> TextureRect:
 	tr.size = Vector2(44, 44)
 	tr.custom_minimum_size = Vector2(44, 44)
 	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return tr
@@ -557,6 +558,7 @@ func _tick_hud() -> void:
 		c.texture = Px.S2("icn_dash")
 		c.custom_minimum_size = Vector2(14, 14)
 		c.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		c.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		c.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_dash_row.add_child(c)
@@ -616,6 +618,7 @@ func _tick_hud() -> void:
 		s.modulate = spec.get("color", Color.WHITE)
 		s.custom_minimum_size = Vector2(24, 24)
 		s.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		s.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		s.mouse_filter = Control.MOUSE_FILTER_STOP
 		_boon_row.add_child(s)
@@ -700,6 +703,7 @@ func _tick_edge() -> void:
 				var m := TextureRect.new()
 				m.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				m.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				m.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				m.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 				root.add_child(m)
 				_edge_pool.append(m)
@@ -747,6 +751,7 @@ func _gear_icon(icon: String, col: String, lvl: int, size: int) -> Control:
 		tr.texture = Px.S("ico_boon")
 	tr.custom_minimum_size = Vector2(size, size)
 	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	tr.modulate = sc
 	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -846,7 +851,8 @@ func boss_taunt(por_key: String, name_s: String, line: String) -> void:
 	pr.texture = Px.S2("por_" + por_key)
 	pr.custom_minimum_size = Vector2(46, 46)
 	pr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	pr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pr.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	pr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	h.add_child(pr)
 	var v := VBoxContainer.new()
@@ -1097,7 +1103,8 @@ func dialogue(nid: String) -> void:
 	por.modulate = Color(1.22, 1.22, 1.25)
 	por.custom_minimum_size = Vector2(64, 64)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	por_f.add_child(por)
 	h.add_child(por_f)
@@ -1454,6 +1461,7 @@ func worldmap_panel() -> void:
 		ic.texture = Px.S2(str(n.icon))
 		ic.custom_minimum_size = Vector2(30, 30)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.modulate = ncol if can else Color(0.4, 0.4, 0.45)
 		var icc := CenterContainer.new()
@@ -1786,6 +1794,7 @@ func _quest_row(q: Dictionary, btn_text: String, bcol: Color, cb: Callable, extr
 	ic.texture = Px.S2("ico_quest")
 	ic.custom_minimum_size = Vector2(26, 26)
 	ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	ic.modulate = bcol
 	h.add_child(ic)
@@ -1842,6 +1851,7 @@ func inventory_panel() -> void:
 		ic.texture = Px.S2(str(d.get("icon", "ico_loot"))) if not d.is_empty() else null
 		ic.custom_minimum_size = Vector2(34, 34)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.modulate = rc if not d.is_empty() else Color(0.2, 0.2, 0.25)
 		var icc := CenterContainer.new()
@@ -1933,6 +1943,7 @@ func inventory_panel() -> void:
 		ic.texture = Px.S2(str(d.icon))
 		ic.custom_minimum_size = Vector2(24, 24)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.modulate = rc
 		row.add_child(ic)
@@ -2054,6 +2065,7 @@ func barter_panel() -> void:
 		ic.texture = Px.S2(str(d.icon))
 		ic.custom_minimum_size = Vector2(24, 24)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.modulate = rc
 		row.add_child(ic)
@@ -2149,6 +2161,7 @@ func shop_panel() -> void:
 		ic.texture = Px.S2(str(d.icon))
 		ic.custom_minimum_size = Vector2(24, 24)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.modulate = rc
 		row.add_child(ic)
@@ -2603,7 +2616,8 @@ func records_panel() -> void:
 			tr.custom_minimum_size = Vector2(34 if (g.por as Array).size() > 1 else 44, 44)
 			tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			tr.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 			tr.modulate = Color(1, 1, 1, 1) if done else Color(0.16, 0.16, 0.2, 0.85)
 			prow.add_child(tr)
 		cell.add_child(prow)
@@ -2646,6 +2660,7 @@ func records_panel() -> void:
 			tr.custom_minimum_size = Vector2(28, 28)
 			tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			row.add_child(tr)
 		var cnt := int(tk.get(Enemy.KIND_NAME[k], 0))
 		var kv := VBoxContainer.new()
@@ -2847,7 +2862,8 @@ func kitchen_panel() -> void:
 	por.texture = Px.S2("por_mina")
 	por.custom_minimum_size = Vector2(72, 72)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pc := CenterContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -2888,7 +2904,8 @@ func routes_panel() -> void:
 	por.texture = Px.S2("por_lena")
 	por.custom_minimum_size = Vector2(72, 72)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pc := CenterContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -2931,7 +2948,8 @@ func orun_panel() -> void:
 	por.texture = Px.S2("por_orun")
 	por.custom_minimum_size = Vector2(72, 72)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pc := CenterContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3038,7 +3056,8 @@ func bet_panel() -> void:
 	por.texture = Px.S2("por_tegan")
 	por.custom_minimum_size = Vector2(72, 72)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pc := CenterContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3095,7 +3114,8 @@ func blessing_panel() -> void:
 	por.texture = Px.S2("por_ahusk")
 	por.custom_minimum_size = Vector2(72, 72)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pc := CenterContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3163,7 +3183,8 @@ func song_panel() -> void:
 	por.texture = Px.S2("por_neva")
 	por.custom_minimum_size = Vector2(72, 72)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pc := CenterContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3204,7 +3225,8 @@ func merchant_panel() -> void:
 	por.texture = Px.S2("por_ahusk")
 	por.custom_minimum_size = Vector2(64, 64)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pc := CenterContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3230,6 +3252,7 @@ func merchant_panel() -> void:
 		ic.texture = Px.S2(str(o.icon))
 		ic.custom_minimum_size = Vector2(26, 26)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.modulate = Px.C("ffd700")
 		row.add_child(ic)
@@ -3283,7 +3306,8 @@ func stray_panel() -> void:
 	por.texture = Px.S2("por_elyb")
 	por.custom_minimum_size = Vector2(64, 64)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	por.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	por.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	por.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pc := CenterContainer.new()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3436,6 +3460,7 @@ func _show_cards(kind: String, title: String, tcol: Color, opts: Array) -> void:
 			icon.texture = Px.S("ico_boon")
 		icon.custom_minimum_size = Vector2(40, 40)
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		icon.modulate = col.lerp(Color.WHITE, 0.35)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3589,6 +3614,7 @@ func death_screen(killer: String, gained: int) -> void:
 	sk.texture = Px.S2("icn_skull")
 	sk.custom_minimum_size = Vector2(44, 44)
 	sk.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	sk.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	sk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sk.modulate = Color(1, 0.4, 0.4)
 	sk.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3678,6 +3704,7 @@ func victory_screen(stats: Dictionary) -> void:
 	cr.texture = Px.S2("icn_crown")
 	cr.custom_minimum_size = Vector2(44, 44)
 	cr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	cr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	cr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	cr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var crc := CenterContainer.new()
@@ -3807,6 +3834,7 @@ func upgrade_panel() -> void:
 		ic.texture = Px.S2(str(spec.get("icon", "icn_upg_" + Meta._key(key))))
 		ic.custom_minimum_size = Vector2(26, 26)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(ic)
@@ -3843,6 +3871,7 @@ func upgrade_panel() -> void:
 		ic2.texture = Px.S2(str(spec.get("icon", "icn_upg_shield")))
 		ic2.custom_minimum_size = Vector2(26, 26)
 		ic2.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic2.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic2.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ic2.modulate = Color(1, 1, 1) if built else Color(0.75, 0.65, 0.4)
@@ -3904,6 +3933,7 @@ func stance_panel() -> void:
 		ic.texture = Px.S2(s.icon)
 		ic.custom_minimum_size = Vector2(36, 36)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var icc := CenterContainer.new()
@@ -3980,6 +4010,7 @@ func hero_panel() -> void:
 		ic.texture = Px.S2(s.por)
 		ic.custom_minimum_size = Vector2(64, 64)
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ic.modulate = Color(1, 1, 1, 1) if not locked else Color(0.4, 0.4, 0.45, 0.7)

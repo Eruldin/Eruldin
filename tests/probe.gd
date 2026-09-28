@@ -151,17 +151,30 @@ func _process(_d: float) -> void:
 					19:
 						_shoot()                    # faz-2 hikaye kartı görünürken
 					20:
-						G.ui.shop_panel()           # saphire pazar tezgâhı
+						G.ui._close_overlay()       # her ne açıksa koşulsuz kapat
 					21:
-						_shoot()                    # tezgâh açıkken çek
+						G.ui.dialogue("david")      # portre kutusu kontrolü
 					22:
+						_shoot()                    # david diyalog + portre (sonraki karede kapanır)
+					23:
+						G.ui._close_overlay()       # advance david'i haritaya yönlendirir — direkt kapat
+						G.ui.dialogue("mina")       # yeni boyalı portre kontrolü
+					24:
+						_shoot()                    # mina diyalog + portre
+					25:
+						G.ui._close_overlay()
+					26:
+						G.ui.shop_panel()           # saphire pazar tezgâhı
+					27:
+						_shoot()                    # tezgâh açıkken çek
+					28:
 						var stk := Items.shop_stock()
 						if not stk.is_empty():
 							var sid := str(stk[0])
 							var paid := Items.buy(sid)
 							print("[probe] shop buy %s -> %d (choralim %d)" % [sid, paid, int(G.meta.data.get("choralim", 0))])
 						G.ui._advance_overlay()
-					23:
+					29:
 						var st4: Array = G.meta.data.get("stash", [])
 						for sid2 in ["i_maske", "i_bilek"]:
 							if not st4.has(sid2):
@@ -179,29 +192,29 @@ func _process(_d: float) -> void:
 						for s in Items.set_state():
 							if s.active:
 								print("[probe] set active: %s" % str(s.name))
-					24:
+					30:
 						_shoot()                    # envanterde AKTİF set satırı
-					25:
+					31:
 						G.ui._advance_overlay()
-					26:
+					32:
 						G.ui.cinematic("cine_i0", "ARA SAHNE", "tam ekran ken-burns kontrolü", 8.0)
-					27:
+					33:
 						_shoot()                    # sinematik tam ekran mı
 						G.ui._advance_overlay()
-					28:
+					34:
 						G.ui.worldmap_panel()       # hikaye düğümü testi için harita
-					29:
+					35:
 						_pre_story_cho = int(G.meta.data.get("choralim", 0))
 						G.ui._wmap_pick("kayalik", Label.new(), {"id": "kayalik"})
-					30:
+					36:
 						_shoot()                    # hikaye kartı 1
-					31:
+					37:
 						G.ui._advance_overlay()     # kart 2
 						_shoot()
-					32:
+					38:
 						G.ui._advance_overlay()     # kartlar bitti -> overlay kapanır
 						print("[probe] story kayalik -> choralim +%d done=%s" % [int(G.meta.data.get("choralim", 0)) - _pre_story_cho, str((G.meta.data.get("story_done", []) as Array).has("kayalik"))])
-					33:
+					39:
 						G.ui._wmap_pick("kayalik", Label.new(), {"id": "kayalik"})  # tekrar: reddedilmeli
 						print("[probe] story re-pick can_enter=%s" % str(Wmap.can_enter("kayalik")))
 					_:
@@ -388,7 +401,7 @@ func _process(_d: float) -> void:
 func _shoot() -> void:
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
-	img.save_png("user://probe/shot_%02d.png" % _shot_n)
+	img.save_png("user://probe/shot_%02d_s%02d.png" % [_shot_n, _sub])
 	_shot_n += 1
 	_magenta_scan()
 
