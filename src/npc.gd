@@ -55,12 +55,13 @@ func _ready() -> void:
 	sh.scale = Vector2.ONE * 0.9
 	sh.z_index = -45
 	add_child(sh)
+	var up := G.upright(self)   # eğik dünyada NPC ve üst yazıları dik durur
 	body = Sprite2D.new()
 	body.texture = Px.S2("npc2_" + nid)
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	body.offset = Vector2(0, -body.texture.get_height() * 0.5)
 	Px.fit(body, 80.0)
-	add_child(body)
+	up.add_child(body)
 	_fr = [Px.S2("npc2_" + nid), Px.S2("npcb_" + nid)]
 	if nid == "neva":
 		G.fx.mk_light(self, Vector2(0, -24), Px.C("c26bff"), 0.6, 1.8)
@@ -74,7 +75,7 @@ func _ready() -> void:
 	prompt.position = Vector2(-46, -body.texture.get_height() - 20)
 	prompt.visible = false
 	prompt.z_index = 500
-	add_child(prompt)
+	up.add_child(prompt)
 	mark = Label.new()
 	mark.text = "!"
 	mark.add_theme_font_size_override("font_size", 22)
@@ -85,7 +86,7 @@ func _ready() -> void:
 	mark.position = Vector2(-6, -body.texture.get_height() - 46)
 	mark.visible = false
 	mark.z_index = 500
-	add_child(mark)
+	up.add_child(mark)
 	_bob = G.rf(0, TAU)
 	_anchor = position
 	_wtarget = _anchor

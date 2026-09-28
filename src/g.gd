@@ -27,6 +27,18 @@ static var MELEE_TOKENS_MAX := 2       # Director raises the cap as minutes pass
 
 static var rng := RandomNumberGenerator.new()
 
+# dimetrik eğim (BG2/iso okunuşu): world Node2D'ye uygulanır; karakterler
+# upright() ile karşı-eğimli tutulur ki zeminde dik dursunlar
+const SHEAR := Transform2D(Vector2(1.0, 0.0), Vector2(-0.10, 0.86), Vector2.ZERO)
+static var SHEAR_INV := SHEAR.affine_inverse()
+
+# sprite'ı eğik dünyada dik gösteren taşıyıcı — konum sheared kalır, çizim düz
+static func upright(n: Node2D) -> Node2D:
+	var h := Node2D.new()
+	h.transform = SHEAR_INV
+	n.add_child(h)
+	return h
+
 static func rf(a: float, b: float) -> float: return rng.randf_range(a, b)
 static func ri(a: int, b: int) -> int: return rng.randi_range(a, b)
 static func chance(p: float) -> bool: return rng.randf() < p

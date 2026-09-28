@@ -54,16 +54,26 @@ const SPRITES := {
 	"gr_7": "art/gen/g_gr_7.png",
 	"gr_8": "art/gen/g_gr_8.png",
 	"gr_hub": "art/gen/g_gr_hub.png",
-	# Kızıl Çöl (biome 6): sinematik kart olarak da zemin resmi kullanılır
-	"cine_6_0": "art/gen/g_gr_6.png",
-	"cine_hazine": "art/gen/g_cine_vault.png",
-	"cine_7_0": "art/gen/g_gr_7.png",
-	"cine_8_0": "art/gen/g_gr_8.png",
+	# boyanmis sinematik kartlar (metinsiz temiz vistalar — art/cine/)
+	# tum cine_<biome>_<v> varyantlari biome'un boyanmis vistasina bakar;
+	# intro kartlari cine_i0..i2 (kovan / kapi / Alfa-04)
+	"cine_0_0": "art/cine/cine_0.png", "cine_0_1": "art/cine/cine_0.png",
+	"cine_0_2": "art/cine/cine_0.png", "cine_0_3": "art/cine/cine_0.png",
+	"cine_1_0": "art/cine/cine_1.png", "cine_1_1": "art/cine/cine_1.png",
+	"cine_1_2": "art/cine/cine_1.png", "cine_1_3": "art/cine/cine_1.png",
+	"cine_2_0": "art/cine/cine_2.png", "cine_2_1": "art/cine/cine_2.png",
+	"cine_2_2": "art/cine/cine_2.png", "cine_2_3": "art/cine/cine_2.png",
+	"cine_3_0": "art/cine/cine_3.png", "cine_3_1": "art/cine/cine_3.png",
+	"cine_3_2": "art/cine/cine_3.png", "cine_3_3": "art/cine/cine_3.png",
+	"cine_4_0": "art/cine/cine_4.png",
+	"cine_5_0": "art/cine/cine_5.png",
+	"cine_6_0": "art/cine/cine_6.png",
+	"cine_7_0": "art/cine/cine_7.png",
+	"cine_8_0": "art/cine/cine_8.png",
+	"cine_hazine": "art/cine/cine_hazine.png",
+	"cine_i0": "art/cine/cine_i0.png", "cine_i1": "art/cine/cine_i1.png",
+	"cine_i2": "art/cine/cine_i2.png",
 	"por_nur": "art/gen/g_nur_0.png",
-	# Çürük Bataklık (biome 4): sinematik kart olarak da zemin resmi kullanılır
-	"cine_4_0": "art/gen/g_gr_4.png",
-	# Kül Ovası (biome 5): sinematik kart olarak da zemin resmi kullanılır
-	"cine_5_0": "art/gen/g_gr_5.png",
 	# biome prop'lari: prop_<biome>_<i> (0..5), hub icin prop_hub_<i>
 	"prop_0_0": "art/gen/g_prop_0__0.png", "prop_0_1": "art/gen/g_prop_0__1.png",
 	"prop_0_2": "art/gen/g_prop_0__2.png", "prop_0_3": "art/gen/g_prop_0__3.png",
@@ -94,6 +104,13 @@ const SPRITES := {
 	"fx_boom": "art/gen/g_fx_0.png", "fx_zap": "art/gen/g_fx_1.png",
 	"fx_slash": "art/gen/g_fx_2.png", "fx_heal": "art/gen/g_fx_3.png",
 	"fx_void": "art/gen/g_fx_4.png", "fx_shine": "art/gen/g_fx_5.png",
+	# Kenney particle pack (CC0) — tintable real smoke/flame/spark sprites
+	"fx_smoke_0": "art/fx_smoke_03.png", "fx_smoke_1": "art/fx_smoke_07.png", "fx_smoke_2": "art/fx_smoke_10.png",
+	"fx_flame_0": "art/fx_flame_01.png", "fx_flame_1": "art/fx_flame_05.png",
+	"fx_spark_0": "art/fx_spark_01.png", "fx_spark_1": "art/fx_spark_05.png", "fx_spark_2": "art/fx_spark_07.png",
+	"fx_star": "art/fx_star.png", "fx_magic": "art/fx_magic.png",
+	"fx_trace_0": "art/fx_trace1.png", "fx_trace_1": "art/fx_trace2.png",
+	"fx_twirl": "art/fx_twirl.png", "fx_muzzle": "art/fx_muzzle.png", "fx_dirt": "art/fx_dirt.png",
 }
 
 static func _hero(prefix: String) -> Dictionary:

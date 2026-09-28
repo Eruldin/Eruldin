@@ -15,6 +15,9 @@ func _ready() -> void:
 
 	world = Node2D.new()
 	world.name = "world"
+	# dimetrik eğim: y ekseni %14 sıkışır + hafif sola kayma — BG2'nin izometrik
+	# okunuşunu taklit eder; kamera aynı dönüşümle mantık konumunu takip eder
+	world.transform = G.SHEAR
 	add_child(world)
 
 	G.fx = Fx.new()
@@ -70,6 +73,6 @@ func set_dark(c: Color) -> void:
 
 func _process(_d: float) -> void:
 	if G.player != null and is_instance_valid(G.player) and not G.player.dead:
-		cam.global_position = G.player.pos
+		cam.global_position = world.global_transform * G.player.pos
 	elif is_instance_valid(G.room):
 		cam.global_position = Vector2.ZERO

@@ -96,7 +96,9 @@ func _intro_story() -> void:
 		G.meta.data["seen_story"] = seen
 		G.meta.save()
 		G.ui.cine_seq([
-			{"tex": "bg3", "title": "DÜŞÜŞ: CHORALIM PROTOKOLÜ", "sub": "Viator son kampa çekildi. Protokol, hayatta kalan tek praetorianı seçti: sen."},
+			{"tex": "cine_i0", "title": "DÜŞÜŞ: CHORALIM PROTOKOLÜ", "sub": "Viator son kampa çekildi. Protokol, hayatta kalan tek praetorianı seçti: sen."},
+			{"tex": "cine_i1", "title": "PROTOKOL", "sub": "Kapıdan geçen ya parçacıkla döner\nya da şarkının bir parçası olur."},
+			{"tex": "cine_i2", "title": "SEN", "sub": "Alfa-04 — kovanın yarım bıraktığı kasa.\nTopla. Güçlen. Protokolü kır."},
 			{"tex": "por_neva", "title": "NEVA", "sub": "Rezonans seni geri getirir, Alfa-04. Her düşüşte bir parçan eksik döner — ama dönersin."},
 			{"tex": "por_david", "title": "DAVID", "sub": "Harita açık. Görevler yazılı, yollar kilitli. Efendileri düşür, dünya açılsın."},
 		])
