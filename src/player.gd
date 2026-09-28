@@ -515,15 +515,21 @@ func _swing(stage: int, dur: float) -> void:
 	G.fx.slash_fx(pos, ang, reach, Px.C("7fd4ff"), stage == 2)
 	G.audio.play("slash", G.rf(0.9, 1.2), 0.7)
 	# hit test lands partway through the swing
+	var swr: WeakRef = weakref(self)
 	get_tree().create_timer(dur * 0.28).timeout.connect(func():
-		if dead or _swing_hit_done:
+		var _p: Player = swr.get_ref()
+		if _p == null or _p.dead or _p._swing_hit_done:
 			return
-		_swing_hit_done = true
-		var dmg := melee_dmg * dmg_mult * st_dmg * (1.7 if stage == 2 else 1.0)
-		hit_arc(dmg, ang, reach, arc, stage == 2)
+		_p._swing_hit_done = true
+		var dmg := _p.melee_dmg * _p.dmg_mult * _p.st_dmg * (1.7 if stage == 2 else 1.0)
+		_p.hit_arc(dmg, ang, reach, arc, stage == 2)
 		G.audio.play("hitHeavy" if stage == 2 else "hit", G.rf(0.9, 1.15), 0.85)
 	)
-	tw.tween_callback(func(): blade.modulate = Color(0.45, 0.9, 1, 0))
+	var bwr: WeakRef = weakref(blade)
+	tw.tween_callback(func():
+		var _b: Node2D = bwr.get_ref()
+		if _b:
+			_b.modulate = Color(0.45, 0.9, 1, 0))
 
 func hit_arc(dmg: float, ang: float, reach: float, arc: float, heavy: bool, wpn := "") -> void:
 	var hits := 0
@@ -625,12 +631,18 @@ func auto_swing(ang: float, reach: float, arc_deg: float, dmg: float, heavy: boo
 	tw.tween_property(blade, "rotation", start_rot + arc, 0.16)
 	G.fx.slash_fx(pos, ang, reach, Px.C("7fd4ff"), heavy)
 	G.audio.play("slash", G.rf(0.95, 1.15), 0.55)
+	var swr: WeakRef = weakref(self)
 	get_tree().create_timer(0.09, false).timeout.connect(func():
-		if dead:
+		var _p: Player = swr.get_ref()
+		if _p == null or _p.dead:
 			return
-		hit_arc(dmg, ang, reach + st_reach, arc, heavy, wpn)
+		_p.hit_arc(dmg, ang, reach + _p.st_reach, arc, heavy, wpn)
 		G.audio.play("hitHeavy" if heavy else "hit", G.rf(0.9, 1.15), 0.6))
-	tw.tween_callback(func(): blade.modulate = Color(0.45, 0.9, 1, 0))
+	var bwr: WeakRef = weakref(blade)
+	tw.tween_callback(func():
+		var _b: Node2D = bwr.get_ref()
+		if _b:
+			_b.modulate = Color(0.45, 0.9, 1, 0))
 
 static func xp_for(lvl: int) -> float:
 	return 6.0 + float(lvl - 1) * 5.0 + pow(maxi(0, lvl - 1), 1.7) * 1.2

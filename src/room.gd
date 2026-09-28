@@ -54,6 +54,35 @@ const MOTE_COL := {
 	"hub": Color(1.0, 0.75, 0.45, 0.35),
 }
 var motes: Array = []   # [{s, vel}] atmosfer parcaciklari
+
+# seviye evrimi: oyuncu 15/25/30/35/40. seviyeyi geçtikçe saha görsel olarak
+# derinleşir — zemin mora kararır, mor koro damarları sızar, moteler kızıllaşır
+func apply_corruption(e: int) -> void:
+	var g := get_node_or_null("ground") as Sprite2D
+	if g != null:
+		var target := Color(1, 1, 1).lerp(Color(0.62, 0.5, 0.88), minf(0.6, e * 0.15))
+		var tw := create_tween()
+		tw.tween_property(g, "modulate", target, 2.5)
+	for i in 8 + e * 4:
+		var s := Sprite2D.new()
+		s.texture = Px.S2("dec_vein_0")
+		if s.texture == null:
+			s.texture = Px.S("splat")
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		s.position = Vector2(G.rf(BOUNDS.position.x, BOUNDS.end.x), G.rf(BOUNDS.position.y, BOUNDS.end.y))
+		s.rotation = G.rf(0, TAU)
+		s.scale = Vector2.ONE * G.rf(1.8, 3.0)
+		s.modulate = Color(0.55, 0.25, 0.95, 0.0)
+		s.z_index = -1890
+		add_child(s)
+		var tw2 := create_tween()
+		tw2.tween_property(s, "modulate:a", 0.55, G.rf(1.5, 3.5))
+	# moteler mor/kızıl koroya döner — saha "kirlendi" hissi
+	for m in motes:
+		var s2: Sprite2D = m.get("s")
+		if is_instance_valid(s2):
+			var tw3 := create_tween()
+			tw3.tween_property(s2, "modulate", s2.modulate.lerp(Color(0.8, 0.35, 0.95, s2.modulate.a), 0.75), 2.0)
 # KUM FIRTINASI (biome 6): periyodik ruzgar dalgasi — herkesi iter
 var storm_t := 0.0
 var storm_cd := 0.0
@@ -1385,7 +1414,7 @@ func _ark_bolt(a: Vector2, b: Vector2) -> void:
 	add_child(ln)
 	var tw := create_tween()
 	tw.tween_property(ln, "modulate:a", 0.0, 0.22)
-	tw.tween_callback(ln.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(ln): ln.queue_free())
 
 func _tick_pickups(d: float) -> void:
 	if G.player == null:
@@ -1820,8 +1849,18 @@ func blood(p: Vector2, col: Color) -> void:
 	s.rotation = G.rf(0, TAU)
 	s.position = p + Vector2(G.rf(-8, 8), G.rf(-4, 4))
 	decals.add_child(s)
-	if decals.get_child_count() > 40:
+	if decals.get_child_count() > 30:
 		decals.get_child(0).queue_free()
+	# izler solup temizlenir — haritada kalıcı kan birikimi kalmaz
+	var tw := create_tween()
+	tw.tween_interval(Fx.SPLAT_LIFE * G.rf(0.7, 1.2))
+	tw.tween_property(s, "modulate:a", 0.0, 3.0)
+	var wr: WeakRef = weakref(s)
+	tw.tween_callback(func():
+		var _s: Sprite2D = wr.get_ref()
+		if _s:
+			_s.queue_free()
+	)
 
 func on_enemy_dead(e) -> void:
 	if is_hub or e is Boss or e.has_meta("add"):

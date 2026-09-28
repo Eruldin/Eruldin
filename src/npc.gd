@@ -102,6 +102,9 @@ func _process(d: float) -> void:
 		_fr_i = (_fr_i + 1) % _fr.size()
 		if is_instance_valid(body):
 			body.texture = _fr[_fr_i]
+	# nefes: kareler arası yumuşak salınım — NPC'ler durgun durmasın
+	if is_instance_valid(body):
+		body.offset = Vector2(0, -body.texture.get_height() * 0.5 + sin(_bob * 2.2) * 1.3)
 	# BG2 "!" — bu NPC'de görev işi varsa başının üstünde yanar (sektirmede hafif zıplar)
 	if is_instance_valid(mark):
 		mark.visible = G.state == G.State.HUB and Quests.has_business(nid)

@@ -95,7 +95,15 @@ func _pgrow(p: Sprite2D, dt: float) -> void:
 		p.rotation += sp * dt
 
 # ---------- floating text ----------
+const FLOAT_CAP := 42   # geç oyunda hasar spam'i kare düşürür — havuz sınırlı
+
 func float_text(pos: Vector2, txt: String, col: Color, size := 1.0) -> void:
+	if floats.size() >= FLOAT_CAP:
+		var old: Dictionary = floats.pop_front()
+		if is_instance_valid(old.get("h")):
+			old["h"].queue_free()
+		elif is_instance_valid(old["l"]):
+			old["l"].queue_free()
 	# eğik dünyada rakamlar dik okunur: taşıyıcı sheared konuma oturur, harfler düz
 	var h := Node2D.new()
 	h.transform = Transform2D(0.0, pos + Vector2(G.rf(-8, 8), -14)) * G.SHEAR_INV
@@ -155,18 +163,32 @@ func kill_tele(t: Dictionary) -> void:
 	teles.erase(t)
 
 # ---------- decals / ghosts ----------
+const SPLAT_LIFE := 55.0   # kan/iz lekeleri solup temizlenir — haritada kalıcı iz kalmaz
+
 func splat(pos: Vector2, col: Color, sc := 1.0) -> void:
 	var s := _mk("splat", -50)
 	s.global_position = pos + Vector2(G.rf(-6, 6), G.rf(-6, 6))
 	s.rotation = G.rf(0, TAU)
 	s.scale = Vector2.ONE * sc * G.rf(0.7, 1.3)
 	s.modulate = Color(col.r, col.g, col.b, 0.55)
+	var life := SPLAT_LIFE * G.rf(0.7, 1.2)
 	if is_instance_valid(G.room):
 		s.reparent(G.room.decals)
+		# room.decals'te biriken eski izleri de sınırla (performans + görsel kalıntı)
+		var kids := G.room.decals.get_children()
+		if kids.size() > 30:
+			kids[0].queue_free()
 	else:
-		var tw := create_tween()
-		tw.tween_property(s, "modulate:a", 0.0, 60.0)
-		tw.tween_callback(s.queue_free)
+		life = 8.0
+	var tw := create_tween()
+	tw.tween_interval(life)
+	tw.tween_property(s, "modulate:a", 0.0, 3.0)
+	var wr: WeakRef = weakref(s)
+	tw.tween_callback(func():
+		var _s: Sprite2D = wr.get_ref()
+		if _s:
+			_s.queue_free()
+	)
 
 func ghost(src: Sprite2D, col: Color) -> void:
 	var s := _mk("px1", 45)
@@ -177,7 +199,7 @@ func ghost(src: Sprite2D, col: Color) -> void:
 	s.modulate = Color(col.r, col.g, col.b, 0.45)
 	var tw := create_tween()
 	tw.tween_property(s, "modulate:a", 0.0, 0.35)
-	tw.tween_callback(s.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(s): s.queue_free())
 
 func clear_decals() -> void:
 	for t in teles.duplicate():
@@ -191,6 +213,10 @@ func clear_decals() -> void:
 		elif is_instance_valid(f["l"]):
 			f["l"].queue_free()
 	floats.clear()
+	# kan/iz lekeleri de odayla birlikte temizlenir
+	if is_instance_valid(G.room) and is_instance_valid(G.room.decals):
+		for d in G.room.decals.get_children():
+			d.queue_free()
 
 # ---------- screen fx ----------
 func shake(amp: float, dur: float) -> void:
@@ -238,14 +264,14 @@ func boom(pos: Vector2, col: Color, radius := 70.0) -> void:
 	var tw := create_tween()
 	tw.tween_property(s, "scale", Vector2.ONE * sc * 1.25, 0.3)
 	tw.parallel().tween_property(s, "modulate:a", 0.0, 0.3)
-	tw.tween_callback(s.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(s): s.queue_free())
 
 func light_flash(pos: Vector2, col: Color, energy := 1.6, tex_scale := 2.5, dur := 0.22) -> void:
 	var l := mk_light(self, pos, col, energy, tex_scale)
 	l.z_index = 70
 	var tw := create_tween()
 	tw.tween_property(l, "energy", 0.0, dur)
-	tw.tween_callback(l.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(l): l.queue_free())
 
 func slash_fx(pos: Vector2, ang: float, reach: float, col: Color, heavy := false) -> void:
 	var s := _mk("slash_arc", 55)
@@ -256,7 +282,7 @@ func slash_fx(pos: Vector2, ang: float, reach: float, col: Color, heavy := false
 	var tw := create_tween()
 	tw.tween_property(s, "modulate:a", 0.0, 0.18)
 	tw.parallel().tween_property(s, "scale", s.scale * 1.15, 0.18)
-	tw.tween_callback(s.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(s): s.queue_free())
 	# lingering secondary trail — sells the weight of the swing
 	var s2 := _mk("slash_arc", 54)
 	s2.global_position = s.global_position
@@ -266,7 +292,7 @@ func slash_fx(pos: Vector2, ang: float, reach: float, col: Color, heavy := false
 	var tw2 := create_tween()
 	tw2.tween_property(s2, "modulate:a", 0.0, 0.3)
 	tw2.parallel().tween_property(s2, "rotation", s2.rotation + 0.3, 0.3)
-	tw2.tween_callback(s2.queue_free)
+	tw2.tween_callback(func(): if is_instance_valid(s2): s2.queue_free())
 	light_flash(pos + Vector2(0, -14), col, 1.2 if heavy else 0.7, 2.0, 0.15)
 
 # Starburst + sparks + light pop at a struck point — the "punch" of every hit.
@@ -279,7 +305,7 @@ func impact(pos: Vector2, dir: Vector2, col: Color, heavy := false) -> void:
 	var tw := create_tween()
 	tw.tween_property(s, "scale", s.scale * 2.4, 0.11)
 	tw.parallel().tween_property(s, "modulate:a", 0.0, 0.11)
-	tw.tween_callback(s.queue_free)
+	tw.tween_callback(func(): if is_instance_valid(s): s.queue_free())
 	if dir.length_squared() > 0.01:
 		directional(pos, dir, col, 7 if heavy else 4, 230.0, 3.0, 0.22, 0.45)
 		directional(pos, dir.rotated(2.6), col.darkened(0.35), 3, 150.0, 2.5, 0.28, 0.7)
@@ -359,13 +385,24 @@ func _process(dt: float) -> void:
 				t["sr2"].global_position = t["follow"].global_position
 		var k := 1.0 - clampf(t["t"] / t["dur"], 0.0, 1.0)
 		var c: Color = t["sr"].modulate
-		c.a = lerpf(0.16, 0.5, k) + sin(Time.get_ticks_msec() * 0.018) * 0.06
-		t["sr"].modulate = c
-		if is_instance_valid(t.get("sr2")):
-			var c2: Color = t["sr2"].modulate
-			c2.a = lerpf(0.3, 0.85, k)
-			t["sr2"].modulate = c2
-			t["sr2"].scale = t["sr"].scale * lerpf(1.08, 1.0, k)
+		if t["dur"] > 100.0:
+			# kalıcı tehlike işareti: leke değil işaretli bölge gibi okunur —
+			# neredeyse şeffaf dolgu + yavaş dönen halka
+			c.a = 0.05 + sin(Time.get_ticks_msec() * 0.003) * 0.025
+			t["sr"].modulate = c
+			if is_instance_valid(t.get("sr2")):
+				var c2: Color = t["sr2"].modulate
+				c2.a = 0.5 + sin(Time.get_ticks_msec() * 0.004) * 0.15
+				t["sr2"].modulate = c2
+				t["sr2"].rotation += dt * 0.5
+		else:
+			c.a = lerpf(0.16, 0.5, k) + sin(Time.get_ticks_msec() * 0.018) * 0.06
+			t["sr"].modulate = c
+			if is_instance_valid(t.get("sr2")):
+				var c2: Color = t["sr2"].modulate
+				c2.a = lerpf(0.3, 0.85, k)
+				t["sr2"].modulate = c2
+				t["sr2"].scale = t["sr"].scale * lerpf(1.08, 1.0, k)
 		if t["t"] <= 0:
 			kill_tele(t)
 

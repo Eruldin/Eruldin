@@ -680,6 +680,7 @@ static func _build2(n: String) -> Texture2D:
 		"gate2": return _gate2()
 	var fb := _img(8, 8)
 	_rect(fb, 0, 0, 8, 8, Color.MAGENTA)
+	push_warning("[miss-tex] %s" % n)
 	return _tex(fb)
 
 # ---------- shared figure builder (humans/armored) ----------

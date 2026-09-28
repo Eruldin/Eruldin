@@ -38,6 +38,36 @@ var _anim_i := 0
 var _anim_t := 0.0
 var _anim_fps := 8.0
 var _anim_off := -30.0
+# procedural life: nefes dalgalanması, koşu eğimi, vuruş squash
+var _fit := Vector2.ZERO
+var _lean := 0.0
+var _squash := Vector2.ONE
+var _last_pos := Vector2(1e20, 1e20)
+
+func _body_fx(d: float) -> void:
+	if not is_instance_valid(body):
+		return
+	if _fit == Vector2.ZERO:
+		_fit = body.scale
+	var dp := Vector2.ZERO
+	if _last_pos.x < 1e19:
+		dp = pos - _last_pos
+	_last_pos = pos
+	var bvel := dp / maxf(d, 0.0005)
+	var moving := bvel.length() > 30.0
+	var ph := float(get_instance_id() % 997) * 0.37 + float(Time.get_ticks_msec()) * 0.001
+	# nefes: dururken yumuşak salınım; koşarken adım zıplaması
+	var bob := sin(ph * (11.0 if moving else 2.4)) * (1.7 if moving else 1.1)
+	body.offset = Vector2(0, _anim_off + bob)
+	_squash = _squash.lerp(Vector2.ONE, minf(d * 8.0, 1.0))
+	var br := 1.0 + (0.0 if moving else sin(ph * 2.4) * 0.024)
+	body.scale = _fit * Vector2(_squash.x / br, _squash.y * br)
+	var tl := clampf(bvel.x * 0.00042, -0.15, 0.15) if moving else 0.0
+	_lean = lerpf(_lean, tl, minf(d * 7.0, 1.0))
+	body.rotation = _lean
+
+func hit_squash(strength := 0.30) -> void:
+	_squash = Vector2(1.0 + strength, 1.0 - strength * 0.7)
 
 func _set_anim(state: String, fps := 8.0) -> void:
 	if _anim == state or not _frames.has(state):
@@ -49,7 +79,17 @@ func _set_anim(state: String, fps := 8.0) -> void:
 	_apply_frame()
 
 func _tick_anim(d: float) -> void:
+	# ekran dışı aktörlerde görsel işleme atlanır — geç oyunda kareyi korur
+	var far := false
+	if is_instance_valid(G.player):
+		far = pos.distance_squared_to(G.player.pos) > 1500.0 * 1500.0
+	if far:
+		_last_pos = pos
+	else:
+		_body_fx(d)
 	if _anim == "" or not _frames.has(_anim):
+		return
+	if far:
 		return
 	var arr: Array = _frames[_anim]
 	if arr.size() <= 1:
@@ -69,6 +109,7 @@ func _apply_frame() -> void:
 
 func _load_frames(set_id: String, fps := 8.0) -> void:
 	_frames = Px.F(set_id)
+	_fit = Vector2.ZERO
 	if _frames.has("idle") and _frames["idle"].size() > 0:
 		var t0: Texture2D = _frames["idle"][0]
 		_anim_off = -t0.get_height() * 0.5
@@ -94,6 +135,7 @@ func take_hit(h: Dictionary) -> void:
 	var dir := (pos - from).normalized()
 	ext_vel += dir * h.get("knock", 0.0) * 30.0 / maxf(0.2, knock_resist)
 	_flash_t = 0.09
+	hit_squash(0.28)
 	var blood := Color(0.6, 0.05, 0.05) if team == G.Team.ENEMY else Color(0.8, 0.1, 0.2)
 	G.fx.impact(pos + Vector2(0, -12), dir, blood.lightened(0.35), h.get("crit", false))
 	G.fx.burst(pos + Vector2(0, -12), blood, 14 if h.get("crit", false) else 7, 130.0, 3.0, 0.35, 6.0)
