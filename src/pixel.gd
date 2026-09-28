@@ -1063,7 +1063,9 @@ static func _light_tex() -> Texture2D:
 			var dy := float(y - 64)
 			var d := sqrt(dx * dx + dy * dy) / 64.0
 			if d < 1.0:
-				_p(t, x, y, Color(1, 1, 1, pow(1.0 - d, 1.7)))
+				# ordered dither: koyu sahnede 8-bit degrade banding'i kırar
+				var jitter := (float((x * 73 + y * 149) % 19) / 19.0 - 0.5) * 0.05
+				_p(t, x, y, Color(1, 1, 1, clampf(pow(1.0 - d, 1.7) + jitter, 0.0, 1.0)))
 	return _tex(t)
 
 # ---------- slash arc (blade trail) ----------

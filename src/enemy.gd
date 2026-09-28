@@ -399,7 +399,7 @@ func init() -> void:
 func _make_body() -> void:
 	body = Sprite2D.new()
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	add_child(body)
+	G.upright(self).add_child(body)
 	var kn: String = KIND_SET.get(kind, EKind.keys()[kind].to_lower())
 	if kind == EKind.BALCIK:
 		base_color = Color(0.82, 1.0, 0.85)

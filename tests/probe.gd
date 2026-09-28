@@ -8,6 +8,8 @@ var _step := 0
 var _way_sub := -1
 var _sub := 0
 var _shot_at := -1.0
+var _cine_shots := 0
+var _dlg_rep := 0
 var _msg_at := 0.0
 var _shot_n := 0
 var _roster_done := false
@@ -62,6 +64,9 @@ func _process(_d: float) -> void:
 			if G.state == G.State.HUB and is_instance_valid(G.player) and is_instance_valid(G.room) and not G.room.doors.is_empty():
 				# açılış/epilog sinematiği oynuyorsa önce boşalt — paneller onu yemesin
 				if is_instance_valid(G.ui) and G.ui.overlay_open() and str(G.ui._overlay.get_meta("kind", "")) == "cine":
+					if _cine_shots < 4:
+						_cine_shots += 1
+						_shoot()                # açılış/epilog sinematik kartı
 					G.ui._advance_overlay()
 					return
 				# one action per frame so each shot captures a distinct state
@@ -71,7 +76,12 @@ func _process(_d: float) -> void:
 					1:
 						G.ui.dialogue("ehnar")      # görevli NPC -> diyalog
 					2:
-						G.ui._advance_overlay()     # diyalog -> görev panosu
+						if _dlg_rep < 1:
+							_dlg_rep += 1
+							_sub -= 1               # bir kare daha diyalogda kal
+							_shoot()                # diyalog kartı açıkken çek
+						else:
+							G.ui._advance_overlay()     # diyalog -> görev panosu
 					3:
 						_shoot()                    # quest panel açıkken çek
 					4:

@@ -975,13 +975,15 @@ func spawn_merchant(p: Vector2) -> void:
 	merchant_pos = p
 	_merch_armed = true
 	var node := Sprite2D.new()
+	var wrap := Node2D.new()   # karşı-eğim: tüccar ve etiketi eğik zeminde dik durur
+	wrap.transform = Transform2D(0.0, p) * G.SHEAR_INV
+	wrap.z_index = int(p.y)
+	add_child(wrap)
 	node.texture = Px.S2("npc2_ahusk")
 	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	node.offset = Vector2(0, -node.texture.get_height() * 0.5)
 	Px.fit(node, 72.0)
-	node.position = p
-	node.z_index = int(p.y)
-	add_child(node)
+	wrap.add_child(node)
 	var tag := Label.new()
 	tag.text = "GEZGİN TÜCCAR"
 	tag.add_theme_font_size_override("font_size", 11)
@@ -989,11 +991,11 @@ func spawn_merchant(p: Vector2) -> void:
 	tag.add_theme_color_override("font_color", Px.C("ffd700"))
 	tag.add_theme_color_override("font_outline_color", Color.BLACK)
 	tag.add_theme_constant_override("outline_size", 3)
-	tag.position = p + Vector2(-52, -88)
+	tag.position = Vector2(-52, -88)
 	tag.z_index = 500
-	add_child(tag)
+	wrap.add_child(tag)
 	G.fx.mk_light(node, Vector2(0, -18), Px.C("ffd700"), 0.8, 2.0)
-	merchant = {"node": node, "tag": tag}
+	merchant = {"node": wrap, "tag": tag}
 	G.audio.jingle("boon")
 	G.ui.toast("GEZGİN TÜCCAR sahada — yanına git")
 
@@ -1015,14 +1017,16 @@ func spawn_stray(p: Vector2) -> void:
 	stray_pos = p
 	_stray_armed = true
 	var node := Sprite2D.new()
+	var wrap := Node2D.new()
+	wrap.transform = Transform2D(0.0, p) * G.SHEAR_INV
+	wrap.z_index = int(p.y)
+	add_child(wrap)
 	node.texture = Px.S2("npc2_elyb")
 	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	node.offset = Vector2(0, -node.texture.get_height() * 0.5)
 	node.modulate = Color(0.75, 0.85, 0.95)
 	Px.fit(node, 68.0)
-	node.position = p
-	node.z_index = int(p.y)
-	add_child(node)
+	wrap.add_child(node)
 	var tag := Label.new()
 	tag.text = "KAYIP ŞASİ"
 	tag.add_theme_font_size_override("font_size", 11)
@@ -1030,11 +1034,11 @@ func spawn_stray(p: Vector2) -> void:
 	tag.add_theme_color_override("font_color", Px.C("8fd4ff"))
 	tag.add_theme_color_override("font_outline_color", Color.BLACK)
 	tag.add_theme_constant_override("outline_size", 3)
-	tag.position = p + Vector2(-42, -84)
+	tag.position = Vector2(-42, -84)
 	tag.z_index = 500
-	add_child(tag)
+	wrap.add_child(tag)
 	G.fx.mk_light(node, Vector2(0, -14), Px.C("8fd4ff"), 0.6, 1.6)
-	stray = {"node": node, "tag": tag}
+	stray = {"node": wrap, "tag": tag}
 	G.audio.play("door", 0.7, 0.5)
 	G.ui.toast("KAYIP ŞASİ sahada — yanına git")
 

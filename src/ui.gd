@@ -367,10 +367,10 @@ func _build_hud() -> void:
 	_boon_row.add_theme_constant_override("separation", 6)
 	_hud.add_child(_boon_row)
 
-	_room_lbl = _lbl("", Vector2(20, 134), 12, Color(0.72, 0.72, 0.82))
+	_room_lbl = _lbl("", Vector2(20, 148), 12, Color(0.72, 0.72, 0.82))
 	_hud.add_child(_room_lbl)
 	# görev izleyici — koşuda aktif görevlerin ilerlemesi (BG2 journal-glance)
-	_quest_lbl = _lbl("", Vector2(20, 152), 11, Color(0.82, 0.78, 0.55))
+	_quest_lbl = _lbl("", Vector2(20, 166), 11, Color(0.82, 0.78, 0.55))
 	_hud.add_child(_quest_lbl)
 
 	_hint_lbl = _lbl("WASD hareket · SPACE dash · Q yetenek · F aşırı yük · R iksir · T şarap · E etkileşim · ESC duraklat", Vector2(18, 702), 10, Color(0.42, 0.42, 0.52))
@@ -459,10 +459,10 @@ func _build_boss_bar() -> void:
 	_boss_wrap.add_child(_boss_por2)
 
 func _build_overlays() -> void:
-	_banner_lbl = _lbl("", Vector2(0, 240), 34, Px.C("00E5FF"))
+	_banner_lbl = _lbl("", Vector2(0, 150), 24, Px.C("00E5FF"))
 	_banner_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_banner_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_banner_lbl.size = Vector2(1280, 80)
+	_banner_lbl.size = Vector2(1280, 64)
 	_banner_lbl.modulate.a = 0.0
 	root.add_child(_banner_lbl)
 
@@ -757,10 +757,13 @@ func banner(title: String, sub: String) -> void:
 	tw.tween_property(_banner_lbl, "modulate:a", 1.0, 0.3)
 
 func toast(msg: String) -> void:
-	var l := _lbl(msg, Vector2(0, 560 + _toasts.size() * 22), 14, Color(0.85, 0.9, 1))
+	while _toasts.size() >= 4:
+		_toasts[0].queue_free()
+		_toasts.remove_at(0)
+	var l := _lbl(msg, Vector2(0, 545 + _toasts.size() * 20), 14, Color(0.85, 0.9, 1))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.size = Vector2(1280, 20)
-	l.set_meta("t", 2.2)
+	l.set_meta("t", 2.6)
 	root.add_child(l)
 	_toasts.append(l)
 
@@ -820,6 +823,8 @@ func _toast_keys() -> void:
 		if l.get_meta("t") <= 0:
 			l.queue_free()
 			_toasts.remove_at(i)
+			for j in _toasts.size():
+				_toasts[j].position.y = 545 + j * 20
 
 func screen_flash(col: Color, a: float) -> void:
 	_flash.color = Color(col.r, col.g, col.b, a)
@@ -856,8 +861,12 @@ func cinematic(tex_key: String, title: String, sub: String, dur := 2.6) -> void:
 	if overlay_open():
 		return
 	_pause(true)
+	_hud.visible = false
+	_banner_lbl.modulate.a = 0.0
+	_banner_t = 0.0
 	_overlay = Control.new()
 	_overlay.set_meta("kind", "cine")
+	_overlay.z_index = 400
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.modulate = Color(1, 1, 1, 0)
@@ -869,7 +878,7 @@ func cinematic(tex_key: String, title: String, sub: String, dur := 2.6) -> void:
 	var still := TextureRect.new()
 	still.texture = Px.S2(tex_key)
 	still.set_anchors_preset(Control.PRESET_FULL_RECT)
-	still.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	still.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	still.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	still.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.add_child(still)
@@ -921,7 +930,7 @@ func _cine_play() -> void:
 	if _cine_cards.is_empty():
 		return
 	var c: Dictionary = _cine_cards.pop_front()
-	cinematic(str(c.get("tex", "bg3")), str(c.get("title", "")), str(c.get("sub", "")), 3.2)
+	cinematic(str(c.get("tex", "bg_3")), str(c.get("title", "")), str(c.get("sub", "")), 3.2)
 
 # ---------------------------------------------------------------- boss bar
 
@@ -1007,6 +1016,7 @@ func dialogue(nid: String) -> void:
 	por_f.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var por := TextureRect.new()
 	por.texture = Px.S2("por_" + nid)
+	por.modulate = Color(1.22, 1.22, 1.25)
 	por.custom_minimum_size = Vector2(64, 64)
 	por.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	por.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -1036,6 +1046,14 @@ func dialogue(nid: String) -> void:
 	if not unseen.is_empty():
 		idx = int(unseen[G.ri(0, unseen.size() - 1)])
 	G.meta.mark_line("%s_%d" % [nid, idx])
+	# ikinci replik kuyruğu — konuşma tek satırda kesilmesin (BG2 sohbet hissi)
+	var rest: Array = []
+	var rest_opts := unseen.duplicate()
+	rest_opts.erase(idx)
+	if not rest_opts.is_empty():
+		var j := int(rest_opts[G.ri(0, rest_opts.size() - 1)])
+		rest.append(lines[j])
+		G.meta.mark_line("%s_%d" % [nid, j])
 	G.meta.save()
 	body_l.text = lines[idx]
 	if nid == "vane":
@@ -1063,11 +1081,16 @@ func dialogue(nid: String) -> void:
 	_overlay.set_meta("kind", "dialogue")
 	_overlay.set_meta("nid", nid)
 	_overlay.set_meta("body", body_l)
+	_overlay.set_meta("rest", rest)
 
 func _close_overlay() -> void:
 	if is_instance_valid(_overlay):
 		_overlay.queue_free()
 	_overlay = null
+	if is_instance_valid(_hud):
+		_hud.visible = true
+	if is_instance_valid(_mmap):
+		_mmap.visible = true
 	_pause(false)
 
 func _input(ev: InputEvent) -> void:
@@ -1090,6 +1113,13 @@ func _advance_overlay() -> void:
 	match kind:
 		"dialogue":
 			var nid: String = _overlay.get_meta("nid")
+			var rest: Array = _overlay.get_meta("rest", [])
+			if not rest.is_empty():
+				_overlay.set_meta("rest", rest)
+				var bl = _overlay.get_meta("body")
+				if is_instance_valid(bl):
+					bl.text = str(rest.pop_front())
+				return
 			# görev işi olan NPC önce görev panosunu açar; panodan hizmete geçilir
 			if Quests.has_business(nid):
 				_close_overlay()
@@ -1159,8 +1189,7 @@ func _advance_overlay() -> void:
 					if cb.is_valid():
 						cb.call())
 		"title":
-			_close_overlay()
-			G.run.hub()
+			_start_game()
 		"boon", "draft", "chest":
 			pass  # cards handle their own clicks
 
@@ -1274,7 +1303,7 @@ func worldmap_panel() -> void:
 	var bg := TextureRect.new()
 	bg.texture = Px.S2("bg_wmap")
 	if bg.texture == null:
-		bg.texture = Px.S2("bg3")
+		bg.texture = Px.S2("bg_3")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
@@ -4111,19 +4140,13 @@ func title_screen() -> void:
 	bc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bc.add_child(btn)
 	v.add_child(bc)
-	btn.pressed.connect(func():
-		_close_overlay()
-		G.run.hub()
-		# ilk açılış: BG2 tarzı giriş kartları — hikaye bir kez anlatılır
-		if not bool(G.meta.data.get("intro_seen", false)):
-			G.meta.data["intro_seen"] = true
-			G.meta.save()
-			cine_seq([
-				{"tex": "cine_4_0", "title": "DÜŞÜŞ", "sub": "Endusterra'da kovan her şeyi yuttu.\nViator Kampı, hâlâ nefes alan son durak."},
-				{"tex": "cine_0_0", "title": "PROTOKOL", "sub": "Kapıdan geçen ya parçacıkla döner\nya da şarkının bir parçası olur."},
-				{"tex": "cine_3_0", "title": "SEN", "sub": "Alfa-04 — kovanın yarım bıraktığı kasa.\nTopla. Güçlen. Protokolü kır."},
-			]))
+	btn.pressed.connect(func(): _start_game())
 	root.add_child(_overlay)
+
+func _start_game() -> void:
+	_close_overlay()
+	# açılış kartları run.gd:_intro_story'de (seen_story bayrağıyla korunur)
+	G.run.hub()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_READY:

@@ -148,18 +148,7 @@ func _edge_walls() -> void:
 					s.modulate = Color(0.5, 0.5, 0.58)
 				add_child(s)
 			x += 64.0
-		var y := -H * 0.5
-		while y <= H * 0.5:
-			for dx in [-W * 0.5 - 30.0, W * 0.5 + 30.0]:
-				var s2 := Sprite2D.new()
-				s2.texture = tex
-				s2.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-				s2.scale = Vector2.ONE * 2.0
-				s2.position = Vector2(dx, y)
-				s2.z_index = int(y) - 40
-				s2.modulate = Color(0.45, 0.45, 0.53)
-				add_child(s2)
-			y += 96.0
+		# yan duvar kolonu yok — kenarlarda boyanmis zemin kararmaya gomulur (BG2 fade)
 
 func _scatter_decals_big() -> void:
 	var kinds := ["stain", "stain", "bones", "bones", "crack"]

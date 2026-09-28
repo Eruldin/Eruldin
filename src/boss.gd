@@ -180,7 +180,7 @@ func _boss_stats(hs: float) -> void:
 func _make_body() -> void:
 	body = Sprite2D.new()
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	add_child(body)
+	G.upright(self).add_child(body)
 	_load_frames(SPR[bkind], 4.0)
 	Px.fit(body, 118.0 if bkind == BKind.DAMAR else (112.0 if bkind == BKind.DEV or bkind == BKind.BUZ else (108.0 if bkind == BKind.REX or bkind == BKind.HOST or bkind == BKind.ANASI else 94.0)))
 	var lc := Px.C("ff2222") if bkind == BKind.REX else (Px.C("00E676") if bkind == BKind.HOST or bkind == BKind.TUMAN else (Px.C("e8a050") if bkind == BKind.ANASI else (Px.C("4ad06a") if bkind == BKind.DEV else (Px.C("ff7722") if bkind == BKind.KOR else (Px.C("4dd0e1") if bkind == BKind.DAMAR else (Px.C("9fd8ff") if bkind == BKind.BUZ else Px.C("c9a227")))))))

@@ -28,28 +28,51 @@ func _mk(tex_name: String, order: int) -> Sprite2D:
 	return s
 
 # ---------- particles ----------
-func burst(pos: Vector2, col: Color, n: int, spd: float, size: float, life: float, grav := 0.0, order := 60) -> void:
+const T_SMOKE := ["fx_smoke_0", "fx_smoke_1", "fx_smoke_2"]
+const T_FLAME := ["fx_flame_0", "fx_flame_1"]
+const T_SPARK := ["fx_spark_0", "fx_spark_1", "fx_spark_2"]
+const T_TRACE := ["fx_trace_0", "fx_trace_1"]
+
+func _ptex(p: Sprite2D, tl: Array) -> float:
+	var tt: Texture2D = Px.S(str(tl[G.ri(0, tl.size() - 1)]))
+	if tt == null:
+		p.texture = Px.S("dot")
+		return 1.0
+	p.texture = tt
+	p.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	return 16.0 / float(tt.get_height())
+
+func burst(pos: Vector2, col: Color, n: int, spd: float, size: float, life: float, grav := 0.0, order := 60, tex := "") -> void:
+	var tl: Array = T_SMOKE if tex == "" else [tex]
+	var grow := size * 0.5 if tex == "" or tex.begins_with("fx_flame") or tex.begins_with("fx_smoke") else 0.0
 	for i in n:
 		var p := _pget()
 		var a := G.rf(0, TAU)
 		var v := spd * G.rf(0.3, 1.0)
 		pdata[p] = {"vel": Vector2(cos(a), sin(a)) * v, "life": life * G.rf(0.6, 1.1), "max": life * G.rf(0.6, 1.1), "grav": grav, "col": col}
 		pdata[p]["max"] = pdata[p]["life"]
+		pdata[p]["grow"] = grow * G.rf(0.7, 1.3)
+		pdata[p]["spin"] = G.rf(-1.4, 1.4) if grow > 0.0 else 0.0
+		var ts := _ptex(p, tl)
 		p.global_position = pos + Vector2(G.rf(-4, 4), G.rf(-4, 4))
-		p.scale = Vector2.ONE * size * G.rf(0.6, 1.4)
+		p.scale = Vector2.ONE * size * G.rf(0.6, 1.4) * ts
+		p.rotation = G.rf(0, TAU)
 		p.z_index = order
 		p.modulate = col
 		p.visible = true
 
-func directional(pos: Vector2, dir: Vector2, col: Color, n: int, spd: float, size: float, life: float, spread := 0.7) -> void:
+func directional(pos: Vector2, dir: Vector2, col: Color, n: int, spd: float, size: float, life: float, spread := 0.7, tex := "") -> void:
+	var tl: Array = T_SPARK if tex == "" else [tex]
 	for i in n:
 		var p := _pget()
 		var a := dir.angle() + G.rf(-spread, spread)
 		var v := spd * G.rf(0.5, 1.0)
 		var lf := life * G.rf(0.6, 1.1)
-		pdata[p] = {"vel": Vector2(cos(a), sin(a)) * v, "life": lf, "max": lf, "grav": 0.0, "col": col}
+		pdata[p] = {"vel": Vector2(cos(a), sin(a)) * v, "life": lf, "max": lf, "grav": 0.0, "col": col, "grow": 0.0, "spin": 0.0}
+		var ts := _ptex(p, tl)
 		p.global_position = pos
-		p.scale = Vector2.ONE * size * G.rf(0.6, 1.3)
+		p.scale = Vector2.ONE * size * G.rf(0.6, 1.3) * ts
+		p.rotation = a if tl == T_TRACE else G.rf(0, TAU)
 		p.z_index = 60
 		p.modulate = col
 		p.visible = true
@@ -62,8 +85,21 @@ func _pget() -> Sprite2D:
 	pool.append(p)
 	return p
 
+func _pgrow(p: Sprite2D, dt: float) -> void:
+	var d: Dictionary = pdata[p]
+	var gr: float = d.get("grow", 0.0)
+	if gr != 0.0:
+		p.scale += Vector2.ONE * gr * dt
+	var sp: float = d.get("spin", 0.0)
+	if sp != 0.0:
+		p.rotation += sp * dt
+
 # ---------- floating text ----------
 func float_text(pos: Vector2, txt: String, col: Color, size := 1.0) -> void:
+	# eğik dünyada rakamlar dik okunur: taşıyıcı sheared konuma oturur, harfler düz
+	var h := Node2D.new()
+	h.transform = Transform2D(0.0, pos + Vector2(G.rf(-8, 8), -14)) * G.SHEAR_INV
+	add_child(h)
 	var l := Label.new()
 	l.text = txt
 	l.add_theme_color_override("font_color", col)
@@ -72,9 +108,9 @@ func float_text(pos: Vector2, txt: String, col: Color, size := 1.0) -> void:
 	l.add_theme_font_size_override("font_size", int(14 * size))
 	l.add_theme_font_override("font", Ui.ui_font())
 	l.z_index = 90
-	l.position = pos + Vector2(G.rf(-8, 8), -14)
-	add_child(l)
-	floats.append({"l": l, "t": 0.0})
+	l.position = Vector2.ZERO
+	h.add_child(l)
+	floats.append({"l": l, "t": 0.0, "h": h})
 
 # ---------- telegraphs ----------
 func tele_circle(pos: Vector2, radius: float, dur: float, col := Color(1, 0.15, 0.1, 0.28)) -> Dictionary:
@@ -150,7 +186,9 @@ func clear_decals() -> void:
 		p.visible = false
 		pdata.erase(p)
 	for f in floats:
-		if is_instance_valid(f["l"]):
+		if is_instance_valid(f.get("h")):
+			f["h"].queue_free()
+		elif is_instance_valid(f["l"]):
 			f["l"].queue_free()
 	floats.clear()
 
@@ -191,6 +229,8 @@ func boom(pos: Vector2, col: Color, radius := 70.0) -> void:
 		return
 	s.global_position = pos
 	s.rotation = G.rf(0, TAU)
+	burst(pos, col.lightened(0.2), 7, 240.0, 4.5, 0.35, 0.0, 63, "fx_flame_0")
+	burst(pos + Vector2(0, 6), Color(0.2, 0.16, 0.2, 0.8), 5, 90.0, 6.0, 0.9, -0.4, 61)
 	var sc := radius * 2.0 / float(maxi(s.texture.get_height(), 1))
 	s.scale = Vector2.ONE * sc * 0.7
 	s.modulate = Color(1, 1, 1, 0.95)
@@ -243,6 +283,8 @@ func impact(pos: Vector2, dir: Vector2, col: Color, heavy := false) -> void:
 	if dir.length_squared() > 0.01:
 		directional(pos, dir, col, 7 if heavy else 4, 230.0, 3.0, 0.22, 0.45)
 		directional(pos, dir.rotated(2.6), col.darkened(0.35), 3, 150.0, 2.5, 0.28, 0.7)
+		if heavy:
+			directional(pos, dir, Color(1, 0.9, 0.7, 0.8), 3, 330.0, 2.0, 0.16, 0.25, "fx_trace_0")
 	light_flash(pos, col, 1.1 if heavy else 0.7, 1.9, 0.13)
 
 func transition(mid := Callable(), in_dur := 0.16, hold := 0.06, out_dur := 0.32) -> void:
@@ -282,6 +324,7 @@ func _process(dt: float) -> void:
 		vel.y += d["grav"] * 100.0 * dt
 		d["vel"] = vel
 		p.global_position += vel * dt
+		_pgrow(p, dt)
 		var k: float = d["life"] / d["max"]
 		var c: Color = d["col"]
 		c.a = clampf(k * 1.4, 0.0, 1.0)
@@ -298,7 +341,10 @@ func _process(dt: float) -> void:
 		fl.position.y -= 42 * dt
 		fl.modulate.a = 1.0 - f["t"] / 0.9
 		if f["t"] >= 0.9:
-			fl.queue_free()
+			if is_instance_valid(f.get("h")):
+				f["h"].queue_free()
+			else:
+				fl.queue_free()
 			floats.remove_at(i)
 
 	# telegraph pulse

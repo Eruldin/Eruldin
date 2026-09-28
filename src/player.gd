@@ -130,10 +130,10 @@ func init() -> void:
 	_apply_stance()
 	body = Sprite2D.new()
 	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	add_child(body)
+	G.upright(self).add_child(body)
 	_load_frames(_hero_set(), 7.0)
 	Px.fit(body, 94.0)
-	_aura = G.fx.mk_light(self, Vector2(0, -20), Px.C("00E5FF"), 0.45, 2.0)
+	_aura = G.fx.mk_light(self, Vector2(0, -20), Px.C("00E5FF"), 0.32, 1.6)
 	blade = Sprite2D.new()
 	blade.texture = Px.S("wedge")
 	blade.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
