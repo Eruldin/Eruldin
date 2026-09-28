@@ -73,6 +73,9 @@ const LINES := {
 	],
 	"vane": [
 		"Sentetik nörolojin hâlâ sağlam. Parçacıklarla yükseltme ister misin?",
+		"Şasi %4 nöral kayıpla çalışıyor — bu kadarına kimse uyum sağlamazdı. Sen sağladın.",
+		"Kovanın frekansı değişiyor. Eskiden dinlerdim — şimdi cevap veriyor. İlginç, değil mi?",
+		"Viator'da bilim, protokolün lütfuydu. Burada benimdir — ve senin de.",
 	],
 	"david": [
 		"Dört sahada iz sürdüm, Ely. Hepsinde kovanın kokusu farklı — ama ölüm aynı.",
@@ -98,6 +101,7 @@ const LINES := {
 		"Ben B-serisiyim — ağır çerçeve, ağır silah. Kılıç değil, dizi taşırım.",
 		"Şasimi takarsan Ely-B olursun: daha az can, daha çok vuruş, biraz daha yavaş.",
 		"Alfa-04 sahada ölürse ben inerim. Protokol tek bedene bağlanmaz.",
+		"Kovanda ölen ilk B-serisini ben saydım. İkincisini de. Üçüncüyü sayamadım — çünkü sendin.",
 	],
 	"mina": [
 		"O kafeste üç gün saydım, Praetorian. Kovan beni yemek yapmadı — yem yapmak için tutuyordu.",
@@ -118,6 +122,7 @@ const LINES := {
 		"Kamp ateşinin yanında herkes dua eder; ben oran okurum, Praetorian.",
 		"Kovan bana bir şey öğretti: kesin olan tek şey kaybettirmesi. Ama sen... sen bir anomalisin.",
 		"Zar atmak yasak demedi Rhasa — çünkü beni görmüyor. Sen de görme, sadece oyna.",
+		"Bahsini alırım ama senden asla uzak durmam — anomaliler kazanır, anomaliler kaybeder; ben hep yanındayım.",
 	],
 }
 
@@ -132,6 +137,9 @@ const DEATH_LINES := [
 	"NEVA: {depth} saniye dayandın. Her düşüşte daha derine iniyorsun.",
 	"VANE: Kalibrasyon tuttu. Düşüş verisi kaydedildi.",
 	"RHASA: Viator'da ölüm bir istatistik. Sen iyi bir istatistik ol.",
+	"NEVA: Bir dahaki sefere farklı bir yol izlersin — ben yine burada olurum.",
+	"LENA: Haritayı yeniden çizdim, Praetorian. Bu sefer farklı ölüm.",
+	"SAPHIRE: Zırhın %40 aşınmış. Bana getir, dikiş atarım — bedava değil ama ucuza.",
 ]
 
 # faction tint per speaker (master-prompt art bible color-coding)
@@ -178,6 +186,10 @@ var _ch_bar: ColorRect
 var _dash_row: HBoxContainer
 var _skill_lbl: Label
 var _iksir_lbl: Label
+var _mana_bg: ColorRect
+var _mana_fg: ColorRect
+var _mana_lbl: Label
+var _style_lbl: Label
 var _tonic_lbl: Label
 var _over_lbl: Label
 var _frag_lbl: Label
@@ -308,9 +320,30 @@ func _build_hud() -> void:
 	_dash_row.add_theme_constant_override("separation", 5)
 	_hud.add_child(_dash_row)
 
-	# Q aktif yetenek pimi — hazır olunca yanar
+	# Q özel yeteneği — mana barı: canavar kesildikçe dolar, eklenti adını taşır
 	_skill_lbl = _lbl("Q", Vector2(90, 676), 14, Px.C("ffd75f"))
 	_hud.add_child(_skill_lbl)
+	_mana_bg = ColorRect.new()
+	_mana_bg.color = Color(0.04, 0.02, 0.10, 0.85)
+	_mana_bg.position = Vector2(90, 696)
+	_mana_bg.size = Vector2(104, 7)
+	_mana_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_mana_bg)
+	_mana_fg = ColorRect.new()
+	_mana_fg.color = Px.C("c26bff")
+	_mana_fg.position = Vector2(1, 1)
+	_mana_fg.size = Vector2(0, 5)
+	_mana_fg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_mana_bg.add_child(_mana_fg)
+	_mana_lbl = _lbl("", Vector2(200, 690), 10, Px.C("c26bff"))
+	_mana_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_mana_lbl)
+	# stil derecesi — hasarsız süre D→C→B→A→S→S+ tırmanır
+	_style_lbl = _lbl("", Vector2(1140, 40), 26, Px.C("ffd75f"))
+	_style_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_style_lbl.size = Vector2(120, 30)
+	_style_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_style_lbl)
 	_iksir_lbl = _lbl("", Vector2(112, 678), 12, Px.C("8affc9"))
 	_hud.add_child(_iksir_lbl)
 	_tonic_lbl = _lbl("", Vector2(150, 678), 12, Px.C("ff7722"))
@@ -531,8 +564,16 @@ func _tick_hud() -> void:
 		_dash_row.get_child(i).modulate = Px.C("00E5FF") if i < p.dash_charges else Color(0.15, 0.2, 0.28)
 	if is_instance_valid(_skill_lbl):
 		var scol: Color = {"elyb": Px.C("9db4c8"), "via": Px.C("00E5FF"), "dg": Px.C("4dd0e1")}.get(str(G.meta.data.get("hero", "ely")), Px.C("c26bff"))
-		_skill_lbl.add_theme_color_override("font_color", scol if p.skill_cd <= 0 else Color(0.3, 0.3, 0.35))
-		_skill_lbl.text = "Q" if p.skill_cd <= 0 else str(int(ceil(p.skill_cd)))
+		_skill_lbl.add_theme_color_override("font_color", scol if p.mana >= p.mana_max else Color(0.3, 0.3, 0.35))
+		_skill_lbl.text = "Q"
+		var mf := clampf(p.mana / p.mana_max, 0.0, 1.0)
+		_mana_fg.size.x = 102.0 * mf
+		_mana_fg.color = Px.C("f5f5f5") if mf >= 1.0 else Px.C("c26bff")
+		_mana_lbl.text = p._special_name() if mf > 0.0 else ""
+		_mana_lbl.add_theme_color_override("font_color", Px.C("f5f5f5") if mf >= 1.0 else Px.C("c26bff"))
+		var st := p.style_rank
+		_style_lbl.text = ["", "C", "B", "A", "S", "S+"][st]
+		_style_lbl.add_theme_color_override("font_color", Color(0.55, 0.55, 0.62) if st < 4 else Px.C("ffd75f") if st == 4 else Px.C("c26bff"))
 	if is_instance_valid(_iksir_lbl):
 		_iksir_lbl.text = ("R ×%d" % p.iksir_n) if p.iksir_n > 0 else ""
 	if is_instance_valid(_tonic_lbl):
@@ -895,23 +936,32 @@ func cinematic(tex_key: String, title: String, sub: String, dur := 2.6) -> void:
 	var still := TextureRect.new()
 	still.texture = Px.S2(tex_key)
 	still.set_anchors_preset(Control.PRESET_FULL_RECT)
+	still.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	still.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	still.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	still.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.add_child(still)
-	# letterbox bars
+	# Ken Burns: yavas yakinlasan kayan kare — ara sahne animasyon hissi
+	still.pivot_offset = Vector2(640, 360)
+	var kb := still.create_tween().set_loops()
+	var dir := 1.0 if G.rf(0.0, 1.0) > 0.5 else -1.0
+	kb.tween_property(still, "scale", Vector2(1.09, 1.09), 3.4).set_trans(Tween.TRANS_SINE)
+	kb.parallel().tween_property(still, "position", Vector2(14 * dir, -10), 3.4).set_trans(Tween.TRANS_SINE)
+	kb.tween_property(still, "scale", Vector2.ONE, 3.4).set_trans(Tween.TRANS_SINE)
+	kb.parallel().tween_property(still, "position", Vector2.ZERO, 3.4).set_trans(Tween.TRANS_SINE)
+	# letterbox bars — ince, goruntu tam ekran
 	var top := ColorRect.new()
 	top.color = Color(0, 0, 0)
-	top.anchor_right = 1.0; top.anchor_bottom = 0.13
+	top.anchor_right = 1.0; top.anchor_bottom = 0.07
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.add_child(top)
 	var bot := ColorRect.new()
 	bot.color = Color(0, 0, 0)
-	bot.anchor_top = 0.80; bot.anchor_right = 1.0; bot.anchor_bottom = 1.0
+	bot.anchor_top = 0.86; bot.anchor_right = 1.0; bot.anchor_bottom = 1.0
 	bot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.add_child(bot)
 	var v := VBoxContainer.new()
-	v.anchor_top = 0.82; v.anchor_right = 1.0; v.anchor_bottom = 0.99
+	v.anchor_top = 0.875; v.anchor_right = 1.0; v.anchor_bottom = 0.99
 	v.add_theme_constant_override("separation", 4)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.add_child(v)
@@ -925,6 +975,17 @@ func cinematic(tex_key: String, title: String, sub: String, dur := 2.6) -> void:
 	var hint := _lbl("E / tık — geç", Vector2.ZERO, 10, Color(0.4, 0.4, 0.48))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(hint)
+	# suzulen kor zerreleri — arka plani canli tutar
+	for i in 26:
+		var m := ColorRect.new()
+		m.color = Color(0.85, 0.55 + G.rf(0, 0.3), 0.25, G.rf(0.25, 0.7))
+		m.size = Vector2(2, 2)
+		m.position = Vector2(G.rf(0, 1280), G.rf(60, 660))
+		m.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_overlay.add_child(m)
+		var mt := m.create_tween().set_loops()
+		mt.tween_property(m, "position:y", m.position.y - G.rf(40, 110), G.rf(1.6, 3.2)).set_trans(Tween.TRANS_SINE)
+		mt.parallel().tween_property(m, "modulate:a", 0.0, G.rf(1.6, 3.2))
 	root.add_child(_overlay)
 	var tw := create_tween()
 	tw.tween_property(_overlay, "modulate:a", 1.0, 0.35)
@@ -1188,7 +1249,7 @@ func _advance_overlay() -> void:
 		"victory":
 			_close_overlay()
 			G.run.respawn_to_hub()
-		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray", "kitchen", "routes", "storychoice":
+		"upgrade", "stance", "pause", "records", "biomesel", "contract", "blessing", "hero", "wmap", "quest", "inv", "barter", "song", "merchant", "shop", "stray", "kitchen", "routes", "storychoice", "journal", "orun", "bet":
 			_close_overlay()
 		"cine":
 			var c := _overlay

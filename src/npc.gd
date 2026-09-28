@@ -72,7 +72,7 @@ func _ready() -> void:
 	prompt.add_theme_color_override("font_color", Px.C("00E5FF"))
 	prompt.add_theme_color_override("font_outline_color", Color.BLACK)
 	prompt.add_theme_constant_override("outline_size", 3)
-	prompt.position = Vector2(-46, -body.texture.get_height() - 20)
+	prompt.position = Vector2(-52, -body.texture.get_height() * body.scale.y - 34)
 	prompt.visible = false
 	prompt.z_index = 500
 	up.add_child(prompt)
@@ -83,7 +83,7 @@ func _ready() -> void:
 	mark.add_theme_color_override("font_color", Px.C("ffd700"))
 	mark.add_theme_color_override("font_outline_color", Color.BLACK)
 	mark.add_theme_constant_override("outline_size", 4)
-	mark.position = Vector2(-6, -body.texture.get_height() - 46)
+	mark.position = Vector2(-6, -body.texture.get_height() * body.scale.y - 16)
 	mark.visible = false
 	mark.z_index = 500
 	up.add_child(mark)
@@ -109,7 +109,7 @@ func _process(d: float) -> void:
 	if is_instance_valid(mark):
 		mark.visible = G.state == G.State.HUB and Quests.has_business(nid)
 		if mark.visible:
-			mark.position.y = -body.texture.get_height() - 46 - absf(sin(_bob * 3.0)) * 5.0
+			mark.position.y = -body.texture.get_height() * body.scale.y - 16 - absf(sin(_bob * 3.0)) * 5.0
 	if G.player == null or G.player.dead or G.state != G.State.HUB or G.ui.overlay_open():
 		if is_instance_valid(prompt):
 			prompt.visible = false
@@ -121,7 +121,7 @@ func _process(d: float) -> void:
 		if position.distance_to(G.player.pos) < 190.0 and G.fx != null:
 			var bk: Array = BARKS.get(nid, [])
 			if not bk.is_empty():
-				G.fx.float_text(position + Vector2(0, -body.texture.get_height() - 20), G.pick(bk), Color(0.75, 0.75, 0.85), 0.85)
+				G.fx.float_text(position + Vector2(0, -body.texture.get_height() * body.scale.y - 30), G.pick(bk), Color(0.75, 0.75, 0.85), 0.85)
 	var near := position.distance_to(G.player.pos) < 58.0
 	prompt.visible = near
 	if near and is_instance_valid(body):

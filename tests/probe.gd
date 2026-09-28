@@ -184,19 +184,24 @@ func _process(_d: float) -> void:
 					25:
 						G.ui._advance_overlay()
 					26:
-						G.ui.worldmap_panel()       # hikaye düğümü testi için harita
+						G.ui.cinematic("cine_i0", "ARA SAHNE", "tam ekran ken-burns kontrolü", 8.0)
 					27:
+						_shoot()                    # sinematik tam ekran mı
+						G.ui._advance_overlay()
+					28:
+						G.ui.worldmap_panel()       # hikaye düğümü testi için harita
+					29:
 						_pre_story_cho = int(G.meta.data.get("choralim", 0))
 						G.ui._wmap_pick("kayalik", Label.new(), {"id": "kayalik"})
-					28:
+					30:
 						_shoot()                    # hikaye kartı 1
-					29:
+					31:
 						G.ui._advance_overlay()     # kart 2
 						_shoot()
-					30:
+					32:
 						G.ui._advance_overlay()     # kartlar bitti -> overlay kapanır
 						print("[probe] story kayalik -> choralim +%d done=%s" % [int(G.meta.data.get("choralim", 0)) - _pre_story_cho, str((G.meta.data.get("story_done", []) as Array).has("kayalik"))])
-					31:
+					33:
 						G.ui._wmap_pick("kayalik", Label.new(), {"id": "kayalik"})  # tekrar: reddedilmeli
 						print("[probe] story re-pick can_enter=%s" % str(Wmap.can_enter("kayalik")))
 					_:

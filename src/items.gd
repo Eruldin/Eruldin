@@ -119,6 +119,11 @@ const DEFS := {
 	"i_dikenman": {"name": "Dikenli Manşon",  "slot": "eldiven", "r": 2, "icon": "icn_upg_shield", "mods": {"armor": 0.8, "thorns": 0.18}},
 	"i_kirpikemer":{"name": "Kirpi Kuşağı",   "slot": "kemer",   "r": 2, "icon": "icn_kovan",      "mods": {"hp": 14, "thorns": 0.15}},
 	"i_dikenyuzuk":{"name": "Diken Yüzüğü",   "slot": "yuzuk",   "r": 3, "icon": "icn_dagger",     "mods": {"thorns": 0.25, "crit": 0.03}},
+	# özel eklentiler: kuşanılınca Q özeli değişir (sp_* modu)
+	"i_goktas":   {"name": "Gök Parçası",     "slot": "kolye",   "r": 3, "icon": "icn_mine",      "mods": {"sp_meteor": 1, "dmg": 0.05}},
+	"i_simges":   {"name": "Şimşek Simgesi",  "slot": "yuzuk2",  "r": 3, "icon": "icn_zap",       "mods": {"sp_firtina": 1, "crit": 0.05}},
+	"i_dagances": {"name": "Dağanç Esi",      "slot": "kemer",   "r": 3, "icon": "icn_sword",     "mods": {"sp_daganc": 1, "hp": 15}},
+	"i_nabiztas": {"name": "Nabız Taşı",      "slot": "kolye",   "r": 2, "icon": "icn_zap",       "mods": {"mangain": 0.35, "hp": 8}},
 }
 
 const RARITY_COL := ["9aa0b0", "42d4f4", "ffd700", "ff4fd8", "f5f5f5"]
@@ -175,7 +180,14 @@ static func drop_to_run(id: String) -> void:
 		G.meta.data["items_seen"] = seen
 	var d: Dictionary = DEFS[id]
 	G.ui.toast("%s bulundu: %s" % [RARITY_NAME[int(d.r)], str(d.name)])
-	G.audio.jingle("boon")
+	if int(d.r) >= 3:
+		# destansi+ alım anı: dopamin patlaması
+		G.fx.flash(Px.C(RARITY_COL[int(d.r)]), 0.25)
+		G.fx.shake(0.18, 0.25)
+		G.ui.banner(str(d.name), "%s — zulana katıldı" % RARITY_NAME[int(d.r)])
+		G.audio.jingle("legendary")
+	else:
+		G.audio.jingle("boon")
 
 # end of run: bag moves into the permanent stash
 static func bank_bag() -> int:

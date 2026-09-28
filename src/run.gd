@@ -53,6 +53,7 @@ var _first_visit := false   # bu koşu düğüme ilk iniş mi (lore kartı için
 var daily := {}             # günlük protokol mutasyonu (Wmap.daily)
 var stats := {"kills": 0, "rooms": 0}
 var node_id := "b0"       # wmap node this run entered through
+var act := 0               # perde — düğümün efendisi düşmüşse her zafer bir perde yükseltir
 var node_name := ""       # banner'da node adı (fallback: biome adı)
 var win_target := 780.0   # HUD ilerleme barının hedefi — hazine düğümünde kısa
 var node_mods := {}       # spawn/hp/dmg/frag/loot/elite_t çarpanları
@@ -61,9 +62,9 @@ var frag_node := 1.0      # node "frag" modu — parçacık düşüşlerini büy
 func _init(g: Node2D) -> void:
 	game = g
 
-# hp_scale/dmg_scale: biome + derinlik + KARANLIK SÖZLEŞME yığını (curse)
-func hp_scale() -> float: return (1.0 + biome * 0.35 + depth * 0.12) * (1.0 + curse * 0.12)
-func dmg_scale() -> float: return (1.0 + biome * 0.18 + depth * 0.06) * (1.0 + curse * 0.12)
+# hp_scale/dmg_scale: biome + derinlik + perde + KARANLIK SÖZLEŞME yığını (curse)
+func hp_scale() -> float: return (1.0 + biome * 0.35 + depth * 0.12) * (1.0 + curse * 0.12) * (1.0 + act * 0.30)
+func dmg_scale() -> float: return (1.0 + biome * 0.18 + depth * 0.06) * (1.0 + curse * 0.12) * (1.0 + act * 0.22)
 
 func hub() -> void:
 	biome = 0
@@ -182,6 +183,16 @@ func start_run() -> void:
 		G.meta.save()
 		stats["omen"] = 1
 		G.ui.toast("KERVANIN LANETİ — sürü bu koşuda daha sert, parçacık bereketli")
+	# PERDE sistemi: düğümün efendisi düşmüşse koro o saha öğrenmiştir —
+	# zafer başına zemin bozulur, sürü sertleşir, efendi farklı döner
+	act = clampi(int((G.meta.data.get("acts", {}) as Dictionary).get(nid, 0)), 0, 3)
+	if act > 0:
+		for amk in {"spawn": 1.0 + act * 0.10, "elite_t": 1.0 - act * 0.06, "loot": 1.0 + act * 0.12, "frag": 1.0 + act * 0.10}:
+			node_mods[amk] = float(node_mods.get(amk, 1.0)) * {"spawn": 1.0 + act * 0.10, "elite_t": 1.0 - act * 0.06, "loot": 1.0 + act * 0.12, "frag": 1.0 + act * 0.10}[amk]
+		frag_node = float(node_mods.get("frag", 1.0))
+		reward_mult *= 1.0 + act * 0.10
+		stats["act"] = act
+		G.ui.toast("PERDE %s — koro bu izi unutmadı; sürü sertleşti, ganimet büyüdü" % ["II", "III", "IV"][act - 1])
 	# sefer zinciri: zafer sonrası kampa dönmeden zincirlenen koşular — ayak başına katlanan zorluk + ödül
 	var sefer := int(G.meta.data.get("sefer", 0))
 	if sefer > 0:
@@ -452,6 +463,9 @@ func next_room(reward: int) -> void:
 	game.world.add_child(r)
 	G.state = G.State.TRANSITION
 	r.build(biome, rt, reward, depth, randi())
+	if act > 0 and depth == 0:
+		# perde görselliği: zaferi görmüş saha koro damarlarıyla kararmış döner
+		r.apply_corruption(act)
 	G.state = G.State.ROOM
 	_place_player(r)
 	G.ui.hub_ui(false)
@@ -459,6 +473,8 @@ func next_room(reward: int) -> void:
 	if is_boss:
 		var por: String = {"rex": "rex", "host": "host", "twins": "nahum", "final": "kirin"}[BOSS_IDS[biome]]
 		G.ui.cinematic("por_" + por, BOSS_NAMES[biome], _boss_intro_sub(biome), 2.4)
+		if act > 0:
+			G.ui.toast("PERDE %s — efendi bu sahanın ölümünü hatırlıyor" % ["II", "III", "IV"][act - 1])
 	elif depth == 0:
 		# görev node'ları kendi lore kartıyla açılır; boss sahaları biome kartını korur
 		var nd := Wmap.node(node_id)
@@ -685,6 +701,12 @@ func victory() -> void:
 	if not wn.has(node_id):
 		wn.append(node_id)
 		G.meta.data["won_nodes"] = wn
+	# perde yükselir: hazine düğümleri boss'suzdur — savaş düğümleri perde alır
+	if str(Wmap.node(node_id).get("kind", "")) != "hazine":
+		var acts: Dictionary = G.meta.data.get("acts", {})
+		acts[node_id] = mini(3, int(acts.get(node_id, 0)) + 1)
+		G.meta.data["acts"] = acts
+		stats["act_next"] = int(acts[node_id])
 	var tribute := wn.size() * 12
 	var gained := int(fragments * G.meta.frag_mult() * reward_mult * Quests.rep_mult()) + tribute
 	G.meta.add_choralim(gained)

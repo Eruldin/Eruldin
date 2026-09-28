@@ -1076,6 +1076,9 @@ func die(h: Dictionary) -> void:
 		G.run.stats["kind_kills"] = kk
 		G.run.on_kill(elite)
 		Quests.tick("kind", kn)
+		# mana: her kesim özeli besler; elit/şampiyon katları doluverir
+		if is_instance_valid(G.player):
+			G.player.gain_mana((9.0 if champ else 3.5) if elite else 2.2)
 		if is_instance_valid(G.room) and float(G.room.storm_t) > 0.0:
 			if G.room.biome == 8:
 				Quests.tick("bora")      # donmus bora altinda kesim

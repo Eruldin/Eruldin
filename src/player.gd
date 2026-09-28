@@ -54,6 +54,18 @@ var _combo_t := 0.0
 var _combo_lock := 0.0
 var _combo_queued := false
 var _plasma_charge := -1.0   # <0 = not charging
+# stil derecesi: hasarsız geçen süre S+'yı doldurur; parry kalan süreyi kısaltır
+var clean_t := 0.0
+const SPLUS_NEED := 30.0
+var style_rank := 0          # 0..5 — D C B A S S+
+var _splus_fired := false
+var _heavy_cd := 0.0
+var _aim_lock := 0.0         # manuel tık yönü auto-aim'i kısa süre bastırır
+# mana yeteneği — canavar kesildikçe dolar; eşya "sp_" modu özeli değiştirir
+var mana := 0.0
+var mana_max := 100.0
+var mana_gain_mult := 1.0
+var special_id := ""
 var _attack_slow := 1.0
 var revived := false
 var revives_extra := 0   # lütuf kaynaklı ek dirilmeler
@@ -162,6 +174,21 @@ func _process(_d: float) -> void:
 		if _combo_lock <= 0:
 			_attack_slow = 1.0
 			blade.modulate = Color(0.45, 0.9, 1, 0)
+	if _combo_queued and _combo_lock <= 0.0:
+		_combo_queued = false
+		_start_swing()
+	if _combo_t > 0.0:
+		_combo_t -= d
+		if _combo_t <= 0.0:
+			_combo = 0
+	if _heavy_cd > 0.0:
+		_heavy_cd -= d
+	if _aim_lock > 0.0:
+		_aim_lock -= d
+	# stil ölçer: hasarsız süre S+'yı besler
+	if G.state == G.State.ROOM and not dead:
+		clean_t += d
+		_update_style()
 	_move(d)
 	_tick_anim(d)
 	_pick_anim()
@@ -189,6 +216,30 @@ func _process(_d: float) -> void:
 
 var _static_t := 0.0
 
+# manuel vuruşlar: sol tık kombo zinciri (imleç yönüne), sağ tık doğrudan
+# bitirici vuruş; tıklar 0.75sn pencerede zincirler: hafif → hafif → ağır
+func _unhandled_input(ev: InputEvent) -> void:
+	if G.state != G.State.ROOM or dead:
+		return
+	if ev is InputEventMouseButton and ev.pressed:
+		if ev.button_index == MOUSE_BUTTON_LEFT:
+			var mw := get_global_mouse_position()
+			if pos.distance_to(mw) > 6.0:
+				aim_dir = (mw - pos).normalized()
+				_aim_lock = 0.4
+			if _combo_lock <= 0.0:
+				_start_swing()
+			else:
+				_combo_queued = true
+		elif ev.button_index == MOUSE_BUTTON_RIGHT and _heavy_cd <= 0.0:
+			var mw2 := get_global_mouse_position()
+			if pos.distance_to(mw2) > 6.0:
+				aim_dir = (mw2 - pos).normalized()
+				_aim_lock = 0.4
+			_heavy_cd = 0.85
+			_combo = 2
+			_start_swing()
+
 func _read_input() -> void:
 	move_dir = Vector2.ZERO
 	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP): move_dir.y -= 1
@@ -202,7 +253,7 @@ func _read_input() -> void:
 
 # weapons aim themselves at the nearest threat; the mouse only matters in camp
 func _auto_aim() -> void:
-	if G.state != G.State.ROOM:
+	if G.state != G.State.ROOM or _aim_lock > 0.0:
 		return
 	var best: Enemy = null
 	var bd := 460.0 * 460.0
@@ -300,7 +351,7 @@ func _tick_skill(d: float) -> void:
 		if _haste_t <= 0:
 			_haste_mult = 1.0
 	var q_now := Input.is_key_pressed(KEY_Q)
-	if q_now and not _skill_held and skill_cd <= 0 and _dash_t <= 0 and G.state == G.State.ROOM:
+	if q_now and not _skill_held and skill_cd <= 0 and _dash_t <= 0 and G.state == G.State.ROOM and mana >= mana_max:
 		_use_skill()
 	_skill_held = q_now
 	var r_now := Input.is_key_pressed(KEY_R)
@@ -343,11 +394,130 @@ func _tick_skill(d: float) -> void:
 			speed /= 1.08
 			G.ui.toast("şarap etkisi geçti")
 
+# canavar manasıyla dolan özel — eşya "sp_" modu şasi özelini değiştirir
+func _special_key() -> String:
+	if special_id != "":
+		return special_id
+	return {"elyb": "siper", "via": "atilim", "h9": "miknatis", "k7": "siginak", "dg": "nabiz"}.get(str(G.meta.data.get("hero", "ely")), "nova")
+
+func _special_name() -> String:
+	return {"nova": "NOVA", "siper": "SİPER", "atilim": "ATILIM", "miknatis": "MIKNATIS",
+		"siginak": "SIĞINAK", "nabiz": "DAMAR NABZI", "meteor": "GÖK KAZI",
+		"firtina": "ŞİMŞEK ZİNCİRİ", "daganc": "DAĞANÇ"}.get(_special_key(), "NOVA")
+
+func gain_mana(v: float) -> void:
+	if dead or mana >= mana_max:
+		return
+	mana = minf(mana_max, mana + v * mana_gain_mult)
+	if mana >= mana_max:
+		G.fx.burst(pos + Vector2(0, -24), Px.C("c26bff"), 18, 160.0, 4.5, 0.5)
+		G.fx.light_flash(pos + Vector2(0, -24), Px.C("c26bff"), 1.4, 2.4, 0.25)
+		G.audio.play("chargeFull", 1.1, 0.6)
+		G.ui.toast("%s HAZIR — Q" % _special_name())
+
+# S+ stil: 30sn hasarsızlık (parry +6sn verir) → haritayı temizleyen özel animasyon
+func _update_style() -> void:
+	var r := clampi(int(clean_t / 6.0), 0, 5)
+	if r != style_rank:
+		style_rank = r
+		if r > 0 and r < 5:
+			var letter: String = ["D", "C", "B", "A", "S", "S+"][r]
+			G.fx.float_text(pos + Vector2(0, -58), letter, Px.C("ffd75f"), 1.0)
+			G.audio.play("rankup", 1.0 + r * 0.08, 0.5)
+	if style_rank >= 5 and not _splus_fired:
+		_splus_nuke()
+
+func _splus_nuke() -> void:
+	_splus_fired = true
+	clean_t = 0.0
+	style_rank = 0
+	_anim = ""
+	_set_anim("charge", 4.0)
+	G.fx.flash(Px.C("f5f5f5"), 0.5)
+	G.fx.shake(0.5, 0.8)
+	G.fx.hitstop(0.25)
+	G.fx.tele_ring(pos, 900.0, 0.9, Color(0.76, 0.42, 1.0, 0.55))
+	G.fx.burst(pos + Vector2(0, -16), Px.C("c26bff"), 48, 500.0, 8.0, 0.9)
+	G.audio.play("supernova", 1.0, 0.9)
+	G.audio.play("rankup", 0.6, 0.8)
+	G.ui.banner("S+", "kovan bu yankıyı duydu")
+	for e in G.enemies.duplicate():
+		if not is_instance_valid(e) or e.dead:
+			continue
+		if e is Boss:
+			e.take_hit({"dmg": e.max_hp * 0.12, "type": G.DamageType.PURE, "from": pos, "source": self})
+		else:
+			e.take_hit({"dmg": 99999.0, "type": G.DamageType.PURE, "from": pos, "source": self})
+	get_tree().create_timer(0.35, false).timeout.connect(func():
+		_splus_fired = false)
+
 # şasi yeteneği: ely → NOVA (AoE), elyb → SİPER (zırh fazı), via → ATILIM (dash refill + hız)
 func _use_skill() -> void:
-	skill_cd = skill_max * (1.0 - 0.07 * G.meta.upg(Meta.U.QCD))
-	match str(G.meta.data.get("hero", "ely")):
-		"elyb":
+	mana = 0.0
+	skill_cd = 0.8
+	match _special_key():
+		"meteor":
+			# GÖK KAZI — en yakın 10 canavarın üstüne gök parçası yağar
+			var tg: Array = []
+			for e in G.enemies:
+				if is_instance_valid(e) and not e.dead:
+					tg.append(e)
+			tg.sort_custom(func(a, b): return pos.distance_squared_to(a.pos) < pos.distance_squared_to(b.pos))
+			G.fx.flash(Px.C("ff7043"), 0.18)
+			G.fx.shake(0.4, 0.5)
+			G.audio.play("explode", 0.8, 0.8)
+			for i in mini(10, tg.size()):
+				var e2: Actor = tg[i]
+				G.fx.boom(e2.pos, Px.C("ff7043"), 60.0)
+				e2.take_hit({"dmg": 60.0 * dmg_mult, "type": G.DamageType.EXPLOSION, "from": e2.pos + Vector2(0, -120), "knock": 10.0, "stagger": 0.5, "source": self})
+			G.fx.float_text(pos + Vector2(0, -44), "GÖK KAZI", Px.C("ff7043"), 1.0)
+		"firtina":
+			# ŞİMŞEK ZİNCİRİ — 9 hedefe sıçrayan ark
+			G.fx.flash(Px.C("00E5FF"), 0.15)
+			G.audio.play("zap", 0.8, 0.9)
+			var struck := {}
+			var cur: Actor = null
+			var best := 420.0
+			for e in G.enemies:
+				if not is_instance_valid(e) or e.dead:
+					continue
+				var dd := pos.distance_to(e.pos)
+				if dd < best:
+					best = dd
+					cur = e
+			var n2 := 0
+			while cur != null and n2 < 9:
+				struck[cur] = true
+				G.fx.burst(cur.pos + Vector2(0, -16), Px.C("00E5FF"), 14, 200.0, 5.0, 0.3)
+				cur.take_hit({"dmg": 42.0 * dmg_mult, "type": G.DamageType.SHOCK, "from": cur.pos, "knock": 4.0, "stagger": 0.4, "source": self})
+				var nx: Actor = null
+				var nb := 170.0
+				for e3 in G.enemies:
+					if not is_instance_valid(e3) or e3.dead or struck.has(e3):
+						continue
+					var d3 := cur.pos.distance_to(e3.pos)
+					if d3 < nb:
+						nb = d3
+						nx = e3
+				cur = nx
+				n2 += 1
+			G.fx.float_text(pos + Vector2(0, -44), "ŞİMŞEK ZİNCİRİ", Px.C("00E5FF"), 1.0)
+		"daganc":
+			# DAĞANÇ — 12 keskin dilim dairesel savrulur
+			G.fx.tele_ring(pos, 300.0, 0.5, Color(0.5, 0.9, 1.0, 0.5))
+			G.fx.shake(0.3, 0.35)
+			G.audio.play("comboFin", 1.0, 0.9)
+			for i2 in 12:
+				var ang2 := TAU * float(i2) / 12.0
+				var dir2 := Vector2.from_angle(ang2)
+				G.fx.directional(pos + dir2 * 30.0, dir2, Px.C("7fd4ff"), 6, 260.0, 5.0, 0.4)
+			for e4 in G.enemies.duplicate():
+				if not is_instance_valid(e4) or e4.dead:
+					continue
+				if pos.distance_to(e4.pos) < 300.0:
+					e4.take_hit({"dmg": 50.0 * dmg_mult, "type": G.DamageType.MELEE, "from": pos, "knock": 16.0, "stagger": 0.5, "source": self})
+			G.fx.float_text(pos + Vector2(0, -44), "DAĞANÇ", Px.C("7fd4ff"), 1.0)
+		"siper":
 			invuln = maxf(invuln, 1.6)
 			_haste_t = 3.0
 			_haste_mult = 1.15
@@ -355,14 +525,14 @@ func _use_skill() -> void:
 			G.fx.burst(pos + Vector2(0, -14), Px.C("9db4c8"), 20, 150.0, 4.0, 0.5)
 			G.fx.float_text(pos + Vector2(0, -44), "SİPER", Px.C("9db4c8"), 1.0)
 			G.audio.play("stance", 0.8)
-		"via":
+		"atilim":
 			dash_charges = dash_max
 			_haste_t = 2.5
 			_haste_mult = 1.45
 			G.fx.directional(pos + Vector2(0, -8), aim_dir, Px.C("00E5FF"), 14, 220.0, 5.0, 0.4)
 			G.fx.float_text(pos + Vector2(0, -44), "ATILIM", Px.C("00E5FF"), 1.0)
 			G.audio.play("dash", 1.25)
-		"h9":
+		"miknatis":
 			var got := 0
 			for g2 in G.room.pickups_node.get_children():
 				if str(g2.get_meta("kind", "")) == "xp":
@@ -377,7 +547,7 @@ func _use_skill() -> void:
 			G.audio.play("boon", 0.9)
 			if got > 0:
 				G.ui.toast("mıknatıs darbesi — %d kristal çekildi" % got)
-		"k7":
+		"siginak":
 			invuln = maxf(invuln, 2.4)
 			G.fx.tele_ring(pos, 260.0, 0.5, Color(0.5, 0.66, 0.8, 0.5))
 			G.fx.flash(Px.C("7fa8c9"), 0.18)
@@ -387,7 +557,7 @@ func _use_skill() -> void:
 					e.take_hit({"dmg": 12.0 * dmg_mult, "type": G.DamageType.MELEE, "from": pos, "knock": 22.0, "stagger": 0.6, "source": self})
 			G.fx.float_text(pos + Vector2(0, -44), "SIĞINAK", Px.C("7fa8c9"), 1.0)
 			G.audio.play("parryOk", 0.8)
-		"dg":
+		"nabiz":
 			G.fx.tele_ring(pos, 280.0, 0.5, Color(0.3, 0.85, 0.9, 0.5))
 			G.fx.flash(Px.C("4dd0e1"), 0.15)
 			G.fx.shake(0.35, 0.3)
@@ -683,6 +853,7 @@ func take_hit(h: Dictionary) -> void:
 		if is_instance_valid(G.run):
 			G.run.stats["parries"] = int(G.run.stats.get("parries", 0)) + 1
 			Quests.tick("parry")
+		clean_t += 6.0   # başarılı parry S+ için gereken süreyi kısaltır
 		src.stagger = maxf(src.stagger, 1.3)
 		invuln = maxf(invuln, 0.35)
 		if b_parry_shock:
@@ -696,6 +867,7 @@ func take_hit(h: Dictionary) -> void:
 	var dmg := maxf(1.0, (h.get("dmg", 1.0) - armor) * dmg_taken_mult)
 	hp -= dmg
 	G.run.stats["_nodmg"] = 0.0   # hasarsiz seri kirildi
+	clean_t = 0.0                 # stil ölçer sıfırlanır
 	# BOZUCU elit: vuruşu aletleri karıştırır — Q bekleme süresi uzar, dash kilitlenir
 	if is_instance_valid(src) and src is Actor and str(src.get("affix")) == "bozucu":
 		skill_cd = minf(skill_max, skill_cd + skill_max * 0.35)
@@ -808,6 +980,16 @@ func reset_for_run() -> void:
 	dash_regen_mult += float(eq.get("dash_regen", 0.0))
 	revives_extra += int(eq.get("revive", 0))
 	thorns += float(eq.get("thorns", 0.0))
+	# eklenti özeli: kuşanılmış "sp_*" modu şasi özelini değiştirir
+	special_id = ""
+	for sk in ["meteor", "firtina", "daganc"]:
+		if float(eq.get("sp_" + sk, 0.0)) > 0.0:
+			special_id = sk
+	mana_gain_mult = 1.0 + float(eq.get("mangain", 0.0))
+	mana = 0.0
+	clean_t = 0.0
+	style_rank = 0
+	_splus_fired = false
 	hp = max_hp
 	dash_charges = dash_max
 	_apply_hero()

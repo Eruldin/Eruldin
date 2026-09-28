@@ -1792,17 +1792,25 @@ func spawn_loot(iid: String, p: Vector2) -> void:
 	pk.set_meta("item", iid)
 	pk.set_meta("val", 0)
 	pickups_node.add_child(pk)
-	G.fx.mk_light(pk, Vector2(0, -8), col, 0.8, 1.8)
+	var leg := int(d.get("r", 0)) >= 4
+	G.fx.mk_light(pk, Vector2(0, -8), col, 1.3 if leg else 0.8, 2.6 if leg else 1.8)
 	# loot beam: nadirliğe boyalı ışık sütunu — uzaktan okunur (BG2 ground-item glow)
 	var beam := Polygon2D.new()
 	beam.polygon = PackedVector2Array([Vector2(-5, -110), Vector2(5, -110), Vector2(2, -10), Vector2(-2, -10)])
 	beam.color = Color(col.r, col.g, col.b, 0.3)
+	beam.scale = Vector2(1.8, 1.25) if leg else Vector2.ONE
 	pk.add_child(beam)
 	var btw := pk.create_tween().set_loops()
 	btw.set_trans(Tween.TRANS_SINE)
 	btw.tween_property(beam, "color:a", 0.6, 0.9)
 	btw.tween_property(beam, "color:a", 0.22, 0.9)
-	G.fx.float_text(p + Vector2(0, -36), "%s!" % str(d.name), col, 0.95)
+	G.fx.float_text(p + Vector2(0, -36), "EFSANEVİ: %s!" % str(d.name) if leg else "%s!" % str(d.name), col, 1.25 if leg else 0.95)
+	if leg:
+		# dopamin sekansı: anlık duraklama + ışıma + altın patlama
+		G.fx.hitstop(0.12)
+		G.fx.flash(col, 0.3)
+		G.fx.burst(pk.position + Vector2(0, -10), col, 26, 220.0, 5.0, 0.7)
+		G.audio.jingle("legendary")
 
 # HoT ability tome: üstüne basınca bedava lütuf taslağı açan saha kalıntısı
 func spawn_tome(p: Vector2) -> void:
