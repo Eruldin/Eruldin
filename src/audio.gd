@@ -70,6 +70,8 @@ func jingle(kind: String) -> void:
 		"clear": play("door", 1.0, 0.8); play("boon", 1.2, 0.5)
 		"boon": play("boon", 1.0, 0.8)
 		"boss": play("roar", 0.7, 0.6); play("door", 0.7, 0.7)
+		"victory": play("victory", 1.0, 0.9)
+		"legendary": play("legendary", 1.0, 0.9)
 		_: play("ui", 1.0, 0.5)
 
 func boss_sting() -> void:
@@ -112,30 +114,39 @@ func _noise() -> float:
 
 func _synth(n: String) -> PackedByteArray:
 	match n:
-		"hit": return _hit(0.09, 900.0, 0.5)
-		"hitHeavy": return _hit(0.16, 300.0, 0.9)
-		"crit": return _hit(0.12, 1400.0, 0.35)
-		"dash": return _sweep(0.14, 1400.0, 300.0, true)
-		"parry": return _hit(0.05, 1600.0, 0.35)
-		"parryOk": return _chime([1320.0, 1980.0], 0.22)
+		"hit": return _thud(0.10, 380.0, 0.85)
+		"hitHeavy": return _thud(0.18, 170.0, 1.0)
+		"crit": return _crack(0.12, 2600.0, 0.9)
+		"slash": return _whoosh(0.16, 2600.0, 700.0, 0.9)
+		"slash2": return _whoosh(0.14, 3400.0, 900.0, 0.7)
+		"comboFin": return _whoosh(0.24, 3800.0, 300.0, 1.0)
+		"dash": return _whoosh(0.18, 1800.0, 400.0, 0.6)
+		"parry": return _metallic([1900.0, 2900.0, 4300.0], 0.10, 0.5)
+		"parryOk": return _metallic([1320.0, 2210.0, 3400.0, 5200.0], 0.30, 0.8)
 		"chargeFull": return _chime([880.0, 1320.0, 1760.0], 0.3)
 		"stance": return _chime([392.0, 587.0, 784.0], 0.4)
 		"gateOpen": return _chime([220.0, 330.0, 440.0, 660.0], 0.6)
 		"plasma": return _sweep(0.22, 220.0, 90.0, false)
 		"plasmaCharge": return _sweep(0.5, 120.0, 700.0, false)
-		"shoot": return _sweep(0.12, 900.0, 200.0, false)
-		"zap": return _hit(0.08, 2400.0, 0.65)
-		"beam": return _sweep(0.3, 1800.0, 500.0, false)
-		"die": return _hit(0.3, 180.0, 0.9)
-		"hurt": return _hit(0.14, 500.0, 0.6)
+		"shoot": return _zapgun(0.12, 1100.0, 240.0, 0.7)
+		"zap": return _crack(0.10, 2200.0, 0.8)
+		"beam": return _laser(0.3, 0.8)
+		"laser": return _laser(0.22, 0.9)
+		"die": return _thud(0.3, 140.0, 0.9)
+		"hurt": return _thud(0.13, 300.0, 0.75)
 		"door": return _chime([330.0, 495.0], 0.35)
-		"boon": return _chime([523.0, 784.0, 1046.0], 0.5)
-		"ui": return _hit(0.04, 1200.0, 0.2)
+		"boon": return _metallic([780.0, 1180.0, 1770.0, 2600.0], 0.45, 0.6)
+		"ui": return _click()
 		"heal": return _chime([660.0, 880.0], 0.4)
 		"roar": return _roar()
 		"alarm": return _chime([220.0, 180.0], 0.5)
-		"explode": return _hit(0.5, 90.0, 1.0)
-		"pickup": return _chime([880.0, 1174.0], 0.18)
+		"explode": return _boom(0.55, 1.0)
+		"pickup": return _metallic([1560.0, 2350.0, 3500.0], 0.16, 0.5)
+		"legendary": return _metallic([620.0, 930.0, 1240.0, 1860.0, 2790.0], 0.9, 0.9)
+		"manapick": return _metallic([1980.0, 2970.0], 0.10, 0.35)
+		"rankup": return _metallic([880.0, 1320.0, 1980.0, 2970.0], 0.35, 0.7)
+		"supernova": return _boom(1.2, 1.0)
+		"victory": return _chime([523.0, 659.0, 784.0, 1046.0], 1.0)
 		# layered ambient: drone base + sparse motif notes + (combat) pulse
 		"mus_hub": return _drone2([55.0, 82.5, 110.0], 14.0, 0.16, [220.0, 277.0, 330.0, 440.0], false)
 		"mus_0": return _drone2([49.0, 73.5, 98.0], 12.0, 0.2, [196.0, 233.0, 294.0, 392.0], true)
@@ -175,6 +186,120 @@ func _drone2(fs: Array, dur: float, vol: float, motif: Array, pulse: bool) -> Pa
 			v += sin(t * 55.0 * TAU) * exp(-pt * 14.0) * 0.5
 		var loop := minf(1.0, minf(i, n - i) / (SR * 0.6))
 		d[i] = v * vol * loop * (0.75 + 0.25 * sin(t * 0.9))
+	return _pack(d)
+
+# --- realistic one-shots: noise/filter driven instead of sine beeps ---
+
+# kılıç savurması / dash: bant-geçiren gürültü, keskin hücum, aşağı süpürme
+func _whoosh(dur: float, f0: float, f1: float, vol: float) -> PackedByteArray:
+	var n := int(SR * dur)
+	var d := PackedFloat32Array()
+	d.resize(n)
+	var lp := 0.0
+	for i in n:
+		var t := i / float(SR)
+		var k := t / dur
+		var cf := lerpf(f0, f1, k) / (SR * 0.5)
+		lp += clampf(cf, 0.0, 0.9) * (_noise() - lp)
+		var env := pow(sin(minf(1.0, k * 1.15) * PI), 1.5)
+		d[i] = env * lp * vol * 2.2
+	return _pack(d)
+
+# beden darbesi: düşen sub sine + gürültü darbesi — tok, beep'siz
+func _thud(dur: float, freq: float, vol: float) -> PackedByteArray:
+	var n := int(SR * dur)
+	var d := PackedFloat32Array()
+	d.resize(n)
+	var lp := 0.0
+	for i in n:
+		var t := i / float(SR)
+		var k := t / dur
+		var f := freq * (1.0 - k * 0.72)
+		var body := sin(t * f * TAU) * exp(-t * 22.0)
+		lp += 0.18 * (_noise() - lp)
+		var env := exp(-t * 16.0)
+		d[i] = (body * 0.7 + lp * 0.8) * env * vol * 1.6
+	return _pack(d)
+
+# keskin çatlak: yüksek gürültü patlaması + kısa zil kalıntısı
+func _crack(dur: float, freq: float, vol: float) -> PackedByteArray:
+	var n := int(SR * dur)
+	var d := PackedFloat32Array()
+	d.resize(n)
+	var lp := 0.0
+	for i in n:
+		var t := i / float(SR)
+		lp += 0.55 * (_noise() - lp)
+		var ring := sin(t * freq * TAU) * exp(-t * 40.0)
+		d[i] = (lp * exp(-t * 26.0) + ring * 0.5) * vol * 1.5
+	return _pack(d)
+
+# metalik tonlar: uyumsuz kısmi tonlar — gerçek "tık/çıng" hissi
+func _metallic(fs: Array, dur: float, vol: float) -> PackedByteArray:
+	var n := int(SR * dur)
+	var d := PackedFloat32Array()
+	d.resize(n)
+	for i in n:
+		var t := i / float(SR)
+		var v := 0.0
+		for k in fs.size():
+			var f: float = fs[k]
+			v += sin(t * f * TAU + sin(t * f * 0.011) * 0.7) * exp(-t * (9.0 + k * 3.5)) / (1.0 + k * 0.5)
+		d[i] = v * vol * 1.1
+	return _pack(d)
+
+# lazer: hızlı düşen cıvıltı + harmonik + ince hava kuyruğu
+func _laser(dur: float, vol: float) -> PackedByteArray:
+	var n := int(SR * dur)
+	var d := PackedFloat32Array()
+	d.resize(n)
+	var ph := 0.0
+	for i in n:
+		var t := i / float(SR)
+		var k := t / dur
+		var f := lerpf(2600.0, 320.0, pow(k, 0.6))
+		ph += f * TAU / SR
+		var env := exp(-t * 9.0)
+		var wob := 1.0 + sin(t * 240.0 * TAU) * 0.12
+		d[i] = env * (sin(ph) * 0.6 + sin(ph * 2.01) * 0.25 + _noise() * 0.18) * wob * vol * 0.9
+	return _pack(d)
+
+# mermi: çok kısa lazer benzeri tik — hafif ve tekrar dostu
+func _zapgun(dur: float, f0: float, f1: float, vol: float) -> PackedByteArray:
+	var n := int(SR * dur)
+	var d := PackedFloat32Array()
+	d.resize(n)
+	var ph := 0.0
+	for i in n:
+		var t := i / float(SR)
+		var k := t / dur
+		ph += lerpf(f0, f1, k) * TAU / SR
+		var env := exp(-t * 30.0)
+		d[i] = env * (sin(ph) * 0.55 + _noise() * 0.3) * vol
+	return _pack(d)
+
+# patlama: sub düşüş + yoğun düşük-geçiren gürültü, uzun kuyruk
+func _boom(dur: float, vol: float) -> PackedByteArray:
+	var n := int(SR * dur)
+	var d := PackedFloat32Array()
+	d.resize(n)
+	var lp := 0.0
+	for i in n:
+		var t := i / float(SR)
+		var k := t / dur
+		lp += lerpf(0.5, 0.04, k) * (_noise() - lp)
+		var sub := sin(t * lerpf(90.0, 34.0, k) * TAU) * exp(-t * 6.0)
+		d[i] = (sub * 0.8 + lp * 1.4) * exp(-t * 4.5) * vol * 1.5
+	return _pack(d)
+
+# UI tık: çok kısa gürültü + alçak tik — kağıt/mekanik his
+func _click() -> PackedByteArray:
+	var n := int(SR * 0.035)
+	var d := PackedFloat32Array()
+	d.resize(n)
+	for i in n:
+		var t := i / float(SR)
+		d[i] = (_noise() * 0.5 + sin(t * 900.0 * TAU) * 0.5) * exp(-t * 160.0) * 0.6
 	return _pack(d)
 
 func _hit(dur: float, freq: float, mix: float) -> PackedByteArray:
