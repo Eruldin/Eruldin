@@ -3,10 +3,11 @@ extends Node
 # --testkeys debug harness (NOT for shipping): F-key hooks for manual testing.
 # Loaded only when the game is launched with `-- --testkeys` (see game.gd hook).
 #   F1  god mode            F2  cycle time_scale 1/4/8     F3  grant one level-up
-#   F4  lethal self-hit     F5  force victory             F6  spawn elite nearby
+#   F4  lethal self-hit     F5  hitstop+level-up combo    F6  spawn elite nearby
 #   F7  make blade evo-ready (lvl8 + greaves)             F8  kill all enemies (drops chests)
 #   F9  jump timer to ~miniboss (5:28)   F10 jump to ~final boss (10:57)
 #   F11 jump to ~collapse failsafe (12:57)
+#   F12 teleport to next arena edge (N/E/S/W cycle)
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -37,9 +38,19 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 				G.run.dbg_hurt_player(999999.0)
 				_say("lethal hit")
 		KEY_F5:
-			if is_instance_valid(G.run):
-				G.run.victory()
-				_say("victory() forced")
+			# item-9 repro: hitstop active at the moment a level-up draft opens
+			if is_instance_valid(G.fx) and is_instance_valid(G.player):
+				G.fx.hitstop(0.8)
+				G.player.add_xp(G.player.xp_next)
+				_say("hitstop + level-up fired together")
+		KEY_F12:
+			if is_instance_valid(G.player) and is_instance_valid(G.room):
+				var rw: float = G.room.W
+				var rh: float = G.room.H
+				var edges := [Vector2(0, -rh * 0.5 + 60), Vector2(rw * 0.5 - 60, 0), Vector2(0, rh * 0.5 - 60), Vector2(-rw * 0.5 + 60, 0)]
+				_edge_i = (_edge_i + 1) % 4
+				G.player.pos = edges[_edge_i]
+				_say("teleported to edge %d (N/E/S/W)" % _edge_i)
 		KEY_F6:
 			if is_instance_valid(G.room) and is_instance_valid(G.player):
 				var e := Enemy.spawn(Enemy.EKind.SENTINEL, G.player.pos + Vector2(160, 0), true, 1.0, 1.0, G.room)
@@ -69,3 +80,5 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 			if is_instance_valid(G.director):
 				G.director.t = 777.0
 				_say("t=777 — collapse imminent")
+
+var _edge_i := -1
