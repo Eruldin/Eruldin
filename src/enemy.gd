@@ -693,13 +693,14 @@ func _seek(d: float) -> void:
 		dist = to_p.length()
 	var dir := to_p.normalized()
 	# separation — bounded checks, hordes stay O(n)
-	var _seen := 0
-	for o in G.enemies:
-		if o == self or o.dead:
+	# eskiden hep listenin İLK 10 düşmanına bakılıyordu → kalabalıkta yığılma.
+	# Artık her düşman her karede listenin farklı bir diliminden 16 komşu tarar.
+	var _n: int = G.enemies.size()
+	var _start: int = (int(get_instance_id() % 997) + Engine.get_process_frames() * 16) % maxi(_n, 1)
+	for _i in mini(_n, 16):
+		var o = G.enemies[(_start + _i) % _n]
+		if o == self or not is_instance_valid(o) or o.dead:
 			continue
-		_seen += 1
-		if _seen > 10:
-			break
 		var away: Vector2 = pos - o.pos
 		var dd := away.length()
 		if dd < radius + o.radius + 5.0 and dd > 0.01:
@@ -926,7 +927,11 @@ func _burst_co() -> void:
 			return
 		var dir := (G.player.pos - pos).normalized().rotated(deg_to_rad(G.rf(-6, 6)))
 		_shoot_dir(dir, proj_spd, proj_dmg, Px.C("ff4444"), 7.0)
-		await get_tree().create_timer(burst_gap).timeout
+		if not is_inside_tree():
+			return
+		await get_tree().create_timer(burst_gap, false).timeout
+		if not is_instance_valid(self) or not is_inside_tree():
+			return
 
 func _shoot_at(target: Vector2, spd: float, dmg: float, col: Color, rad: float) -> void:
 	_shoot_dir((target - pos).normalized(), spd, dmg, col, rad)

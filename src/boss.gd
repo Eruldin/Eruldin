@@ -1005,7 +1005,8 @@ func dist_to_player() -> float:
 
 func _wait(sec: float) -> void:
 	if is_inside_tree():
-		await get_tree().create_timer(sec).timeout
+		# pause'a duyarlı: panel açıkken boss desenleri ilerlemesin
+		await get_tree().create_timer(sec, false).timeout
 
 func die(h: Dictionary) -> void:
 	if dead:

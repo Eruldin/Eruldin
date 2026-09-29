@@ -36,8 +36,8 @@ func _ready() -> void:
 	# 2D lighting atmosphere: global darkening + HDR glow so emissive
 	# colors (Choralim purple, plasma cyan, hive green) bloom.
 	_dark = CanvasModulate.new()
-	_dark.color = Color(0.45, 0.40, 0.36)
 	add_child(_dark)
+	set_dark(Color(0.45, 0.40, 0.36))
 	var we := WorldEnvironment.new()
 	var env := Environment.new()
 	env.glow_enabled = true
@@ -67,12 +67,44 @@ func _ready() -> void:
 
 var _dark: CanvasModulate
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		if G.run != null and is_instance_valid(G.run):
+			G.run.bank_on_quit()
+
+func quit_game() -> void:
+	if G.run != null and is_instance_valid(G.run):
+		G.run.bank_on_quit()
+	get_tree().quit()
+
+var _dark_base := Color(0.45, 0.40, 0.36)
+
+# Sahne karartması × oyuncu parlaklık ayarı. Eskiden biome karartmaları
+# oyunu çok koyu bırakıyordu (oyuncu/düşman zeminle karışıyordu).
 func set_dark(c: Color) -> void:
-	if is_instance_valid(_dark):
-		_dark.color = c
+	_dark_base = c
+	apply_brightness()
+
+func apply_brightness() -> void:
+	if not is_instance_valid(_dark):
+		return
+	var b := 1.3
+	if G.meta != null:
+		b = float(G.meta.data.get("settings", {}).get("bright", 1.3))
+	_dark.color = Color(minf(_dark_base.r * b, 1.0), minf(_dark_base.g * b, 1.0), minf(_dark_base.b * b, 1.0), 1.0)
+
+const ZOOM_RUN := 0.72
+const ZOOM_HUB := 1.05   # kamp küçük: 0.72'de ekranın alt yarısı boş kalıyordu
 
 func _process(_d: float) -> void:
+	var in_hub := G.state == G.State.HUB
+	var zt := ZOOM_HUB if in_hub else ZOOM_RUN
+	cam.zoom = cam.zoom.lerp(Vector2.ONE * zt, clampf(_d * 6.0, 0.0, 1.0))
 	if G.player != null and is_instance_valid(G.player) and not G.player.dead:
-		cam.global_position = world.global_transform * G.player.pos
+		if in_hub:
+			# kamp ekrana sığıyor → merkeze yakın dur, oyuncuyu hafifçe takip et
+			cam.global_position = world.global_transform * (G.player.pos * 0.25)
+		else:
+			cam.global_position = world.global_transform * G.player.pos
 	elif is_instance_valid(G.room):
 		cam.global_position = Vector2.ZERO

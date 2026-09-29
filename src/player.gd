@@ -145,7 +145,18 @@ func init() -> void:
 	G.upright(self).add_child(body)
 	_load_frames(_hero_set(), 7.0)
 	Px.fit(body, 94.0)
-	_aura = G.fx.mk_light(self, Vector2(0, -20), Px.C("00E5FF"), 0.32, 1.6)
+	# okunabilirlik: oyuncu kalabalıkta/koyu zeminde kayboluyordu → daha güçlü
+	# aura + ayak altında parlak zemin halkası (dünya eğimiyle elipse döner)
+	_aura = G.fx.mk_light(self, Vector2(0, -20), Px.C("00E5FF"), 0.55, 2.2)
+	var ring := Line2D.new()
+	var pts := PackedVector2Array()
+	for i in 33:
+		pts.append(Vector2.from_angle(TAU * i / 32.0) * 30.0)
+	ring.points = pts
+	ring.width = 2.5
+	ring.default_color = Color(0.35, 1.5, 1.9, 0.55)   # HDR → glow ile hafif parlar
+	ring.z_index = -1
+	add_child(ring)
 	blade = Sprite2D.new()
 	blade.texture = Px.S("wedge")
 	blade.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -242,10 +253,15 @@ func _unhandled_input(ev: InputEvent) -> void:
 
 func _read_input() -> void:
 	move_dir = Vector2.ZERO
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP): move_dir.y -= 1
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN): move_dir.y += 1
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT): move_dir.x -= 1
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT): move_dir.x += 1
+	# fiziksel tuş konumu: AZERTY/QWERTZ klavyede de WASD yerinde çalışır
+	if Input.is_physical_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP): move_dir.y -= 1
+	if Input.is_physical_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN): move_dir.y += 1
+	if Input.is_physical_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT): move_dir.x -= 1
+	if Input.is_physical_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT): move_dir.x += 1
+	# gamepad sol çubuk (temel destek — menüler henüz klavye/fare ister)
+	var stick := Vector2(Input.get_joy_axis(0, JOY_AXIS_LEFT_X), Input.get_joy_axis(0, JOY_AXIS_LEFT_Y))
+	if stick.length() > 0.22:
+		move_dir += stick
 	if move_dir.length_squared() > 1:
 		move_dir = move_dir.normalized()
 	if is_instance_valid(body) and move_dir.length_squared() > 0.01:
@@ -318,7 +334,7 @@ func _tick_dash(d: float) -> void:
 			pos = G.room.clamp_pos(pos, radius)
 	if _buf_dash > 0:
 		_buf_dash -= d
-	var space_now := Input.is_key_pressed(KEY_SPACE)
+	var space_now := Input.is_key_pressed(KEY_SPACE) or Input.is_joy_button_pressed(0, JOY_BUTTON_A)
 	if space_now and not _space_held:
 		_buf_dash = BUF_T
 	_space_held = space_now
@@ -686,7 +702,7 @@ func _swing(stage: int, dur: float) -> void:
 	G.audio.play("slash", G.rf(0.9, 1.2), 0.7)
 	# hit test lands partway through the swing
 	var swr: WeakRef = weakref(self)
-	get_tree().create_timer(dur * 0.28).timeout.connect(func():
+	get_tree().create_timer(dur * 0.28, false).timeout.connect(func():
 		var _p: Player = swr.get_ref()
 		if _p == null or _p.dead or _p._swing_hit_done:
 			return

@@ -231,6 +231,11 @@ func hitstop(sec: float) -> void:
 	Engine.time_scale = 0.06
 	hitstop_t = maxf(hitstop_t, sec)
 
+func clear_hitstop() -> void:
+	if hitstop_t > 0.0:
+		hitstop_t = 0.0
+		Engine.time_scale = prev_scale
+
 func flash(col: Color, a := 0.35) -> void:
 	G.ui.screen_flash(col, a)
 

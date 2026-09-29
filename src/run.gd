@@ -18,6 +18,8 @@ var hyper := false          # AŞILAMA modu — David'in saha panelinden açıl�
 var curse := 0             # KARANLIK SÖZLEŞME yığını — düşmanları sertleştirir
 var dark := false          # KARANLIK mutator — şifa düşmez, ödeme ×1.25
 var route_mark := false    # Lena'nın keşif güzergâhı — saha ekstra sandık + kalıntı serer
+const SEFER_CAP := 8             # sefer zinciri ölçeğinin durduğu ayak (denge ayarı)
+const REWARD_MULT_CAP := 6.0     # koşu başı toplam ödeme çarpanı tavanı (denge ayarı)
 var reward_mult := 1.0     # choralim payout multiplier (hyper ×1.5, dark ×1.25)
 var fragments := 0        # impure choralim gathered this run → purified on death
 var boon_ids: Array = []
@@ -196,11 +198,13 @@ func start_run() -> void:
 	# sefer zinciri: zafer sonrası kampa dönmeden zincirlenen koşular — ayak başına katlanan zorluk + ödül
 	var sefer := int(G.meta.data.get("sefer", 0))
 	if sefer > 0:
-		var sm := {"hp": pow(1.2, sefer), "dmg": pow(1.1, sefer), "spawn": pow(1.1, sefer), "frag": pow(1.45, sefer), "elite_t": pow(0.85, sefer)}
+		# denge: üstel ölçek sınırsızdı (10. ayakta HP ×6.2, frag ×41) → SEFER_CAP ayakta durur
+		var se := mini(sefer, SEFER_CAP)
+		var sm := {"hp": pow(1.2, se), "dmg": pow(1.1, se), "spawn": pow(1.1, se), "frag": pow(1.45, se), "elite_t": pow(0.85, se)}
 		for mk in sm:
 			node_mods[mk] = float(node_mods.get(mk, 1.0)) * float(sm[mk])
 		frag_node = float(node_mods.get("frag", 1.0))
-		reward_mult *= 1.0 + 0.3 * sefer
+		reward_mult *= 1.0 + 0.3 * se
 		stats["sefer"] = sefer
 		G.ui.toast("SEFER %d — zincir uzuyor: sürü katlandı, ganimet bereketi büyüdü" % sefer)
 	# günün ilk koşusu: her gerçek günün ilk koşusuna bereket primi — kamp güne çalışla açılır
@@ -239,6 +243,8 @@ func start_run() -> void:
 		reward_mult *= float(roll.get("rew", 1.0))
 		stats["kaos"] = str(roll.name)
 		G.ui.toast("KAOS DAMARI sızdı — bu koşunun mutasyonu: %s" % str(roll.name))
+	# ~10 çarpan üst üste binince ödeme ×10'u aşabiliyordu → tavan
+	reward_mult = minf(reward_mult, REWARD_MULT_CAP)
 	if bool(node_mods.get("noheal", false)):
 		G.ui.toast("YEMİN DARESİ — şifa küresi düşmez, tek yaşamla sınan")
 	alive = true
@@ -255,6 +261,8 @@ func start_run() -> void:
 	waylay_chance = 0.35
 	baskin_plus = false
 	fanatik_plus = false
+	kacak_plus = false
+	route_mark = false
 	curse = 0
 	pending_ambush = false
 	pending_dmg = 0.0
@@ -846,6 +854,17 @@ func abandon_to_hub() -> void:
 		G.meta.add_choralim(gained)
 	fragments = 0
 	respawn_to_hub()
+
+# Oyun kapatılırken (pencere X / OYUNDAN ÇIK) koşuda toplanan parçacıklar
+# kaybolmasın — abandon_to_hub ile aynı hesapla bankaya yatırılır.
+func bank_on_quit() -> void:
+	if alive and fragments > 0:
+		var gained := int(fragments * G.meta.frag_mult() * reward_mult * Quests.rep_mult())
+		if gained > 0:
+			G.meta.add_choralim(gained)
+		fragments = 0
+	if G.meta != null:
+		G.meta.save()
 
 func retry_node() -> void:
 	# ölüm ekranından hızlı dönüş — kamp atlanır, aynı node'a direkt koşu

@@ -258,6 +258,12 @@ func overlay_open() -> bool:
 	return is_instance_valid(_overlay)
 
 func _pause(v: bool) -> void:
+	# panel hitstop anında açılırsa time_scale 0.06'da takılı kalıyordu — geri al
+	if v and G.fx != null and is_instance_valid(G.fx):
+		G.fx.clear_hitstop()
+	# overlay'i SPACE ile kapatmak anında dash tetikliyordu — tuş bırakılana dek yut
+	if not v and G.player != null and is_instance_valid(G.player):
+		G.player._space_held = true
 	get_tree().paused = v
 
 # ---------------------------------------------------------------- HUD
@@ -438,12 +444,18 @@ func _build_hud() -> void:
 	tm.add_child(_tip_lbl)
 	root.add_child(_tip)
 
+const MIN_FONT := 12
+
 func _lbl(t: String, p: Vector2, size: int, col: Color) -> Label:
 	var l := Label.new()
 	l.text = t
 	l.position = p
-	l.add_theme_font_size_override("font_size", size)
+	# okunabilirlik: 720p'de 10-11px yazılar okunmuyordu → alt sınır 12px;
+	# çok soluk gri ipucu yazıları biraz aydınlatılır (renkli vurgular korunur)
+	l.add_theme_font_size_override("font_size", maxi(size, MIN_FONT))
 	l.add_theme_font_override("font", ui_font())
+	if col.get_luminance() < 0.55 and col.s < 0.35:
+		col = col.lerp(Color(0.86, 0.86, 0.92, col.a), 0.35)
 	l.add_theme_color_override("font_color", col)
 	l.add_theme_color_override("font_outline_color", Color.BLACK)
 	l.add_theme_constant_override("outline_size", 3)
@@ -596,6 +608,13 @@ func _tick_hud() -> void:
 	# choralim pulse (#6a3fd1 -> #2c9be8) per the art bible
 	_xp_bar.color = Px.C("6a3fd1").lerp(Px.C("2c9be8"), 0.5 + 0.5 * sin(_pulse * 2.4))
 	_lvl_lbl.text = "SEV %d" % p.level
+	# kampta koşu sayaçları anlamsız (00:00 · SEV 1 · 0 kesim) — sadece sahada göster
+	var in_run := G.state == G.State.ROOM
+	_lvl_lbl.visible = in_run
+	_time_lbl.visible = in_run
+	_kills_lbl.visible = in_run
+	if is_instance_valid(_prog_bg):
+		_prog_bg.visible = in_run
 	var tt := int(G.run.time)
 	_time_lbl.text = ("%02d:%02d" % [tt / 60, tt % 60]) + ("   AZAP ×%d" % int(G.run.curse) if int(G.run.curse) > 0 else "") + ("   SEFER %d" % int(G.meta.data.get("sefer", 0)) if int(G.meta.data.get("sefer", 0)) > 0 else "")
 	_time_lbl.add_theme_color_override("font_color", Px.C("c26bff") if G.run.endless else (Px.C("ff5533") if (G.run.hyper or G.run.dark) else Color(0.9, 0.95, 1)))
@@ -818,10 +837,19 @@ func banner(title: String, sub: String) -> void:
 	tw.tween_property(_banner_lbl, "modulate:a", 1.0, 0.3)
 
 func toast(msg: String) -> void:
+	# aynı mesaj zaten ekrandaysa yeniden ekleme — süresini tazele
+	for old in _toasts:
+		if is_instance_valid(old) and old.text == msg:
+			old.set_meta("t", 2.6)
+			return
 	while _toasts.size() >= 4:
-		_toasts[0].queue_free()
+		if is_instance_valid(_toasts[0]):
+			_toasts[0].queue_free()
 		_toasts.remove_at(0)
-	var l := _lbl(msg, Vector2(0, 545 + _toasts.size() * 20), 14, Color(0.85, 0.9, 1))
+	# DÜZELTME: en eski toast atılınca kalanlar yukarı kaydırılmıyordu → yeni
+	# toast mevcut son satırın üstüne biniyordu (üst üste yazı)
+	_relayout_toasts()
+	var l := _lbl(msg, Vector2(0, 545 + _toasts.size() * 22), 14, Color(0.85, 0.9, 1))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.size = Vector2(1280, 20)
 	l.set_meta("t", 2.6)
@@ -887,10 +915,17 @@ func _toast_keys() -> void:
 		if l.get_meta("t") <= 0:
 			l.queue_free()
 			_toasts.remove_at(i)
-			for j in _toasts.size():
-				_toasts[j].position.y = 545 + j * 20
+			_relayout_toasts()
+
+func _relayout_toasts() -> void:
+	for j in _toasts.size():
+		if is_instance_valid(_toasts[j]):
+			_toasts[j].position.y = 545 + j * 22
 
 func screen_flash(col: Color, a: float) -> void:
+	# ışığa duyarlılık: ayarlardan kapatılabilir
+	if G.meta != null and not bool(G.meta.data.get("settings", {}).get("flash", true)):
+		return
 	_flash.color = Color(col.r, col.g, col.b, a)
 	var tw := create_tween()
 	tw.tween_property(_flash, "color:a", 0.0, 0.5)
@@ -3599,6 +3634,8 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 	if overlay_open() and str(_overlay.get_meta("kind", "")) in ["boon", "draft", "chest", "biomesel", "bloot"]:
 		var opts: Array = _overlay.get_meta("opts", [])
 		var idx := int(ev.keycode) - int(KEY_1)
+		if ev.keycode >= KEY_KP_1 and ev.keycode <= KEY_KP_9:
+			idx = int(ev.keycode) - int(KEY_KP_1)   # numpad 1-9 de kart seçer
 		if idx >= 0 and idx < opts.size():
 			_pick_card(opts[idx])
 	elif ev.keycode == KEY_ESCAPE and not overlay_open() and G.state in [G.State.ROOM, G.State.HUB]:
@@ -4106,7 +4143,7 @@ func pause_panel() -> void:
 	_pause(true)
 	var v := _show_panel("pause", "DURAKLATILDI", Color(0.6, 0.6, 0.75))
 	var st: Dictionary = G.meta.data.settings
-	for opt in [["shake", "Ekran sarsıntısı"], ["crt", "CRT taraması"], ["mus", "Müzik"], ["sfx", "Efekt sesi"], ["full", "Tam ekran"], ["mmap", "Mini harita"]]:
+	for opt in [["shake", "Ekran sarsıntısı"], ["crt", "CRT taraması"], ["mus", "Müzik"], ["sfx", "Efekt sesi"], ["full", "Tam ekran"], ["mmap", "Mini harita"], ["bright", "Parlaklık"], ["flash", "Ekran flaşları"]]:
 		var key: String = opt[0]
 		var row := HBoxContainer.new()
 		row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -4117,13 +4154,21 @@ func pause_panel() -> void:
 		btn.custom_minimum_size = Vector2(80, 26)
 		btn.add_theme_font_override("font", ui_font())
 		var is_slider: bool = key in ["mus", "sfx"]
-		if is_slider:
+		if key == "bright":
+			btn.text = "%d%%" % roundi(float(st.get(key, 1.3)) * 100)
+		elif is_slider:
 			btn.text = "%d%%" % roundi(float(st.get(key, 1.0)) * 100)
 		else:
 			btn.text = "AÇIK" if bool(st.get(key, key != "full")) else "KAPALI"
 		row.add_child(btn)
 		btn.pressed.connect(func():
-			if is_slider:
+			if key == "bright":
+				# 100 → 115 → 130 → 145 → 160 → 100 …
+				var nb := float(st.get(key, 1.3)) + 0.15
+				st[key] = 1.0 if nb > 1.61 else nb
+				btn.text = "%d%%" % roundi(float(st[key]) * 100)
+				G.game.apply_brightness()
+			elif is_slider:
 				st[key] = wrapf(float(st.get(key, 1.0)) - 0.25, 0.0, 1.26)
 				btn.text = "%d%%" % roundi(float(st[key]) * 100)
 			else:
@@ -4133,7 +4178,7 @@ func pause_panel() -> void:
 			_apply_settings()
 			# live-apply music volume
 			if key == "mus" and is_instance_valid(G.audio.music):
-				G.audio.music.volume_db = linear_to_db(clampf(0.4 * float(st.mus), 0.001, 1.0))
+				G.audio.music.volume_db = linear_to_db(clampf(G.audio.mus_vol * float(st.mus), 0.001, 1.0))
 			G.audio.play("ui", 1.2, 0.5))
 	if G.state == G.State.ROOM:
 		var p := G.player
@@ -4198,6 +4243,12 @@ func pause_panel() -> void:
 			G.run.abandon_to_hub()
 		else:
 			_close_overlay())
+	var xb := Button.new()
+	xb.text = "OYUNDAN ÇIK"
+	xb.custom_minimum_size = Vector2(240, 24)
+	xb.add_theme_font_override("font", ui_font())
+	v.add_child(xb)
+	xb.pressed.connect(func(): G.game.quit_game())
 	var h := _lbl("[ESC / E / tık] devam et", Vector2.ZERO, 11, Color(0.5, 0.5, 0.62))
 	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h)
@@ -4250,6 +4301,15 @@ func title_screen() -> void:
 	bc.add_child(btn)
 	v.add_child(bc)
 	btn.pressed.connect(func(): _start_game())
+	var xb := Button.new()
+	xb.text = "OYUNDAN ÇIK"
+	xb.custom_minimum_size = Vector2(220, 30)
+	xb.add_theme_font_override("font", ui_font())
+	var xc := CenterContainer.new()
+	xc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	xc.add_child(xb)
+	v.add_child(xc)
+	xb.pressed.connect(func(): G.game.quit_game())
 	root.add_child(_overlay)
 
 func _start_game() -> void:

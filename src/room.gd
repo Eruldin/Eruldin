@@ -692,7 +692,7 @@ func _plan_waves(depth: int) -> void:
 	_begin_waves()
 
 func _begin_waves() -> void:
-	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(0.6, false).timeout
 	if not is_instance_valid(self) or cleared:
 		return
 	_next_wave()
@@ -730,7 +730,7 @@ func spawn_point() -> Vector2:
 var _bosses_left := 0
 
 func _start_boss_fight() -> void:
-	await get_tree().create_timer(1.2).timeout
+	await get_tree().create_timer(1.2, false).timeout
 	if not is_instance_valid(self):
 		return
 	var pair: Array = []
@@ -1876,7 +1876,7 @@ func on_enemy_dead(e) -> void:
 	alive = maxi(0, alive - 1)
 	if alive <= 0 and not cleared:
 		if wave_idx < waves.size() - 1:
-			await get_tree().create_timer(0.9).timeout
+			await get_tree().create_timer(0.9, false).timeout
 			if is_instance_valid(self) and not cleared:
 				_next_wave()
 		else:
