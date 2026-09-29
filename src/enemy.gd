@@ -1152,6 +1152,19 @@ func die(h: Dictionary) -> void:
 	G.audio.play("die", G.rf(0.9, 1.2), 0.6)
 	G.fx.light_flash(pos + Vector2(0, -12), Color(1, 0.5, 0.3), 1.4, 2.4, 0.2)
 	var kcol := Px.C(str(KIND_COL.get(kind, "801020")))
+	# gercek olum sprite'i — Legacy EnemyDeath karesi tek-pop uzerine
+	var ds := Sprite2D.new()
+	ds.texture = Px.S2("fx_die")
+	ds.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	ds.global_position = pos + Vector2(0, -14)
+	ds.scale = Vector2.ONE * (1.4 if elite else 0.9)
+	ds.modulate = kcol.lightened(0.35)
+	ds.z_index = 62
+	get_parent().add_child(ds)
+	var dtw := ds.create_tween()
+	dtw.tween_property(ds, "scale", ds.scale * 1.6, 0.28)
+	dtw.parallel().tween_property(ds, "modulate:a", 0.0, 0.28)
+	dtw.tween_callback(func(): if is_instance_valid(ds): ds.queue_free())
 	G.fx.burst(pos + Vector2(0, -10), kcol.darkened(0.45), 30 if elite else 16, 190.0, 5.0, 0.6, 6.0)
 	G.fx.burst(pos + Vector2(0, -10), kcol.lerp(Color(1, 0.9, 0.6), 0.4), 8 if elite else 4, 210.0, 3.0, 0.3)
 	if elite:

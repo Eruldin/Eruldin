@@ -1112,6 +1112,10 @@ func hub_ui(_show: bool) -> void:
 func dialogue(nid: String) -> void:
 	if overlay_open():
 		return
+	# kisa vokal blip — Super Dialogue Audio Pack'ten homurtu sesleri
+	var FEM := ["nur", "neva", "saphire", "viawar", "elyb", "ely"]
+	var gv: String = ("grunt_f%d" % (abs(nid.hash()) % 2)) if nid in FEM else ("grunt_m%d" % (abs(nid.hash()) % 3))
+	G.audio.play(gv, 0.85 + float(abs(nid.hash()) % 5) * 0.06, 0.38)
 	_pause(true)
 	_overlay = PanelContainer.new()
 	_overlay.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)

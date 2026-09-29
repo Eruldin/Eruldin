@@ -588,6 +588,7 @@ const _AMF := preload("res://src/art_manifest.gd")
 const _CMF := preload("res://src/concept_manifest.gd")
 const _PMF := preload("res://src/paint_manifest.gd")
 const _GMF := preload("res://src/gen_manifest.gd")
+const _PKMF := preload("res://src/pack_manifest.gd")
 
 static func _ext_manifest() -> Dictionary:
 	if _ext.is_empty():
@@ -599,6 +600,9 @@ static func _ext_manifest() -> Dictionary:
 			sp[k] = _PMF.SPRITES[k]
 		for k in _GMF.SPRITES:
 			sp[k] = _GMF.SPRITES[k]
+		# paketten kesilmis gercek assetler en ust oncelik
+		for k in _PKMF.SPRITES:
+			sp[k] = _PKMF.SPRITES[k]
 		var fr := _AMF.FRAMES.duplicate()
 		for k in _CMF.FRAMES:
 			fr[k] = _CMF.FRAMES[k]
@@ -606,6 +610,8 @@ static func _ext_manifest() -> Dictionary:
 			fr[k] = _PMF.FRAMES[k]
 		for k in _GMF.frames():
 			fr[k] = _GMF.frames()[k]
+		for k in _PKMF.FRAMES:
+			fr[k] = _PKMF.FRAMES[k]
 		_ext = {"sprites": sp, "frames": fr}
 	return _ext
 

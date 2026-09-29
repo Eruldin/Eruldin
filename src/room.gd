@@ -16,25 +16,32 @@ const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRI
 # biome'a ozgu uretilmis prop setleri (prop_<key>_<i>) — BG2 tarzi scatter
 const PROP_SPR := {
 	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5",
-		"prop_void_0", "prop_void_1", "prop_void_2", "st_dev", "st_kyklops"],
-	"1": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
+		"prop_void_0", "prop_void_1", "prop_void_2", "st_dev", "st_kyklops",
+		"pk_pa_tires", "pk_pa_barrel", "pk_pa_bench"],
+	"1": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5",
+		"pk_pa_tires2", "pk_pa_barrel2", "pk_wc_antenna"],
 	"2": ["prop_2_0", "prop_2_1", "prop_2_2", "prop_2_3", "prop_2_4", "prop_2_5",
-		"prop_olym_1", "prop_olym_2"],
+		"prop_olym_1", "prop_olym_2", "pk_wc_banner", "pk_wc_neon", "pk_wc_arrow"],
 	"3": ["prop_3_0", "prop_3_1", "prop_3_2", "prop_3_3", "prop_3_4", "prop_3_5",
-		"prop_meru_0", "prop_meru_1", "prop_meru_2", "prop_olym_0", "prop_alt_1", "dec_olym_0"],
+		"prop_meru_0", "prop_meru_1", "prop_meru_2", "prop_olym_0", "prop_alt_1", "dec_olym_0",
+		"pk_wc_antenna", "pk_wc_neon"],
 	# Çürük Bataklik: Simithar mantar/kristal seti + aztek ölü yapıları + bataklık otları
 	"4": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5",
-		"prop_mict_0", "prop_mict_1", "prop_mict_2", "prop_alt_3", "dec_mict_0", "dec_mict_1", "st_medusa"],
-	# Kül Ovası: obsidiyan/bazalt/kor seti + uyuyan volkan golemi
-	"5": ["prop_5_0", "prop_5_1", "prop_5_2", "prop_5_3", "prop_5_4", "prop_5_5", "st_golem"],
+		"prop_mict_0", "prop_mict_1", "prop_mict_2", "prop_alt_3", "dec_mict_0", "dec_mict_1", "st_medusa",
+		"pk_pa_tires2", "pk_pa_bench2"],
+	# Kül Ovası: obsidiyan/bazalt/kor seti + uyuyan volkan golemi + enkaz
+	"5": ["prop_5_0", "prop_5_1", "prop_5_2", "prop_5_3", "prop_5_4", "prop_5_5", "st_golem",
+		"pk_pa_barrel", "pk_pa_bench"],
 	# Kızıl Çöl: kaktüs/kafes kemik/kuru çalı/taş anıt/bazalt/kemik totem + mısır yapıları
 	"6": ["prop_6_0", "prop_6_1", "prop_6_2", "prop_6_3", "prop_6_4", "prop_6_5",
 		"prop_duat_0", "prop_duat_1", "prop_duat_2", "prop_alt_0", "dec_duat_0", "dec_duat_1", "dec_duat_2",
-		"st_sfenks", "st_mumya", "st_ammit"],
-	# Kristal Çukur: Simithar'in kristal/mantar seti çukura da uyar + obsidiyan jaguar
-	"7": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5", "st_jaguar"],
-	# Donmuş Çatlak: kendi buz seti — sarkıt/monolit/aurora kristali/kar yığını/kaburga/totem
-	"8": ["prop_8_0", "prop_8_1", "prop_8_2", "prop_8_3", "prop_8_4", "prop_8_5"],
+		"st_sfenks", "st_mumya", "st_ammit", "pk_pa_tires", "pk_pa_barrel2"],
+	# Kristal Çukur: Simithar'in kristal/mantar seti çukura da uyar + obsidiyan jaguar + uzayli flora
+	"7": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5", "st_jaguar",
+		"pk_ss_0", "pk_ss_1", "pk_ss_2"],
+	# Donmuş Çatlak: kendi buz seti + karli agac/kutuk
+	"8": ["prop_8_0", "prop_8_1", "prop_8_2", "prop_8_3", "prop_8_4", "prop_8_5",
+		"pk_wt_0", "pk_wt_1", "pk_wt_2", "pk_wt_3"],
 	"hub": ["prop_hub_0", "prop_hub_1", "prop_hub_2", "prop_hub_3", "prop_hub_4", "prop_hub_5"],
 }
 # isik veren prop'lar (kristal, mantar, fener, turbin, obelisk, ateslik)
@@ -580,13 +587,21 @@ func add_hazard(p: Vector2, r: float, dps: float, dur: float, col: Color) -> voi
 	s.position = p
 	s.z_index = -1950
 	add_child(s)
-	var l := G.fx.mk_light(self, p, col, 0.5, 1.6)
-	hazards.append({"pos": p, "r": r, "dps": dps, "kind": "pool", "node": s, "t": dur, "light": l})
+	# net kenarli aura — duz diskin ustune dokulu katman
+	var a := Sprite2D.new()
+	a.texture = Px.S2("hz_pool")
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	a.scale = Vector2.ONE * (r * 2.3) / float(maxi(a.texture.get_height(), 1))
+	a.modulate = Color(col.r, col.g, col.b, minf(col.a * 2.2, 0.85))
+	a.position = p
+	a.z_index = -1940
+	add_child(a)
+	hazards.append({"pos": p, "r": r, "dps": dps, "kind": "pool", "node": s, "t": dur, "light": G.fx.mk_light(self, p, col, 0.5, 1.6), "aura": a})
 
 func add_slowzone(p: Vector2, r: float, dur: float, col := Color(0.4, 0.9, 0.6, 0.22)) -> void:
 	var s := Sprite2D.new()
-	s.texture = Px.S("circle")
-	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	s.texture = Px.S2("hz_pool")
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	s.scale = Vector2.ONE * (r * 2.0) / 72.0
 	s.modulate = col
 	s.position = p
@@ -1345,6 +1360,8 @@ func _tick_hazards(d: float) -> void:
 			if h.t <= 0:
 				if is_instance_valid(h.node):
 					h.node.queue_free()
+				if is_instance_valid(h.get("aura")):
+					h.aura.queue_free()
 				if is_instance_valid(h.get("light")):
 					h.light.queue_free()
 				hazards.remove_at(i)
