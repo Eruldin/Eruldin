@@ -8,19 +8,19 @@ extends RefCounted
 #   boss sheet    (4): 0 idle 1 windup 2 strike 3 die
 #   npc sheet     (4): npca = rhasa neva saphire vane | npcb = david zirkon ehnar ahusk
 const SPRITES := {
-	"npc2_rhasa": "art/gen/g_npca_0.png", "npcb_rhasa": "art/gen/g_npca_0.png",
+	"npc2_rhasa": "art/omni/npc_rhasa.png", "npcb_rhasa": "art/omni/npcb_rhasa.png",
 	"npc2_neva": "art/gen/g_npca_1.png", "npcb_neva": "art/gen/g_npca_1.png",
 	"npc2_saphire": "art/gen/g_npca_2.png", "npcb_saphire": "art/gen/g_npca_2.png",
 	"npc2_vane": "art/gen/g_npca_3.png", "npcb_vane": "art/gen/g_npca_3.png",
 	"npc2_david": "art/gen/g_npcb_0.png", "npcb_david": "art/gen/g_npcb_0.png",
 	"npc2_zirkon": "art/gen/g_npcb_1.png", "npcb_zirkon": "art/gen/g_npcb_1.png",
-	"npc2_ehnar": "art/gen/g_npcb_2.png", "npcb_ehnar": "art/gen/g_npcb_2.png",
-	"npc2_ahusk": "art/gen/g_npcb_3.png", "npcb_ahusk": "art/gen/g_npcb_3.png",
+	"npc2_ehnar": "art/omni/npc_ehnar.png", "npcb_ehnar": "art/omni/npcb_ehnar.png",
+	"npc2_ahusk": "art/omni/npc_ahusk.png", "npcb_ahusk": "art/omni/npcb_ahusk.png",
 	"npc2_elyb": "art/gen/g_elyb_0.png", "npcb_elyb": "art/gen/g_elyb_1.png",
-	"npc2_mina": "art/c_mina_idle_0.png", "npcb_mina": "art/c_mina_idle_1.png",
+	"npc2_mina": "art/omni/npc_mina.png", "npcb_mina": "art/omni/npcb_mina.png",
 	"por_mina": "art/por/por_mina.png",
 	"prop_mahkum": "art/prop_mahkum.png",
-	"npc2_lena": "art/c_lena_idle_0.png", "npcb_lena": "art/c_lena_idle_1.png",
+	"npc2_lena": "art/omni/npc_lena.png", "npcb_lena": "art/omni/npcb_lena.png",
 	"por_lena": "art/por/por_lena.png",
 	"npc2_tegan": "art/gen/g_tegan_0.png", "npcb_tegan": "art/gen/g_tegan_1.png",
 	"por_tegan": "art/por/por_tegan.png",
@@ -32,7 +32,7 @@ const SPRITES := {
 	"por_buz": "art/por/por_buz.png",
 	"por_h9": "art/por_h9.png",
 	"prop_mahkum2": "art/prop_mahkum2.png",
-	"npc2_orun": "art/gen/g_orun_0.png", "npcb_orun": "art/gen/g_orun_1.png",
+	"npc2_orun": "art/omni/npc_orun.png", "npcb_orun": "art/omni/npcb_orun.png",
 	"por_orun": "art/por/por_orun.png",
 	"prop_mahkum3": "art/prop_mahkum3.png",
 	# sahne vistalari (uretilmis): backdrop katmanlari + arena ufku
@@ -184,6 +184,17 @@ const SPRITES := {
 	"ch_kheper_0": "art/omni/ch_kheper_0.png", "ch_kheper_1": "art/omni/ch_kheper_1.png",
 	"ch_kheper_2": "art/omni/ch_kheper_2.png", "ch_kheper_3": "art/omni/ch_kheper_3.png",
 	"ch_kheper_4": "art/omni/ch_kheper_4.png", "ch_kheper_5": "art/omni/ch_kheper_5.png",
+	# omni tanrı portreleri — KOZ kart ikonları (por_god_<tanrı>)
+	"por_god_agni": "art/omni/por_god_agni.png", "por_god_anubis": "art/omni/por_god_anubis.png",
+	"por_god_apollon": "art/omni/por_god_apollon.png", "por_god_athena": "art/omni/por_god_athena.png",
+	"por_god_durga": "art/omni/por_god_durga.png", "por_god_hades": "art/omni/por_god_hades.png",
+	"por_god_huitz": "art/omni/por_god_huitzilopochtli.png", "por_god_indra": "art/omni/por_god_indra.png",
+	"por_god_isis": "art/omni/por_god_isis.png", "por_god_mict": "art/omni/por_god_mictlantecuhtli.png",
+	"por_god_poseidon": "art/omni/por_god_poseidon.png", "por_god_quetz": "art/omni/por_god_quetzalcoatl.png",
+	"por_god_ra": "art/omni/por_god_ra.png", "por_god_sekhmet": "art/omni/por_god_sekhmet.png",
+	"por_god_set": "art/omni/por_god_set.png", "por_god_shiva": "art/omni/por_god_shiva.png",
+	"por_god_tezz": "art/omni/por_god_tezcatlipoca.png", "por_god_tlaloc": "art/omni/por_god_tlaloc.png",
+	"por_god_vishnu": "art/omni/por_god_vishnu.png", "por_god_zeus": "art/omni/por_god_zeus.png",
 	# efekt kareleri (renkleri pikselde — modulate beyaz kullan)
 	"fx_boom": "art/gen/g_fx_0.png", "fx_zap": "art/gen/g_fx_1.png",
 	"fx_slash": "art/gen/g_fx_2.png", "fx_heal": "art/gen/g_fx_3.png",
@@ -278,8 +289,20 @@ const FRAMES := {
 	"anasi": {}, "dev": {}, "kor": {}, "damar": {}, "buz": {}, "nur": {},
 }
 
+static func _om(path: String) -> Dictionary:
+	# tek karelik omni düşman seti — tüm anim durumları aynı görsel
+	return {"idle": [path], "windup": [path], "strike": [path], "atk": [path],
+		"hurt": [path], "die": [path]}
+
 static func frames() -> Dictionary:
 	var d := FRAMES.duplicate()
+	# omni düşman türleri (tek kare sprite'lar)
+	d["om_harpi"] = _om("art/omni/e_harpi.png")
+	d["om_medusa"] = _om("art/omni/st_medusa.png")
+	d["om_mumya"] = _om("art/omni/e_mumya.png")
+	d["om_itzpap"] = _om("art/omni/e_itzpap.png")
+	d["om_raksha"] = _om("art/omni/e_raksha.png")
+	d["om_ates"] = _om("art/omni/e_ates.png")
 	for k in ["husk", "sentinel", "spitter", "turret", "drone"]:
 		d[k] = _en("g_" + k)
 	for k in ["c_varl", "c_cereb", "c_konakci", "c_alfa", "c_herald", "c_akrep", "c_balcik", "c_gozetmen", "c_copcu", "c_dinamitci", "c_kuzgun", "c_sivri", "c_koc", "c_gol", "c_fisilti", "c_pence", "c_tayf", "c_emici", "c_dol"]:

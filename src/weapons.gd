@@ -713,7 +713,7 @@ static func _seken(st: Dictionary, p: Player) -> void:
 		pr.bounces = maxi(0, roundi(float(st.get("bnc", 3.0))))
 		pr.knock = 2.5
 		pr.stag = 0.15
-	G.audio.play("shoot", 1.5, 0.55)
+	G.audio.play("disc", 1.4, 0.55)
 	G.fx.directional(p.pos + Vector2(0, -12), base_dir, Px.C("a5f2f3"), 5, 210.0, 3.0, 0.2)
 
 # pet arketipi (VS yardımcısı): drone'lar oyuncuya bağlı dünya node'ları olarak

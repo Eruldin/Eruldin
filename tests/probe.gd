@@ -272,9 +272,12 @@ func _process(_d: float) -> void:
 			# visual coverage: roster of the new enemy kinds, then a vista shot at the arena edge
 			if not _roster_done and t >= 30.0:
 				_roster_done = true
-				for i in [Enemy.EKind.VARL, Enemy.EKind.CEREB, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA].size():
-					var kd: int = [Enemy.EKind.VARL, Enemy.EKind.CEREB, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA][i]
-					Enemy.spawn(kd, G.player.pos + Vector2.from_angle(TAU * i / 4.0) * 240.0, false, 1.0, 0.0, G.room)
+				var roster := [Enemy.EKind.VARL, Enemy.EKind.CEREB, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA,
+					Enemy.EKind.HARPI, Enemy.EKind.MEDUSA, Enemy.EKind.MUMYA,
+					Enemy.EKind.ITZPAP, Enemy.EKind.RAKSHA, Enemy.EKind.ATESRUH]
+				for i in roster.size():
+					var kd: int = roster[i]
+					Enemy.spawn(kd, G.player.pos + Vector2.from_angle(TAU * i / float(roster.size())) * 250.0, false, 1.0, 0.0, G.room)
 				_shot_at = t + 2.0
 			if not _edge_done and t >= 45.0:
 				_edge_done = true

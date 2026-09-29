@@ -123,13 +123,13 @@ func _tick_spawn(d: float) -> void:
 	var m := t / 60.0
 	var hyp: bool = G.run.hyper
 	var inf: bool = G.run.endless
-	_spawn_t = lerpf(1.6, 0.34, clampf(t / 540.0, 0.0, 1.0)) * (0.72 if hyp else 1.0) * (0.7 if inf else 1.0)
+	_spawn_t = lerpf(2.0, 0.5, clampf(t / 540.0, 0.0, 1.0)) * (0.72 if hyp else 1.0) * (0.7 if inf else 1.0)
 	_spawn_t /= float(G.run.node_mods.get("spawn", 1.0))
 	_spawn_t /= (1.0 + esc * 0.08)   # evrimleşen sürü daha sık akar
 	if _rush():
 		_spawn_t *= 1.8  # boss-rush: hafif sürü basıncı, odak zincirde
-	var cap := mini(190, int((60 + m * 12.0) * (1.35 if hyp else 1.0) * (1.25 if inf else 1.0)))
-	var batch := mini(6, 2 + int(t / 140.0)) + (1 if hyp else 0)
+	var cap := mini(150, int((48 + m * 10.0) * (1.35 if hyp else 1.0) * (1.25 if inf else 1.0)))
+	var batch := mini(5, 2 + int(t / 160.0)) + (1 if hyp else 0)
 	while batch > 0 and G.enemies.size() < cap:
 		_spawn(_comp(m), false)
 		batch -= 1
@@ -172,7 +172,7 @@ func _tick_events(d: float) -> void:
 	# elites — every ~50s after 1:35; they drop chests
 	_elite_t -= d
 	if _elite_t <= 0.0:
-		_elite_t = G.rf(44.0, 58.0) * (0.8 if G.run.hyper else 1.0) * (0.8 if G.run.elite_fever else 1.0) * float(G.run.node_mods.get("elite_t", 1.0))
+		_elite_t = G.rf(55.0, 72.0) * (0.8 if G.run.hyper else 1.0) * (0.8 if G.run.elite_fever else 1.0) * float(G.run.node_mods.get("elite_t", 1.0))
 		var kind: int = G.pick([Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER, Enemy.EKind.HUSK] if m < 4.0 else ([Enemy.EKind.SENTINEL, Enemy.EKind.SENTINEL, Enemy.EKind.SPITTER] if m < 6.5 else [Enemy.EKind.SENTINEL, Enemy.EKind.KONAKCI, Enemy.EKind.ALFA, Enemy.EKind.SPITTER]))
 		var e := _spawn(kind, true)
 		if e != null:
@@ -183,7 +183,7 @@ func _tick_events(d: float) -> void:
 	# surge events — a visible ring/flood every ~75s
 	_surge_t -= d
 	if _surge_t <= 0.0:
-		_surge_t = G.rf(62.0, 82.0) * (0.8 if G.run.hyper else 1.0) * (0.75 if is_instance_valid(G.player) and G.player.has_meta("surge_up") else 1.0)
+		_surge_t = G.rf(78.0, 100.0) * (0.8 if G.run.hyper else 1.0) * (0.75 if is_instance_valid(G.player) and G.player.has_meta("surge_up") else 1.0)
 		_surge(m)
 	# HoT-style side objective: a resonance cluster spawns once around 3:30
 	if not _mono_fired and m >= 3.5 and is_instance_valid(G.room) and G.player != null and not G.player.dead:
@@ -362,11 +362,11 @@ func _comp(m: float) -> int:
 			0: pool.append_array([Enemy.EKind.KUZGUN, Enemy.EKind.KUZGUN, Enemy.EKind.DRONE, Enemy.EKind.KOCBASI])   # tarla: dalışa geçen kuzgunlar + şarjlı koçbaşları
 			1: pool.append_array([Enemy.EKind.SPITTER, Enemy.EKind.DRONE, Enemy.EKind.DINAMITCI, Enemy.EKind.DINAMITCI])   # maden: barutçu tayfler
 			2: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.HUSK, Enemy.EKind.COPCU, Enemy.EKind.COPCU, Enemy.EKind.EMICI, Enemy.EKind.EMICI])   # enkaz: kristal yutan çöpçüler + parçacık emicileri
-			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA, Enemy.EKind.GOZETMEN])   # kule: keskin nişancı gözetmenler
-			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK, Enemy.EKind.SIVRI, Enemy.EKind.SIVRI, Enemy.EKind.DOL])   # bataklık: konakçılar + kistler + balçıklar + sivri bulutları
-			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ, Enemy.EKind.KORP, Enemy.EKind.KORP]) # kül ovası: ateşi seven sert öncüler + kor hortlakları
-			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.AKREP, Enemy.EKind.AKREP, Enemy.EKind.DRONE, Enemy.EKind.KOCBASI])   # kızıl çöl: koşucular + gömülü akrepler + koçbaşları
-			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.DAMARGOL, Enemy.EKind.DAMARGOL, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI])   # kristal çukur: gözler + kistler + damar golemleri + fısıltı sürüleri
+			3: pool.append_array([Enemy.EKind.CEREB, Enemy.EKind.ALFA, Enemy.EKind.GOZETMEN, Enemy.EKind.HARPI, Enemy.EKind.HARPI, Enemy.EKind.MEDUSA])   # kule: keskin nişancı gözetmenler + harpiler + medusa
+			4: pool.append_array([Enemy.EKind.KONAKCI, Enemy.EKind.CEREB, Enemy.EKind.BALCIK, Enemy.EKind.BALCIK, Enemy.EKind.SIVRI, Enemy.EKind.SIVRI, Enemy.EKind.DOL, Enemy.EKind.ITZPAP, Enemy.EKind.ITZPAP])   # bataklık: konakçılar + kistler + balçıklar + sivri/itzpap bulutları
+			5: pool.append_array([Enemy.EKind.ALFA, Enemy.EKind.SENTINEL, Enemy.EKind.MUHFIZ, Enemy.EKind.KORP, Enemy.EKind.KORP, Enemy.EKind.ATESRUH, Enemy.EKind.ATESRUH]) # kül ovası: ateşi seven sert öncüler + kor hortlakları + ateş ruhları
+			6: pool.append_array([Enemy.EKind.VARL, Enemy.EKind.AKREP, Enemy.EKind.AKREP, Enemy.EKind.DRONE, Enemy.EKind.KOCBASI, Enemy.EKind.MUMYA, Enemy.EKind.MUMYA])   # kızıl çöl: koşucular + gömülü akrepler + koçbaşları + mumya muhafızları
+			7: pool.append_array([Enemy.EKind.GOZETMEN, Enemy.EKind.GOZETMEN, Enemy.EKind.CEREB, Enemy.EKind.DAMARGOL, Enemy.EKind.DAMARGOL, Enemy.EKind.SENTINEL, Enemy.EKind.TURRET, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI, Enemy.EKind.FISILTI, Enemy.EKind.RAKSHA])   # kristal çukur: gözler + kistler + damar golemleri + fısıltı sürüleri + rakşasalar
 			8: pool.append_array([Enemy.EKind.MUHFIZ, Enemy.EKind.KONAKCI, Enemy.EKind.SENTINEL, Enemy.EKind.GOZETMEN, Enemy.EKind.FISILTI, Enemy.EKind.BUZRUH, Enemy.EKind.BUZRUH, Enemy.EKind.TAYF, Enemy.EKind.TAYF])   # donmuş çatlak: ağır sürü + buz serenler + ufuk tayfları
 	# seviye evrimi: evre derinleştikçe biyom-dışı avcılar havuza sızar
 	if esc >= 1:
@@ -405,8 +405,8 @@ func _spawn(kind: int, elite: bool) -> Enemy:
 		e.hp = e.max_hp
 		e.touch_dmg *= 1.1
 		e.actor_name = "KARANMIŞ " + e.actor_name
-	# sivri bulutu tek doğmaz — bulut halinde akar
-	if e != null and (kind == Enemy.EKind.SIVRI or kind == Enemy.EKind.FISILTI) and not elite:
+	# sivri/itzpap bulutu tek doğmaz — bulut halinde akar
+	if e != null and (kind == Enemy.EKind.SIVRI or kind == Enemy.EKind.FISILTI or kind == Enemy.EKind.ITZPAP) and not elite:
 		for i in 3:
 			Enemy.spawn(kind, p + Vector2(G.rf(-46, 46), G.rf(-46, 46)), false, _hp_scale(), _dmg_scale(), G.room)
 	return e
@@ -440,7 +440,7 @@ func _ambush() -> void:
 
 # surge şekilleri: halka (VS klasik), duvar (bir yönden akan hat), pusu (yakın çember)
 func _surge(m: float) -> void:
-	G.audio.play("roar", 0.7, 0.5)
+	G.audio.play("wave", 0.7, 0.5)
 	var n := mini(34, 16 + int(m * 2.0))
 	var shapes := ["ring", "wall", "hunt", "twins", "devriye"]
 	if m >= 4.5:
