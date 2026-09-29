@@ -15,16 +15,21 @@ var BOUNDS := Rect2(-540, -290, 1080, 580)
 const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRIMUS WRECKAGE", "AETERNA SPIRE", "ÇÜRÜK BATAKLIK", "KÜL OVASI", "KIZIL ÇÖL", "KRİSTAL ÇUKUR", "DONMUŞ ÇATLAK"]
 # biome'a ozgu uretilmis prop setleri (prop_<key>_<i>) — BG2 tarzi scatter
 const PROP_SPR := {
-	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5"],
+	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5",
+		"prop_void_0", "prop_void_1", "prop_void_2"],
 	"1": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
-	"2": ["prop_2_0", "prop_2_1", "prop_2_2", "prop_2_3", "prop_2_4", "prop_2_5"],
-	"3": ["prop_3_0", "prop_3_1", "prop_3_2", "prop_3_3", "prop_3_4", "prop_3_5"],
-	# Çürük Bataklik: Simithar'in mantar/kristal setini ödünç alır — fungal örtü
-	"4": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
+	"2": ["prop_2_0", "prop_2_1", "prop_2_2", "prop_2_3", "prop_2_4", "prop_2_5",
+		"prop_olym_1", "prop_olym_2"],
+	"3": ["prop_3_0", "prop_3_1", "prop_3_2", "prop_3_3", "prop_3_4", "prop_3_5",
+		"prop_meru_0", "prop_meru_1", "prop_meru_2", "prop_olym_0", "prop_alt_1", "dec_olym_0"],
+	# Çürük Bataklik: Simithar mantar/kristal seti + aztek ölü yapıları + bataklık otları
+	"4": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5",
+		"prop_mict_0", "prop_mict_1", "prop_mict_2", "prop_alt_3", "dec_mict_0", "dec_mict_1"],
 	# Kül Ovası: obsidiyan/bazalt/kor seti
 	"5": ["prop_5_0", "prop_5_1", "prop_5_2", "prop_5_3", "prop_5_4", "prop_5_5"],
-	# Kızıl Çöl: kaktüs/kafes kemik/kuru çalı/taş anıt/bazalt/kemik totem
-	"6": ["prop_6_0", "prop_6_1", "prop_6_2", "prop_6_3", "prop_6_4", "prop_6_5"],
+	# Kızıl Çöl: kaktüs/kafes kemik/kuru çalı/taş anıt/bazalt/kemik totem + mısır yapıları
+	"6": ["prop_6_0", "prop_6_1", "prop_6_2", "prop_6_3", "prop_6_4", "prop_6_5",
+		"prop_duat_0", "prop_duat_1", "prop_duat_2", "prop_alt_0", "dec_duat_0", "dec_duat_1", "dec_duat_2"],
 	# Kristal Çukur: Simithar'in kristal/mantar seti çukura da uyar
 	"7": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
 	# Donmuş Çatlak: kendi buz seti — sarkıt/monolit/aurora kristali/kar yığını/kaburga/totem
@@ -39,6 +44,11 @@ const PROP_LIGHT := {
 	"prop_5_0": Color(1.0, 0.45, 0.12), "prop_5_2": Color(1.0, 0.55, 0.15), "prop_5_4": Color(1.0, 0.5, 0.1),
 	"prop_6_0": Color(0.4, 0.95, 0.9), "prop_6_3": Color(0.4, 0.9, 1.0),
 	"prop_8_0": Color(0.45, 0.85, 1.0), "prop_8_2": Color(0.4, 0.95, 0.9), "prop_8_5": Color(0.5, 0.7, 1.0),
+	"prop_void_0": Color(0.6, 0.35, 1.0), "prop_void_1": Color(0.5, 0.3, 0.95), "prop_void_2": Color(0.55, 0.3, 1.0),
+	"prop_duat_1": Color(1.0, 0.8, 0.3),
+	"prop_meru_0": Color(1.0, 0.8, 0.3), "prop_meru_1": Color(1.0, 0.75, 0.25), "prop_meru_2": Color(1.0, 0.8, 0.35),
+	"prop_mict_0": Color(1.0, 0.55, 0.2), "prop_mict_2": Color(1.0, 0.5, 0.15),
+	"prop_alt_0": Color(1.0, 0.7, 0.3), "prop_alt_1": Color(0.9, 0.8, 0.5), "prop_alt_2": Color(1.0, 0.6, 0.3), "prop_alt_3": Color(1.0, 0.55, 0.2),
 }
 # atmosfer motes: renk + yon egilimi (biome basina)
 const MOTE_COL := {
@@ -1468,7 +1478,7 @@ func _collect(pk: Node) -> void:
 			G.fx.burst(pk.position, Px.C("7fd4ff"), 4, 100.0, 2.5, 0.22)
 			if xv >= 25.0:
 				G.fx.float_text(pk.position + Vector2(0, -18), "+%d" % roundi(xv), Px.C("7fd4ff"), 0.85)
-			G.audio.play("pickup", G.rf(1.2, 1.4), 0.35)
+			G.audio.play("xp", G.rf(1.2, 1.4), 0.35)
 		"heal":
 			G.player.heal(24.0 * (1.5 if G.player.has_meta("heal_plus") else 1.0))
 			G.audio.play("heal", 1.0, 0.5)
@@ -1675,7 +1685,10 @@ func _collect(pk: Node) -> void:
 
 func spawn_gem(p: Vector2, val: float) -> void:
 	var pk := Sprite2D.new()
-	var tex := Px.S2("crystal")
+	var key := "pk_xp_s" if val < 3.0 else ("pk_xp_m" if val < 10.0 else "pk_xp_l")
+	var tex := Px.S2(key)
+	if tex == null:
+		tex = Px.S("crystal")
 	if tex == null:
 		tex = Px.S("dot")
 	pk.texture = tex
@@ -1692,10 +1705,10 @@ func spawn_gem(p: Vector2, val: float) -> void:
 
 func spawn_chest(p: Vector2, _twin := false) -> void:
 	var pk := Sprite2D.new()
-	pk.texture = Px.S("crate")
+	pk.texture = Px.S2("pk_chest") if Px.S2("pk_chest") != null else Px.S("crate")
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	pk.modulate = Px.C("ffb74d")
-	pk.scale = Vector2.ONE * 0.85
+	pk.scale = Vector2.ONE * (1.7 if Px.S2("pk_chest") != null else 0.85)
 	pk.position = p
 	pk.z_index = int(p.y)
 	pk.set_meta("kind", "chest")
@@ -1714,7 +1727,7 @@ func spawn_special(kind: String, p: Vector2) -> Sprite2D:
 	var col := "ffffff"
 	match kind:
 		"vacuum":
-			pk.texture = Px.S("crystal")
+			pk.texture = Px.S2("pk_magnet") if Px.S2("pk_magnet") != null else Px.S("crystal")
 			col = "00E5FF"
 		"bomb":
 			pk.texture = Px.S("spark")
@@ -1829,7 +1842,7 @@ func spawn_tome(p: Vector2) -> void:
 
 func spawn_heal(p: Vector2) -> void:
 	var pk := Sprite2D.new()
-	pk.texture = Px.S("ico_heal")
+	pk.texture = Px.S2("pk_heal") if Px.S2("pk_heal") != null else Px.S("ico_heal")
 	pk.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	pk.position = p + Vector2(G.rf(-30, 30), G.rf(-24, 24))
 	pk.z_index = int(pk.position.y)
