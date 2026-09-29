@@ -161,13 +161,14 @@ const NPC_COL := {
 
 static var _font: Font
 
-# Bundle font, temaya uygun: art/fonts/ChakraPetch-Bold.ttf (Türkçe glyph var)
+# Bundle font, temaya uygun: art/fonts/PixelifySans-Bold.ttf (pixel-art, Türkçe glyph var)
 static func ui_font() -> Font:
 	if _font == null:
-		var p := "res://art/fonts/ChakraPetch-Bold.ttf"
-		if ResourceLoader.exists(p):
-			_font = load(p)
-		else:
+		for p in ["res://art/fonts/PixelifySans-Bold.ttf", "res://art/fonts/ChakraPetch-Bold.ttf"]:
+			if ResourceLoader.exists(p):
+				_font = load(p)
+				break
+		if _font == null:
 			var sf := SystemFont.new()
 			sf.font_names = ["Consolas", "Cascadia Mono", "Courier New"]
 			sf.font_weight = 600

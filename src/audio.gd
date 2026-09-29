@@ -94,9 +94,11 @@ func _clip(n: String) -> AudioStream:
 	if clips.has(n):
 		return clips[n]
 	var c: AudioStream = null
-	var p := "res://audio/%s.wav" % n
-	if ResourceLoader.exists(p):
-		c = load(p)
+	for ext in ["ogg", "mp3", "wav"]:
+		var p := "res://audio/%s.%s" % [n, ext]
+		if ResourceLoader.exists(p):
+			c = load(p)
+			break
 	if c == null:
 		var data := _synth(n)
 		if data.is_empty():
@@ -106,10 +108,13 @@ func _clip(n: String) -> AudioStream:
 		w.mix_rate = SR
 		w.data = data
 		c = w
-	if n.begins_with("mus_") and c is AudioStreamWAV:
-		c.loop_mode = AudioStreamWAV.LOOP_FORWARD
-		c.loop_begin = 0
-		c.loop_end = int(c.get_length() * c.mix_rate)
+	if n.begins_with("mus_"):
+		if c is AudioStreamWAV:
+			c.loop_mode = AudioStreamWAV.LOOP_FORWARD
+			c.loop_begin = 0
+			c.loop_end = int(c.get_length() * c.mix_rate)
+		elif c is AudioStreamOggVorbis:
+			c.loop = true
 	clips[n] = c
 	return c
 
