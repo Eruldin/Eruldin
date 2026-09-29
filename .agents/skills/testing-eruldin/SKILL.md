@@ -6,20 +6,30 @@ description: How to launch and end-to-end test the Godot game "Düşüş: Choral
 # Testing Eruldin (Godot 4.7 survivors roguelite)
 
 ## Launch
-- Binary: `~/godot/Godot_v4.7.2-stable_win64_console.exe --path C:\Users\Administrator\repos\Eruldin` opens a windowed game on the desktop (1280x720; use the window's maximize button — no wmctrl on Windows).
+- Binary: `~/godot/Godot_v4.7.2-stable_win64_console.exe --path C:\Users\Administrator\repos\Eruldin` opens a windowed game on the desktop (use the window's maximize button — no wmctrl on Windows). Quote-free `~/` fails under bash — use `"$HOME/godot/..."`.
 - Add `-- --probe` for the built-in autopilot (tests/probe.gd): title→kamp→arena, godmode, auto-picks drafts, screenshots to `user://probe/`.
-- Console build prints to a console window; capture output by redirecting to a file (`> /tmp/godot_boot.log 2>&1`).
+- Add `-- --testkeys` to arm `tests/testkeys.gd` — BUT the file only loads if game.gd `_ready()` contains the two-line loader `if OS.get_cmdline_user_args().has("--testkeys"): add_child(preload("res://tests/testkeys.gd").new())`. Re-add it temporarily for a session and revert afterwards (do not commit it or testkeys.gd).
+- Console build prints to a console window; capture output by redirecting to a file (`> /tmp/godot_boot.log 2>&1`). Art PNGs load at runtime → hundreds of "Loaded resource as image file" warnings are normal noise, not errors.
 
 ## Manual play flow
-Title → click "VIATOR'A UYAN" → camp (WASD move; E near an NPC opens dialogue; E/click advances; ESC pause) → walk south into the glowing portal → arena run.
-Controls in run: WASD + SPACE dash only; weapons auto-fire. Level-up opens a 3-card draft (keys 1/2/3 or click). Chests open on walk-over. ESC → "DURAKLATILDI" panel (settings + "KAMPA DÖN").
+Title → click "VIATOR'A UYAN" → camp (WASD; E near an NPC opens dialogue; E/SPACE/click advances; ESC pause) → walk south into the glowing gate → arena run.
+Controls in run: WASD + SPACE dash; weapons auto-fire. New combat keys since #323: Q yetenek, F ağır vük, R iksir, T şarap. Run start draws a "KOZ KARTI" fate card [1-3]; level-up draft is 6 cards ([1-3] picks, 4=reroll, 5=banish, 6=skip); numpad KP_1..9 also selects cards. ESC → "DURAKLATILDI" (settings incl. Parlaklık/Ekran flaşları + KAMPA DÖN + OYUNDAN ÇIK); J opens GÜNLÜK journal in camp.
+- Single key taps sometimes drop during overlay transitions — prefer `hold_key ~0.3-0.5s` or re-press; F-keys are reliable.
 
-## Debug harness for long timers
-Bosses fire at 5:30 / 11:00 / collapse 13:00 — too long for manual testing. A temporary `tests/testkeys.gd` F-key harness (F1 god, F2 time_scale, F3 force level-up, F4 lethal self-hit, F5 victory, F6 spawn elite, F7 evo-ready blade8+greaves, F8 kill-all, F9/F10/F11 jump director.t) plus a two-line loader block in game.gd gated on `-- --testkeys` was used for this session — check if tests/testkeys.gd still exists before relying on it; recreate from that pattern if needed. Godot processes F-keys via `_unhandled_key_input`; set `process_mode = PROCESS_MODE_ALWAYS` so keys work while paused.
+## testkeys.gd F-key map (kept on disk, uncommitted)
+F1 god · F2 time_scale 1→4→16 · F3 grant level-up · F4 lethal self-hit · F5 hitstop+level-up combo (tests pause-during-hitstop) · F6 spawn elite SENTINEL · F7 blade8+greaves evo-ready · F8 kill all (drops chests) · F9/F10/F11 director.t = 328/657/777 (miniboss/final/collapse) · F12 teleport to next arena edge N/E/S/W (arena 3400×2300).
+Set `process_mode = PROCESS_MODE_ALWAYS` so keys work while paused; each fires a `[dbg]` toast for recording visibility.
 
-## Gotchas found while testing (fixed in PR #2 — regression-watch items)
-- Overlay leaks: a level-up draft open when victory/death fires used to leave a zombie card panel; `_show_panel` now frees the old overlay first. Watch for any path that creates an overlay while one is open.
-- The 13:00 collapse victory used to leak the boss bar + orphan boss sprites into the camp/next run; `victory()`/`_room_to` now clear them. If bosses reappear in camp, check the world-children sweep in `Run._room_to`.
-- Camp HUD is reset by `hub_ui(true)`; stale timer/kesim after a run means that reset path broke.
-- Meta save: `user://` → `C:\Users\Administrator\AppData\Roaming\Godot\app_userdata\Düşüş- Choralim Protocol\dusus_save.json` — check deaths/kills/choralim/victories there to confirm run end paths.
+## Save file + verification tricks
+- Save: `C:\Users\Administrator\AppData\Roaming\Godot\app_userdata\Düşüş- Choralim Protocol\dusus_save.json` (+ `.bak` sibling since #325 — deleting the main save restores from `.bak` on next launch).
+- Quit mid-run banks fragments via `run.bank_on_quit()` — works for both the OYUNDAN ÇIK button and the window X (WM_CLOSE_REQUEST); verify via choralim in the save.
+- Replay intro cinematic: edit `seen_story` to remove `"intro"` (and quit first — the game rewrites the save on exit/hub).
+- Boss/elite staging: F1 god first, then F9/F10 time-jump; apply keys BEFORE anything kills the player.
+- Camp NPCs cluster at the campfire — stacked "E · NAME" prompts overlap there (known cosmetic issue).
+
+## Gotchas found while testing (regression-watch items)
+- Overlay leaks: a level-up draft open when victory/death fires used to leave a zombie panel; `_show_panel` frees the old overlay first. Watch any path that creates an overlay while one is open.
+- The 13:00 collapse victory used to leak the boss bar + orphan boss sprites into the camp/next run; `victory()`/`_room_to` clear them now.
+- Camp HUD: run elements (timer/SEV/kesim/progress) hide in camp via `_tick_hud` visibility flags — if they show in camp, check `G.state == ROOM` gating.
+- Pause-safety: `create_timer(sec, false)` makes timers pause-aware; a wave/boss progressing while paused means a default-`process_always` timer slipped in.
 - First-ever launch may need `--headless --import --quit` once for `.godot` caches (blueprint already covers this).
