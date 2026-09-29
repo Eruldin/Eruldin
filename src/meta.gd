@@ -118,7 +118,7 @@ var data := {
 	"rescued_orun": false, # üçüncü kafes — eski Koro sözcüsü İhbarcı Orun
 	"lena_route": false,   # Lena'nın keşif güzergâhı — sonraki koşuda saha zengin
 	"affix_seen": [],      # görülen elit affix'leri — LANET KIRANI başarımını besler
-	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0, "full": false},
+	"settings": {"shake": true, "crt": true, "mus": 1.0, "sfx": 1.0, "full": false, "bright": 1.3, "flash": true},
 }
 
 var _defaults: Dictionary
@@ -351,35 +351,52 @@ func mark_line(id: String) -> void:
 	data["seen_lines"].append(id)
 
 func save() -> void:
-	var f := FileAccess.open(SAVE_PATH + ".tmp", FileAccess.WRITE)
+	var tmp := SAVE_PATH + ".tmp"
+	var bak := SAVE_PATH + ".bak"
+	var f := FileAccess.open(tmp, FileAccess.WRITE)
 	if f == null:
+		push_warning("Meta.save: geçici kayıt dosyası açılamadı")
 		return
 	f.store_string(JSON.stringify(data))
 	f.close()
-	# atomic-ish swap
+	# çökmeye dayanıklı takas: eski kayıt silinmez, .bak olarak saklanır.
+	# Arada çökme olursa load() .tmp / .bak'tan geri döner.
 	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(SAVE_PATH)
-	DirAccess.rename_absolute(SAVE_PATH + ".tmp", SAVE_PATH)
+		if FileAccess.file_exists(bak):
+			DirAccess.remove_absolute(bak)
+		DirAccess.rename_absolute(SAVE_PATH, bak)
+	var err := DirAccess.rename_absolute(tmp, SAVE_PATH)
+	if err != OK:
+		push_warning("Meta.save: kayıt taşınamadı (%d)" % err)
 
-func load() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return
-	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
+func _read_json(path: String):
+	if not FileAccess.file_exists(path):
+		return null
+	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null:
-		return
+		return null
 	var parsed = JSON.parse_string(f.get_as_text())
 	f.close()
-	if typeof(parsed) != TYPE_DICTIONARY:
+	return parsed if typeof(parsed) == TYPE_DICTIONARY else null
+
+func load() -> void:
+	# sırayla ana kayıt → yarım kalmış .tmp → yedek .bak
+	var parsed = null
+	for path in [SAVE_PATH, SAVE_PATH + ".tmp", SAVE_PATH + ".bak"]:
+		parsed = _read_json(path)
+		if parsed != null:
+			break
+	if parsed == null:
 		return
-	# merge onto defaults so old saves gain new fields
+	# merge onto defaults so old saves gain new fields — iç içe sözlükler
+	# (upg, last_death, settings…) anahtar anahtar birleşir, yeni alanlar kaybolmaz
 	for k in parsed:
-		if k == "upg" and typeof(parsed[k]) == TYPE_DICTIONARY:
-			for uk in parsed[k]:
-				data["upg"][uk] = parsed[k][uk]
-		elif k == "last_death" and typeof(parsed[k]) == TYPE_DICTIONARY:
-			for dk in parsed[k]:
-				data["last_death"][dk] = parsed[k][dk]
-		elif data.has(k):
+		if not data.has(k):
+			continue
+		if typeof(parsed[k]) == TYPE_DICTIONARY and typeof(data[k]) == TYPE_DICTIONARY:
+			for sk in parsed[k]:
+				data[k][sk] = parsed[k][sk]
+		else:
 			data[k] = parsed[k]
 
 func frag_mult() -> float:

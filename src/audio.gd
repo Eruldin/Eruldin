@@ -12,13 +12,25 @@ var mus_vol := 0.35
 var srng := RandomNumberGenerator.new()
 
 func _ready() -> void:
+	_ensure_bus("Music")
+	_ensure_bus("SFX")
 	music = AudioStreamPlayer.new()
-	music.bus = "Master"
+	music.bus = "Music"
 	add_child(music)
 	for i in 12:
 		var p := AudioStreamPlayer.new()
+		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+
+# Müzik ve efektler ayrı bus'larda — ileride miks/ducking/ayar kolaylaşır
+func _ensure_bus(bus_name: String) -> void:
+	if AudioServer.get_bus_index(bus_name) != -1:
+		return
+	AudioServer.add_bus()
+	var idx := AudioServer.bus_count - 1
+	AudioServer.set_bus_name(idx, bus_name)
+	AudioServer.set_bus_send(idx, "Master")
 
 func play(n: String, pitch := 1.0, vol := 1.0) -> void:
 	var c := _clip(n)

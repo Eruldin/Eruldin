@@ -203,6 +203,25 @@ func _vignette_arena() -> void:
 		s.modulate = Color(0.01, 0.01, 0.02, 0.9)
 		s.z_index = -1850
 		add_child(s)
+	# DÜZELTME: vignette şeridinin dış ucundan sonra zemin/backdrop tekrar tam
+	# parlaklıkta görünüyordu → kenarda keskin siyah "blok" + parlak şerit.
+	# Şeridin bittiği yerden dışarıyı düz karanlıkla kapat.
+	var o := t - ov - 2.0          # şeridin arena kenarından taşan kısmı
+	var far := 4000.0
+	var col := Color(0.01, 0.01, 0.02, 0.9 * 0.85)
+	var hx := W * 0.5 + o
+	var hy := H * 0.5 + o
+	for r in [
+		Rect2(-hx - far, -hy - far, 2.0 * (hx + far), far),   # üst
+		Rect2(-hx - far, hy, 2.0 * (hx + far), far),          # alt
+		Rect2(-hx - far, -hy, far, 2.0 * hy),                 # sol
+		Rect2(hx, -hy, far, 2.0 * hy),                        # sağ
+	]:
+		var poly := Polygon2D.new()
+		poly.polygon = PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)])
+		poly.color = col
+		poly.z_index = -1850
+		add_child(poly)
 
 func _place_hazards_arena() -> void:
 	for i in 9:
