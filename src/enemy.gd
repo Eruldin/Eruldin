@@ -4,13 +4,18 @@ extends Actor
 # Data-driven melee/ranged enemy AI with readable telegraphs.
 # States: RISE -> SEEK -> WINDUP -> STRIKE -> RECOVER -> SEEK ...
 
-enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK, GOZETMEN, COPCU, DINAMITCI, KUZGUN, SIVRI, KOCBASI, DAMARGOL, FISILTI, KORP, BUZRUH, TAYF, EMICI, DOL }
+enum EKind { HUSK, SPITTER, TURRET, DRONE, SENTINEL, VARL, CEREB, KONAKCI, ALFA, CARRIER, MUHFIZ, HERALD, AKREP, BALCIK, GOZETMEN, COPCU, DINAMITCI, KUZGUN, SIVRI, KOCBASI, DAMARGOL, FISILTI, KORP, BUZRUH, TAYF, EMICI, DOL,
+	HARPI, MEDUSA, MUMYA, ITZPAP, RAKSHA, ATESRUH }
 
 # tür-bazlı ölüm patlaması rengi — kesimden kimin öldüğü görsel okunur
-const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73", EKind.GOZETMEN: "b388ff", EKind.COPCU: "d7a05a", EKind.DINAMITCI: "ff7043", EKind.KUZGUN: "5e3f8c", EKind.SIVRI: "7fe0b8", EKind.KOCBASI: "c97040", EKind.DAMARGOL: "4dd0e1", EKind.FISILTI: "8be9f5", EKind.KORP: "ff8a50", EKind.BUZRUH: "a8dcff", EKind.TAYF: "7fe8d8", EKind.EMICI: "6fd3c9", EKind.DOL: "9ccc65"}
+const KIND_COL := {EKind.HUSK: "69f0ae", EKind.SENTINEL: "8ea0b5", EKind.SPITTER: "39ff14", EKind.TURRET: "90a4ae", EKind.DRONE: "4dd0e1", EKind.VARL: "e8c468", EKind.CEREB: "b26bff", EKind.KONAKCI: "ff9e4d", EKind.ALFA: "ff5252", EKind.CARRIER: "ffd700", EKind.MUHFIZ: "80d8ff", EKind.HERALD: "e8d060", EKind.AKREP: "e8a050", EKind.BALCIK: "6fbf73", EKind.GOZETMEN: "b388ff", EKind.COPCU: "d7a05a", EKind.DINAMITCI: "ff7043", EKind.KUZGUN: "5e3f8c", EKind.SIVRI: "7fe0b8", EKind.KOCBASI: "c97040", EKind.DAMARGOL: "4dd0e1", EKind.FISILTI: "8be9f5", EKind.KORP: "ff8a50", EKind.BUZRUH: "a8dcff", EKind.TAYF: "7fe8d8", EKind.EMICI: "6fd3c9", EKind.DOL: "9ccc65",
+	EKind.HARPI: "e8b06a", EKind.MEDUSA: "7fae6f", EKind.MUMYA: "c9b896",
+	EKind.ITZPAP: "4dd0e1", EKind.RAKSHA: "d46a6a", EKind.ATESRUH: "ff8a3d"}
 # biome rengi — sürü sahanın fener/mote paletine oturur (room.gd ile aynı sıra)
 const BIOME_TINT := ["ffb74d", "00E676", "ff7722", "c9a227", "66bb6a", "ff5522", "ffaa55", "4dd0e1", "9fd8ff"]
-const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam", EKind.GOZETMEN: "Gözetmen", EKind.COPCU: "Çöpçü Kurt", EKind.DINAMITCI: "Dinamitçi Tayf", EKind.KUZGUN: "Tarla Kuzgunu", EKind.SIVRI: "Sivri Bulutu", EKind.KOCBASI: "Kocboynuz", EKind.DAMARGOL: "Damar Golemi", EKind.FISILTI: "Damar Fısıltısı", EKind.KORP: "Kor Pençe", EKind.BUZRUH: "Buz Ruhu", EKind.TAYF: "Ufuk Tayfı", EKind.EMICI: "Parçacık Emicisi", EKind.DOL: "Döl Yuması"}
+const KIND_NAME := {EKind.HUSK: "Proterian Husk", EKind.SENTINEL: "İmparatorluk Muhafızı", EKind.SPITTER: "Tükürükçü", EKind.TURRET: "Taret", EKind.DRONE: "Vızıltı Dronu", EKind.VARL: "Çölayan Varl", EKind.CEREB: "Cerebellum Kisti", EKind.KONAKCI: "Konakçı Yaratık", EKind.ALFA: "Alfa Şövalye", EKind.CARRIER: "Hamal Taşıyıcı", EKind.MUHFIZ: "Kalkan Muhafızı", EKind.HERALD: "Koro Sözcüsü", EKind.AKREP: "Kum Akrebi", EKind.BALCIK: "Balçık Adam", EKind.GOZETMEN: "Gözetmen", EKind.COPCU: "Çöpçü Kurt", EKind.DINAMITCI: "Dinamitçi Tayf", EKind.KUZGUN: "Tarla Kuzgunu", EKind.SIVRI: "Sivri Bulutu", EKind.KOCBASI: "Kocboynuz", EKind.DAMARGOL: "Damar Golemi", EKind.FISILTI: "Damar Fısıltısı", EKind.KORP: "Kor Pençe", EKind.BUZRUH: "Buz Ruhu", EKind.TAYF: "Ufuk Tayfı", EKind.EMICI: "Parçacık Emicisi", EKind.DOL: "Döl Yuması",
+	EKind.HARPI: "Harpi", EKind.MEDUSA: "Medusa", EKind.MUMYA: "Mumya Muhafız",
+	EKind.ITZPAP: "İtzpapalotl", EKind.RAKSHA: "Rakşasa", EKind.ATESRUH: "Ateş Ruhu"}
 enum St { RISE, SEEK, WINDUP, STRIKE, RECOVER }
 
 # painted concept-art sets for the new kinds; biome variants fall back to the
@@ -24,6 +29,8 @@ const KIND_SET := {
 	EKind.SIVRI: "c_sivri", EKind.KOCBASI: "c_koc", EKind.DAMARGOL: "c_gol",
 	EKind.FISILTI: "c_fisilti", EKind.KORP: "c_pence", EKind.BUZRUH: "c_fisilti",
 	EKind.TAYF: "c_tayf", EKind.EMICI: "c_emici", EKind.DOL: "c_dol",
+	EKind.HARPI: "om_harpi", EKind.MEDUSA: "om_medusa", EKind.MUMYA: "om_mumya",
+	EKind.ITZPAP: "om_itzpap", EKind.RAKSHA: "om_raksha", EKind.ATESRUH: "om_ates",
 }
 
 # tür lore'u — Zirkon'un kayıtlarında kesim sayısının altında gösterilir
@@ -55,6 +62,12 @@ const KIND_LORE := {
 	EKind.TAYF: "Beyaz Ufuk'un ışık hortlağı — aurora perdelerinden dokunmuş; belirir, dağılır, yeniden belirir. Mermiler dağılmış halinden geçer.",
 	EKind.EMICI: "Enkazın kese askeri — huni ağzı parçacık kokar, teması kesenden ◈ emer. Öldürürsen kesesini sana döker.",
 	EKind.DOL: "Bataklığın gömülü kuluçkası — kımıldamaz ama yavru kusar; yok edilmedikçe sürüyü sonsuz besler. Önce onu bul.",
+	EKind.HARPI: "Aeterna kayalıklarının avcısı — tüyleri eski koroların telini andırır. Dalışa geçmeden önce çığlığını duyarsın.",
+	EKind.MEDUSA: "Aeterna'nın lanetli korosu — bakışı sinyalini kilitler. Taş yüzü çözülmeden ona yaklaşma.",
+	EKind.MUMYA: "Kızıl Çöl'ün bekçisi — bandajının altında hâlâ kor bir kalp atar. Yavaştır ama durmaz.",
+	EKind.ITZPAP: "Obsidyen kelebeği — döl anasının saldığı çocuk. Tek görünürse sıkıntı yok; toplu görünürse koş.",
+	EKind.RAKSHA: "Çukurun çılgın savaşçısı — kristal damarından beslenen eski iblis. Öfkesi vuruşundan belli olur.",
+	EKind.ATESRUH: "Kül Ovası'ndan doğan kor ruhu — etrafına köz serper. Alevini söndürmeden yakınına girme.",
 }
 
 var kind: int = EKind.HUSK
@@ -272,6 +285,34 @@ func _setup_stats(hs: float, ds: float) -> void:
 			windup_t = 0.6; recover_t = 1.0; attack_cd = 4.0; keep_min = 0; keep_max = 9999
 			actor_name = "Döl Yuması"
 			knock_resist = 95.0
+		# omni düşmanları — biome'a tematik oturan kadim yaratıklar
+		EKind.HARPI:
+			max_hp = 30; speed = 200; touch_dmg = 9; radius = 11; hit_radius = 13
+			windup_t = 0.32; recover_t = 0.4; attack_cd = 1.2; touch_r = 36
+			actor_name = "Harpi"
+		EKind.MEDUSA:
+			max_hp = 72; speed = 84; touch_dmg = 10; radius = 14; hit_radius = 17
+			windup_t = 0.7; recover_t = 0.85; attack_cd = 2.0; keep_min = 190; keep_max = 320
+			proj_spd = 240; proj_dmg = 14; burst_n = 1
+			actor_name = "Medusa"
+		EKind.MUMYA:
+			max_hp = 165; speed = 55; touch_dmg = 18; radius = 17; hit_radius = 20
+			windup_t = 0.7; recover_t = 0.9; attack_cd = 1.6; touch_r = 46
+			actor_name = "Mumya Muhafız"
+			knock_resist = 70.0
+		EKind.ITZPAP:
+			max_hp = 11; speed = 210; touch_dmg = 5; radius = 8; hit_radius = 11
+			windup_t = 0.28; recover_t = 0.3; attack_cd = 0.7; touch_r = 26
+			actor_name = "İtzpapalotl"
+		EKind.RAKSHA:
+			max_hp = 115; speed = 96; touch_dmg = 15; radius = 15; hit_radius = 18
+			windup_t = 0.55; recover_t = 0.7; attack_cd = 1.3; touch_r = 44
+			actor_name = "Rakşasa"
+		EKind.ATESRUH:
+			max_hp = 42; speed = 105; touch_dmg = 8; radius = 12; hit_radius = 15
+			windup_t = 0.5; recover_t = 0.6; attack_cd = 1.6; keep_min = 160; keep_max = 280
+			proj_spd = 210; proj_dmg = 11; burst_n = 1
+			actor_name = "Ateş Ruhu"
 	if elite:
 		max_hp *= 2.6; touch_dmg *= 1.35; proj_dmg *= 1.3; speed *= 1.1
 		actor_name = "Elit " + actor_name

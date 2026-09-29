@@ -1738,6 +1738,7 @@ func _collect(pk: Node) -> void:
 			Quests.tick("sunak")
 			G.ui.boon_choice()
 		"chest":
+			G.audio.play("break", 1.0, 0.55)
 			G.run.open_chest()
 		"loot":
 			var ld: Dictionary = Items.DEFS.get(str(pk.get_meta("item", "")), {})

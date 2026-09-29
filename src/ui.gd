@@ -164,7 +164,7 @@ static var _font: Font
 # Bundle font, temaya uygun: art/fonts/PixelifySans-Bold.ttf (pixel-art, Türkçe glyph var)
 static func ui_font() -> Font:
 	if _font == null:
-		for p in ["res://art/fonts/PixelifySans-Bold.ttf", "res://art/fonts/ChakraPetch-Bold.ttf"]:
+		for p in ["res://art/fonts/PixelifySans-Bold.ttf", "res://art/fonts/PixelifySans-Regular.ttf", "res://art/fonts/ChakraPetch-Bold.ttf"]:
 			if ResourceLoader.exists(p):
 				_font = load(p)
 				break
@@ -3426,6 +3426,16 @@ func _open_draft() -> void:
 	all.append({"kind": "gift", "id": "skip", "name": "GEÇ", "icon": "ico_frag", "col": "9aa0b0", "desc": "+15 parçacık — hiçbirini alma", "top": "SEÇME", "w": 1.0})
 	_show_cards("draft", "SEVİYE %d — güçlendirme seç  [1-%d]" % [G.player.level, all.size()], Px.C("00E5FF"), all)
 
+# koz kartı → kadim tanrı portresi (omni paketinden por_god_*; temaya göre eşlendi)
+const ARCANA_GODS := {
+	"kan": "mict", "firtina": "tlaloc", "sari": "ra", "golge": "set",
+	"hasat": "quetz", "temkin": "athena", "kum": "tezz", "aci": "durga",
+	"hurda": "vishnu", "yanki": "apollon", "kasa": "hades", "kervan": "poseidon",
+	"toren": "huitz", "nabiz": "shiva", "alacak": "anubis", "ocak": "agni",
+	"sarj": "indra", "sofra": "isis", "pence": "sekhmet", "yemin": "zeus",
+	"kirici": "shiva", "borclu": "hades", "sur": "athena",
+}
+
 # koşu açılışında KOZ taslağı (VS arcana) — bir kart, koşu boyu etki
 func arcana_choice() -> void:
 	var pool := Boons.ARCANAS.keys()
@@ -3436,7 +3446,7 @@ func arcana_choice() -> void:
 	var draw_n := 4 if is_instance_valid(G.meta) and G.meta.has_build("kehne") else 3
 	for aid in pool.slice(0, draw_n):
 		var a: Dictionary = Boons.ARCANAS[aid]
-		cards.append({"kind": "arcana", "id": aid, "name": str(a["name"]), "icon": "icn_crown", "col": str(a["col"]), "desc": str(a["desc"]), "top": "KOZ", "w": 1.0})
+		cards.append({"kind": "arcana", "id": aid, "name": str(a["name"]), "icon": "por_god_" + ARCANA_GODS.get(aid, "zeus"), "col": str(a["col"]), "desc": str(a["desc"]), "top": "KOZ", "w": 1.0})
 	if is_instance_valid(G.meta) and G.meta.has_build("tahta") and not G.run.koz_rerolled:
 		cards.append({"kind": "kozreroll", "name": "KADERİ YENİLE", "icon": "icn_dash", "col": "e8d060", "desc": "kartları yeniden dağıt — Kader Tahtası koşuda bir kez izin verir", "top": "YENİLE", "w": 1.0})
 	_pause(true)
