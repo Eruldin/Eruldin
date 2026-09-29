@@ -837,7 +837,13 @@ func banner(title: String, sub: String) -> void:
 	var tw := create_tween()
 	tw.tween_property(_banner_lbl, "modulate:a", 1.0, 0.3)
 
+var _notif_log: Array = []   # son bildirimler — günlükte listelenir
+
 func toast(msg: String) -> void:
+	# bildirim log'u — günlük paneli son mesajları gosterir
+	_notif_log.append(msg)
+	while _notif_log.size() > 30:
+		_notif_log.remove_at(0)
 	# aynı mesaj zaten ekrandaysa yeniden ekleme — süresini tazele
 	for old in _toasts:
 		if is_instance_valid(old) and old.text == msg:
@@ -1226,6 +1232,21 @@ func _input(ev: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _unhandled_input(ev: InputEvent) -> void:
+	# gamepad menü tuşları — hareket/ates zaten player.gd'de
+	if ev is InputEventJoypadButton and ev.pressed:
+		match ev.button_index:
+			JOY_BUTTON_START:
+				if overlay_open():
+					_advance_overlay()
+				elif G.state in [G.State.ROOM, G.State.HUB]:
+					pause_panel()
+			JOY_BUTTON_B:
+				if overlay_open():
+					_advance_overlay()
+			JOY_BUTTON_DPAD_UP:
+				if not overlay_open() and G.state in [G.State.ROOM, G.State.HUB]:
+					journal_panel()
+		return
 	if not overlay_open():
 		return
 	if ev is InputEventMouseButton and ev.pressed:
@@ -1819,6 +1840,15 @@ func journal_panel() -> void:
 	var fl := _lbl("biten görev: %d / %d" % [done_n, Quests.DEFS.size()], Vector2.ZERO, 11, Color(0.5, 0.5, 0.62))
 	fl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vb.add_child(fl)
+	if not _notif_log.is_empty():
+		var nh := _lbl("— SON BİLDİRİMLER —", Vector2.ZERO, 12, Color(0.6, 0.8, 1.0))
+		nh.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vb.add_child(nh)
+		var tail := _notif_log.slice(maxi(0, _notif_log.size() - 8))
+		for m in tail:
+			var ml := _lbl(str(m), Vector2.ZERO, 10, Color(0.62, 0.68, 0.78))
+			ml.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			vb.add_child(ml)
 	var h2 := _lbl("[J / E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h2)

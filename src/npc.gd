@@ -142,7 +142,7 @@ func _process(d: float) -> void:
 		if position.distance_to(_wtarget) > 2.0:
 			position = position.move_toward(_wtarget, 12.0 * d)
 			body.flip_h = _wtarget.x < position.x
-	var e := Input.is_key_pressed(KEY_E)
+	var e := Input.is_key_pressed(KEY_E) or Input.is_joy_button_pressed(0, JOY_BUTTON_X)
 	if near and e and not _e_held:
 		G.ui.dialogue(nid)
 	_e_held = e

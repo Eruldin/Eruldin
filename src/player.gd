@@ -366,11 +366,11 @@ func _tick_skill(d: float) -> void:
 		_haste_t -= d
 		if _haste_t <= 0:
 			_haste_mult = 1.0
-	var q_now := Input.is_key_pressed(KEY_Q)
+	var q_now := Input.is_key_pressed(KEY_Q) or Input.is_joy_button_pressed(0, JOY_BUTTON_LEFT_SHOULDER)
 	if q_now and not _skill_held and skill_cd <= 0 and _dash_t <= 0 and G.state == G.State.ROOM and mana >= mana_max:
 		_use_skill()
 	_skill_held = q_now
-	var r_now := Input.is_key_pressed(KEY_R)
+	var r_now := Input.is_key_pressed(KEY_R) or Input.is_joy_button_pressed(0, JOY_BUTTON_Y)
 	if r_now and not _iksir_held and iksir_n > 0 and not dead and hp < max_hp - 1.0 and G.state == G.State.ROOM:
 		iksir_n -= 1
 		heal(max_hp * 0.45 * (1.5 if has_meta("table") else 1.0))
@@ -380,7 +380,7 @@ func _tick_skill(d: float) -> void:
 		Quests.tick("iksir")
 	_iksir_held = r_now
 	# F aşırı yük: koşu parçacığını yak, 8sn boyunca silahlar +%35 hızlı
-	var f_now := Input.is_key_pressed(KEY_F)
+	var f_now := Input.is_key_pressed(KEY_F) or Input.is_joy_button_pressed(0, JOY_BUTTON_RIGHT_SHOULDER)
 	if f_now and not _over_held and boost_t <= 0 and G.state == G.State.ROOM and G.run.fragments >= _over_cost():
 		G.run.fragments -= _over_cost()
 		_over_used += 1
@@ -391,7 +391,7 @@ func _tick_skill(d: float) -> void:
 		G.fx.float_text(pos + Vector2(0, -44), "AŞIRI YÜK", Px.C("ffd75f"), 1.0)
 		G.audio.play("boon", 1.1, 0.6)
 	_over_held = f_now
-	var t_now := Input.is_key_pressed(KEY_T)
+	var t_now := Input.is_key_pressed(KEY_T) or Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_DOWN)
 	if t_now and not _sarap_held and sarap_n > 0 and not dead and G.state == G.State.ROOM:
 		sarap_n -= 1
 		if sarap_t <= 0.0:
