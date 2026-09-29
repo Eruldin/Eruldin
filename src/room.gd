@@ -16,7 +16,7 @@ const BIOME_NAME := ["ENDUSTERRA BARRENS", "SIMITHAR MINE — 4-GAMMA", "SOL PRI
 # biome'a ozgu uretilmis prop setleri (prop_<key>_<i>) — BG2 tarzi scatter
 const PROP_SPR := {
 	"0": ["prop_0_0", "prop_0_1", "prop_0_2", "prop_0_3", "prop_0_4", "prop_0_5",
-		"prop_void_0", "prop_void_1", "prop_void_2"],
+		"prop_void_0", "prop_void_1", "prop_void_2", "st_dev", "st_kyklops"],
 	"1": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
 	"2": ["prop_2_0", "prop_2_1", "prop_2_2", "prop_2_3", "prop_2_4", "prop_2_5",
 		"prop_olym_1", "prop_olym_2"],
@@ -24,14 +24,15 @@ const PROP_SPR := {
 		"prop_meru_0", "prop_meru_1", "prop_meru_2", "prop_olym_0", "prop_alt_1", "dec_olym_0"],
 	# Çürük Bataklik: Simithar mantar/kristal seti + aztek ölü yapıları + bataklık otları
 	"4": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5",
-		"prop_mict_0", "prop_mict_1", "prop_mict_2", "prop_alt_3", "dec_mict_0", "dec_mict_1"],
-	# Kül Ovası: obsidiyan/bazalt/kor seti
-	"5": ["prop_5_0", "prop_5_1", "prop_5_2", "prop_5_3", "prop_5_4", "prop_5_5"],
+		"prop_mict_0", "prop_mict_1", "prop_mict_2", "prop_alt_3", "dec_mict_0", "dec_mict_1", "st_medusa"],
+	# Kül Ovası: obsidiyan/bazalt/kor seti + uyuyan volkan golemi
+	"5": ["prop_5_0", "prop_5_1", "prop_5_2", "prop_5_3", "prop_5_4", "prop_5_5", "st_golem"],
 	# Kızıl Çöl: kaktüs/kafes kemik/kuru çalı/taş anıt/bazalt/kemik totem + mısır yapıları
 	"6": ["prop_6_0", "prop_6_1", "prop_6_2", "prop_6_3", "prop_6_4", "prop_6_5",
-		"prop_duat_0", "prop_duat_1", "prop_duat_2", "prop_alt_0", "dec_duat_0", "dec_duat_1", "dec_duat_2"],
-	# Kristal Çukur: Simithar'in kristal/mantar seti çukura da uyar
-	"7": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5"],
+		"prop_duat_0", "prop_duat_1", "prop_duat_2", "prop_alt_0", "dec_duat_0", "dec_duat_1", "dec_duat_2",
+		"st_sfenks", "st_mumya", "st_ammit"],
+	# Kristal Çukur: Simithar'in kristal/mantar seti çukura da uyar + obsidiyan jaguar
+	"7": ["prop_1_0", "prop_1_1", "prop_1_2", "prop_1_3", "prop_1_4", "prop_1_5", "st_jaguar"],
 	# Donmuş Çatlak: kendi buz seti — sarkıt/monolit/aurora kristali/kar yığını/kaburga/totem
 	"8": ["prop_8_0", "prop_8_1", "prop_8_2", "prop_8_3", "prop_8_4", "prop_8_5"],
 	"hub": ["prop_hub_0", "prop_hub_1", "prop_hub_2", "prop_hub_3", "prop_hub_4", "prop_hub_5"],
@@ -126,6 +127,22 @@ var stray_active := false
 var _stray_armed := true
 var _merge_t := 80.0            # kristal konsolidasyonu sayacı
 var critters: Array = []        # [{s, vel}] — zararsiz yaban hayatı; üstüne koşarsan yakalanır
+var walkers: Array = []         # [{s, frames, fi, ft, vel}] — kampta gezinen mülteciler (omni karakterler)
+# biome'a özgü yakalanabilir sürüngen sprite'ı (omni) — yoksa c_varl karesi
+const CRITTER_SPR := {
+	"0": "cr_0", "1": "cr_1", "2": "cr_2", "3": "cr_3", "4": "cr_4",
+	"5": "cr_5", "6": "cr_6", "7": "cr_7", "8": "cr_8",
+}
+# kamp gezgini karakter kare setleri (omni yürüyüş animasyonu)
+const WALKER_SETS := [
+	["ch_itzel_0", "ch_itzel_1", "ch_itzel_2", "ch_itzel_3", "ch_itzel_4", "ch_itzel_5", "ch_itzel_6", "ch_itzel_7"],
+	["ch_kheper_0", "ch_kheper_1", "ch_kheper_2", "ch_kheper_3", "ch_kheper_4", "ch_kheper_5"],
+	["ch_meret_0", "ch_meret_1", "ch_meret_2", "ch_meret_3", "ch_meret_4", "ch_meret_5"],
+	["ch_tonatiuh_0", "ch_tonatiuh_1", "ch_tonatiuh_2", "ch_tonatiuh_3", "ch_tonatiuh_4", "ch_tonatiuh_5"],
+	["ch_kavya_0", "ch_kavya_1", "ch_kavya_2", "ch_kavya_3", "ch_kavya_4", "ch_kavya_5"],
+	["ch_kallisto_0", "ch_kallisto_1", "ch_kallisto_2", "ch_kallisto_3", "ch_kallisto_4", "ch_kallisto_5"],
+	["ch_ravi_0", "ch_ravi_1", "ch_ravi_2", "ch_ravi_3", "ch_ravi_4", "ch_ravi_5"],
+]
 var caches: Array = []          # gizli gömülü sandıklar — işaretlenmez, yaklaşınca açılır
 var veins: Array = []           # CHORALİM DAMARI — yanında durup kazılan parçacık madeni {node,t,pos}
 var decals: Node2D
@@ -283,16 +300,18 @@ func build_hub() -> void:
 		if G.meta.has_build("ahir"):
 			# ağıldaki sürüngenler kampta gezinir (yakalanmaz — pet işaretli)
 			var fpet: Array = Px.F("c_varl").get("idle", [])
+			var sheep: Texture2D = Px.S2("cr_hub")
 			for i in mini(int(G.meta.data.get("pets", 0)), 8):
 				var ps := Sprite2D.new()
-				ps.texture = fpet[0] if not fpet.is_empty() else Px.S("dot")
+				ps.texture = sheep if sheep != null else (fpet[0] if not fpet.is_empty() else Px.S("dot"))
 				ps.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 				Px.fit(ps, 18.0)
-				ps.modulate = Color(0.95, 0.9, 0.6, 0.9)
+				ps.modulate = Color(1.0, 1.0, 1.0, 0.9) if sheep != null else Color(0.95, 0.9, 0.6, 0.9)
 				ps.position = Vector2(rng.randf_range(140, 380), rng.randf_range(240, 380))
 				ps.z_index = 30
 				add_child(ps)
 				critters.append({"s": ps, "vel": Vector2(rng.randf_range(-20, 20), rng.randf_range(-20, 20)), "pet": true})
+	_scatter_walkers()
 	if tier > int(G.meta.data.get("camp_tier", 0)):
 		G.meta.data["camp_tier"] = tier
 		G.meta.save()
@@ -785,6 +804,7 @@ func _process(d: float) -> void:
 	_tick_merchant(d)
 	_tick_stray(d)
 	_tick_critters(d)
+	_tick_walkers(d)
 	_tick_caches()
 	_tick_veins(d)
 	_tick_doors()
@@ -1094,12 +1114,13 @@ func despawn_stray() -> void:
 # yakalanirsa ufak parçacık bırakır (BG2 yaban hayatı — dünyayı canlı tutar)
 func _scatter_critters() -> void:
 	var ft: Array = Px.F("c_varl").get("idle", [])
+	var omni: Texture2D = Px.S2(CRITTER_SPR.get(str(biome), ""))
 	for i in 6:
 		var s := Sprite2D.new()
-		s.texture = ft[0] if not ft.is_empty() else Px.S("dot")
+		s.texture = omni if omni != null else (ft[0] if not ft.is_empty() else Px.S("dot"))
 		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		Px.fit(s, 20.0)
-		s.modulate = Color(0.95, 0.85, 0.5, 0.85)
+		s.modulate = Color(1.0, 1.0, 1.0, 0.9) if omni != null else Color(0.95, 0.85, 0.5, 0.85)
 		s.position = Vector2(rng.randf_range(BOUNDS.position.x + 90, BOUNDS.end.x - 90), rng.randf_range(BOUNDS.position.y + 90, BOUNDS.end.y - 90))
 		s.z_index = 30
 		add_child(s)
@@ -1138,6 +1159,56 @@ func _tick_critters(d: float) -> void:
 			c.vel = -c.vel
 			s.position = clamp_pos(s.position, 30.0)
 		s.flip_h = c.vel.x < 0
+
+# kamp gezginleri: kurtarılmış mülteciler omni karakter kareleriyle kamp içinde dolanır
+func _scatter_walkers() -> void:
+	var n := 3
+	n += int(bool(G.meta.data.get("rescued_mina", false))) + int(bool(G.meta.data.get("rescued_lena", false))) + int(bool(G.meta.data.get("rescued_orun", false)))
+	for i in mini(n, WALKER_SETS.size()):
+		var keys: Array = WALKER_SETS[i]
+		var frames: Array = []
+		for k in keys:
+			var t := Px.S2(k)
+			if t != null:
+				frames.append(t)
+		if frames.is_empty():
+			continue
+		var s := Sprite2D.new()
+		s.texture = frames[0]
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		Px.fit(s, 52.0)
+		s.position = Vector2(rng.randf_range(-420, 420), rng.randf_range(-260, 340))
+		s.z_index = int(s.position.y)
+		add_child(s)
+		walkers.append({"s": s, "frames": frames, "fi": 0, "ft": 0.0, "vel": Vector2(rng.randf_range(-26, 26), rng.randf_range(-18, 18)), "pause": rng.randf_range(0, 2.0)})
+
+func _tick_walkers(d: float) -> void:
+	if walkers.is_empty():
+		return
+	for w in walkers:
+		var s: Sprite2D = w.s
+		if not is_instance_valid(s):
+			continue
+		if float(w.get("pause", 0.0)) > 0.0:
+			w["pause"] = float(w["pause"]) - d
+			w["fi"] = 0
+			s.texture = w["frames"][0]
+			continue
+		s.position += w.vel * d
+		if not inside(s.position, 60.0):
+			w.vel = -w.vel
+			s.position = clamp_pos(s.position, 60.0)
+		s.z_index = int(s.position.y)
+		s.flip_h = w.vel.x < 0
+		w["ft"] = float(w["ft"]) + d
+		if float(w["ft"]) > 0.14:
+			w["ft"] = 0.0
+			w["fi"] = (int(w["fi"]) + 1) % w["frames"].size()
+			s.texture = w["frames"][int(w["fi"])]
+		if rng.randf() < 0.008:
+			w.vel = Vector2(rng.randf_range(-26, 26), rng.randf_range(-18, 18))
+		if rng.randf() < 0.004:
+			w["pause"] = rng.randf_range(1.2, 3.0)
 
 # gizli zulalar: arena basina 2 gömülü sandık — toprağa gömülü görünür,
 # kenar işareti yok; üstüne yürüyen keşfeder (açık dünya keşif teşviki)
