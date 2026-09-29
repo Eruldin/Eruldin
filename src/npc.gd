@@ -122,7 +122,14 @@ func _process(d: float) -> void:
 			var bk: Array = BARKS.get(nid, [])
 			if not bk.is_empty():
 				G.fx.float_text(position + Vector2(0, -body.texture.get_height() * body.scale.y - 30), G.pick(bk), Color(0.75, 0.75, 0.85), 0.85)
-	var near := position.distance_to(G.player.pos) < 58.0
+	var dist := position.distance_to(G.player.pos)
+	var near := dist < 58.0
+	# birden fazla NPC menzildeyse sadece en yakınının etiketi görünür (üst üste binme)
+	if near:
+		for sib in get_parent().get_children():
+			if sib != self and sib is NPC and sib.position.distance_to(G.player.pos) < dist:
+				near = false
+				break
 	prompt.visible = near
 	if near and is_instance_valid(body):
 		body.flip_h = G.player.pos.x < position.x

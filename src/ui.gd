@@ -1801,19 +1801,19 @@ func journal_panel() -> void:
 		vb.add_child(nl)
 	var hd := _lbl("— GÜNLÜK İHALELER —", Vector2.ZERO, 12, Px.C("ffd700"))
 	hd.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(hd)
+	vb.add_child(hd)
 	for b in Quests.daily():
 		var done_b := bool(b.get("done", false))
 		var bl := _lbl("%s  —  %s" % [str(b.get("desc", "")), "✓ ÖDENDİ" if done_b else "◆ %d" % int(b.get("cho", 0))], Vector2.ZERO, 11, Color(0.55, 0.85, 0.55) if done_b else Color(0.82, 0.76, 0.6))
 		bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		v.add_child(bl)
+		vb.add_child(bl)
 	var done_n := 0
 	for q in Quests.DEFS:
 		if Quests.state(q.id) == "claimed":
 			done_n += 1
 	var fl := _lbl("biten görev: %d / %d" % [done_n, Quests.DEFS.size()], Vector2.ZERO, 11, Color(0.5, 0.5, 0.62))
 	fl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(fl)
+	vb.add_child(fl)
 	var h2 := _lbl("[J / E / tık] kapat", Vector2.ZERO, 11, Color(0.4, 0.4, 0.5))
 	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(h2)
